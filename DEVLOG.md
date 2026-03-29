@@ -18,6 +18,9 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-29 | Sprint 1 — Firebase Auth + routing + Knight generation | ✅ Done |
 | 2026-03-29 | Sprint 2 — Sprites + dice library + DiceRoller component | ✅ Done |
 | 2026-03-29 | Sprint 3 — Combat engine (multiplayer-ready) | ✅ Done |
+| 2026-03-29 | Combat UX overhaul + narrative + iOS fixes | ✅ Done |
+| 2026-03-29 | Knight sprite + party bar + encounter algorithm | ✅ Done |
+| 2026-03-29 | First production deploy to GitHub Pages | ✅ Done |
 |            | Sprint 4 — Items + loot + basic inventory | ⬜ |
 |            | Sprint 5 — Encounter deck + run loop (8 encounters + boss) | ⬜ |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
