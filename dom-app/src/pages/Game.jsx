@@ -25,10 +25,18 @@ function Game({ character, user, onEndRun }) {
     var players = [{ uid: user.uid, character: character }]
     var bs = createBattleState(players, enemies)
     setBattle(bs)
-    setPhase('playerTurn')
     setLastResult(null)
     setSelectedTarget(null)
     setCombatLog([])
+
+    // Check who goes first based on initiative
+    var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
+    var firstActor = getActor(bs, firstTurnId)
+    if (firstActor && firstActor.type === 'enemy') {
+      setPhase('enemyTurn')
+    } else {
+      setPhase('playerTurn')
+    }
   }
 
   // Enemy turn — auto-attack after a delay
@@ -254,7 +262,10 @@ function Game({ character, user, onEndRun }) {
         )}
 
         {isPlayerTurn && !selectedTarget && (
-          <p className="text-ink-dim text-sm">Select an enemy to attack</p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-gold text-sm font-display">Your Turn</p>
+            <p className="text-ink-dim text-sm">Tap an enemy to attack</p>
+          </div>
         )}
 
         {isPlayerTurn && selectedTarget && (
