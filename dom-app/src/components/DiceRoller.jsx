@@ -25,15 +25,11 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
     }, 60)
   }
 
-  useEffect(function() {
-    if (state === 'result') {
-      var timeout = setTimeout(function() {
-        setState('idle')
-        if (onResult) onResult(result)
-      }, 2000)
-      return function() { clearTimeout(timeout) }
-    }
-  }, [state])
+  // No auto-advance — wait for user to tap Continue
+  function handleContinue() {
+    setState('idle')
+    if (onResult) onResult(result)
+  }
 
   // Plain English outcomes
   var outcomeText = null
@@ -92,7 +88,7 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
         </div>
       )}
 
-      {/* Button */}
+      {/* Roll button */}
       {state === 'idle' && (
         <button
           onClick={handleRoll}
@@ -105,6 +101,16 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
           }
         >
           {buttonLabel || 'Roll the Dice'}
+        </button>
+      )}
+
+      {/* Continue button after result */}
+      {state === 'result' && (
+        <button
+          onClick={handleContinue}
+          className="py-3 px-8 rounded-lg bg-surface border border-border-hl text-ink font-sans text-base hover:bg-raised transition-colors"
+        >
+          Continue →
         </button>
       )}
     </div>

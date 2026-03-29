@@ -120,43 +120,44 @@ function Game({ character, user, onEndRun }) {
     return function() { clearInterval(interval) }
   }, [phase, enemyAttackInfo])
 
-  // Enemy result — show outcome, apply damage, then advance
+  // Enemy result — apply damage to log immediately, wait for player to continue
   useEffect(function() {
-    if (phase !== 'enemyResult' || !enemyAttackInfo) return
+    if (phase !== 'enemyResult' || !enemyAttackInfo || enemyAttackInfo.logged) return
 
-    var timeout = setTimeout(function() {
-      var attackOut = enemyAttackInfo.attackOut
-      var updatedBattle = attackOut.newBattle
-      var r = attackOut.result
+    var attackOut = enemyAttackInfo.attackOut
+    var r = attackOut.result
+    addLog({ type: 'enemy', text: formatAttackLog(r, 'enemy') })
+    setLastResult(r)
+    // Mark as logged so we don't double-log
+    setEnemyAttackInfo(Object.assign({}, enemyAttackInfo, { logged: true }))
+  }, [phase, enemyAttackInfo])
 
-      addLog({ type: 'enemy', text: formatAttackLog(r, 'enemy') })
-      setLastResult(r)
+  function handleEnemyContinue() {
+    var attackOut = enemyAttackInfo.attackOut
+    var updatedBattle = attackOut.newBattle
 
-      var endResult = checkBattleEnd(updatedBattle)
-      if (endResult === 'defeat') {
-        setBattle(updatedBattle)
-        setEnemyAttackInfo(null)
-        setEnemyDiceDisplay(null)
-        setPhase('defeat')
-        return
-      }
-
-      var nextBattle = advanceTurn(updatedBattle)
-      setBattle(nextBattle)
+    var endResult = checkBattleEnd(updatedBattle)
+    if (endResult === 'defeat') {
+      setBattle(updatedBattle)
       setEnemyAttackInfo(null)
       setEnemyDiceDisplay(null)
+      setPhase('defeat')
+      return
+    }
 
-      var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
-      if (nextActor && nextActor.type === 'enemy') {
-        setPhase('enemyWindup')
-      } else {
-        setPhase('playerTurn')
-        setSelectedTarget(null)
-      }
-    }, 2000)
+    var nextBattle = advanceTurn(updatedBattle)
+    setBattle(nextBattle)
+    setEnemyAttackInfo(null)
+    setEnemyDiceDisplay(null)
 
-    return function() { clearTimeout(timeout) }
-  }, [phase, enemyAttackInfo])
+    var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
+    if (nextActor && nextActor.type === 'enemy') {
+      setPhase('enemyWindup')
+    } else {
+      setPhase('playerTurn')
+      setSelectedTarget(null)
+    }
+  }
 
   if (!battle) {
     return (
@@ -388,6 +389,12 @@ function Game({ character, user, onEndRun }) {
             {enemyResultData.playerDowned && (
               <div className="text-red-400 text-xl font-display animate-pulse">You fall...</div>
             )}
+            <button
+              onClick={handleEnemyContinue}
+              className="mt-2 py-3 px-8 rounded-lg bg-surface border border-border-hl text-ink font-sans text-base hover:bg-raised transition-colors"
+            >
+              Continue →
+            </button>
           </div>
         )}
 
