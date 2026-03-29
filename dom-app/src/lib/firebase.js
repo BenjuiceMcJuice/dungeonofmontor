@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 var firebaseConfig = {
-  apiKey: 'AIzaSyBRPkd-KzNQC5oS7SCh3hpzCUEmpXfTDsE',
+  apiKey: 'AIzaSyBWZq0sj_HddnzchM2W5aC9NW3sFM2xfng',
   authDomain: 'dungeon-of-montor-1dc89.firebaseapp.com',
   projectId: 'dungeon-of-montor-1dc89',
   storageBucket: 'dungeon-of-montor-1dc89.firebasestorage.app',
