@@ -14,19 +14,9 @@ function App() {
   var [character, setCharacter] = useState(null)
   var [runResult, setRunResult] = useState(null)
 
-  // iOS scroll prevention — prevent body bounce/scroll on all screens
+  // Reset scroll position on screen changes (iOS Safari fix)
   useEffect(function() {
-    function preventScroll(e) {
-      // Allow scrolling inside elements that need it (combat log)
-      if (e.target.closest && e.target.closest('[data-scrollable]')) return
-      e.preventDefault()
-    }
-    document.body.addEventListener('touchmove', preventScroll, { passive: false })
-    // Also reset scroll on every screen change
     window.scrollTo(0, 0)
-    return function() {
-      document.body.removeEventListener('touchmove', preventScroll)
-    }
   }, [screen, user])
 
   // Loading auth state

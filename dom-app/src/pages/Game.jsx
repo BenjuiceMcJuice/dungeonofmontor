@@ -170,7 +170,7 @@ function Game({ character, user, onEndRun }) {
 
   if (!battle) {
     return (
-      <div className="min-h-svh flex items-center justify-center bg-raised">
+      <div className="h-full flex items-center justify-center bg-raised">
         <span className="text-ink text-base">Entering the dungeon...</span>
       </div>
     )
@@ -229,7 +229,7 @@ function Game({ character, user, onEndRun }) {
   // Victory
   if (phase === 'victory') {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
         <h1 className="font-display text-4xl text-gold">Victory!</h1>
         <p className="text-ink text-lg italic">The enemies fall. The dungeon holds its breath.</p>
         <div className="bg-surface border border-border rounded-lg p-5 w-full max-w-xs">
@@ -248,7 +248,7 @@ function Game({ character, user, onEndRun }) {
   // Defeat
   if (phase === 'defeat') {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
         <h1 className="font-display text-4xl text-red-400">Defeated</h1>
         <p className="text-ink text-lg italic">Darkness swallows you whole. The dungeon does not mourn.</p>
         <button
@@ -268,7 +268,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   return (
-    <div className="h-svh flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
+    <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
       {/* Scene header — minimal */}
       <div className="flex items-center justify-between mb-2">
         <span className="text-ink-dim text-xs uppercase tracking-widest">
