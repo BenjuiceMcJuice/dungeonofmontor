@@ -43,20 +43,15 @@ function getMaxHp(cls, stats) {
 // Generate a Knight with evenly distributed stats for Stage 1
 function generateKnight(name) {
   // 70 points across 14 skills = 5 each, then boost Knight-relevant stats
-  var stats = {}
-  SKILLS.forEach(function(s) { stats[s.id] = 4 })
-  // Remaining: 70 - (14 * 4) = 14 points to distribute
-  // Knight favours STR, DEF, VIT, END
-  stats.str = 8
-  stats.def = 8
-  stats.vit = 7
-  stats.end = 6
-  stats.agi = 5
-  stats.per = 5
-  stats.wil = 5
-  // That's 4*7 + 8+8+7+6+5+5+5 = 28 + 44 = 72... let me recalculate
-  // 14 skills at 4 = 56. Remaining = 14.
-  // str +4=8, def +4=8, vit +3=7, end +2=6, agi +1=5 = 14 extra. Good.
+  // 70 points across 14 skills. Knight favours STR, DEF, VIT, END.
+  // Target: STR/DEF 12-13 for +1 modifier, VIT/END 11-12 for decent HP
+  var stats = {
+    str: 13, def: 12, vit: 11, end: 11,
+    agi: 8, per: 4, wil: 3,
+    int: 1, wis: 1, lck: 1,
+    cha: 1, res: 1, sth: 1, cun: 2,
+  }
+  // Total: 13+12+11+11+8+4+3+1+1+1+1+1+1+2 = 70 ✓
 
   var cls = CLASSES.knight
   return {
