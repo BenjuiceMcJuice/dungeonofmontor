@@ -320,7 +320,7 @@ function Game({ character, user, onEndRun }) {
       </div>
 
       {/* Combat log — compact, last 6 entries */}
-      <div ref={logRef} className="bg-surface border border-border rounded-lg p-2 mb-2 max-h-24 overflow-y-auto shrink-0">
+      <div ref={logRef} data-scrollable className="bg-surface border border-border rounded-lg p-2 mb-2 max-h-24 overflow-y-auto shrink-0">
         {combatLog.length === 0 && (
           <p className="text-ink-dim text-sm italic">The battle begins...</p>
         )}
