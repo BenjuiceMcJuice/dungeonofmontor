@@ -13,7 +13,7 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-29 | Infra — GitHub Pages live, Firebase project created | ✅ Done |
 | 2026-03-29 | React scaffold + app shell (5-tab nav, design system) | ✅ Done |
 | 2026-03-29 | Design docs v0.3 incorporated (incl. Dungeon Mood, Build Plan, Sprite Sheet) | ✅ Done |
-|            | Firebase — Firestore DB (europe-west2) + web app config | ⬜ |
+| 2026-03-29 | Firebase — Firestore DB (europe-west2) + Auth enabled | ✅ Done |
 |            | **Stage 1 — The Crawl** | |
 |            | Sprint 1 — Firebase Auth + routing + design system | ⬜ |
 |            | Sprint 2 — Sprites + dice library + DiceRoller component | ⬜ |
