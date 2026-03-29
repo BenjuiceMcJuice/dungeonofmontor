@@ -178,6 +178,22 @@ The game UI is built around **five persistent tabs** on a fixed bottom nav bar. 
   chronicle: [ChronicleEntry], // Story Page content
   keyMoments: [KeyMoment],
 
+  dungeonMood: {
+    current: 'amused'|'bored'|'delighted'|'wrathful'|'strange'|'reverent',
+    score: number,             // 0–100; position within current mood
+    runCarryover: number,      // partial score carried into next run (20% of current)
+    lastShiftAt: timestamp,    // when mood last changed — prevents rapid flickering
+    lastEventEncounterIndex: number, // cooldown — min 3 encounters between Offer/Curse events
+  },
+
+  activeConditions: [{         // Montor Offer/Curse conditions currently in effect
+    type: string,              // 'no_abilities_next_encounter' | 'voluntary_damage' | etc.
+    triggeredBy: string,       // 'montor_offer' | 'montor_curse'
+    expiresAfter: string,      // 'next_encounter' | 'run_end'
+    liftCondition: string | null,
+    isMet: boolean
+  }],
+
   createdAt: timestamp,
   updatedAt: timestamp
 }
@@ -271,6 +287,7 @@ function buildCompressedContext(campaign, battleState, triggerType) {
     brief: campaign.brief,                   // always — ~100–300 tokens
     runNumber: campaign.currentRunNumber,    // always — tiny
     difficulty: campaign.difficulty,         // always — tiny
+    mood: campaign.dungeonMood.current,      // always — 1 token; shapes entire narration voice
     trigger: triggerType,                    // always
     encounter: getCurrentEncounterSummary(), // always — ~30–50 tokens
     party: buildPartySummary(battleState),   // always — ~60–100 tokens
@@ -448,7 +465,7 @@ All meaningful game state writes go through Cloud Functions. Clients read freely
 Character creation, stat system, class selection. Solo campaign with basic encounter deck. Combat loop with dice UI. Groq AI narration (run_start, combat_start, turn_result, run_end). Story Page. Loot system. Item synergy detection. Sprite renderer with tier colours.
 
 ### Phase 2 — Multiplayer
-Campaign lobby + Campaign Code. Turn enforcement via Cloud Function. Real-time Firestore sync. FCM push notifications for async turns. Inventory lock during battle. Cross-level party mechanics (Morale Aura, Lucky Charm).
+Campaign lobby + Campaign Code. Turn enforcement via Cloud Function. Real-time Firestore sync. FCM push notifications for async turns. Inventory lock during battle. Cross-level party mechanics (Morale Aura, Lucky Charm). Dungeon Mood system — score tracking, mood shifts, mood-shift scenes. Basic Montor Offer and Curse events (no Strange yet).
 
 ### Phase 3 — Faction & Deity Foundation
 Faction Record on character. Standing tracking from narrative events. Faction merchants at Allied+. Deity selection at Narrative Events. Devotion tracking (AI-judged alignment). Faithful/Devoted tier effects. Character arc phase reflected in AI narration.
@@ -464,6 +481,10 @@ Token usage indicator + brief narration mode. Shareable Story Page link. Faction
 ## 12. Open Questions
 
 - [ ] Groq model: `llama-3.3-70b-versatile` (quality) vs `llama-3.1-8b-instant` (speed/cost)? Consider per-trigger — cheap model for devotion checks, better model for run_end.
+- [ ] Montor Offer conditions: how large should the condition pool be at launch? Start with 6–8 well-tested conditions rather than open-ended AI generation.
+- [ ] Strange Offer "type a message" mechanic: needs content moderation before the AI reads it — even light filtering required.
+- [ ] Curse lift conditions: enforce via Cloud Function on every action, or check only at specific trigger points (end of encounter)? Latter is simpler.
+- [ ] Basic Crawler mode toggle: per-account setting or per-campaign? Per-campaign gives more flexibility.
 - [ ] Faction IDs: canonical cross-campaign IDs, or campaign-scoped with fuzzy matching on re-introduction?
 - [ ] Embue validation: level gap, lifetime limits, cross-user character auth — needs careful design.
 - [ ] Legacy Characters: same `/characters` collection (`status: 'legacy'`) or separate `/legacyCharacters`?

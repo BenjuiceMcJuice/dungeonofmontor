@@ -35,7 +35,7 @@ The only tab that changes meaningfully during play. Everything else is relativel
 
 **Layout top to bottom:**
 
-1. **Scene header** — one line. Encounter type and round. e.g. *"Combat · Round 2"*
+1. **Scene header** — one line. Encounter type and round. e.g. *"Combat · Round 2"*. Dungeon mood shown as a single faded word in the far right of this line — e.g. *"amused"*. Subtle. No icon, no colour. Players who notice it will wonder. Players who don't won't be distracted.
 
 2. **Situation text** — 2–4 sentences of AI narration. What you can see. What's happening. Second person, present tense. Only text on screen before you act.
 
@@ -87,9 +87,29 @@ View tab shows a **live event feed** — read-only, no buttons.
 
 4. **Rest encounters** — narration only + Continue button.
 
+### State D — Montor Event (Offer or Curse)
+
+A distinct visual treatment — this is not a normal encounter. The View tab clears completely. No header, no encounter label. Just the dungeon speaking.
+
+**Layout:**
+
+1. **Full-width narration** — AI-written, mood-appropriate. The dungeon is addressing you. Rendered in larger type than normal narration. No speaker label. It just appears.
+
+2. **The offer or curse** — below the narration, a bordered card showing:
+   - Item name and stats (for Offers) or curse effect (for Curses) — always in plain mechanical language
+   - The condition — clearly stated in both AI flavour text and a plain-language mechanical note below it
+
+3. **Buttons:**
+   - Offer: **Accept** and **Decline** — both visible, no default highlighted
+   - Curse: **Acknowledge** (no choice to decline — the curse is already happening) with lift condition displayed below
+
+4. **No timer.** The player can sit with this as long as they need.
+
+The mood indicator word in the header is hidden during Montor events. The dungeon's mood is not labelled here — it's felt.
+
 ---
 
-### State D — Between Runs
+### State E — Between Runs
 
 Brief downtime screen: run summary, XP earned, loot found. Link to Story Page. Option to start next run or return to home.
 

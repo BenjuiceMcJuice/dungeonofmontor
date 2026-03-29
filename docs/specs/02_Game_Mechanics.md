@@ -491,4 +491,308 @@ No additional AI calls required — assembled from narration already generated d
 
 ---
 
+## 12. The Dungeon Mood System
+
+Inspired by Dungeon Crawler Carl — the dungeon is not a neutral setting. It is a place with a personality, controlled by something that watches, judges, and reacts. That something is Montor's voice.
+
+Every piece of AI narration in Dungeon of Montor is delivered not by an omniscient narrator but by the dungeon itself. It has moods. It has opinions about what you're doing. It gets bored. It gets delighted. Sometimes it gets strange.
+
+This reframes the entire AI output — the dungeon isn't describing events, it's *commenting* on them.
+
+---
+
+### The Six Moods
+
+| Mood | Feel | Narration Style | Mechanical Effect |
+|---|---|---|---|
+| **Amused** | The dungeon finds your party entertaining | Dark humour, slightly theatrical, enjoys the drama | Loot rolls +5 bonus; encounter difficulty −5% |
+| **Bored** | You're not trying hard enough | Dismissive, contemptuous, impatient | Encounter difficulty +10%; enemy initiative +2 |
+| **Delighted** | Something extraordinary just happened | Gleeful, almost celebratory, overly generous | Loot rolls +15 bonus; chance of bonus encounter reward |
+| **Wrathful** | You did something that displeased it | Threatening, personal, cold | Enemy damage +15%; no rest HP recovery this encounter |
+| **Strange** | The dungeon is in an odd place | Surreal, non-sequitur, unsettling, rules feel bent | Random encounter modifier; AI may introduce unexpected elements |
+| **Reverent** | You've done something genuinely impressive | Quiet, respectful, almost awed | Encounter difficulty −10%; one free reroll available this run |
+
+The dungeon's mood is a **visible state** — not hidden from players. A subtle indicator on the View tab header shows the current mood as a single word or icon. Players should feel the shifts and be able to play into or against them.
+
+---
+
+### The Mood Score
+
+Mood is tracked as a score from 0–100 on the campaign doc, with a current mood state. The score moves based on events and resets partially between runs (the dungeon has a memory, but it's not infinite).
+
+```javascript
+// campaign doc
+dungeonMood: {
+  current: 'amused' | 'bored' | 'delighted' | 'wrathful' | 'strange' | 'reverent',
+  score: number,       // 0–100, position within current mood
+  runCarryover: number // partial score carried into next run
+}
+```
+
+**Score thresholds:**
+```
+0–15   → Wrathful
+16–30  → Bored
+31–50  → Amused       ← default starting state
+51–70  → Delighted
+71–85  → Reverent
+86–100 → Strange      (the dungeon tips into something else entirely at extremes)
+```
+
+Strange is only reachable from the extremes — the dungeon has to tip past Wrathful or past Reverent to get there. It's an edge state, not a regular rotation.
+
+---
+
+### What Moves the Score
+
+Mood shifts are triggered by coded game events, then *expressed* by the AI. The triggers are mechanical and deterministic. The expression is AI-generated and unique each time.
+
+**Moves score UP (toward Delighted / Reverent / Strange):**
+
+| Event | Score Change |
+|---|---|
+| Critical hit (natural 20) | +6 |
+| Party survives encounter at low HP (any member below 20%) | +8 |
+| Player attempts a dramatic or unusual action (AI-judged) | +5 |
+| Rare or Legendary loot found | +7 |
+| Campaign boss defeated | +15 |
+| Run completed on Legendary difficulty | +12 |
+| Player uses a consumable item creatively (AI-judged) | +4 |
+| Character earns a scar and survives | +5 |
+
+**Moves score DOWN (toward Bored / Wrathful / Strange):**
+
+| Event | Score Change |
+|---|---|
+| Critical fumble (natural 1) | −5 |
+| Party member Downed | −4 |
+| Player flees combat | −8 |
+| Party wipes (run failure) | −15 |
+| Player takes no action for their turn (skips) | −6 |
+| Same action used 3+ turns in a row (repetitive play) | −5 |
+| Run completed too quickly (under 4 encounters) | −10 |
+
+**Neutral / reset events:**
+- Start of new run: score moves 20% toward centre (50)
+- Rest encounter: score moves 10% toward centre
+- Merchant encounter: no effect
+
+---
+
+### Mood Shift Scenes
+
+When the score crosses a mood threshold, the AI writes a brief **Mood Shift Scene** — 1–3 sentences delivered as dungeon narration, inserted into the View tab between encounters. These are the moments the dungeon *notices* something changed.
+
+They should feel like the room just shifted. Not an announcement. A feeling.
+
+**Example mood shift narrations (AI-generated, these are illustrative):**
+
+*Amused → Delighted (after a critical hit that kills a boss):*
+> "Oh. Now *that* was something. The dungeon holds its breath for a moment — then exhales, slowly, like something old settling back into itself. It liked that."
+
+*Amused → Bored (after three consecutive missed attacks):*
+> "The torches dim. Not by much. But you notice."
+
+*Bored → Wrathful (after a party wipe attempt):*
+> "Something shifts in the walls. The temperature drops two degrees. Somewhere deeper, something stirs — not because it was summoned. Because it heard."
+
+*Reverent → Strange (after a Legendary item is found and the score tips past 85):*
+> "The corridor ahead is the same as it was. You are reasonably certain of this. You are less certain of the corridor behind."
+
+---
+
+### The Dungeon Addressing the Party
+
+At Delighted, Reverent, and Strange moods, the AI is permitted to have the dungeon **address the party directly** — briefly, sparingly, never explained. Not breaking the fourth wall exactly. More like the wall becoming briefly transparent.
+
+This is one of the things that makes Montor feel present without being seen.
+
+**Rules for direct address:**
+- Maximum once per run
+- Never more than one sentence
+- Never explains itself or answers questions
+- Should feel like it could almost be coincidence
+
+*Examples:*
+> *"...and the door opens. As if it was waiting for you specifically."*
+
+> *"You are the most interesting thing down here in some time."*
+
+> *"Torren. The dungeon knows your name. It has always known your name."*
+
+---
+
+### Mood in the AI Prompt
+
+The current mood is passed as a single token in the compressed context object — negligible cost:
+
+```javascript
+function buildCompressedContext(campaign, battleState, triggerType) {
+  return {
+    brief: campaign.brief,
+    mood: campaign.dungeonMood.current,  // single word — ~1 token
+    // ... rest of context
+  };
+}
+```
+
+The AI system prompt includes mood-specific instruction:
+
+```
+Current dungeon mood: {mood}
+
+Adjust narration voice accordingly:
+- amused: wry, theatrical, darkly entertained
+- bored: flat, dismissive, impatient
+- delighted: gleeful, generous, almost performative
+- wrathful: cold, threatening, personal
+- strange: non-linear, unsettling, slightly wrong
+- reverent: quiet, measured, respectful
+```
+
+This costs almost nothing in tokens and changes everything about how the narration feels.
+
+---
+
+### Mood & Montor
+
+The mood system *is* Montor's personality, expressed through the dungeon. Players will form a mental model of Montor through the shifts — not from description, but from behaviour. Some players will try to please the dungeon. Some will try to anger it. Some will find the Strange state and try to stay there.
+
+None of this is explained in the game UI. It's discovered through play.
+
+---
+
+## 13. Montor's Offers & Curses
+
+At certain mood thresholds, Montor intervenes directly — not through narration, but through a **special Narrative Event** that displaces a normal encounter in the deck. This is Montor's mechanical hand in the game.
+
+Critically: **the player always chooses whether to engage**. Montor never imposes changes on existing gear or stats without consent. The offer is made. The player decides. This preserves trust — your sword is always your sword unless you chose otherwise.
+
+Item stats are always generated by code. Montor influences *what is offered* and *at what cost* — not the underlying numbers.
+
+---
+
+### Montor's Offer (Delighted or Reverent mood, score 51+)
+
+When mood crosses into Delighted or Reverent and at least 3 encounters have passed since the last Offer, a **Montor's Offer** event may trigger in place of the next Narrative Event slot.
+
+The dungeon presents the party with something. The AI names and describes it. The item's stats are generated by the loot system at one rarity tier higher than the party would normally see. It is not random — the AI selects a *type* of item based on what the party needs most (inferred from current loadout and recent combat performance), and the code generates the stats for that type.
+
+**The offer has a condition.** Always. The dungeon doesn't give freely.
+
+Conditions are generated by the AI based on mood and campaign context. Examples:
+
+| Mood | Example Condition |
+|---|---|
+| Delighted | "Take it. But the next enemy you kill — let it choose how it dies." (enemy gets a free final action) |
+| Delighted | "It's yours. One of you must carry it unarmed for the next encounter." |
+| Reverent | "The dungeon asks nothing. It simply wants to see what you do with it." (no condition — rare) |
+| Reverent | "Wear it, and fight the next encounter without using abilities." |
+| Strange | "Yes. But one of you will not remember receiving it." (random party member loses 5 XP from their next gain) |
+
+The condition is mechanical — coded, not freeform. The AI selects from a pool of condition types; the code enforces it.
+
+**If accepted:** item added to the accepting player's inventory. Condition logged to campaign doc and enforced by the game on the specified trigger.
+
+**If declined:** mood score drops by 10 (the dungeon is mildly offended). No other consequence. You don't have to take it.
+
+---
+
+### Montor's Curse (Wrathful mood, score 0–15)
+
+When mood crosses into Wrathful and at least 3 encounters have passed since the last Curse, a **Montor's Curse** event triggers in place of the next Narrative Event slot.
+
+The dungeon does not remove or alter existing items. Instead it places a **Run Curse** — a debuff that lasts until the end of the current run only. Never permanent. Never touches base stats on the character doc.
+
+The AI names and describes the curse in a mood-shift scene. The mechanical effect is coded and selected from a pool based on mood score severity.
+
+**Curse pool (selected by code, named by AI):**
+
+| Severity | Effect | Duration |
+|---|---|---|
+| Mild (score 10–15) | One random equipped relic goes inert — no effect this run | Until run end |
+| Mild | All merchant prices +25% this run | Until run end |
+| Moderate (score 5–10) | One party member's LCK treated as 5 regardless of actual value | Until run end |
+| Moderate | Rest encounters restore 50% of normal HP this run | Until run end |
+| Severe (score 0–5) | First combat encounter each run: all enemies act before party regardless of initiative | Until run end |
+| Severe | Loot table drops one rarity tier for remainder of run | Until run end |
+
+**The curse can be lifted.** The AI presents a condition in the curse narration — something the party can do to appease the dungeon. If the condition is met during the run, the curse lifts and mood score rises by 15.
+
+**Lift conditions are dramatic, not mechanical favours:**
+
+> *"The dungeon will release this if one of you takes a wound willingly before the next fight."* (a player voluntarily takes 10 damage before combat starts)
+
+> *"Kill the next enemy with a natural 20. Nothing else will satisfy it."*
+
+> *"Finish the next encounter without using any items."*
+
+**If the run ends with the curse unlifted:** no further consequence. It expires. The dungeon's mood carries its carryover score into the next run — so a severe Wrathful state takes several runs to climb out of, but the curse itself doesn't persist.
+
+---
+
+### The Strange Offer
+
+When mood is Strange (score 86–100), neither a standard Offer nor a standard Curse triggers. Instead: **The Strange Offer** — an event that can only happen in this state.
+
+The Strange Offer is always unusual. The AI has more latitude here than anywhere else in the game. The item offered is real and coded, but the framing is wrong. The condition is real but slightly nonsensical. It shouldn't quite make sense, and that's correct.
+
+The Strange Offer always involves a choice that feels like it has implications the game isn't telling you about.
+
+**Examples:**
+
+> *"There is a sword in the wall. It was not there before. It is very good. You may take it, but you must leave something behind — the game will not tell you what."* (random equipped item is moved to stash, inaccessible for this run — player doesn't know which one until after they accept)
+
+> *"The dungeon offers you nothing. But if you ask it nicely, in writing, it may reconsider."* (player must type a short message — the AI reads it and decides whether to give an item. If the message pleases it, Rare item. If not, nothing. Mood unchanged either way.)
+
+> *"Take the relic. It will work correctly on Tuesdays."* (item has double stats every other encounter — odd encounters normal, even encounters doubled. Coded. Genuinely useful if you track it.)
+
+The Strange Offer always resolves cleanly in code. The weirdness is in the framing, not the mechanics.
+
+---
+
+### Implementation Notes
+
+**Offer/Curse trigger check** runs after every encounter resolution in the Cloud Function:
+
+```javascript
+async function checkMontorEvent(campaignId) {
+  const campaign = await getCampaign(campaignId);
+  const { score, current, lastEventAt } = campaign.dungeonMood;
+  const encountersSinceLastEvent = campaign.currentEncounterIndex - lastEventAt;
+
+  if (encountersSinceLastEvent < 3) return; // cooldown
+
+  if (score >= 86) return triggerStrangeOffer(campaign);
+  if (score >= 51) return triggerOffer(campaign);
+  if (score <= 15) return triggerCurse(campaign);
+}
+```
+
+**AI call for Offer/Curse** is a single call with the current context + mood + party loadout summary. Returns: item type suggestion, condition text, flavour narration. Output token limit: 200. Cheap.
+
+**Conditions are enforced mechanically** — stored on the campaign doc as structured objects, not freeform text:
+
+```javascript
+activeConditions: [{
+  type: 'no_abilities_next_encounter' | 'voluntary_damage' | 'natural_20_kill' | ...,
+  triggeredBy: 'montor_offer' | 'montor_curse',
+  expiresAfter: 'next_encounter' | 'run_end',
+  liftCondition: string | null,
+  isMet: boolean
+}]
+```
+
+The AI names the condition. The code enforces it. These never overlap.
+
+---
+
+### Montor's Offer/Curse & the Basic Crawler
+
+In Basic Crawler mode (no AI / Montor disabled), Offer and Curse events are replaced by standard Narrative Events. The mood system still runs mechanically but has no output — loot roll modifier only (mood score shifts the table without any event firing).
+
+This means the mood system gracefully degrades: full Montor mode gives named events and AI flavour; Basic Crawler mode gives silent loot table adjustments. Same code path, different output.
+
+---
+
 *Mechanics — v0.3 — March 2026*

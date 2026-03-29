@@ -155,11 +155,14 @@ Montor is never mechanically defined. The AI interprets it through the Campaign 
 
 The dungeon is Montor's house. Players are always the intruders.
 
+**The Dungeon Mood system is Montor's personality made mechanical.** The dungeon watches, judges, and reacts. It gets amused. It gets bored. It gets wrathful. At extremes it gets strange. Players will form a mental model of Montor entirely through these shifts — not from description, but from behaviour. It is never explained. It is discovered through play.
+
 **Rules for Montor in the AI system:**
 - Referenced by the AI when dramatically appropriate — never casually
 - Its nature is never fully explained unless the Campaign Brief explicitly defines it
 - It may be the final boss, already dead, absent, or watching — the brief decides
 - The ambiguity is intentional and preserved across campaigns
+- At Delighted, Reverent, and Strange moods the dungeon may address the party directly — once per run, one sentence, never explains itself
 
 The name implies ownership. You're not exploring a dungeon. You're inside something.
 
