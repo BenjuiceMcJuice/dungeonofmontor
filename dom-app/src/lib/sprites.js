@@ -138,27 +138,31 @@ var SPRITES = {
 // Player class sprites — same grid system, custom colours
 var PLAYER_SPRITES = {
   knight: {
-    name: 'Knight', cols: 14, rows: 20, grid: [
-      [_,_,_,_,_,K,K,K,K,_,_,_,_,_],  // helm top
-      [_,_,_,_,K,C,C,C,C,K,_,_,_,_],
-      [_,_,_,K,C,C,C,C,C,C,K,_,_,_],  // helm widens
-      [_,_,_,K,C,S,C,C,S,C,K,_,_,_],  // visor slit (shadow = eye line)
-      [_,_,_,K,C,C,C,C,C,C,K,_,_,_],
-      [_,_,_,_,K,C,S,S,C,K,_,_,_,_],  // chin guard
-      [_,_,_,_,_,K,K,K,K,_,_,_,_,_],  // neck
-      [_,_,K,K,K,C,C,C,C,K,K,K,_,_],  // shoulders — wide
-      [_,K,C,C,K,C,C,C,C,K,C,C,K,_],  // shoulder plates
-      [_,K,C,C,K,S,C,C,S,K,C,C,K,_],  // chest armour
-      [_,K,C,C,K,C,C,C,C,K,C,C,K,_],
-      [_,_,K,C,K,C,S,S,C,K,C,K,_,_],  // belt
-      [_,_,K,C,_,K,C,C,K,_,C,K,_,_],  // arms at sides
-      [_,_,K,K,_,K,C,C,K,_,K,K,_,_],  // gauntlets
-      [_,_,_,_,_,K,C,C,K,_,_,_,_,_],  // waist
-      [_,_,_,_,K,C,C,C,C,K,_,_,_,_],  // legs
-      [_,_,_,_,K,C,S,S,C,K,_,_,_,_],  // greaves
-      [_,_,_,_,K,C,C,C,C,K,_,_,_,_],
-      [_,_,_,K,K,C,K,K,C,K,K,_,_,_],  // boots
-      [_,_,_,K,K,K,_,_,K,K,K,_,_,_],  // feet
+    name: 'Knight', cols: 18, rows: 24, grid: [
+      [_,_,_,_,_,_,K,K,K,K,K,K,_,_,_,_,_,_],  // helm crest
+      [_,_,_,_,_,K,C,C,C,C,C,C,K,_,_,_,_,_],
+      [_,_,_,_,K,C,C,C,C,C,C,C,C,K,_,_,_,_],  // helm widens
+      [_,_,_,_,K,C,S,S,S,S,S,S,C,K,_,_,_,_],  // visor slit — horizontal shadow band
+      [_,_,_,_,K,C,C,C,C,C,C,C,C,K,_,_,_,_],  // below visor
+      [_,_,_,_,_,K,C,S,S,S,S,C,K,_,_,_,_,_],  // chin / breath guard
+      [_,_,_,_,_,_,K,C,C,C,C,K,_,_,_,_,_,_],  // gorget (neck armour)
+      [_,_,K,K,K,K,K,C,C,C,C,K,K,K,K,K,_,_],  // wide pauldrons
+      [_,K,S,C,C,K,C,C,C,C,C,C,K,C,C,S,K,_],  // shoulder plates
+      [_,K,C,C,C,K,S,C,C,C,C,S,K,C,C,C,K,_],  // upper chest — armour shadow
+      [_,K,C,C,C,K,C,C,S,S,C,C,K,C,C,C,K,_],  // chest plate — central ridge
+      [_,K,C,C,C,K,C,S,C,C,S,C,K,C,C,C,K,_],  // lower chest
+      [_,_,K,C,C,K,C,C,C,C,C,C,K,C,C,K,_,_],  // waist / belt
+      [_,_,K,C,K,_,K,S,S,S,S,K,_,K,C,K,_,_],  // belt buckle + arms
+      [_,_,K,C,K,_,K,C,C,C,C,K,_,K,C,K,_,_],  // gauntlets
+      [_,_,K,K,K,_,K,C,C,C,C,K,_,K,K,K,_,_],  // fists
+      [_,_,_,_,_,_,K,C,C,C,C,K,_,_,_,_,_,_],  // tabard
+      [_,_,_,_,_,K,C,C,K,K,C,C,K,_,_,_,_,_],  // upper legs
+      [_,_,_,_,_,K,C,S,K,K,S,C,K,_,_,_,_,_],  // greaves — shadow detail
+      [_,_,_,_,_,K,C,C,K,K,C,C,K,_,_,_,_,_],  // lower greaves
+      [_,_,_,_,_,K,C,C,K,K,C,C,K,_,_,_,_,_],  // shin guards
+      [_,_,_,_,K,C,S,C,K,K,C,S,C,K,_,_,_,_],  // ankle plates
+      [_,_,_,K,K,C,C,K,_,_,K,C,C,K,K,_,_,_],  // boots
+      [_,_,_,K,K,K,K,K,_,_,K,K,K,K,K,_,_,_],  // soles — planted
     ],
   },
 }
