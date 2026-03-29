@@ -15,7 +15,7 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-29 | Design docs v0.3 incorporated (incl. Dungeon Mood, Build Plan, Sprite Sheet) | ✅ Done |
 | 2026-03-29 | Firebase — Firestore DB (europe-west2) + Auth enabled | ✅ Done |
 |            | **Stage 1 — The Crawl** | |
-|            | Sprint 1 — Firebase Auth + routing + design system | ⬜ |
+| 2026-03-29 | Sprint 1 — Firebase Auth + routing + Knight generation | ✅ Done |
 |            | Sprint 2 — Sprites + dice library + DiceRoller component | ⬜ |
 |            | Sprint 3 — Combat engine + Cloud Function + enemy AI | ⬜ |
 |            | Sprint 4 — Items + loot + basic inventory | ⬜ |
