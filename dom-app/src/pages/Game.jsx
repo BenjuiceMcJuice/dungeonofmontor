@@ -54,7 +54,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   function startCombat() {
-    var enemies = generateCombatEnemies('seasoned')
+    var enemies = generateCombatEnemies('seasoned', 1) // encounter level 1 = easy starter
     var players = [{ uid: user.uid, character: character }]
     var bs = createBattleState(players, enemies)
     setBattle(bs)

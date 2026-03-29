@@ -71,17 +71,29 @@ function generateEnemy(archetypeKey, tierKey, difficulty) {
   }
 }
 
+// Enemy pools by encounter difficulty (not game difficulty)
+// encounterLevel: 1 = easy opener, 2 = moderate, 3 = tough, 4 = hard
+var ENCOUNTER_POOLS = {
+  1: { types: ['rat', 'slug'], tiers: ['dust'], count: [1, 2] },
+  2: { types: ['rat', 'slug', 'orc'], tiers: ['dust', 'dust', 'slate'], count: [1, 2] },
+  3: { types: ['rat', 'orc', 'slug', 'wraith'], tiers: ['dust', 'slate'], count: [1, 3] },
+  4: { types: ['orc', 'rock', 'wraith'], tiers: ['slate'], count: [1, 2] },
+}
+
 // Generate enemies for a combat encounter
-// Stage 1: 1-3 enemies, Dust/Slate only
-function generateCombatEnemies(difficulty) {
-  var types = ['rat', 'orc', 'rock', 'slug', 'wraith']
-  var tiers = ['dust', 'slate']
-  var count = roll(3) // 1-3 enemies
+// encounterLevel defaults to 1 (easy)
+function generateCombatEnemies(difficulty, encounterLevel) {
+  var level = encounterLevel || 1
+  var pool = ENCOUNTER_POOLS[level] || ENCOUNTER_POOLS[1]
+
+  var minCount = pool.count[0]
+  var maxCount = pool.count[1]
+  var count = minCount + Math.floor(Math.random() * (maxCount - minCount + 1))
 
   var enemies = []
   for (var i = 0; i < count; i++) {
-    var type = types[Math.floor(Math.random() * types.length)]
-    var tier = tiers[Math.floor(Math.random() * tiers.length)]
+    var type = pool.types[Math.floor(Math.random() * pool.types.length)]
+    var tier = pool.tiers[Math.floor(Math.random() * pool.tiers.length)]
     enemies.push(generateEnemy(type, tier, difficulty))
   }
   return enemies
