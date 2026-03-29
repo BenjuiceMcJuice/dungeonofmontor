@@ -40,6 +40,7 @@ function Game({ character, user, onEndRun }) {
   var [enemyDiceDisplay, setEnemyDiceDisplay] = useState(null)
   var [hasRolled, setHasRolled] = useState(false)
   var [lastAttackRoll, setLastAttackRoll] = useState(null)
+  var [pendingAttackResult, setPendingAttackResult] = useState(null) // full combat result, shown before Continue
   var logRef = useRef(null)
 
   useEffect(function() {
@@ -187,6 +188,7 @@ function Game({ character, user, onEndRun }) {
     setSelectedTarget(enemyId)
     setHasRolled(false)
     setLastAttackRoll(null)
+    setPendingAttackResult(null)
   }
 
   function handleAttackRoll() {
@@ -195,12 +197,20 @@ function Game({ character, user, onEndRun }) {
     var defTn = 10 + getModifier(enemy.stats.def)
     var rollResult = d20Check(strMod, defTn)
     setLastAttackRoll(rollResult)
+
+    // Resolve combat immediately with this roll so we can show damage
+    var attackOut = resolvePlayerAttack(battle, user.uid, selectedTarget, rollResult)
+    if (attackOut) {
+      setPendingAttackResult(attackOut)
+    }
+
     return rollResult
   }
 
   function handleRollComplete() {
-    // Pass the SAME roll the player saw into combat resolution
-    var attackOut = resolvePlayerAttack(battle, user.uid, selectedTarget, lastAttackRoll)
+    // Attack was already resolved in handleAttackRoll — just apply it now
+    var attackOut = pendingAttackResult
+    if (!attackOut) return
 
     var updatedBattle = battle
     if (attackOut) {
@@ -421,6 +431,29 @@ function Game({ character, user, onEndRun }) {
                 onResult={handleRollComplete}
                 buttonLabel="Attack!"
               />
+              {/* Damage result — shown after roll resolves */}
+              {pendingAttackResult && hasRolled && (function() {
+                var pr = pendingAttackResult.result
+                if (pr.attackRoll.fumble) {
+                  return <p className="text-red-400 text-base italic text-center">You stumble — a complete miss!</p>
+                }
+                if (!pr.attackRoll.success && !pr.attackRoll.crit) {
+                  return <p className="text-ink-dim text-base italic text-center">Your swing goes wide. No damage.</p>
+                }
+                return (
+                  <div className="text-center">
+                    <p className="text-gold text-lg font-display">
+                      {pr.attackRoll.crit ? '💥 ' : '⚔️ '}{pr.damage} damage!
+                    </p>
+                    <p className="text-ink-dim text-sm">
+                      {pr.attackRoll.crit ? 'Critical hit — double damage!' : 'Your longsword strikes true.'}
+                    </p>
+                    {pr.enemyDefeated && (
+                      <p className="text-gold text-base font-display mt-1">☠️ {pr.target} defeated!</p>
+                    )}
+                  </div>
+                )
+              })()}
               {!hasRolled && (
                 <button
                   onClick={function() { setSelectedTarget(null) }}
