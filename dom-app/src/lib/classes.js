@@ -60,7 +60,7 @@ function generateKnight(name) {
     level: 1,
     xp: 0,
     stats: stats,
-    maxHp: getMaxHp(cls, stats),
+    maxHp: 40, // Stage 1: fixed HP. Formula (getMaxHp) used in Stage 2 with levelling.
     abilities: [],
     scars: [],
     titles: [],
