@@ -15,7 +15,7 @@ function Home({ onSignInWithGoogle, onSignInWithEmail, onSignUpWithEmail, error 
   }
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center">
+    <div className="h-svh overflow-hidden flex flex-col items-center justify-center px-6 text-center">
       <h1 className="font-display text-5xl md:text-6xl text-gold leading-tight mb-3">
         Dungeon of Montor
       </h1>

@@ -9,7 +9,7 @@ function Tavern({ user, onSignOut, onStartRun }) {
   }
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center px-6 text-center">
+    <div className="h-svh overflow-hidden flex flex-col items-center justify-center px-6 text-center">
       <h1 className="font-display text-4xl text-gold mb-2">The Tavern</h1>
       <p className="text-ink-dim text-sm mb-8">
         Signed in as {user.displayName || user.email}

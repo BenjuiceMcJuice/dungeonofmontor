@@ -40,7 +40,13 @@ function Game({ character, user, onEndRun }) {
   var [hasRolled, setHasRolled] = useState(false)
   var logRef = useRef(null)
 
-  useEffect(function() { startCombat() }, [])
+  useEffect(function() {
+    // Force scroll to top on iOS when entering game
+    window.scrollTo(0, 0)
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
+    startCombat()
+  }, [])
 
   useEffect(function() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
