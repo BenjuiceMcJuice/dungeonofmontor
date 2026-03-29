@@ -36,6 +36,7 @@ function Game({ character, user, onEndRun }) {
   var [totalXp, setTotalXp] = useState(0)
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null) // { enemyId, enemyName, targetName, result }
   var [enemyDiceDisplay, setEnemyDiceDisplay] = useState(null)
+  var [hasRolled, setHasRolled] = useState(false)
   var logRef = useRef(null)
 
   useEffect(function() { startCombat() }, [])
@@ -175,9 +176,11 @@ function Game({ character, user, onEndRun }) {
 
   function handleSelectTarget(enemyId) {
     setSelectedTarget(enemyId)
+    setHasRolled(false)
   }
 
   function handleAttackRoll() {
+    setHasRolled(true)
     var enemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
     var defTn = 10 + getModifier(enemy.stats.def)
     return d20Check(strMod, defTn)
@@ -426,12 +429,14 @@ function Game({ character, user, onEndRun }) {
                 onResult={handleRollComplete}
                 buttonLabel="Attack!"
               />
-              <button
-                onClick={function() { setSelectedTarget(null) }}
-                className="text-ink-dim text-sm hover:text-ink transition-colors"
-              >
-                ← Choose different target
-              </button>
+              {!hasRolled && (
+                <button
+                  onClick={function() { setSelectedTarget(null) }}
+                  className="text-ink-dim text-sm hover:text-ink transition-colors"
+                >
+                  ← Choose different target
+                </button>
+              )}
             </div>
           )
         })()}
