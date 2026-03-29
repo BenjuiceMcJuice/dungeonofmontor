@@ -39,6 +39,7 @@ function Game({ character, user, onEndRun }) {
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null) // { enemyId, enemyName, targetName, result }
   var [enemyDiceDisplay, setEnemyDiceDisplay] = useState(null)
   var [hasRolled, setHasRolled] = useState(false)
+  var [lastAttackRoll, setLastAttackRoll] = useState(null)
   var logRef = useRef(null)
 
   useEffect(function() {
@@ -185,17 +186,21 @@ function Game({ character, user, onEndRun }) {
   function handleSelectTarget(enemyId) {
     setSelectedTarget(enemyId)
     setHasRolled(false)
+    setLastAttackRoll(null)
   }
 
   function handleAttackRoll() {
     setHasRolled(true)
     var enemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
     var defTn = 10 + getModifier(enemy.stats.def)
-    return d20Check(strMod, defTn)
+    var rollResult = d20Check(strMod, defTn)
+    setLastAttackRoll(rollResult)
+    return rollResult
   }
 
   function handleRollComplete() {
-    var attackOut = resolvePlayerAttack(battle, user.uid, selectedTarget)
+    // Pass the SAME roll the player saw into combat resolution
+    var attackOut = resolvePlayerAttack(battle, user.uid, selectedTarget, lastAttackRoll)
 
     var updatedBattle = battle
     if (attackOut) {

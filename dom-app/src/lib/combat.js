@@ -94,16 +94,33 @@ function getActor(battleState, actorId) {
   return null
 }
 
-// Resolve player attack — returns { newBattle, result }
-function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
+// Resolve player attack — accepts pre-rolled attackResult from DiceRoller
+// This ensures the roll the player SEES is the roll that determines the outcome
+function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult) {
   var bs = cloneBattle(battleState)
   var player = bs.players[playerUid]
   var enemy = bs.enemies.find(function(e) { return e.id === targetEnemyId })
   if (!player || !enemy || player.isDown || enemy.isDown) return null
 
   var strMod = getModifier(player.combatStats.str)
-  var defTn = 10 + getModifier(enemy.stats.def)
-  var attackResult = d20Check(strMod, defTn)
+
+  // If no pre-rolled result provided, roll now (for AI/multiplayer use)
+  if (!attackResult) {
+    var defTn = 10 + getModifier(enemy.stats.def)
+    attackResult = d20Check(strMod, defTn)
+  }
+
+  // Enforce D&D natural roll rules:
+  // Natural 1 = ALWAYS miss regardless of modifiers
+  // Natural 20 = ALWAYS hit regardless of target
+  var isHit = false
+  if (attackResult.fumble) {
+    isHit = false  // nat 1 always misses
+  } else if (attackResult.crit) {
+    isHit = true   // nat 20 always hits
+  } else {
+    isHit = attackResult.success
+  }
 
   var result = {
     attacker: player.name,
@@ -115,7 +132,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
     enemyDefeated: false,
   }
 
-  if (attackResult.success || attackResult.crit) {
+  if (isHit) {
     var weaponDie = 6
     if (player.equipped && player.equipped.weapon && player.equipped.weapon.die) {
       weaponDie = player.equipped.weapon.die
@@ -141,6 +158,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
 }
 
 // Resolve enemy attack — returns { newBattle, result }
+// Same nat 1/nat 20 rules as player attacks
 function resolveEnemyAttack(battleState, enemyId) {
   var bs = cloneBattle(battleState)
   var enemy = bs.enemies.find(function(e) { return e.id === enemyId })
@@ -155,6 +173,16 @@ function resolveEnemyAttack(battleState, enemyId) {
   var defTn = 10 + getModifier(target.combatStats.def)
   var attackResult = d20Check(strMod, defTn)
 
+  // Enforce nat 1/nat 20 rules
+  var isHit = false
+  if (attackResult.fumble) {
+    isHit = false
+  } else if (attackResult.crit) {
+    isHit = true
+  } else {
+    isHit = attackResult.success
+  }
+
   var result = {
     attacker: enemy.name,
     attackerId: enemyId,
@@ -165,7 +193,7 @@ function resolveEnemyAttack(battleState, enemyId) {
     playerDowned: false,
   }
 
-  if (attackResult.success || attackResult.crit) {
+  if (isHit) {
     var dmgResult = rollDamage(enemy.weaponDie, strMod)
     var finalDmg = applyDefence(dmgResult.total, target.combatStats.def)
 
