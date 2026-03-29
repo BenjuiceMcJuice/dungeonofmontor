@@ -10,8 +10,8 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | Date       | Milestone                          | Status |
 |------------|------------------------------------|--------|
 | 2026-03-29 | Repo scaffolded, SDLC in place     | ✅ Done |
-|            | Step 0 — Infra & hosting setup     | ⬜ |
-|            | Step 1 — React scaffold + shell    | ⬜ |
+| 2026-03-29 | Step 0 — Infra & hosting setup     | 🟡 Firebase DB still needed |
+| 2026-03-29 | Step 1 — React scaffold + shell    | ✅ Done |
 |            | Step 2 — Character creation        | ⬜ |
 |            | Step 3 — Campaign brief + encounter deck | ⬜ |
 |            | Step 4 — Combat loop + dice UI     | ⬜ |
