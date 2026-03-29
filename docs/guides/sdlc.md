@@ -10,8 +10,8 @@ How code goes from idea to production.
 
 | Branch | Purpose | Deploys to |
 |---|---|---|
-| `main` | Production. Only merged code lands here. | TBC |
-| `dev` | Active development. All new work happens here. | TBC |
+| `main` | Production. Only merged code lands here. | `benjuicemcjuice.github.io/dungeonofmontor/` (GitHub Pages) |
+| `dev` | Active development. All new work happens here. | Local dev server only |
 
 **Never commit directly to `main`.** All work goes through `dev` first.
 
@@ -70,9 +70,10 @@ git push origin main
 
 ### 6. Verify production
 
-- Check the live site
-- Hard refresh to bypass any caches
+- Check `https://benjuicemcjuice.github.io/dungeonofmontor/`
+- Hard refresh (Ctrl+Shift+R) to bypass service worker cache
 - Spot-check the feature on desktop and mobile
+- If something is wrong: revert the merge on `main` or push a fix through `dev`
 
 ---
 

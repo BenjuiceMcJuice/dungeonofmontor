@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-**Dungeon of Montor** — project details TBC.
+**Dungeon of Montor** is a browser-based RPG PWA — mobile or desktop, solo or multiplayer — combining D&D-style tactical mechanics (d20 dice, stats, combat, loot, progression) with AI-driven live narrative via Groq API. Every campaign tells a different story because an AI writes it in real time, guided by a player-written Campaign Brief.
+
+## Tech Stack
+
+- **React PWA** — mobile-first, installable, offline-capable
+- **Firebase** — Auth (email + Google), Firestore (real-time multiplayer sync), Cloud Functions (turn enforcement, AI proxy), Cloud Messaging (async turn alerts)
+- **Groq API** — AI narration (user-supplied key, stored in localStorage only)
+- **Firebase Hosting** — CDN, PWA manifest
+- **Sprites** — canvas grid arrays, no image files
 
 ## Repository
 
@@ -49,3 +57,8 @@ Rules:
 |---|---|---|
 | `DEVLOG.md` | **CURRENT** | Milestone tracker — read first in any session |
 | `docs/guides/sdlc.md` | **CURRENT** | Dev → test → deploy workflow |
+| `docs/strategy/01_Game_Vision.md` | **CURRENT** | Product pitch, audience, design pillars, Montor lore |
+| `docs/specs/02_Game_Mechanics.md` | **CURRENT** | Full rules: stats, dice, combat, items, factions, deities, legacy |
+| `docs/specs/03_Technical_Architecture.md` | **CURRENT** | Stack, Firebase data model, AI system, token mgmt, build phases |
+| `docs/specs/04_UI_Specification.md` | **CURRENT** | Tab system, screen states, combat UX flow, design system |
+| `docs/specs/05_Characters_and_Assets.md` | **CURRENT** | Enemy archetypes, player classes, power tiers, sprite spec |
