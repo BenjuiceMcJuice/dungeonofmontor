@@ -4,8 +4,14 @@ function Tavern({ user, onSignOut, onStartRun }) {
   var [name, setName] = useState('')
 
   function handleStart() {
-    var charName = name.trim() || 'Unnamed Knight'
-    onStartRun(charName)
+    // Blur input to dismiss iOS keyboard and reset viewport
+    document.activeElement && document.activeElement.blur()
+    window.scrollTo(0, 0)
+    // Small delay to let keyboard dismiss before screen change
+    setTimeout(function() {
+      var charName = name.trim() || 'Unnamed Knight'
+      onStartRun(charName)
+    }, 100)
   }
 
   return (
@@ -25,9 +31,12 @@ function Tavern({ user, onSignOut, onStartRun }) {
           <input
             type="text"
             placeholder="Name your Knight"
+            enterKeyHint="go"
+            autoComplete="off"
             value={name}
             onChange={function(e) { setName(e.target.value) }}
-            className="w-full py-3 px-4 rounded-lg bg-raised border border-border text-ink font-sans text-sm placeholder:text-ink-faint focus:border-border-hl focus:outline-none"
+            onKeyDown={function(e) { if (e.key === 'Enter') handleStart() }}
+            className="w-full py-3 px-4 rounded-lg bg-raised border border-border text-ink font-sans text-base placeholder:text-ink-faint focus:border-border-hl focus:outline-none"
           />
 
           <button
