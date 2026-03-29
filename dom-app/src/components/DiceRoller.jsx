@@ -60,7 +60,7 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
       {/* Die */}
       <div
         className={
-          'w-24 h-24 rounded-xl flex items-center justify-center font-display text-4xl border-2 transition-all ' +
+          'w-20 h-20 rounded-xl flex items-center justify-center font-display text-3xl border-2 transition-all ' +
           (state === 'rolling'
             ? 'border-gold bg-gold-glow text-gold animate-pulse scale-110'
             : state === 'result'
@@ -94,7 +94,7 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
           onClick={handleRoll}
           disabled={disabled}
           className={
-            'py-4 px-10 rounded-lg font-sans text-lg font-semibold transition-all ' +
+            'py-3 px-8 rounded-lg font-sans text-base font-semibold transition-all ' +
             (disabled
               ? 'bg-raised text-ink-faint border border-border'
               : 'bg-gold text-bg hover:opacity-90 active:scale-95')

@@ -260,37 +260,26 @@ function Game({ character, user, onEndRun }) {
   }
 
   return (
-    <div className="min-h-svh flex flex-col px-4 pt-4 pb-6 bg-raised">
-      {/* Scene header */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-ink-dim text-sm uppercase tracking-widest">
-          Combat · Round {battle.round}
-        </span>
-        <span className="text-ink text-sm">
-          {character.name} — Knight L{character.level}
-        </span>
-      </div>
-
-      {/* Player HP bar */}
-      <div className="bg-surface border border-border rounded-lg p-3 mb-4">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="font-display text-base text-ink">{playerState.name}</span>
-          <span className="text-ink text-sm font-sans">
-            {playerState.currentHp} / {playerState.maxHp} HP
-          </span>
-        </div>
-        <div className="w-full bg-bg rounded-full h-3">
+    <div className="h-svh flex flex-col px-3 pt-2 pb-3 bg-raised overflow-hidden">
+      {/* Scene header + Player HP — compact single row */}
+      <div className="flex items-center gap-3 mb-2">
+        <span className="font-display text-sm text-ink shrink-0">{playerState.name}</span>
+        <div className="flex-1 bg-bg rounded-full h-2.5">
           <div
-            className={'rounded-full h-3 transition-all duration-500 ' +
+            className={'rounded-full h-2.5 transition-all duration-500 ' +
               (playerState.currentHp / playerState.maxHp > 0.5 ? 'bg-green-500' :
                playerState.currentHp / playerState.maxHp > 0.25 ? 'bg-amber-500' : 'bg-red-500')}
             style={{ width: Math.max(0, (playerState.currentHp / playerState.maxHp) * 100) + '%' }}
           />
         </div>
+        <span className="text-ink text-sm font-sans shrink-0">
+          {playerState.currentHp}/{playerState.maxHp}
+        </span>
+        <span className="text-ink-dim text-xs shrink-0">R{battle.round}</span>
       </div>
 
-      {/* Enemies */}
-      <div className="flex flex-wrap justify-center gap-3 mb-4">
+      {/* Enemies — compact */}
+      <div className="flex flex-wrap justify-center gap-2 mb-2">
         {battle.enemies.map(function(enemy) {
           var isTarget = selectedTarget === enemy.id
           var isDead = enemy.isDown
@@ -301,7 +290,7 @@ function Game({ character, user, onEndRun }) {
               onClick={function() { if (!isDead && isPlayerTurn) handleSelectTarget(enemy.id) }}
               disabled={isDead || !isPlayerTurn}
               className={
-                'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ' +
+                'flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ' +
                 (isDead ? 'opacity-20 border-transparent' :
                  isActing ? 'border-red-400 bg-red-400/10 scale-105' :
                  isTarget ? 'border-gold bg-gold-glow' :
@@ -309,22 +298,22 @@ function Game({ character, user, onEndRun }) {
                  'border-border')
               }
             >
-              <SpriteRenderer spriteKey={enemy.archetypeKey} tierKey={enemy.tierKey} scale={4} />
-              <span className="font-display text-base text-ink">{enemy.name}</span>
-              <div className="w-24 bg-bg rounded-full h-2.5">
+              <SpriteRenderer spriteKey={enemy.archetypeKey} tierKey={enemy.tierKey} scale={3} />
+              <span className="font-display text-sm text-ink">{enemy.name}</span>
+              <div className="w-20 bg-bg rounded-full h-2">
                 <div
-                  className="bg-red-500 rounded-full h-2.5 transition-all duration-300"
+                  className="bg-red-500 rounded-full h-2 transition-all duration-300"
                   style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }}
                 />
               </div>
-              <span className="text-ink text-sm font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
+              <span className="text-ink text-xs font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
             </button>
           )
         })}
       </div>
 
-      {/* Combat log — last 6 entries */}
-      <div ref={logRef} className="bg-surface border border-border rounded-lg p-3 mb-4 max-h-40 overflow-y-auto">
+      {/* Combat log — compact, last 6 entries */}
+      <div ref={logRef} className="bg-surface border border-border rounded-lg p-2 mb-2 max-h-24 overflow-y-auto shrink-0">
         {combatLog.length === 0 && (
           <p className="text-ink-dim text-sm italic">The battle begins...</p>
         )}
@@ -337,15 +326,15 @@ function Game({ character, user, onEndRun }) {
         })}
       </div>
 
-      {/* Action area */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-3">
+      {/* Action area — fills remaining space */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
 
         {/* Enemy windup — show who's attacking */}
         {phase === 'enemyWindup' && enemyAttackInfo && (
-          <div className="flex flex-col items-center gap-3 p-5 border-2 border-red-400/30 rounded-lg bg-red-400/5 max-w-sm">
-            <p className="text-red-400 text-xl font-display">{enemyAttackInfo.enemyName}</p>
-            <p className="text-ink text-base italic text-center">
-              The {enemyAttackInfo.enemyName.toLowerCase()} turns towards {enemyAttackInfo.targetName} and prepares to strike...
+          <div className="flex flex-col items-center gap-2 p-4 border-2 border-red-400/30 rounded-lg bg-red-400/5 max-w-sm">
+            <p className="text-red-400 text-lg font-display">{enemyAttackInfo.enemyName}</p>
+            <p className="text-ink text-sm italic text-center">
+              The {enemyAttackInfo.enemyName.toLowerCase()} prepares to strike...
             </p>
           </div>
         )}
@@ -403,9 +392,9 @@ function Game({ character, user, onEndRun }) {
 
         {/* Player turn — no target selected */}
         {isPlayerTurn && !selectedTarget && (
-          <div className="flex flex-col items-center gap-3 p-5 border-2 border-gold/40 rounded-lg bg-gold-glow max-w-sm">
-            <p className="text-gold text-xl font-display">Your Turn</p>
-            <p className="text-ink text-base text-center">Choose an enemy above to attack</p>
+          <div className="flex flex-col items-center gap-2 p-4 border-2 border-gold/40 rounded-lg bg-gold-glow max-w-sm">
+            <p className="text-gold text-lg font-display">Your Turn</p>
+            <p className="text-ink text-sm text-center">Choose an enemy above to attack</p>
           </div>
         )}
 
