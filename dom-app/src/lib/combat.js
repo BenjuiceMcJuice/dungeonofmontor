@@ -1,15 +1,35 @@
 // Combat engine — multiplayer-ready from day one
-// All state uses the BattleState structure from the tech spec
+// Returns NEW state objects (never mutates) so React re-renders correctly
 import { roll, rollWithMod, d20Check, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
 
+// Deep-clone battle state for immutable updates
+function cloneBattle(bs) {
+  return {
+    players: Object.keys(bs.players).reduce(function(acc, uid) {
+      acc[uid] = Object.assign({}, bs.players[uid], {
+        combatStats: Object.assign({}, bs.players[uid].combatStats),
+        statusEffects: bs.players[uid].statusEffects.slice(),
+      })
+      return acc
+    }, {}),
+    enemies: bs.enemies.map(function(e) {
+      return Object.assign({}, e, { stats: Object.assign({}, e.stats) })
+    }),
+    turnOrder: bs.turnOrder.slice(),
+    turnOrderDetails: bs.turnOrderDetails.slice(),
+    currentTurnIndex: bs.currentTurnIndex,
+    round: bs.round,
+    inBattle: bs.inBattle,
+    log: bs.log.slice(),
+  }
+}
+
 // Build initial BattleState from party and enemies
-// players: [{ uid, character }], enemies: [enemy]
 function createBattleState(players, enemies) {
   var playerStates = {}
   var turnOrder = []
 
-  // Snapshot each player into BattleState
   players.forEach(function(p) {
     var char = p.character
     var agiMod = getModifier(char.stats.agi)
@@ -33,7 +53,6 @@ function createBattleState(players, enemies) {
     turnOrder.push({ id: p.uid, type: 'player', initiative: initRoll.total, agi: char.stats.agi })
   })
 
-  // Add enemies to turn order
   var enemyStates = enemies.map(function(e) {
     var agiMod = getModifier(e.stats.agi)
     var initRoll = rollWithMod(20, agiMod)
@@ -42,7 +61,6 @@ function createBattleState(players, enemies) {
     return e
   })
 
-  // Sort by initiative (highest first), ties broken by raw AGI, then coin flip
   turnOrder.sort(function(a, b) {
     if (b.initiative !== a.initiative) return b.initiative - a.initiative
     if (b.agi !== a.agi) return b.agi - a.agi
@@ -61,12 +79,10 @@ function createBattleState(players, enemies) {
   }
 }
 
-// Get the current actor's ID
 function getCurrentTurnId(battleState) {
   return battleState.turnOrder[battleState.currentTurnIndex]
 }
 
-// Get actor info (player or enemy)
 function getActor(battleState, actorId) {
   if (battleState.players[actorId]) {
     return { type: 'player', data: battleState.players[actorId] }
@@ -78,16 +94,15 @@ function getActor(battleState, actorId) {
   return null
 }
 
-// Resolve a player attack on an enemy
+// Resolve player attack — returns { newBattle, result }
 function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
-  var player = battleState.players[playerUid]
-  var enemy = battleState.enemies.find(function(e) { return e.id === targetEnemyId })
+  var bs = cloneBattle(battleState)
+  var player = bs.players[playerUid]
+  var enemy = bs.enemies.find(function(e) { return e.id === targetEnemyId })
   if (!player || !enemy || player.isDown || enemy.isDown) return null
 
   var strMod = getModifier(player.combatStats.str)
   var defTn = 10 + getModifier(enemy.stats.def)
-
-  // Attack roll
   var attackResult = d20Check(strMod, defTn)
 
   var result = {
@@ -101,7 +116,6 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
   }
 
   if (attackResult.success || attackResult.crit) {
-    // Determine weapon die (default d6 shortsword if nothing equipped)
     var weaponDie = 6
     if (player.equipped && player.equipped.weapon && player.equipped.weapon.die) {
       weaponDie = player.equipped.weapon.die
@@ -110,7 +124,6 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
     var dmgResult = rollDamage(weaponDie, strMod)
     var finalDmg = applyDefence(dmgResult.total, enemy.stats.def)
 
-    // Crits double damage
     if (attackResult.crit) {
       finalDmg = finalDmg * 2
     }
@@ -124,23 +137,22 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId) {
     }
   }
 
-  return result
+  return { newBattle: bs, result: result }
 }
 
-// Resolve an enemy attack on a player
+// Resolve enemy attack — returns { newBattle, result }
 function resolveEnemyAttack(battleState, enemyId) {
-  var enemy = battleState.enemies.find(function(e) { return e.id === enemyId })
+  var bs = cloneBattle(battleState)
+  var enemy = bs.enemies.find(function(e) { return e.id === enemyId })
   if (!enemy || enemy.isDown) return null
 
-  // Pick a random living player to attack
-  var livingPlayers = Object.values(battleState.players).filter(function(p) { return !p.isDown })
+  var livingPlayers = Object.values(bs.players).filter(function(p) { return !p.isDown })
   if (livingPlayers.length === 0) return null
 
   var target = livingPlayers[Math.floor(Math.random() * livingPlayers.length)]
 
   var strMod = getModifier(enemy.stats.str)
   var defTn = 10 + getModifier(target.combatStats.def)
-
   var attackResult = d20Check(strMod, defTn)
 
   var result = {
@@ -170,49 +182,41 @@ function resolveEnemyAttack(battleState, enemyId) {
     }
   }
 
-  return result
+  return { newBattle: bs, result: result }
 }
 
-// Advance to next living combatant
+// Advance to next living combatant — returns new battle state
 function advanceTurn(battleState) {
-  var maxIterations = battleState.turnOrder.length * 2
+  var bs = cloneBattle(battleState)
+  var maxIterations = bs.turnOrder.length * 2
   var iterations = 0
 
   do {
-    battleState.currentTurnIndex = (battleState.currentTurnIndex + 1) % battleState.turnOrder.length
-
-    // New round when we wrap
-    if (battleState.currentTurnIndex === 0) {
-      battleState.round++
+    bs.currentTurnIndex = (bs.currentTurnIndex + 1) % bs.turnOrder.length
+    if (bs.currentTurnIndex === 0) {
+      bs.round++
     }
-
-    var actor = getActor(battleState, getCurrentTurnId(battleState))
+    var actor = getActor(bs, getCurrentTurnId(bs))
     iterations++
-
-    // Skip downed actors
     if (actor && !actor.data.isDown) break
   } while (iterations < maxIterations)
 
-  return battleState
+  return bs
 }
 
-// Check win/lose conditions
 function checkBattleEnd(battleState) {
   var allEnemiesDown = battleState.enemies.every(function(e) { return e.isDown })
   var allPlayersDown = Object.values(battleState.players).every(function(p) { return p.isDown })
-
   if (allEnemiesDown) return 'victory'
   if (allPlayersDown) return 'defeat'
   return null
 }
 
-// Calculate XP from defeated enemies
 function calculateXp(battleState) {
   var xp = 0
   battleState.enemies.forEach(function(e) {
     if (e.isDown) xp += e.xp
   })
-  // Bonus for winning the encounter
   xp += 25
   return xp
 }

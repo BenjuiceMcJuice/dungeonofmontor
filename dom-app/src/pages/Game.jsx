@@ -45,33 +45,36 @@ function Game({ character, user, onEndRun }) {
 
     var timeout = setTimeout(function() {
       var currentId = getCurrentTurnId(battle)
-      var result = resolveEnemyAttack(battle, currentId)
+      var attackOut = resolveEnemyAttack(battle, currentId)
 
-      if (result) {
+      var updatedBattle = battle
+      if (attackOut) {
+        updatedBattle = attackOut.newBattle
+        var r = attackOut.result
         var newLog = combatLog.concat([{
           type: 'enemy',
-          text: result.attacker + ' attacks ' + result.target + ' — ' +
-            (result.attackRoll.crit ? 'CRITICAL! ' : result.attackRoll.fumble ? 'FUMBLE! ' : '') +
-            (result.attackRoll.success || result.attackRoll.crit
-              ? 'Hit for ' + result.damage + ' damage' + (result.playerDowned ? ' — DOWNED!' : '')
+          text: r.attacker + ' attacks ' + r.target + ' — ' +
+            (r.attackRoll.crit ? 'CRITICAL! ' : r.attackRoll.fumble ? 'FUMBLE! ' : '') +
+            (r.attackRoll.success || r.attackRoll.crit
+              ? 'Hit for ' + r.damage + ' damage' + (r.playerDowned ? ' — DOWNED!' : '')
               : 'Miss!'),
         }])
         setCombatLog(newLog)
-        setLastResult(result)
+        setLastResult(r)
 
-        // Check end conditions
-        var endResult = checkBattleEnd(battle)
+        var endResult = checkBattleEnd(updatedBattle)
         if (endResult === 'defeat') {
+          setBattle(updatedBattle)
           setPhase('defeat')
           return
         }
       }
 
       // Advance to next turn
-      advanceTurn(battle)
-      setBattle(Object.assign({}, battle))
+      var nextBattle = advanceTurn(updatedBattle)
+      setBattle(nextBattle)
 
-      var nextActor = getActor(battle, getCurrentTurnId(battle))
+      var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
       if (nextActor && nextActor.type === 'enemy') {
         setPhase('enemyTurn')
       } else {
@@ -108,36 +111,39 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handleRollComplete() {
-    // Resolve the attack
-    var result = resolvePlayerAttack(battle, user.uid, selectedTarget)
-    if (result) {
+    var attackOut = resolvePlayerAttack(battle, user.uid, selectedTarget)
+
+    var updatedBattle = battle
+    if (attackOut) {
+      updatedBattle = attackOut.newBattle
+      var r = attackOut.result
       var newLog = combatLog.concat([{
         type: 'player',
-        text: result.attacker + ' attacks ' + result.target + ' — ' +
-          (result.attackRoll.crit ? 'CRITICAL! ' : result.attackRoll.fumble ? 'FUMBLE! ' : '') +
-          (result.attackRoll.success || result.attackRoll.crit
-            ? 'Hit for ' + result.damage + ' damage' + (result.enemyDefeated ? ' — DEFEATED!' : '')
+        text: r.attacker + ' attacks ' + r.target + ' — ' +
+          (r.attackRoll.crit ? 'CRITICAL! ' : r.attackRoll.fumble ? 'FUMBLE! ' : '') +
+          (r.attackRoll.success || r.attackRoll.crit
+            ? 'Hit for ' + r.damage + ' damage' + (r.enemyDefeated ? ' — DEFEATED!' : '')
             : 'Miss!'),
       }])
       setCombatLog(newLog)
-      setLastResult(result)
+      setLastResult(r)
 
-      // Check end conditions
-      var endResult = checkBattleEnd(battle)
+      var endResult = checkBattleEnd(updatedBattle)
       if (endResult === 'victory') {
-        var xp = calculateXp(battle)
+        var xp = calculateXp(updatedBattle)
         setTotalXp(totalXp + xp)
+        setBattle(updatedBattle)
         setPhase('victory')
         return
       }
     }
 
     // Advance turn
-    advanceTurn(battle)
-    setBattle(Object.assign({}, battle))
+    var nextBattle = advanceTurn(updatedBattle)
+    setBattle(nextBattle)
     setSelectedTarget(null)
 
-    var nextActor = getActor(battle, getCurrentTurnId(battle))
+    var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
     if (nextActor && nextActor.type === 'enemy') {
       setPhase('enemyTurn')
     } else {

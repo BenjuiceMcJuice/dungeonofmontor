@@ -44,14 +44,14 @@ function getMaxHp(cls, stats) {
 function generateKnight(name) {
   // 70 points across 14 skills = 5 each, then boost Knight-relevant stats
   // 70 points across 14 skills. Knight favours STR, DEF, VIT, END.
-  // Target: STR/DEF 12-13 for +1 modifier, VIT/END 11-12 for decent HP
+  // STR 14 (+2 mod) so Knight hits hard. DEF 12 (+1) for tankiness.
   var stats = {
-    str: 13, def: 12, vit: 11, end: 11,
-    agi: 8, per: 4, wil: 3,
-    int: 1, wis: 1, lck: 1,
-    cha: 1, res: 1, sth: 1, cun: 2,
+    str: 14, def: 12, vit: 10, end: 10,
+    agi: 8, per: 3, wil: 3,
+    int: 1, wis: 1, lck: 2,
+    cha: 1, res: 2, sth: 1, cun: 2,
   }
-  // Total: 13+12+11+11+8+4+3+1+1+1+1+1+1+2 = 70 ✓
+  // Total: 14+12+10+10+8+3+3+1+1+2+1+2+1+2 = 70 ✓
 
   var cls = CLASSES.knight
   return {
@@ -64,7 +64,12 @@ function generateKnight(name) {
     abilities: [],
     scars: [],
     titles: [],
-    equipped: { weapon: null, offhand: null, armour: null, relics: [] },
+    equipped: {
+      weapon: { name: 'Longsword', die: 8, stat: 'str', rarity: 'common' },
+      offhand: null,
+      armour: { name: 'Chainmail', defBonus: 4, agiPenalty: -1, rarity: 'common' },
+      relics: [],
+    },
     inventory: [],
     gold: 0,
   }
