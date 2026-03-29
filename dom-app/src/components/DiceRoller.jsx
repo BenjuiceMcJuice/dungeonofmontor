@@ -31,28 +31,14 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
     if (onResult) onResult(result)
   }
 
-  // Plain English outcomes
+  // Outcome label only — damage details handled by parent
   var outcomeText = null
   var outcomeColor = 'text-ink'
-  var narrativeText = null
   if (result) {
-    if (result.crit) {
-      outcomeText = 'Critical Hit!'
-      outcomeColor = 'text-gold'
-      narrativeText = 'A perfect strike!'
-    } else if (result.fumble) {
-      outcomeText = 'Fumble!'
-      outcomeColor = 'text-red-400'
-      narrativeText = 'You stumble and miss completely.'
-    } else if (result.success) {
-      outcomeText = 'Hit!'
-      outcomeColor = 'text-gold'
-      narrativeText = 'Your blade connects.'
-    } else {
-      outcomeText = 'Missed'
-      outcomeColor = 'text-ink-dim'
-      narrativeText = 'Your swing goes wide.'
-    }
+    if (result.crit) { outcomeText = 'Critical Hit!'; outcomeColor = 'text-gold' }
+    else if (result.fumble) { outcomeText = 'Fumble!'; outcomeColor = 'text-red-400' }
+    else if (result.success) { outcomeText = 'Hit!'; outcomeColor = 'text-gold' }
+    else { outcomeText = 'Missed'; outcomeColor = 'text-ink-dim' }
   }
 
   return (
@@ -81,8 +67,7 @@ function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
       {result && (
         <div className="text-center">
           <p className={'text-xl font-display mb-1 ' + outcomeColor}>{outcomeText}</p>
-          <p className="text-ink text-base italic">{narrativeText}</p>
-          <p className="text-ink-dim text-sm mt-1">
+          <p className="text-ink-dim text-sm">
             Rolled {result.roll} (needed {tn - modifier} or higher)
           </p>
         </div>
