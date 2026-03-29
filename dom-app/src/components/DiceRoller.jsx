@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react'
 
-// Dice animation states: idle → rolling → result
-function DiceRoller({ onRoll, onResult, modifier, tn, label, disabled }) {
-  var [state, setState] = useState('idle') // idle | rolling | result
+function DiceRoller({ onRoll, onResult, modifier, tn, disabled, buttonLabel }) {
+  var [state, setState] = useState('idle')
   var [display, setDisplay] = useState(null)
   var [result, setResult] = useState(null)
 
   function handleRoll() {
     if (state === 'rolling' || disabled) return
-
     setState('rolling')
     setResult(null)
 
-    // Animate: show random numbers for ~700ms
     var ticks = 0
     var maxTicks = 12
     var interval = setInterval(function() {
@@ -20,7 +17,6 @@ function DiceRoller({ onRoll, onResult, modifier, tn, label, disabled }) {
       ticks++
       if (ticks >= maxTicks) {
         clearInterval(interval)
-        // Final roll
         var rollResult = onRoll()
         setResult(rollResult)
         setDisplay(rollResult.roll)
@@ -29,7 +25,6 @@ function DiceRoller({ onRoll, onResult, modifier, tn, label, disabled }) {
     }, 60)
   }
 
-  // After showing result, fire callback and reset
   useEffect(function() {
     if (state === 'result') {
       var timeout = setTimeout(function() {
@@ -40,71 +35,77 @@ function DiceRoller({ onRoll, onResult, modifier, tn, label, disabled }) {
     }
   }, [state])
 
-  var outcomeLabel = null
+  // Plain English outcomes
+  var outcomeText = null
   var outcomeColor = 'text-ink'
+  var narrativeText = null
   if (result) {
-    if (result.crit) { outcomeLabel = 'CRITICAL HIT'; outcomeColor = 'text-gold' }
-    else if (result.fumble) { outcomeLabel = 'FUMBLE'; outcomeColor = 'text-crimson' }
-    else if (result.success) { outcomeLabel = 'HIT'; outcomeColor = 'text-gold' }
-    else { outcomeLabel = 'MISS'; outcomeColor = 'text-ink-dim' }
+    if (result.crit) {
+      outcomeText = 'Critical Hit!'
+      outcomeColor = 'text-gold'
+      narrativeText = 'A perfect strike!'
+    } else if (result.fumble) {
+      outcomeText = 'Fumble!'
+      outcomeColor = 'text-red-400'
+      narrativeText = 'You stumble and miss completely.'
+    } else if (result.success) {
+      outcomeText = 'Hit!'
+      outcomeColor = 'text-gold'
+      narrativeText = 'Your blade connects.'
+    } else {
+      outcomeText = 'Missed'
+      outcomeColor = 'text-ink-dim'
+      narrativeText = 'Your swing goes wide.'
+    }
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Confirmation strip */}
-      {label && state === 'idle' && (
-        <p className="text-ink-dim text-sm">{label}</p>
-      )}
-
-      {/* Die display */}
+      {/* Die */}
       <div
         className={
-          'w-20 h-20 rounded-xl flex items-center justify-center font-display text-3xl border-2 transition-all ' +
+          'w-24 h-24 rounded-xl flex items-center justify-center font-display text-4xl border-2 transition-all ' +
           (state === 'rolling'
             ? 'border-gold bg-gold-glow text-gold animate-pulse scale-110'
             : state === 'result'
               ? (result && result.crit
                   ? 'border-gold bg-gold-glow text-gold scale-125'
                   : result && result.fumble
-                    ? 'border-crimson bg-surface text-crimson scale-110'
-                    : 'border-border bg-surface text-ink scale-100')
-              : 'border-border bg-raised text-ink-faint')
+                    ? 'border-red-400 bg-red-400/10 text-red-400 scale-110'
+                    : result && result.success
+                      ? 'border-gold bg-surface text-gold'
+                      : 'border-border bg-surface text-ink-dim')
+              : 'border-border-hl bg-raised text-ink-dim')
         }
       >
-        {display !== null ? display : 'd20'}
+        {display !== null ? display : '?'}
       </div>
 
-      {/* Modifier breakdown */}
+      {/* Result narrative */}
       {result && (
         <div className="text-center">
-          <div className="text-ink-faint text-xs">
-            {result.roll} {result.modifier >= 0 ? '+' : ''}{result.modifier} = {result.total}
-            {tn ? ' vs TN ' + tn : ''}
-          </div>
-          <div className={'text-lg font-display mt-1 ' + outcomeColor}>
-            {outcomeLabel}
-          </div>
+          <p className={'text-xl font-display mb-1 ' + outcomeColor}>{outcomeText}</p>
+          <p className="text-ink text-base italic">{narrativeText}</p>
+          <p className="text-ink-dim text-sm mt-1">
+            Rolled {result.roll} (needed {tn - modifier} or higher)
+          </p>
         </div>
       )}
 
-      {/* Roll button */}
+      {/* Button */}
       {state === 'idle' && (
         <button
           onClick={handleRoll}
           disabled={disabled}
           className={
-            'py-3 px-8 rounded-lg font-sans text-sm font-semibold transition-all ' +
+            'py-4 px-10 rounded-lg font-sans text-lg font-semibold transition-all ' +
             (disabled
               ? 'bg-raised text-ink-faint border border-border'
               : 'bg-gold text-bg hover:opacity-90 active:scale-95')
           }
         >
-          Roll the Dice
+          {buttonLabel || 'Roll the Dice'}
         </button>
-      )}
-
-      {state === 'rolling' && (
-        <p className="text-ink-faint text-xs animate-pulse">Rolling...</p>
       )}
     </div>
   )

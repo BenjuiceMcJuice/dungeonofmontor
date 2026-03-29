@@ -9,16 +9,21 @@ import DiceRoller from '../components/DiceRoller.jsx'
 var MAX_LOG_ENTRIES = 6
 
 function formatAttackLog(r, type) {
-  var rollInfo = '🎲 ' + r.attackRoll.roll + (r.attackRoll.modifier >= 0 ? '+' : '') + r.attackRoll.modifier + ' = ' + r.attackRoll.total + ' vs TN ' + r.attackRoll.tn
-  var outcome = ''
-  if (r.attackRoll.crit) outcome = '💥 CRITICAL! '
-  else if (r.attackRoll.fumble) outcome = '😵 FUMBLE! '
+  var who = r.attacker
+  var target = r.target
 
-  if (r.attackRoll.success || r.attackRoll.crit) {
-    var defeated = type === 'player' ? (r.enemyDefeated ? ' ☠️ DEFEATED!' : '') : (r.playerDowned ? ' 💀 DOWNED!' : '')
-    return r.attacker + ' → ' + r.target + '  |  ' + rollInfo + '  |  ' + outcome + r.damage + ' damage' + defeated
+  if (r.attackRoll.crit) {
+    var defeated = type === 'player' ? (r.enemyDefeated ? ' — it crumbles!' : '') : (r.playerDowned ? ' — you fall!' : '')
+    return '💥 ' + who + ' lands a devastating blow on ' + target + '! ' + r.damage + ' damage' + defeated
   }
-  return r.attacker + ' → ' + r.target + '  |  ' + rollInfo + '  |  ' + outcome + 'Miss!'
+  if (r.attackRoll.fumble) {
+    return '😵 ' + who + ' swings wildly and misses completely!'
+  }
+  if (r.attackRoll.success) {
+    var defeated2 = type === 'player' ? (r.enemyDefeated ? ' — it falls!' : '') : (r.playerDowned ? ' — you collapse!' : '')
+    return '⚔️ ' + who + ' strikes ' + target + ' for ' + r.damage + ' damage.' + defeated2
+  }
+  return '🛡️ ' + who + ' attacks ' + target + ' but misses.'
 }
 
 function Game({ character, user, onEndRun }) {
@@ -333,59 +338,64 @@ function Game({ character, user, onEndRun }) {
 
         {/* Enemy windup — show who's attacking */}
         {phase === 'enemyWindup' && enemyAttackInfo && (
-          <div className="flex flex-col items-center gap-2 p-4 border-2 border-red-400/30 rounded-lg bg-red-400/5">
-            <p className="text-red-400 text-lg font-display">{enemyAttackInfo.enemyName}</p>
-            <p className="text-ink text-sm">Attacking {enemyAttackInfo.targetName}...</p>
+          <div className="flex flex-col items-center gap-3 p-5 border-2 border-red-400/30 rounded-lg bg-red-400/5 max-w-sm">
+            <p className="text-red-400 text-xl font-display">{enemyAttackInfo.enemyName}</p>
+            <p className="text-ink text-base italic text-center">
+              The {enemyAttackInfo.enemyName.toLowerCase()} turns towards {enemyAttackInfo.targetName} and prepares to strike...
+            </p>
           </div>
         )}
 
         {/* Enemy rolling — animated dice */}
         {phase === 'enemyRolling' && enemyAttackInfo && (
           <div className="flex flex-col items-center gap-4">
-            <p className="text-red-400 text-lg font-display">{enemyAttackInfo.enemyName} attacks!</p>
-            <div className="w-20 h-20 rounded-xl flex items-center justify-center font-display text-3xl border-2 border-red-400 bg-red-400/10 text-red-400 animate-pulse scale-110">
+            <p className="text-ink text-base italic">The {enemyAttackInfo.enemyName.toLowerCase()} swings!</p>
+            <div className="w-24 h-24 rounded-xl flex items-center justify-center font-display text-4xl border-2 border-red-400 bg-red-400/10 text-red-400 animate-pulse scale-110">
               {enemyDiceDisplay !== null ? enemyDiceDisplay : '?'}
             </div>
-            <p className="text-ink-dim text-xs animate-pulse">Rolling...</p>
           </div>
         )}
 
-        {/* Enemy result — show outcome */}
+        {/* Enemy result — show outcome in plain English */}
         {phase === 'enemyResult' && enemyResultData && (
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-red-400 text-lg font-display">{enemyResultData.attacker}</p>
+          <div className="flex flex-col items-center gap-3 max-w-sm">
             <div className={
-              'w-20 h-20 rounded-xl flex items-center justify-center font-display text-3xl border-2 ' +
+              'w-24 h-24 rounded-xl flex items-center justify-center font-display text-4xl border-2 ' +
               (enemyResultData.attackRoll.crit ? 'border-red-400 bg-red-400/20 text-red-400 scale-125' :
                enemyResultData.attackRoll.fumble ? 'border-green-400 bg-green-400/10 text-green-400 scale-110' :
-               'border-border bg-surface text-ink')
+               enemyResultData.attackRoll.success ? 'border-red-400 bg-surface text-red-400' :
+               'border-green-400 bg-surface text-green-400')
             }>
               {enemyResultData.attackRoll.roll}
             </div>
-            <div className="text-center">
-              <div className="text-ink text-sm">
-                {enemyResultData.attackRoll.roll} {enemyResultData.attackRoll.modifier >= 0 ? '+' : ''}{enemyResultData.attackRoll.modifier} = {enemyResultData.attackRoll.total} vs TN {enemyResultData.attackRoll.tn}
-              </div>
-              <div className={'text-xl font-display mt-1 ' +
-                (enemyResultData.attackRoll.crit ? 'text-red-400' :
-                 enemyResultData.attackRoll.fumble ? 'text-green-400' :
-                 (enemyResultData.attackRoll.success ? 'text-red-400' : 'text-green-400'))}>
-                {enemyResultData.attackRoll.crit ? 'CRITICAL HIT!' :
-                 enemyResultData.attackRoll.fumble ? 'FUMBLE!' :
-                 (enemyResultData.attackRoll.success ? enemyResultData.damage + ' DAMAGE' : 'MISS!')}
-              </div>
-              {enemyResultData.playerDowned && (
-                <div className="text-red-400 text-lg font-display mt-1 animate-pulse">💀 YOU ARE DOWNED</div>
-              )}
-            </div>
+            <p className="text-ink text-base italic text-center">
+              {enemyResultData.attackRoll.crit
+                ? 'A devastating blow! ' + enemyResultData.attacker + ' hits you for ' + enemyResultData.damage + ' damage!'
+                : enemyResultData.attackRoll.fumble
+                  ? enemyResultData.attacker + ' stumbles and misses completely!'
+                  : enemyResultData.attackRoll.success
+                    ? enemyResultData.attacker + ' hits you for ' + enemyResultData.damage + ' damage.'
+                    : enemyResultData.attacker + '\'s attack glances off your armour. No damage.'}
+            </p>
+            <p className={'text-xl font-display ' +
+              (enemyResultData.attackRoll.crit ? 'text-red-400' :
+               enemyResultData.attackRoll.success ? 'text-red-400' : 'text-green-400')}>
+              {enemyResultData.attackRoll.crit ? 'Critical Hit!'
+                : enemyResultData.attackRoll.fumble ? 'Fumble!'
+                : enemyResultData.attackRoll.success ? enemyResultData.damage + ' Damage'
+                : 'Missed!'}
+            </p>
+            {enemyResultData.playerDowned && (
+              <div className="text-red-400 text-xl font-display animate-pulse">You fall...</div>
+            )}
           </div>
         )}
 
         {/* Player turn — no target selected */}
         {isPlayerTurn && !selectedTarget && (
-          <div className="flex flex-col items-center gap-2 p-5 border-2 border-gold/40 rounded-lg bg-gold-glow">
+          <div className="flex flex-col items-center gap-3 p-5 border-2 border-gold/40 rounded-lg bg-gold-glow max-w-sm">
             <p className="text-gold text-xl font-display">Your Turn</p>
-            <p className="text-ink text-base">Tap an enemy above to attack</p>
+            <p className="text-ink text-base text-center">Choose an enemy above to attack</p>
           </div>
         )}
 
@@ -393,17 +403,21 @@ function Game({ character, user, onEndRun }) {
         {isPlayerTurn && selectedTarget && (function() {
           var targetEnemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
           var defTn = 10 + getModifier(targetEnemy.stats.def)
+          var needToRoll = defTn - strMod
           return (
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-4 max-w-sm">
               <div className="text-center">
-                <p className="text-gold text-lg font-display mb-1">Attacking {targetEnemy.name}</p>
-                <p className="text-ink text-sm">🎲 d20 + {strMod} vs TN {defTn}  ·  ⚔️ d8 + {strMod} damage</p>
+                <p className="text-gold text-xl font-display mb-2">{targetEnemy.name}</p>
+                <p className="text-ink text-base italic">
+                  You ready your longsword. You need to roll <span className="text-gold font-semibold not-italic">{needToRoll} or higher</span> to hit.
+                </p>
               </div>
               <DiceRoller
                 onRoll={handleAttackRoll}
                 modifier={strMod}
                 tn={defTn}
                 onResult={handleRollComplete}
+                buttonLabel="Attack!"
               />
               <button
                 onClick={function() { setSelectedTarget(null) }}
