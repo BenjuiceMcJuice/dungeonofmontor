@@ -189,10 +189,10 @@ function Game({ character, user, onEndRun }) {
     <div className="min-h-svh flex flex-col px-4 pt-4 pb-6">
       {/* Scene header */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-ink-faint text-xs uppercase tracking-widest">
+        <span className="text-ink-dim text-xs uppercase tracking-widest">
           Combat · Round {battle.round}
         </span>
-        <span className="text-ink-faint text-xs">
+        <span className="text-ink text-xs">
           {character.name} — Knight L{character.level}
         </span>
       </div>
@@ -200,15 +200,15 @@ function Game({ character, user, onEndRun }) {
       {/* Player HP bar */}
       <div className="bg-surface border border-border rounded-lg p-3 mb-4">
         <div className="flex justify-between items-center mb-1">
-          <span className="font-display text-sm text-gold">{playerState.name}</span>
-          <span className="text-ink-dim text-xs">
+          <span className="font-display text-sm text-ink">{playerState.name}</span>
+          <span className="text-ink text-xs">
             HP {playerState.currentHp}/{playerState.maxHp}
           </span>
         </div>
-        <div className="w-full bg-raised rounded-full h-2">
+        <div className="w-full bg-raised rounded-full h-2.5">
           <div
-            className={'rounded-full h-2 transition-all duration-500 ' +
-              (playerState.currentHp / playerState.maxHp > 0.5 ? 'bg-gold' :
+            className={'rounded-full h-2.5 transition-all duration-500 ' +
+              (playerState.currentHp / playerState.maxHp > 0.5 ? 'bg-green-500' :
                playerState.currentHp / playerState.maxHp > 0.25 ? 'bg-amber-500' : 'bg-crimson')}
             style={{ width: Math.max(0, (playerState.currentHp / playerState.maxHp) * 100) + '%' }}
           />
@@ -234,14 +234,14 @@ function Game({ character, user, onEndRun }) {
               }
             >
               <SpriteRenderer spriteKey={enemy.archetypeKey} tierKey={enemy.tierKey} scale={4} />
-              <span className="font-display text-xs text-ink">{enemy.name}</span>
-              <div className="w-16 bg-raised rounded-full h-1.5">
+              <span className="font-display text-sm text-ink">{enemy.name}</span>
+              <div className="w-20 bg-raised rounded-full h-2">
                 <div
-                  className="bg-crimson rounded-full h-1.5 transition-all duration-300"
+                  className="bg-crimson rounded-full h-2 transition-all duration-300"
                   style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }}
                 />
               </div>
-              <span className="text-ink-faint text-[10px]">{enemy.currentHp}/{enemy.maxHp}</span>
+              <span className="text-ink-dim text-xs">{enemy.currentHp}/{enemy.maxHp}</span>
             </button>
           )
         })}
@@ -250,11 +250,11 @@ function Game({ character, user, onEndRun }) {
       {/* Combat log */}
       <div className="bg-surface border border-border rounded-lg p-3 mb-4 max-h-32 overflow-y-auto">
         {combatLog.length === 0 && (
-          <p className="text-ink-faint text-xs italic">The battle begins...</p>
+          <p className="text-ink-dim text-sm italic">The battle begins...</p>
         )}
         {combatLog.map(function(entry, i) {
           return (
-            <p key={i} className={'text-xs mb-1 ' + (entry.type === 'player' ? 'text-gold' : 'text-crimson')}>
+            <p key={i} className={'text-sm mb-1.5 ' + (entry.type === 'player' ? 'text-ink' : 'text-crimson')}>
               {entry.text}
             </p>
           )
