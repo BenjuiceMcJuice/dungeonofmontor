@@ -40,6 +40,7 @@ function App() {
     return (
       <Game
         character={character}
+        user={user}
         onEndRun={function(result) {
           setRunResult(result)
           setScreen('results')

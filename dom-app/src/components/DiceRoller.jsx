@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 // Dice animation states: idle → rolling → result
-function DiceRoller({ onRoll, modifier, tn, label, disabled }) {
+function DiceRoller({ onRoll, onResult, modifier, tn, label, disabled }) {
   var [state, setState] = useState('idle') // idle | rolling | result
   var [display, setDisplay] = useState(null)
   var [result, setResult] = useState(null)
@@ -29,12 +29,13 @@ function DiceRoller({ onRoll, modifier, tn, label, disabled }) {
     }, 60)
   }
 
-  // Auto-reset after showing result
+  // After showing result, fire callback and reset
   useEffect(function() {
     if (state === 'result') {
       var timeout = setTimeout(function() {
         setState('idle')
-      }, 3000)
+        if (onResult) onResult(result)
+      }, 2000)
       return function() { clearTimeout(timeout) }
     }
   }, [state])
