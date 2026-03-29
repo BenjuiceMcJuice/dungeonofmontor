@@ -1,49 +1,78 @@
 import { useState } from 'react'
-import Nav from './components/Nav.jsx'
+import useAuth from './hooks/useAuth.js'
+import { generateKnight } from './lib/classes.js'
+import Home from './pages/Home.jsx'
+import Tavern from './pages/Tavern.jsx'
+import Game from './pages/Game.jsx'
+import Results from './pages/Results.jsx'
 import './App.css'
 
-var TABS = ['view', 'party', 'stats', 'inventory', 'story']
-
+// Screens: home (auth) → tavern (start run) → game (dungeon) → results → tavern
 function App() {
-  var [tab, setTab] = useState('view')
+  var { user, loading, error, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } = useAuth()
+  var [screen, setScreen] = useState('tavern') // tavern | game | results
+  var [character, setCharacter] = useState(null)
+  var [runResult, setRunResult] = useState(null)
 
-  return (
-    <div className="flex flex-col min-h-svh">
-      <main className="flex-1 px-4 pt-6 pb-20">
-        {tab === 'view' && <ViewTab />}
-        {tab === 'party' && <PlaceholderTab name="Party" icon="⚔️" />}
-        {tab === 'stats' && <PlaceholderTab name="Stats" icon="📋" />}
-        {tab === 'inventory' && <PlaceholderTab name="Inventory" icon="🎒" />}
-        {tab === 'story' && <PlaceholderTab name="Story" icon="📜" />}
-      </main>
-      <Nav tab={tab} setTab={setTab} />
-    </div>
-  )
-}
-
-function ViewTab() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60svh] text-center gap-6">
-      <h1 className="font-display text-4xl md:text-5xl text-gold leading-tight">
-        Dungeon of Montor
-      </h1>
-      <p className="text-ink-dim text-lg italic max-w-md">
-        The dungeon is Montor's house. You are the intruder.
-      </p>
-      <div className="mt-4 px-6 py-3 rounded-lg bg-raised border border-border text-ink-dim text-sm">
-        v0.1 — Solo Foundation coming soon
+  // Loading auth state
+  if (loading) {
+    return (
+      <div className="min-h-svh flex items-center justify-center">
+        <span className="text-ink-faint text-sm">Loading...</span>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-function PlaceholderTab({ name, icon }) {
+  // Not signed in
+  if (!user) {
+    return (
+      <Home
+        onSignInWithGoogle={signInWithGoogle}
+        onSignInWithEmail={signInWithEmail}
+        onSignUpWithEmail={signUpWithEmail}
+        error={error}
+      />
+    )
+  }
+
+  // Signed in — route by screen
+  if (screen === 'game' && character) {
+    return (
+      <Game
+        character={character}
+        onEndRun={function(result) {
+          setRunResult(result)
+          setScreen('results')
+        }}
+      />
+    )
+  }
+
+  if (screen === 'results' && character && runResult) {
+    return (
+      <Results
+        character={character}
+        result={runResult}
+        onReturnToTavern={function() {
+          setCharacter(null)
+          setRunResult(null)
+          setScreen('tavern')
+        }}
+      />
+    )
+  }
+
+  // Default: tavern
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60svh] text-center gap-4">
-      <span className="text-5xl">{icon}</span>
-      <h2 className="font-display text-2xl text-gold">{name}</h2>
-      <p className="text-ink-faint text-sm">Coming soon</p>
-    </div>
+    <Tavern
+      user={user}
+      onSignOut={signOut}
+      onStartRun={function(name) {
+        var knight = generateKnight(name)
+        setCharacter(knight)
+        setScreen('game')
+      }}
+    />
   )
 }
 
