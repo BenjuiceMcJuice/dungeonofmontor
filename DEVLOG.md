@@ -16,7 +16,7 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-29 | Firebase — Firestore DB (europe-west2) + Auth enabled | ✅ Done |
 |            | **Stage 1 — The Crawl** | |
 | 2026-03-29 | Sprint 1 — Firebase Auth + routing + Knight generation | ✅ Done |
-|            | Sprint 2 — Sprites + dice library + DiceRoller component | ⬜ |
+| 2026-03-29 | Sprint 2 — Sprites + dice library + DiceRoller component | ✅ Done |
 |            | Sprint 3 — Combat engine + Cloud Function + enemy AI | ⬜ |
 |            | Sprint 4 — Items + loot + basic inventory | ⬜ |
 |            | Sprint 5 — Encounter deck + run loop (8 encounters + boss) | ⬜ |
