@@ -34,6 +34,8 @@ function Game({ character, user, onEndRun }) {
   var [combatLog, setCombatLog] = useState([])
   var [totalXp, setTotalXp] = useState(0)
   var [pendingAttackResult, setPendingAttackResult] = useState(null)
+  var [encounterNumber, setEncounterNumber] = useState(1)
+  var MAX_ENCOUNTERS = 2
   // Enemy turn state
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null)
   var [enemyRollerKey, setEnemyRollerKey] = useState(0)
@@ -178,18 +180,51 @@ function Game({ character, user, onEndRun }) {
     )
   }
 
+  function startNextEncounter() {
+    var depth = encounterNumber / MAX_ENCOUNTERS // 0.5 for encounter 2 of 2
+    var enemies = generateEncounter(depth, 1, 'seasoned', 'dungeon')
+    var players = [{ uid: user.uid, character: Object.assign({}, character, { maxHp: playerState.maxHp }) }]
+    // Keep current HP from previous encounter
+    var bs = createBattleState(players, enemies)
+    bs.players[user.uid].currentHp = playerState.currentHp
+    setBattle(bs)
+    setSelectedTarget(null)
+    setCombatLog([])
+    setPendingAttackResult(null)
+    setEnemyAttackInfo(null)
+    setEncounterNumber(encounterNumber + 1)
+
+    var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
+    var firstActor = getActor(bs, firstTurnId)
+    setPhase(firstActor && firstActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+  }
+
   if (phase === 'victory') {
+    var isLastEncounter = encounterNumber >= MAX_ENCOUNTERS
     return (
       <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
         <h1 className="font-display text-4xl text-gold">Victory</h1>
-        <p className="text-ink text-lg italic">The enemies fall. The dungeon holds its breath.</p>
-        <div className="bg-surface border border-border rounded-lg p-5 w-full max-w-xs">
-          <p className="text-ink text-base">XP earned: <span className="text-gold font-display text-xl">{totalXp}</span></p>
+        <p className="text-ink text-base italic">
+          {isLastEncounter
+            ? 'The dungeon falls silent. You have survived.'
+            : 'The enemies fall. But the dungeon stirs deeper ahead...'}
+        </p>
+        <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
+          <p className="text-ink text-sm">Encounter {encounterNumber} of {MAX_ENCOUNTERS}</p>
+          <p className="text-ink text-base mt-1">XP earned: <span className="text-gold font-display text-xl">{totalXp}</span></p>
+          <p className="text-ink-dim text-sm mt-1">HP remaining: {playerState ? playerState.currentHp : '?'}/{character.maxHp}</p>
         </div>
-        <button onClick={function() { onEndRun({ victory: true, encounters: 1, xp: totalXp }) }}
-          className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
-          Continue
-        </button>
+        {isLastEncounter ? (
+          <button onClick={function() { onEndRun({ victory: true, encounters: encounterNumber, xp: totalXp }) }}
+            className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
+            Leave the Dungeon
+          </button>
+        ) : (
+          <button onClick={startNextEncounter}
+            className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
+            Go Deeper
+          </button>
+        )}
       </div>
     )
   }
@@ -214,7 +249,7 @@ function Game({ character, user, onEndRun }) {
     <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-ink-dim text-xs uppercase tracking-widest">Round {battle.round}</span>
+        <span className="text-ink-dim text-xs uppercase tracking-widest">Encounter {encounterNumber}/{MAX_ENCOUNTERS} -- Round {battle.round}</span>
       </div>
 
       {/* Enemies */}
@@ -242,6 +277,11 @@ function Game({ character, user, onEndRun }) {
                   style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }} />
               </div>
               <span className="text-ink text-xs font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
+              <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
+                <span>STR {enemy.stats.str}</span>
+                <span>DEF {enemy.stats.def}</span>
+                <span>AGI {enemy.stats.agi}</span>
+              </div>
             </button>
           )
         })}
@@ -333,18 +373,31 @@ function Game({ character, user, onEndRun }) {
 
       {/* Party bar */}
       <div className="shrink-0 bg-surface border-t border-border px-3 py-2">
-        <div className="flex items-center gap-3">
-          <PlayerSprite classKey="knight" scale={3} />
+        <div className="flex items-center gap-2">
+          <PlayerSprite classKey="knight" scale={2} />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-display text-sm text-ink truncate">{playerState.name}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-display text-sm text-ink truncate">{playerState.name}</span>
+                <span className="text-[10px] font-sans text-ink-dim">
+                  STR {playerState.combatStats.str} DEF {playerState.combatStats.def} AGI {playerState.combatStats.agi}
+                </span>
+              </div>
               <span className="text-ink text-xs font-sans shrink-0">{playerState.currentHp}/{playerState.maxHp}</span>
             </div>
-            <div className="w-full bg-bg rounded-full h-2.5">
-              <div className={'rounded-full h-2.5 transition-all duration-500 ' +
+            <div className="w-full bg-bg rounded-full h-2 mt-1">
+              <div className={'rounded-full h-2 transition-all duration-500 ' +
                   (playerState.currentHp / playerState.maxHp > 0.5 ? 'bg-green-500' :
                    playerState.currentHp / playerState.maxHp > 0.25 ? 'bg-amber-500' : 'bg-red-500')}
                 style={{ width: Math.max(0, (playerState.currentHp / playerState.maxHp) * 100) + '%' }} />
+            </div>
+            <div className="flex gap-2 mt-1 text-[10px] font-sans text-ink-faint">
+              {playerState.equipped && playerState.equipped.weapon && (
+                <span>{playerState.equipped.weapon.name}</span>
+              )}
+              {playerState.equipped && playerState.equipped.armour && (
+                <span>{playerState.equipped.armour.name}</span>
+              )}
             </div>
           </div>
         </div>
