@@ -23,22 +23,20 @@ function formatAttackLog(r, type) {
 
 function Game({ character, user, onEndRun }) {
   var [battle, setBattle] = useState(null)
+  // phases: playerTurn | enemyWindup | enemyRolling | enemyResult | victory | defeat
   var [phase, setPhase] = useState('intro')
   var [lastResult, setLastResult] = useState(null)
   var [selectedTarget, setSelectedTarget] = useState(null)
   var [combatLog, setCombatLog] = useState([])
   var [totalXp, setTotalXp] = useState(0)
+  var [enemyAttackInfo, setEnemyAttackInfo] = useState(null) // { enemyId, enemyName, targetName, result }
+  var [enemyDiceDisplay, setEnemyDiceDisplay] = useState(null)
   var logRef = useRef(null)
 
-  useEffect(function() {
-    startCombat()
-  }, [])
+  useEffect(function() { startCombat() }, [])
 
-  // Auto-scroll log to bottom
   useEffect(function() {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight
-    }
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
   }, [combatLog])
 
   function addLog(entry) {
@@ -57,53 +55,103 @@ function Game({ character, user, onEndRun }) {
     setLastResult(null)
     setSelectedTarget(null)
     setCombatLog([])
+    setEnemyAttackInfo(null)
+    setEnemyDiceDisplay(null)
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
     var firstActor = getActor(bs, firstTurnId)
     if (firstActor && firstActor.type === 'enemy') {
-      setPhase('enemyTurn')
+      setPhase('enemyWindup')
     } else {
       setPhase('playerTurn')
     }
   }
 
-  // Enemy turn
+  // Enemy windup — show who's attacking, pause, then roll
   useEffect(function() {
-    if (phase !== 'enemyTurn' || !battle) return
+    if (phase !== 'enemyWindup' || !battle) return
+
+    var currentId = getCurrentTurnId(battle)
+    var actor = getActor(battle, currentId)
+    if (!actor) return
+
+    // Pre-resolve the attack (but don't apply yet — just to know the target)
+    var attackOut = resolveEnemyAttack(battle, currentId)
+    if (attackOut) {
+      setEnemyAttackInfo({
+        enemyId: currentId,
+        enemyName: attackOut.result.attacker,
+        targetName: attackOut.result.target,
+        attackOut: attackOut,
+      })
+    }
+
+    // Pause to show who's acting, then start dice
+    var timeout = setTimeout(function() {
+      setPhase('enemyRolling')
+    }, 800)
+
+    return function() { clearTimeout(timeout) }
+  }, [phase, battle])
+
+  // Enemy rolling — animate dice
+  useEffect(function() {
+    if (phase !== 'enemyRolling' || !enemyAttackInfo) return
+
+    var ticks = 0
+    var maxTicks = 12
+    var interval = setInterval(function() {
+      setEnemyDiceDisplay(Math.floor(Math.random() * 20) + 1)
+      ticks++
+      if (ticks >= maxTicks) {
+        clearInterval(interval)
+        // Show the actual roll
+        var r = enemyAttackInfo.attackOut.result
+        setEnemyDiceDisplay(r.attackRoll.roll)
+        setPhase('enemyResult')
+      }
+    }, 60)
+
+    return function() { clearInterval(interval) }
+  }, [phase, enemyAttackInfo])
+
+  // Enemy result — show outcome, apply damage, then advance
+  useEffect(function() {
+    if (phase !== 'enemyResult' || !enemyAttackInfo) return
 
     var timeout = setTimeout(function() {
-      var currentId = getCurrentTurnId(battle)
-      var attackOut = resolveEnemyAttack(battle, currentId)
+      var attackOut = enemyAttackInfo.attackOut
+      var updatedBattle = attackOut.newBattle
+      var r = attackOut.result
 
-      var updatedBattle = battle
-      if (attackOut) {
-        updatedBattle = attackOut.newBattle
-        var r = attackOut.result
-        addLog({ type: 'enemy', text: formatAttackLog(r, 'enemy') })
-        setLastResult(r)
+      addLog({ type: 'enemy', text: formatAttackLog(r, 'enemy') })
+      setLastResult(r)
 
-        var endResult = checkBattleEnd(updatedBattle)
-        if (endResult === 'defeat') {
-          setBattle(updatedBattle)
-          setPhase('defeat')
-          return
-        }
+      var endResult = checkBattleEnd(updatedBattle)
+      if (endResult === 'defeat') {
+        setBattle(updatedBattle)
+        setEnemyAttackInfo(null)
+        setEnemyDiceDisplay(null)
+        setPhase('defeat')
+        return
       }
 
       var nextBattle = advanceTurn(updatedBattle)
       setBattle(nextBattle)
+      setEnemyAttackInfo(null)
+      setEnemyDiceDisplay(null)
 
       var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
       if (nextActor && nextActor.type === 'enemy') {
-        setPhase('enemyTurn')
+        setPhase('enemyWindup')
       } else {
         setPhase('playerTurn')
         setSelectedTarget(null)
       }
-    }, 1200)
+    }, 2000)
 
     return function() { clearTimeout(timeout) }
-  }, [phase, battle])
+  }, [phase, enemyAttackInfo])
 
   if (!battle) {
     return (
@@ -117,6 +165,7 @@ function Game({ character, user, onEndRun }) {
   var currentTurnId = getCurrentTurnId(battle)
   var isPlayerTurn = currentTurnId === user.uid && phase === 'playerTurn'
   var strMod = getModifier(playerState.combatStats.str)
+  var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.enemyId : null
 
   function handleSelectTarget(enemyId) {
     setSelectedTarget(enemyId)
@@ -154,7 +203,7 @@ function Game({ character, user, onEndRun }) {
 
     var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
     if (nextActor && nextActor.type === 'enemy') {
-      setPhase('enemyTurn')
+      setPhase('enemyWindup')
     } else {
       setPhase('playerTurn')
     }
@@ -195,6 +244,12 @@ function Game({ character, user, onEndRun }) {
     )
   }
 
+  // Determine enemy result for display
+  var enemyResultData = null
+  if (phase === 'enemyResult' && enemyAttackInfo) {
+    enemyResultData = enemyAttackInfo.attackOut.result
+  }
+
   return (
     <div className="min-h-svh flex flex-col px-4 pt-4 pb-6 bg-raised">
       {/* Scene header */}
@@ -230,6 +285,7 @@ function Game({ character, user, onEndRun }) {
         {battle.enemies.map(function(enemy) {
           var isTarget = selectedTarget === enemy.id
           var isDead = enemy.isDown
+          var isActing = activeEnemyId === enemy.id
           return (
             <button
               key={enemy.id}
@@ -238,6 +294,7 @@ function Game({ character, user, onEndRun }) {
               className={
                 'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ' +
                 (isDead ? 'opacity-20 border-transparent' :
+                 isActing ? 'border-red-400 bg-red-400/10 scale-105' :
                  isTarget ? 'border-gold bg-gold-glow' :
                  isPlayerTurn ? 'border-border-hl hover:border-ink-faint cursor-pointer' :
                  'border-border')
@@ -273,13 +330,58 @@ function Game({ character, user, onEndRun }) {
 
       {/* Action area */}
       <div className="flex-1 flex flex-col items-center justify-center gap-3">
-        {phase === 'enemyTurn' && (
+
+        {/* Enemy windup — show who's attacking */}
+        {phase === 'enemyWindup' && enemyAttackInfo && (
           <div className="flex flex-col items-center gap-2 p-4 border-2 border-red-400/30 rounded-lg bg-red-400/5">
-            <p className="text-red-400 text-lg font-display">Enemy Turn</p>
-            <p className="text-ink text-sm animate-pulse">The enemy strikes...</p>
+            <p className="text-red-400 text-lg font-display">{enemyAttackInfo.enemyName}</p>
+            <p className="text-ink text-sm">Attacking {enemyAttackInfo.targetName}...</p>
           </div>
         )}
 
+        {/* Enemy rolling — animated dice */}
+        {phase === 'enemyRolling' && enemyAttackInfo && (
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-red-400 text-lg font-display">{enemyAttackInfo.enemyName} attacks!</p>
+            <div className="w-20 h-20 rounded-xl flex items-center justify-center font-display text-3xl border-2 border-red-400 bg-red-400/10 text-red-400 animate-pulse scale-110">
+              {enemyDiceDisplay !== null ? enemyDiceDisplay : '?'}
+            </div>
+            <p className="text-ink-dim text-xs animate-pulse">Rolling...</p>
+          </div>
+        )}
+
+        {/* Enemy result — show outcome */}
+        {phase === 'enemyResult' && enemyResultData && (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-red-400 text-lg font-display">{enemyResultData.attacker}</p>
+            <div className={
+              'w-20 h-20 rounded-xl flex items-center justify-center font-display text-3xl border-2 ' +
+              (enemyResultData.attackRoll.crit ? 'border-red-400 bg-red-400/20 text-red-400 scale-125' :
+               enemyResultData.attackRoll.fumble ? 'border-green-400 bg-green-400/10 text-green-400 scale-110' :
+               'border-border bg-surface text-ink')
+            }>
+              {enemyResultData.attackRoll.roll}
+            </div>
+            <div className="text-center">
+              <div className="text-ink text-sm">
+                {enemyResultData.attackRoll.roll} {enemyResultData.attackRoll.modifier >= 0 ? '+' : ''}{enemyResultData.attackRoll.modifier} = {enemyResultData.attackRoll.total} vs TN {enemyResultData.attackRoll.tn}
+              </div>
+              <div className={'text-xl font-display mt-1 ' +
+                (enemyResultData.attackRoll.crit ? 'text-red-400' :
+                 enemyResultData.attackRoll.fumble ? 'text-green-400' :
+                 (enemyResultData.attackRoll.success ? 'text-red-400' : 'text-green-400'))}>
+                {enemyResultData.attackRoll.crit ? 'CRITICAL HIT!' :
+                 enemyResultData.attackRoll.fumble ? 'FUMBLE!' :
+                 (enemyResultData.attackRoll.success ? enemyResultData.damage + ' DAMAGE' : 'MISS!')}
+              </div>
+              {enemyResultData.playerDowned && (
+                <div className="text-red-400 text-lg font-display mt-1 animate-pulse">💀 YOU ARE DOWNED</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Player turn — no target selected */}
         {isPlayerTurn && !selectedTarget && (
           <div className="flex flex-col items-center gap-2 p-5 border-2 border-gold/40 rounded-lg bg-gold-glow">
             <p className="text-gold text-xl font-display">Your Turn</p>
@@ -287,6 +389,7 @@ function Game({ character, user, onEndRun }) {
           </div>
         )}
 
+        {/* Player turn — target selected, ready to roll */}
         {isPlayerTurn && selectedTarget && (function() {
           var targetEnemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
           var defTn = 10 + getModifier(targetEnemy.stats.def)
