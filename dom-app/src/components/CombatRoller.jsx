@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react'
 // Two-dice combat roller: d20 attack → pause → weapon damage die
 // Shows both dice side by side. Damage die only appears on hit.
 // States: idle → attackRolling → attackResult → damageRolling → damageResult
-function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, damageMod, buttonLabel, colour, autoRoll }) {
+// resolvedDamage: if provided, this is the actual damage to display (from combat.js)
+// The damage die animation is visual only — the final number comes from resolvedDamage
+function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage }) {
   var accentBorder = colour === 'red' ? 'border-red-400' : 'border-gold'
   var accentBg = colour === 'red' ? 'bg-red-400/10' : 'bg-gold-glow'
   var accentText = colour === 'red' ? 'text-red-400' : 'text-gold'
@@ -59,10 +61,10 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
               if (dTicks >= 8) {
                 clearInterval(dInterval)
                 // Roll actual damage
-                var rawRoll = Math.floor(Math.random() * damageDie) + 1
-                var total = rawRoll + damageMod
-                setDamageDisplay(rawRoll)
-                setDamageTotal(Math.max(total, 1))
+                var visualRoll = Math.floor(Math.random() * damageDie) + 1
+                setDamageDisplay(visualRoll)
+                // Use the actual resolved damage from combat.js, not our own calc
+                setDamageTotal(resolvedDamage != null ? resolvedDamage : Math.max(visualRoll + damageMod, 1))
                 setPhase('damageResult')
               }
             }, 60)
@@ -153,10 +155,10 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
       {phase === 'damageResult' && damageTotal !== null && (
         <div className="text-center">
           <p className={'text-xl font-display ' + accentText}>
-            {attackResult && attackResult.crit ? (damageTotal * 2) + ' damage' : damageTotal + ' damage'}
+            {damageTotal} damage
           </p>
           {attackResult && attackResult.crit && (
-            <p className="text-ink-dim text-xs">Critical — double damage!</p>
+            <p className="text-ink-dim text-xs">Critical -- double damage!</p>
           )}
         </div>
       )}
@@ -180,11 +182,7 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
       {showContinue && (
         <button
           onClick={function() {
-            var finalDamage = 0
-            if (isHit && damageTotal !== null) {
-              finalDamage = attackResult.crit ? damageTotal * 2 : damageTotal
-            }
-            if (onComplete) onComplete(attackResult, finalDamage)
+            if (onComplete) onComplete(attackResult, damageTotal || 0)
           }}
           className="py-2 px-6 rounded-lg bg-surface border border-border-hl text-ink font-sans text-sm hover:bg-raised transition-colors"
         >
