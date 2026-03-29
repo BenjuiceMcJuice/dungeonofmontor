@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { getModifier } from '../lib/classes.js'
 import { d20Check } from '../lib/dice.js'
-import { generateCombatEnemies, generateBoss } from '../lib/enemies.js'
+import { generateBoss } from '../lib/enemies.js'
+import { generateEncounter } from '../lib/encounters.js'
 import { createBattleState, getCurrentTurnId, getActor, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import DiceRoller from '../components/DiceRoller.jsx'
@@ -54,7 +55,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   function startCombat() {
-    var enemies = generateCombatEnemies('seasoned', 1) // encounter level 1 = easy starter
+    var enemies = generateEncounter(0.1, 1, 'seasoned', 'dungeon') // depth 0.1 = early in run
     var players = [{ uid: user.uid, character: character }]
     var bs = createBattleState(players, enemies)
     setBattle(bs)
