@@ -61,10 +61,9 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
               if (dTicks >= 8) {
                 clearInterval(dInterval)
                 // Roll actual damage
-                var visualRoll = Math.floor(Math.random() * damageDie) + 1
-                setDamageDisplay(visualRoll)
-                // Use the actual resolved damage from combat.js, not our own calc
-                setDamageTotal(resolvedDamage != null ? resolvedDamage : Math.max(visualRoll + damageMod, 1))
+                var actualDmg = resolvedDamage != null ? resolvedDamage : Math.max(Math.floor(Math.random() * damageDie) + 1 + damageMod, 1)
+                setDamageDisplay(actualDmg)
+                setDamageTotal(actualDmg)
                 setPhase('damageResult')
               }
             }, 60)
