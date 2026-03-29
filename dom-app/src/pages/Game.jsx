@@ -262,27 +262,45 @@ function Game({ character, user, onEndRun }) {
       </div>
 
       {/* Action area */}
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3">
         {phase === 'enemyTurn' && (
-          <p className="text-ink-faint text-sm animate-pulse">Enemy turn...</p>
-        )}
-
-        {isPlayerTurn && !selectedTarget && (
           <div className="flex flex-col items-center gap-2">
-            <p className="text-gold text-sm font-display">Your Turn</p>
-            <p className="text-ink-dim text-sm">Tap an enemy to attack</p>
+            <p className="text-crimson text-sm font-display">Enemy Turn</p>
+            <p className="text-ink-faint text-sm animate-pulse">The enemy strikes...</p>
           </div>
         )}
 
-        {isPlayerTurn && selectedTarget && (
-          <DiceRoller
-            onRoll={handleAttackRoll}
-            modifier={strMod}
-            tn={10 + getModifier(battle.enemies.find(function(e) { return e.id === selectedTarget }).stats.def)}
-            label={'Attack → ' + battle.enemies.find(function(e) { return e.id === selectedTarget }).name + ' · d20 +' + strMod}
-            onResult={handleRollComplete}
-          />
+        {isPlayerTurn && !selectedTarget && (
+          <div className="flex flex-col items-center gap-2 p-4 border border-gold/30 rounded-lg bg-gold-glow">
+            <p className="text-gold text-lg font-display">Your Turn</p>
+            <p className="text-ink-dim text-sm">Tap an enemy above to attack</p>
+          </div>
         )}
+
+        {isPlayerTurn && selectedTarget && (function() {
+          var targetEnemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
+          var defTn = 10 + getModifier(targetEnemy.stats.def)
+          return (
+            <div className="flex flex-col items-center gap-3">
+              <div className="text-center">
+                <p className="text-gold text-sm font-display mb-1">Attacking {targetEnemy.name}</p>
+                <p className="text-ink-faint text-xs">d20 + {strMod} vs TN {defTn} · Longsword d8 + {strMod} damage</p>
+              </div>
+              <DiceRoller
+                onRoll={handleAttackRoll}
+                modifier={strMod}
+                tn={defTn}
+                onResult={handleRollComplete}
+              />
+              <button
+                onClick={function() { setSelectedTarget(null) }}
+                className="text-ink-faint text-xs hover:text-ink-dim"
+              >
+                Choose different target
+              </button>
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
