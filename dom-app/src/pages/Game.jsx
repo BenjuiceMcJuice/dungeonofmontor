@@ -281,6 +281,7 @@ function Game({ character, user, onEndRun }) {
               colour="red"
               buttonLabel=""
               autoRoll={true}
+              resolvedDamage={enemyResult.damage}
             />
           </div>
         )}
@@ -317,6 +318,7 @@ function Game({ character, user, onEndRun }) {
                 damageMod={strMod}
                 colour="gold"
                 buttonLabel="Attack!"
+                resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage : null}
               />
               {!pendingAttackResult && (
                 <button onClick={function() { setSelectedTarget(null) }}
