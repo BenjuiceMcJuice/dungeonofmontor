@@ -5,6 +5,7 @@ import { generateBoss } from '../lib/enemies.js'
 import { generateEncounter } from '../lib/encounters.js'
 import { createBattleState, getCurrentTurnId, getActor, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
+import PlayerSprite from '../components/PlayerSprite.jsx'
 import DiceRoller from '../components/DiceRoller.jsx'
 
 var MAX_LOG_ENTRIES = 6
@@ -267,22 +268,12 @@ function Game({ character, user, onEndRun }) {
   }
 
   return (
-    <div className="h-svh flex flex-col px-3 pt-2 pb-3 bg-raised overflow-hidden">
-      {/* Scene header + Player HP — compact single row */}
-      <div className="flex items-center gap-3 mb-2">
-        <span className="font-display text-sm text-ink shrink-0">{playerState.name}</span>
-        <div className="flex-1 bg-bg rounded-full h-2.5">
-          <div
-            className={'rounded-full h-2.5 transition-all duration-500 ' +
-              (playerState.currentHp / playerState.maxHp > 0.5 ? 'bg-green-500' :
-               playerState.currentHp / playerState.maxHp > 0.25 ? 'bg-amber-500' : 'bg-red-500')}
-            style={{ width: Math.max(0, (playerState.currentHp / playerState.maxHp) * 100) + '%' }}
-          />
-        </div>
-        <span className="text-ink text-sm font-sans shrink-0">
-          {playerState.currentHp}/{playerState.maxHp}
+    <div className="h-svh flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
+      {/* Scene header — minimal */}
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-ink-dim text-xs uppercase tracking-widest">
+          Round {battle.round}
         </span>
-        <span className="text-ink-dim text-xs shrink-0">R{battle.round}</span>
       </div>
 
       {/* Enemies — compact */}
@@ -436,6 +427,29 @@ function Game({ character, user, onEndRun }) {
             </div>
           )
         })()}
+      </div>
+
+      {/* Party bar — bottom. Sprite + HP. Ready for multiplayer (map over players) */}
+      <div className="shrink-0 bg-surface border-t border-border px-3 py-2">
+        <div className="flex items-center gap-3">
+          <PlayerSprite classKey="knight" scale={3} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="font-display text-sm text-ink truncate">{playerState.name}</span>
+              <span className="text-ink text-xs font-sans shrink-0">
+                {playerState.currentHp}/{playerState.maxHp}
+              </span>
+            </div>
+            <div className="w-full bg-bg rounded-full h-2.5">
+              <div
+                className={'rounded-full h-2.5 transition-all duration-500 ' +
+                  (playerState.currentHp / playerState.maxHp > 0.5 ? 'bg-green-500' :
+                   playerState.currentHp / playerState.maxHp > 0.25 ? 'bg-amber-500' : 'bg-red-500')}
+                style={{ width: Math.max(0, (playerState.currentHp / playerState.maxHp) * 100) + '%' }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

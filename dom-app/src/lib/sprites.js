@@ -135,7 +135,72 @@ var SPRITES = {
   },
 }
 
-// Draw a sprite onto a canvas element
+// Player class sprites — same grid system, custom colours
+var PLAYER_SPRITES = {
+  knight: {
+    name: 'Knight', cols: 14, rows: 20, grid: [
+      [_,_,_,_,_,K,K,K,K,_,_,_,_,_],  // helm top
+      [_,_,_,_,K,C,C,C,C,K,_,_,_,_],
+      [_,_,_,K,C,C,C,C,C,C,K,_,_,_],  // helm widens
+      [_,_,_,K,C,S,C,C,S,C,K,_,_,_],  // visor slit (shadow = eye line)
+      [_,_,_,K,C,C,C,C,C,C,K,_,_,_],
+      [_,_,_,_,K,C,S,S,C,K,_,_,_,_],  // chin guard
+      [_,_,_,_,_,K,K,K,K,_,_,_,_,_],  // neck
+      [_,_,K,K,K,C,C,C,C,K,K,K,_,_],  // shoulders — wide
+      [_,K,C,C,K,C,C,C,C,K,C,C,K,_],  // shoulder plates
+      [_,K,C,C,K,S,C,C,S,K,C,C,K,_],  // chest armour
+      [_,K,C,C,K,C,C,C,C,K,C,C,K,_],
+      [_,_,K,C,K,C,S,S,C,K,C,K,_,_],  // belt
+      [_,_,K,C,_,K,C,C,K,_,C,K,_,_],  // arms at sides
+      [_,_,K,K,_,K,C,C,K,_,K,K,_,_],  // gauntlets
+      [_,_,_,_,_,K,C,C,K,_,_,_,_,_],  // waist
+      [_,_,_,_,K,C,C,C,C,K,_,_,_,_],  // legs
+      [_,_,_,_,K,C,S,S,C,K,_,_,_,_],  // greaves
+      [_,_,_,_,K,C,C,C,C,K,_,_,_,_],
+      [_,_,_,K,K,C,K,K,C,K,K,_,_,_],  // boots
+      [_,_,_,K,K,K,_,_,K,K,K,_,_,_],  // feet
+    ],
+  },
+}
+
+// Class colour schemes — main colour + shadow
+var CLASS_COLOURS = {
+  knight: { hex: '#9ca3af', shadow: '#6b7280' },  // steel grey
+  // Future classes:
+  // ranger:    { hex: '#4ade80', shadow: '#16a34a' },
+  // mage:      { hex: '#818cf8', shadow: '#4f46e5' },
+  // rogue:     { hex: '#a78bfa', shadow: '#7c3aed' },
+  // cleric:    { hex: '#fbbf24', shadow: '#d97706' },
+}
+
+// Draw a player sprite with class colours
+function drawPlayerSprite(canvas, classKey, scale) {
+  var sprite = PLAYER_SPRITES[classKey]
+  var colours = CLASS_COLOURS[classKey]
+  if (!sprite || !colours) return
+
+  var px = scale || 3
+  canvas.width = sprite.cols * px
+  canvas.height = sprite.rows * px
+  canvas.style.imageRendering = 'pixelated'
+
+  var ctx = canvas.getContext('2d')
+  ctx.imageSmoothingEnabled = false
+
+  for (var r = 0; r < sprite.rows; r++) {
+    for (var c = 0; c < sprite.cols; c++) {
+      var v = sprite.grid[r][c]
+      if (v === null) continue
+      if (v === K) ctx.fillStyle = '#000000'
+      else if (v === C) ctx.fillStyle = colours.hex
+      else if (v === S) ctx.fillStyle = colours.shadow
+      else ctx.fillStyle = v
+      ctx.fillRect(c * px, r * px, px, px)
+    }
+  }
+}
+
+// Draw an enemy sprite onto a canvas element
 function drawSprite(canvas, spriteKey, tierKey, scale) {
   var sprite = SPRITES[spriteKey]
   var tier = TIERS[tierKey]
@@ -170,4 +235,4 @@ function drawSprite(canvas, spriteKey, tierKey, scale) {
   }
 }
 
-export { SPRITES, TIERS, DARK_TIERS, drawSprite }
+export { SPRITES, PLAYER_SPRITES, CLASS_COLOURS, TIERS, DARK_TIERS, drawSprite, drawPlayerSprite }
