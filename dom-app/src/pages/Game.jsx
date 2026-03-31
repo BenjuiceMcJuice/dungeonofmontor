@@ -748,6 +748,29 @@ function Game({ character, user, onEndRun }) {
   var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn'
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
+  // Direct attack — click enemy card to attack without going through CombatRoller button
+  function handlePlayerAttackDirect(enemyId) {
+    if (pendingAttackResult) return
+    setSelectedTarget(enemyId)
+    var rollResult = d20Attack(strMod, 20)
+    if (godModeRef.current) {
+      rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
+    }
+    var attackOut = resolvePlayerAttack(battle, user.uid, enemyId, rollResult)
+    if (attackOut && godModeRef.current) {
+      var target = attackOut.newBattle.enemies.find(function(e) { return e.id === enemyId })
+      if (target) {
+        var overkill = target.currentHp + target.maxHp
+        target.currentHp = 0
+        target.isDown = true
+        attackOut.result.damage = overkill
+        attackOut.result.enemyDefeated = true
+        if (attackOut.result.damageBreakdown) attackOut.result.damageBreakdown.final = overkill
+      }
+    }
+    if (attackOut) setPendingAttackResult(attackOut)
+  }
+
   function handlePlayerAttackRoll() {
     var rollResult = d20Attack(strMod, 20)
     if (godModeRef.current) {
@@ -2044,7 +2067,15 @@ function Game({ character, user, onEndRun }) {
             var isActing = activeEnemyId === enemy.id
             return (
               <button key={enemy.id}
-                onClick={function() { if (!isDead && isPlayerTurn) handleSelectTarget(enemy.id) }}
+                onClick={function() {
+                  if (isDead || !isPlayerTurn || pendingAttackResult) return
+                  if (isTarget) {
+                    // Already selected — clicking again triggers attack roll directly
+                    handlePlayerAttackDirect(enemy.id)
+                  } else {
+                    handleSelectTarget(enemy.id)
+                  }
+                }}
                 disabled={isDead || !isPlayerTurn}
                 className={
                   'flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ' +
