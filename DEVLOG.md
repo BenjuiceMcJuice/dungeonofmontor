@@ -21,8 +21,10 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-29 | Combat UX overhaul + narrative + iOS fixes | ✅ Done |
 | 2026-03-29 | Knight sprite + party bar + encounter algorithm | ✅ Done |
 | 2026-03-29 | First production deploy to GitHub Pages | ✅ Done |
+| 2026-03-30 | Design docs v0.4 — Conditions spec, Dungeon Architecture, visual layout | ✅ Done |
+| 2026-03-31 | 4x4 dungeon grid — Montor's Garden zone with maze navigation | ✅ Done |
 |            | Sprint 4 — Items + loot + basic inventory | ⬜ |
-|            | Sprint 5 — Encounter deck + run loop (8 encounters + boss) | ⬜ |
+|            | Sprint 5 — Full run loop (boss, run summary) | ⬜ |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
 
 ---

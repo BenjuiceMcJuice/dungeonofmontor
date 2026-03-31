@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dungeon of Montor — Conditions</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #0d0a07;
+    --paper: #13100c;
+    --border: #3a2e1e;
+    --body-col: #8b2e2e;
+    --mind-col: #2e5c8b;
+    --soul-col: #6b3d8b;
+    --body-glow: rgba(139,46,46,0.15);
+    --mind-glow: rgba(46,92,139,0.15);
+    --soul-glow: rgba(107,61,139,0.15);
+    --text: #c8b89a;
+    --text-dim: #7a6a52;
+    --accent: #c4922a;
+    --white: #e8dcc8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  /* Parchment texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(80,40,10,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(60,30,80,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  h1 {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(28px, 5vw, 48px);
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-shadow: 0 0 30px rgba(196,146,42,0.4);
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Slot filter tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab {
+    padding: 8px 20px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    position: relative;
+    bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active-all { color: var(--accent); border-color: var(--border); border-bottom-color: var(--bg); background: var(--paper); }
+  .tab.active-body { color: var(--body-col); border-color: var(--body-col); border-bottom-color: var(--paper); background: var(--paper); }
+  .tab.active-mind { color: var(--mind-col); border-color: var(--mind-col); border-bottom-color: var(--paper); background: var(--paper); }
+  .tab.active-soul { color: var(--soul-col); border-color: var(--soul-col); border-bottom-color: var(--paper); background: var(--paper); }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    background: var(--paper);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead tr {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+    font-weight: 700;
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(58,46,30,0.4);
+    vertical-align: top;
+    font-size: 12px;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Slot badges */
+  .slot {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .slot-body { background: var(--body-glow); color: var(--body-col); border: 1px solid rgba(139,46,46,0.3); }
+  .slot-mind { background: var(--mind-glow); color: var(--mind-col); border: 1px solid rgba(46,92,139,0.3); }
+  .slot-soul { background: var(--soul-glow); color: var(--soul-col); border: 1px solid rgba(107,61,139,0.3); }
+
+  /* Source tags */
+  .source {
+    display: inline-block;
+    padding: 1px 6px;
+    font-size: 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    margin: 1px 2px 1px 0;
+    white-space: nowrap;
+  }
+
+  /* Target */
+  .target {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Duration */
+  .dur-transient { color: #8bb88b; }
+  .dur-persistent { color: var(--accent); }
+  .dur-branded { color: var(--soul-col); }
+
+  /* Effect text */
+  .effect-text {
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  /* Synergy */
+  .synergy {
+    color: #7aaa8b;
+    font-style: italic;
+    font-size: 11px;
+  }
+
+  /* Downside */
+  .downside {
+    color: #aa7a5a;
+    font-style: italic;
+    font-size: 11px;
+  }
+
+  /* Name */
+  .cond-name {
+    font-weight: 700;
+    color: var(--white);
+    white-space: nowrap;
+  }
+
+  /* Soul unlock */
+  .unlock {
+    font-size: 11px;
+    color: var(--soul-col);
+    opacity: 0.8;
+  }
+
+  /* Legend */
+  .legend {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .legend-group h3 {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .legend-item span {
+    color: var(--text);
+  }
+
+  /* Hidden rows */
+  tr.hidden { display: none; }
+
+  /* Removable tag */
+  .removable { color: #6b8b6b; font-size: 10px; }
+  .not-removable { color: #8b5a5a; font-size: 10px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <h1>Dungeon of Montor</h1>
+    <div class="subtitle">Conditions Reference — v0.1 Draft</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active-all" onclick="filter('all', this)">All</button>
+    <button class="tab" onclick="filter('body', this)">⬤ Body</button>
+    <button class="tab" onclick="filter('mind', this)">⬤ Mind</button>
+    <button class="tab" onclick="filter('soul', this)">⬤ Soul</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name (placeholder)</th>
+          <th>Slot</th>
+          <th>Duration</th>
+          <th>Source(s)</th>
+          <th>Target</th>
+          <th>Removable</th>
+          <th>Mechanical Effect</th>
+          <th>Synergy</th>
+          <th>Downside</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+
+        <!-- ═══ BODY ═══ -->
+        <tr data-slot="body">
+          <td class="text-dim">B1</td>
+          <td class="cond-name">BLEED</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-transient">Transient (3 turns)</span></td>
+          <td><span class="source">Weapon</span><span class="source">Trap</span><span class="source">Infectious</span></td>
+          <td class="target">Enemy / Self</td>
+          <td><span class="removable">✓ Cure item</span></td>
+          <td class="effect-text">Deals small flat damage each turn. % chance per hit to deepen (extend duration +1 turn, stacks to max 6).</td>
+          <td class="synergy">+ NAUSEA → enemy loses 1 action every 2 turns (weakened state)</td>
+          <td class="downside">—</td>
+          <td>Good intro condition. Easy to understand, visible turn counter.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B2</td>
+          <td class="cond-name">NAUSEA</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-transient">Transient (2–4 turns)</span></td>
+          <td><span class="source">Potion</span><span class="source">Consumed</span><span class="source">Infectious</span></td>
+          <td class="target">Enemy / Self</td>
+          <td><span class="removable">✓ Cure item</span></td>
+          <td class="effect-text">% chance each turn that target skips their action (retching). Chance increases if target moves.</td>
+          <td class="synergy">+ BLEED → weakened state (see B1)</td>
+          <td class="downside">If applied to self via bad potion roll, movement costs double.</td>
+          <td>Good from cursed food / bad potions.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B3</td>
+          <td class="cond-name">IRONHIDE</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-persistent">Persistent (gear-bound)</span></td>
+          <td><span class="source">Gear</span><span class="source">Blessing</span></td>
+          <td class="target">Self / Ally</td>
+          <td><span class="removable">✓ Unequip item</span></td>
+          <td class="effect-text">Reduces incoming physical damage by a flat amount. Does not affect magic or soul damage.</td>
+          <td class="synergy">+ LEADEN (M3) → immunity to knockback effects</td>
+          <td class="downside">Reduces AGI by 1 step while active (heavier body, slower).</td>
+          <td>Potion version: stronger reduction, lasts 3 turns only.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B4</td>
+          <td class="cond-name">WITHERED</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-persistent">Persistent (curse)</span></td>
+          <td><span class="source">Curse</span><span class="source">Enemy ability</span></td>
+          <td class="target">Self / Enemy</td>
+          <td><span class="not-removable">✗ Blessing only</span></td>
+          <td class="effect-text">Max HP reduced by a % for the duration. Healing items are 50% less effective.</td>
+          <td class="synergy">+ DREAD (M1) → target's attack accuracy drops additionally</td>
+          <td class="downside">Is the downside. Applied to self it's nasty.</td>
+          <td>Montor likes applying this to tanky players.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B5</td>
+          <td class="cond-name">BURNING</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-transient">Transient (3 turns)</span></td>
+          <td><span class="source">Weapon</span><span class="source">Trap</span><span class="source">Environmental</span></td>
+          <td class="target">Enemy / Self</td>
+          <td><span class="removable">✓ Water item / exit room</span></td>
+          <td class="effect-text">Damage per turn, higher than bleed but no stacking. Spreads to adjacent enemies at % chance per turn.</td>
+          <td class="synergy">+ FRENZY (M2) → burning target is attacked recklessly; attacker ignores own defence</td>
+          <td class="downside">—</td>
+          <td>Environmental version: whole room. Everyone burns until exit.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B6</td>
+          <td class="cond-name">SLUGGISH</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-transient">Transient (2 turns)</span></td>
+          <td><span class="source">Gear</span><span class="source">Trap</span><span class="source">Infectious</span></td>
+          <td class="target">Enemy / Self</td>
+          <td><span class="removable">✓ Wears off / cure</span></td>
+          <td class="effect-text">Movement range halved. % chance to act last in turn order regardless of AGI.</td>
+          <td class="synergy">+ BOREDOM (M4) → target will not pursue; stays stationary</td>
+          <td class="downside">If self-applied (heavy armour gear), AGI checks suffer.</td>
+          <td>Useful for crowd control combos.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B7</td>
+          <td class="cond-name">FORTIFIED</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-persistent">Persistent (potion / gear)</span></td>
+          <td><span class="source">Potion</span><span class="source">Gear</span><span class="source">Blessing</span></td>
+          <td class="target">Self / Ally</td>
+          <td><span class="removable">✓ Unequip / wears off</span></td>
+          <td class="effect-text">Resistance to one damage type (physical or elemental, decided at application). Not both.</td>
+          <td class="synergy">+ IRONHIDE (B3) → 1 hit per combat negated entirely (absorbed)</td>
+          <td class="downside">Potion version: resistance to one type but vulnerability to the other type increases.</td>
+          <td>Type decided at application time, locked in. Interesting potion gamble.</td>
+        </tr>
+
+        <tr data-slot="body">
+          <td class="text-dim">B8</td>
+          <td class="cond-name">MARKED</td>
+          <td><span class="slot slot-body">Body</span></td>
+          <td><span class="dur-persistent">Persistent (until cured)</span></td>
+          <td><span class="source">Enemy ability</span><span class="source">Montor</span></td>
+          <td class="target">Self / Ally</td>
+          <td><span class="not-removable">✗ Special item only</span></td>
+          <td class="effect-text">Enemies of a specific type prioritise the marked target 100%. All enemies of that type detect marked target through walls.</td>
+          <td class="synergy">+ DREAD (M1) → marked target has -% on all rolls while both active</td>
+          <td class="downside">Is the downside.</td>
+          <td>Montor marks players he finds tedious. Also used by Wraith enemy type.</td>
+        </tr>
+
+        <!-- ═══ MIND ═══ -->
+        <tr data-slot="mind">
+          <td class="text-dim">M1</td>
+          <td class="cond-name">DREAD</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-transient">Transient (3 turns)</span></td>
+          <td><span class="source">Enemy ability</span><span class="source">Trap</span><span class="source">Curse</span></td>
+          <td class="target">Self / Ally / Enemy</td>
+          <td><span class="removable">✓ Cure / specific items</span></td>
+          <td class="effect-text">% chance per turn that target skips offensive action (paralysed by fear). Not movement — just attack.</td>
+          <td class="synergy">+ WITHERED (B4) → accuracy drop stacks additionally<br>+ MARKED (B8) → see B8</td>
+          <td class="downside">—</td>
+          <td>Wraith and Orc types favour this. Good opening combo.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M2</td>
+          <td class="cond-name">FRENZY</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-transient">Transient (2 turns)</span></td>
+          <td><span class="source">Potion</span><span class="source">Blessing</span><span class="source">Enemy ability</span></td>
+          <td class="target">Self / Enemy</td>
+          <td><span class="removable">✓ Wears off</span></td>
+          <td class="effect-text">+% attack damage. Target attacks the nearest entity regardless of allegiance. Hits allies if they're closer.</td>
+          <td class="synergy">+ BURNING (B5) → reckless attack, see B5</td>
+          <td class="downside">On self: defence ignored for duration. High risk, high reward potion use.</td>
+          <td>Can be weaponised — apply to enemy near its allies.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M3</td>
+          <td class="cond-name">LEADEN</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-persistent">Persistent (gear-bound)</span></td>
+          <td><span class="source">Gear</span><span class="source">Blessing</span></td>
+          <td class="target">Self</td>
+          <td><span class="removable">✓ Unequip</span></td>
+          <td class="effect-text">Mental state is unmovable. Immune to Mind conditions being replaced (existing Mind condition cannot be overwritten by enemy). Resists fear, charm, confusion.</td>
+          <td class="synergy">+ IRONHIDE (B3) → knockback immunity, see B3</td>
+          <td class="downside">Cannot receive positive Mind conditions either (e.g. cannot receive Clarity while Leaden).</td>
+          <td>Defensive mind condition. A double-edged shield.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M4</td>
+          <td class="cond-name">BOREDOM</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-transient">Transient (variable)</span></td>
+          <td><span class="source">Environmental</span><span class="source">Montor</span><span class="source">Consumed</span></td>
+          <td class="target">Enemy / Self</td>
+          <td><span class="removable">✓ Combat event triggers removal</span></td>
+          <td class="effect-text">Reduces enemy aggression. % chance per turn enemy does nothing. Removed instantly if enemy takes damage.</td>
+          <td class="synergy">+ SLUGGISH (B6) → target becomes stationary, see B6</td>
+          <td class="downside">On self: Montor's Mood drops if player is Bored (he notices).</td>
+          <td>Montor inflicts this on enemies he finds equally boring. Rare.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M5</td>
+          <td class="cond-name">CLARITY</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-persistent">Persistent (potion / blessing)</span></td>
+          <td><span class="source">Potion</span><span class="source">Blessing</span><span class="source">Gear</span></td>
+          <td class="target">Self / Ally</td>
+          <td><span class="removable">✓ Wears off / unequip</span></td>
+          <td class="effect-text">% bonus to all skill checks. Montor's Offers become visible one round before they expire (preview window). Trap detection improved.</td>
+          <td class="synergy">+ FORTIFIED (B7) → correct resistance type chosen automatically on application</td>
+          <td class="downside">Potion version: after it wears off, BOREDOM (M4) applied automatically (the crash).</td>
+          <td>The hangover mechanic makes potion use a calculated risk.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M6</td>
+          <td class="cond-name">HAUNTED</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-persistent">Persistent (curse)</span></td>
+          <td><span class="source">Curse</span><span class="source">Montor</span><span class="source">Wraith kill</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Shrine only</span></td>
+          <td class="effect-text">Random negative effect triggers once per room (from a small table: missed attack, dropped item, false trap trigger). Unpredictable, not constant.</td>
+          <td class="synergy">+ DREAD (M1) → Haunted visions count as fear source; Dread duration extended</td>
+          <td class="downside">Is the downside.</td>
+          <td>Killing a Wraith without the correct item risks triggering this.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M7</td>
+          <td class="cond-name">BLOODLUST</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-transient">Transient (combat only)</span></td>
+          <td><span class="source">Weapon</span><span class="source">Blessing</span></td>
+          <td class="target">Self</td>
+          <td><span class="removable">✓ Ends when combat ends</span></td>
+          <td class="effect-text">Each kill this combat restores small HP. If no kill in 2 turns, condition punishes with HP loss instead. Keeps escalating pressure to kill.</td>
+          <td class="synergy">+ BLEED (B1) → kills from bleed damage count toward kill chain</td>
+          <td class="downside">Cannot flee combat while active. Montor finds this very entertaining (+Mood).</td>
+          <td>Montor occasionally gifts this. It's a trap wrapped in a reward.</td>
+        </tr>
+
+        <tr data-slot="mind">
+          <td class="text-dim">M8</td>
+          <td class="cond-name">HEXED</td>
+          <td><span class="slot slot-mind">Mind</span></td>
+          <td><span class="dur-persistent">Persistent (curse)</span></td>
+          <td><span class="source">Enemy ability</span><span class="source">Curse</span></td>
+          <td class="target">Self / Enemy</td>
+          <td><span class="not-removable">✗ Specific counter item</span></td>
+          <td class="effect-text">One random equipped item has its effect inverted (damage item heals enemies, armour increases damage taken). Which item is hidden from player.</td>
+          <td class="synergy">+ CLARITY (M5) → reveals which item is hexed</td>
+          <td class="downside">Is the downside. Devastating on enemies too if you can apply it.</td>
+          <td>Slug enemy type casts this. Also obtainable as a weapon effect to throw at enemies.</td>
+        </tr>
+
+        <!-- ═══ SOUL ═══ -->
+        <tr data-slot="soul">
+          <td class="text-dim">S1</td>
+          <td class="cond-name">NOTICED</td>
+          <td><span class="slot slot-soul">Soul</span></td>
+          <td><span class="dur-branded">Branded (cross-run)</span></td>
+          <td><span class="source">Montor</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Cannot be removed</span></td>
+          <td class="effect-text">Montor's starting Mood toward this character is +10. He offers earlier in runs. His Offers are slightly more generous. He's paying attention.</td>
+          <td class="synergy">Deepens to FAVOURED (S1b) via further Montor interactions. Favoured: +20 Mood, access to exclusive Offer tier.</td>
+          <td class="downside">Montor also punishes harder when displeased. His Curses are meaner.</td>
+          <td class="unlock">Unlock: Reach level 3. Trigger: survive 3 Montor interactions without refusing an Offer.</td>
+        </tr>
+
+        <tr data-slot="soul">
+          <td class="text-dim">S2</td>
+          <td class="cond-name">BLOODSWORN</td>
+          <td><span class="slot slot-soul">Soul</span></td>
+          <td><span class="dur-branded">Branded (cross-run)</span></td>
+          <td><span class="source">Kill data</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Cannot be removed</span></td>
+          <td class="effect-text">One enemy type is permanently marked as prey. Loot table skewed toward that enemy's drops. Spawn rate of that enemy slightly reduced (they fear you).</td>
+          <td class="synergy">Deepens to APEX via 50 kills of prey type. Apex: spawn rate drops further, that enemy type occasionally flees on sight.</td>
+          <td class="downside">Prey type's faction (if applicable) hostile from run start.</td>
+          <td class="unlock">Unlock: Reach level 3. Trigger: 20+ kills of same enemy type across runs.</td>
+        </tr>
+
+        <tr data-slot="soul">
+          <td class="text-dim">S3</td>
+          <td class="cond-name">OATHBOUND</td>
+          <td><span class="slot slot-soul">Soul</span></td>
+          <td><span class="dur-branded">Branded (cross-run)</span></td>
+          <td><span class="source">Faction / Deity allegiance</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Cannot be removed</span></td>
+          <td class="effect-text">Shrine of sworn deity costs nothing to use. Deity's faction NPCs have improved pricing and dialogue. One deity-specific item available from run start.</td>
+          <td class="synergy">Deepens to DEVOTED: deity occasionally intervenes in combat (once per run, passive).</td>
+          <td class="downside">Opposing deity's shrines are cursed for this character. Using one triggers a Curse.</td>
+          <td class="unlock">Unlock: Reach level 4. Trigger: Use same deity shrine 5 times across runs.</td>
+        </tr>
+
+        <tr data-slot="soul">
+          <td class="text-dim">S4</td>
+          <td class="cond-name">CURSED BLOOD</td>
+          <td><span class="slot slot-soul">Soul</span></td>
+          <td><span class="dur-branded">Branded (cross-run)</span></td>
+          <td><span class="source">Death data / Montor</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Cannot be removed</span></td>
+          <td class="effect-text">Character died to the same enemy type 3+ times. That enemy type deals +% damage to this character permanently. Montor finds this hilarious.</td>
+          <td class="synergy">Deepens to DOOMED: enemy type also spawns more frequently. Montor may occasionally seed the run start with one.</td>
+          <td class="downside">Is the downside. Entirely negative. Legacy of repeated failure.</td>
+          <td class="unlock">Unlock: automatic. Trigger: die to same enemy type 3 times across runs.</td>
+        </tr>
+
+        <tr data-slot="soul">
+          <td class="text-dim">S5</td>
+          <td class="cond-name">WANDERER</td>
+          <td><span class="slot slot-soul">Soul</span></td>
+          <td><span class="dur-branded">Branded (cross-run)</span></td>
+          <td><span class="source">Run data</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Cannot be removed</span></td>
+          <td class="effect-text">Character has completed 10+ runs. Trap detection improved passively. Loot from chests slightly better. Montor respects the persistence (neutral Mood baseline raised).</td>
+          <td class="synergy">Deepens to VETERAN at 25 runs: one additional item slot available from run start.</td>
+          <td class="downside">—</td>
+          <td class="unlock">Unlock: automatic at 10 completed runs with same character.</td>
+        </tr>
+
+        <tr data-slot="soul">
+          <td class="text-dim">S6</td>
+          <td class="cond-name">FORSAKEN</td>
+          <td><span class="slot slot-soul">Soul</span></td>
+          <td><span class="dur-branded">Branded (cross-run)</span></td>
+          <td><span class="source">Betrayal data / Montor</span></td>
+          <td class="target">Self</td>
+          <td><span class="not-removable">✗ Cannot be removed</span></td>
+          <td class="effect-text">Character has betrayed a partner (PvP or abandoned). Partner-based bonuses unavailable. Solo play bonuses increased. Montor finds the character interesting — unpredictable Mood responses.</td>
+          <td class="synergy">Deepens to OUTCAST: all faction NPCs start hostile. Solo bonuses increase further. Montor occasionally aids directly (he likes chaos).</td>
+          <td class="downside">Partner play locked out for character until condition is somehow addressed (TBD mechanic).</td>
+          <td class="unlock">Unlock: automatic. Trigger: betray or abandon a partner mid-run.</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-group">
+      <h3>Duration</h3>
+      <div class="legend-item"><span class="dur-transient">Transient</span> — N turns then gone</div>
+      <div class="legend-item"><span class="dur-persistent">Persistent</span> — until removed / unequipped</div>
+      <div class="legend-item"><span class="dur-branded">Branded</span> — survives death, cross-run</div>
+    </div>
+    <div class="legend-group">
+      <h3>Source</h3>
+      <div class="legend-item"><span>Gear</span> — active while equipped</div>
+      <div class="legend-item"><span>Consumed</span> — one-shot (potion, scroll)</div>
+      <div class="legend-item"><span>Curse / Blessing</span> — cannot unequip</div>
+      <div class="legend-item"><span>Infectious</span> — enemy-applied</div>
+      <div class="legend-item"><span>Environmental</span> — room-level, all present</div>
+    </div>
+    <div class="legend-group">
+      <h3>Slots</h3>
+      <div class="legend-item"><span class="slot slot-body">Body</span> — physical state</div>
+      <div class="legend-item"><span class="slot slot-mind">Mind</span> — mental / psychological</div>
+      <div class="legend-item"><span class="slot slot-soul">Soul</span> — permanent character identity</div>
+    </div>
+    <div class="legend-group">
+      <h3>Removable</h3>
+      <div class="legend-item"><span class="removable">✓</span> — can be removed (method shown)</div>
+      <div class="legend-item"><span class="not-removable">✗</span> — cannot be removed normally</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function filter(slot, btn) {
+    document.querySelectorAll('.tab').forEach(t => {
+      t.className = 'tab';
+    });
+    btn.className = 'tab active-' + slot;
+
+    document.querySelectorAll('#tbody tr').forEach(row => {
+      if (slot === 'all' || row.dataset.slot === slot) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+  }
+</script>
+</body>
+</html>

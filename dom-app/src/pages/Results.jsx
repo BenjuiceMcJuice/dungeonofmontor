@@ -11,13 +11,19 @@ function Results({ character, result, onReturnToTavern }) {
 
         <div className="flex flex-col gap-2 mt-4 text-sm text-ink-dim">
           <div className="flex justify-between">
-            <span>Encounters</span>
-            <span className="text-ink">{result.encounters}</span>
+            <span>Chambers Cleared</span>
+            <span className="text-ink">{result.chambersCleared || result.encounters || 0}</span>
           </div>
           <div className="flex justify-between">
             <span>XP Earned</span>
             <span className="text-ink">{result.xp}</span>
           </div>
+          {result.gold > 0 && (
+            <div className="flex justify-between">
+              <span>Gold</span>
+              <span className="text-gold">{result.gold}</span>
+            </div>
+          )}
         </div>
       </div>
 

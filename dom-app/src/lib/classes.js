@@ -44,14 +44,16 @@ function getMaxHp(cls, stats) {
 function generateKnight(name) {
   // 70 points across 14 skills = 5 each, then boost Knight-relevant stats
   // 70 points across 14 skills. Knight favours STR, DEF, VIT, END.
-  // STR 14 (+2 mod) so Knight hits hard. DEF 12 (+1) for tankiness.
+  // STR 14 (+2 mod) — trained fighter, hits reliably
+  // DEF 10 (+0 mod) — base defence, armour adds the rest
+  // AGI 10 (+0) — average initiative, not slow not fast
   var stats = {
-    str: 14, def: 12, vit: 10, end: 10,
-    agi: 8, per: 3, wil: 3,
-    int: 1, wis: 1, lck: 2,
+    str: 14, def: 10, vit: 10, end: 8,
+    agi: 10, per: 4, wil: 3,
+    int: 2, wis: 1, lck: 2,
     cha: 1, res: 2, sth: 1, cun: 2,
   }
-  // Total: 14+12+10+10+8+3+3+1+1+2+1+2+1+2 = 70 ✓
+  // Total: 14+10+10+8+10+4+3+2+1+2+1+2+1+2 = 70 ✓
 
   var cls = CLASSES.knight
   return {
@@ -60,7 +62,7 @@ function generateKnight(name) {
     level: 1,
     xp: 0,
     stats: stats,
-    maxHp: 40, // Stage 1: fixed HP. Formula (getMaxHp) used in Stage 2 with levelling.
+    maxHp: 35, // Stage 1: fixed HP. Slightly lower — rats should feel threatening in groups.
     abilities: [],
     scars: [],
     titles: [],

@@ -1,6 +1,7 @@
 // Combat engine — multiplayer-ready from day one
 // Returns NEW state objects (never mutates) so React re-renders correctly
-import { roll, rollWithMod, d20Check, rollDamage, applyDefence } from './dice.js'
+// Uses 4-tier attack resolution: Crit / Hit / Glancing Blow / Miss
+import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
 
 // Deep-clone battle state for immutable updates
@@ -94,8 +95,32 @@ function getActor(battleState, actorId) {
   return null
 }
 
-// Resolve player attack — accepts pre-rolled attackResult from DiceRoller
-// This ensures the roll the player SEES is the roll that determines the outcome
+// Calculate damage for a given tier — returns breakdown object
+// Order: raw damage (weapon + STR) → tier multiplier → DEF reduction
+function calculateTierDamage(weaponRoll, strMod, tier, defStat, critMultiplier) {
+  if (tier === 4) return { final: 0, weaponRoll: weaponRoll, strMod: strMod, raw: 0, tierMul: 'miss', afterTier: 0, defReduction: 0 }
+
+  var raw = Math.max(weaponRoll + strMod, 1)
+  var afterTier = raw
+  var tierMul = 'x1'
+  if (tier === 1) { afterTier = Math.round(raw * (critMultiplier || 2.0)); tierMul = 'x' + (critMultiplier || 2.0) }
+  if (tier === 3) { afterTier = Math.max(Math.round(raw / 2), 1); tierMul = 'x0.5' }
+
+  var defReduction = Math.floor(defStat / 2)
+  var final_ = Math.max(afterTier - defReduction, 1)
+
+  return {
+    final: final_,
+    weaponRoll: weaponRoll,
+    strMod: strMod,
+    raw: raw,
+    tierMul: tierMul,
+    afterTier: afterTier,
+    defReduction: defReduction,
+  }
+}
+
+// Resolve player attack — 4-tier system
 function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult) {
   var bs = cloneBattle(battleState)
   var player = bs.players[playerUid]
@@ -104,22 +129,9 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
 
   var strMod = getModifier(player.combatStats.str)
 
-  // If no pre-rolled result provided, roll now (for AI/multiplayer use)
+  // If no pre-rolled result provided, roll now
   if (!attackResult) {
-    var defTn = 10 + getModifier(enemy.stats.def)
-    attackResult = d20Check(strMod, defTn)
-  }
-
-  // Enforce D&D natural roll rules:
-  // Natural 1 = ALWAYS miss regardless of modifiers
-  // Natural 20 = ALWAYS hit regardless of target
-  var isHit = false
-  if (attackResult.fumble) {
-    isHit = false  // nat 1 always misses
-  } else if (attackResult.crit) {
-    isHit = true   // nat 20 always hits
-  } else {
-    isHit = attackResult.success
+    attackResult = d20Attack(strMod, 20)
   }
 
   var result = {
@@ -132,21 +144,19 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     enemyDefeated: false,
   }
 
-  if (isHit) {
+  // Calculate damage based on tier
+  if (attackResult.tier <= 3) {
     var weaponDie = 6
     if (player.equipped && player.equipped.weapon && player.equipped.weapon.die) {
       weaponDie = player.equipped.weapon.die
     }
 
     var dmgResult = rollDamage(weaponDie, strMod)
-    var finalDmg = applyDefence(dmgResult.total, enemy.stats.def)
+    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, enemy.stats.def, 2.0)
 
-    if (attackResult.crit) {
-      finalDmg = finalDmg * 2
-    }
-
-    enemy.currentHp = Math.max(0, enemy.currentHp - finalDmg)
-    result.damage = finalDmg
+    enemy.currentHp = Math.max(0, enemy.currentHp - breakdown.final)
+    result.damage = breakdown.final
+    result.damageBreakdown = breakdown
 
     if (enemy.currentHp <= 0) {
       enemy.isDown = true
@@ -157,8 +167,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   return { newBattle: bs, result: result }
 }
 
-// Resolve enemy attack — returns { newBattle, result }
-// Same nat 1/nat 20 rules as player attacks
+// Resolve enemy attack — 4-tier system
 function resolveEnemyAttack(battleState, enemyId) {
   var bs = cloneBattle(battleState)
   var enemy = bs.enemies.find(function(e) { return e.id === enemyId })
@@ -170,18 +179,7 @@ function resolveEnemyAttack(battleState, enemyId) {
   var target = livingPlayers[Math.floor(Math.random() * livingPlayers.length)]
 
   var strMod = getModifier(enemy.stats.str)
-  var defTn = 10 + getModifier(target.combatStats.def)
-  var attackResult = d20Check(strMod, defTn)
-
-  // Enforce nat 1/nat 20 rules
-  var isHit = false
-  if (attackResult.fumble) {
-    isHit = false
-  } else if (attackResult.crit) {
-    isHit = true
-  } else {
-    isHit = attackResult.success
-  }
+  var attackResult = d20Attack(strMod, 20)
 
   var result = {
     attacker: enemy.name,
@@ -193,16 +191,13 @@ function resolveEnemyAttack(battleState, enemyId) {
     playerDowned: false,
   }
 
-  if (isHit) {
+  if (attackResult.tier <= 3) {
     var dmgResult = rollDamage(enemy.weaponDie, strMod)
-    var finalDmg = applyDefence(dmgResult.total, target.combatStats.def)
+    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, target.combatStats.def, 2.0)
 
-    if (attackResult.crit) {
-      finalDmg = finalDmg * 2
-    }
-
-    target.currentHp = Math.max(0, target.currentHp - finalDmg)
-    result.damage = finalDmg
+    target.currentHp = Math.max(0, target.currentHp - breakdown.final)
+    result.damage = breakdown.final
+    result.damageBreakdown = breakdown
 
     if (target.currentHp <= 0) {
       target.isDown = true
@@ -213,7 +208,7 @@ function resolveEnemyAttack(battleState, enemyId) {
   return { newBattle: bs, result: result }
 }
 
-// Advance to next living combatant — returns new battle state
+// Advance to next living combatant
 function advanceTurn(battleState) {
   var bs = cloneBattle(battleState)
   var maxIterations = bs.turnOrder.length * 2

@@ -16,8 +16,48 @@ function rollWithMod(sides, modifier) {
   }
 }
 
-// d20 check against a target number
-// Returns { roll, modifier, total, tn, success, crit, fumble }
+// 4-Tier attack resolution (replaces binary hit/miss)
+// Tiers based on d20 roll + modifier:
+//   Tier 1 — Critical Hit: natural 20 (or critThreshold)
+//   Tier 2 — Hit: 11-19
+//   Tier 3 — Glancing Blow: 5-10
+//   Tier 4 — Miss: 1-4
+// Modifier shifts the effective roll, making higher tiers more likely
+function d20Attack(modifier, critThreshold) {
+  var r = roll(20)
+  var total = r + modifier
+  var threshold = critThreshold || 20
+
+  var tier, tierName
+  if (r >= threshold) {
+    tier = 1
+    tierName = 'crit'
+  } else if (total >= 11) {
+    tier = 2
+    tierName = 'hit'
+  } else if (total >= 5) {
+    tier = 3
+    tierName = 'glancing'
+  } else {
+    tier = 4
+    tierName = 'miss'
+  }
+
+  return {
+    sides: 20,
+    roll: r,
+    modifier: modifier,
+    total: total,
+    tier: tier,
+    tierName: tierName,
+    crit: tier === 1,
+    hit: tier === 2,
+    glancing: tier === 3,
+    miss: tier === 4,
+  }
+}
+
+// Legacy d20Check — kept for any non-combat checks that still use binary pass/fail
 function d20Check(modifier, tn) {
   var r = roll(20)
   var total = r + modifier
@@ -57,7 +97,6 @@ function rollInitiative(agiMod) {
 }
 
 // Loot rarity roll: d100 + LCK modifier
-// Returns { roll, modifier, total, rarity }
 function rollLootRarity(lckMod) {
   var result = rollWithMod(100, lckMod)
   var t = result.total
@@ -70,17 +109,28 @@ function rollLootRarity(lckMod) {
   return Object.assign({}, result, { rarity: rarity })
 }
 
-// Crit chance: base 5% (nat 20), +1% per 4 LCK above 10
-function getCritChance(lckStat) {
-  var bonus = Math.max(0, Math.floor((lckStat - 10) / 4))
-  return 5 + bonus
+// Flee resolution — 4-tier AGI check
+// Crit Success: 17-20 (clean exit)
+// Success: 11-16 (messy exit, some HP loss)
+// Failure: 5-10 (bad exit, HP + gold loss)
+// Crit Failure: 1-4 (flee fails, combat continues, heavy HP + gold loss)
+function d20Flee(agiModifier) {
+  var r = roll(20)
+  var total = r + agiModifier
+
+  var tier, tierName
+  if (total >= 17) { tier = 1; tierName = 'crit_success' }
+  else if (total >= 11) { tier = 2; tierName = 'success' }
+  else if (total >= 5) { tier = 3; tierName = 'failure' }
+  else { tier = 4; tierName = 'crit_failure' }
+
+  return {
+    roll: r,
+    modifier: agiModifier,
+    total: total,
+    tier: tier,
+    tierName: tierName,
+  }
 }
 
-// Check if a roll is a crit (expanded crit range for high LCK)
-function isCrit(d20Roll, lckStat) {
-  var chance = getCritChance(lckStat)
-  var critThreshold = 21 - Math.floor(chance / 5)
-  return d20Roll >= Math.max(critThreshold, 2)
-}
-
-export { roll, rollWithMod, d20Check, rollDamage, applyDefence, rollInitiative, rollLootRarity, getCritChance, isCrit }
+export { roll, rollWithMod, d20Attack, d20Check, d20Flee, rollDamage, applyDefence, rollInitiative, rollLootRarity }

@@ -186,6 +186,7 @@ The game UI is built around **five persistent tabs** on a fixed bottom nav bar. 
     lastEventEncounterIndex: number, // cooldown — min 3 encounters between Offer/Curse events
   },
 
+  // See 07_Conditions_and_Persistence.md for full Body/Mind/Soul condition data model
   activeConditions: [{         // Montor Offer/Curse conditions currently in effect
     type: string,              // 'no_abilities_next_encounter' | 'voluntary_damage' | etc.
     triggeredBy: string,       // 'montor_offer' | 'montor_curse'
