@@ -109,10 +109,12 @@ function generateCombatEnemies(difficulty, encounterLevel, zonePools) {
   return enemies
 }
 
-function generateBoss(difficulty) {
-  var boss = generateEnemy('orc', 'void', difficulty)
-  boss.name = 'The Unbroken'
-  boss.xp = 80
+function generateBoss(difficulty, archetypeKey, tierKey, bossName) {
+  var type = archetypeKey || 'orc'
+  var tier = tierKey || 'void'
+  var boss = generateEnemy(type, tier, difficulty)
+  boss.name = bossName || 'The Unbroken'
+  boss.xp = tier === 'dust' ? 30 : tier === 'slate' ? 50 : tier === 'iron' ? 70 : 80
   return boss
 }
 

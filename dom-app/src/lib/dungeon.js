@@ -364,17 +364,9 @@ function generateChamberContent(chamber, difficulty, zoneDef) {
     content.description = 'A hulking shape blocks the path. It has been waiting.'
     content.dropsZoneKey = true  // mini boss can drop zone door key
   } else if (chamber.type === 'boss') {
-    // Zone boss — guards the stairwell
-    var boss = generateBoss(difficulty)
-    if (zd.bossType) {
-      var bossEnemy = generateBoss(difficulty)
-      // Override with zone-specific boss
-      bossEnemy.archetypeKey = zd.bossType
-      bossEnemy.tierKey = zd.bossTier || 'slate'
-      bossEnemy.name = zd.bossName || 'Guardian'
-      bossEnemy.xp = 80
-    }
-    content.enemies = [bossEnemy || boss]
+    // Zone boss — guards the stairwell. Uses zone-specific type/tier.
+    var bossEnemy = generateBoss(difficulty, zd.bossType || 'orc', zd.bossTier || 'slate', zd.bossName || 'Guardian')
+    content.enemies = [bossEnemy]
     content.description = 'A powerful creature guards the way deeper. It will not let you pass.'
     content.isBoss = true
   } else if (chamber.type === 'keystone') {

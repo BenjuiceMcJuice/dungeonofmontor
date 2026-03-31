@@ -62,7 +62,7 @@ function generateKnight(name) {
     level: 1,
     xp: 0,
     stats: stats,
-    maxHp: 35, // Stage 1: fixed HP. Slightly lower — rats should feel threatening in groups.
+    maxHp: 45, // Stage 1: fixed HP. Enough buffer for early fights without potions.
     abilities: [],
     scars: [],
     titles: [],

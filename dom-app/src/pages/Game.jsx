@@ -385,10 +385,39 @@ function Game({ character, user, onEndRun }) {
       setChamberContent(null)
       setGamePhase('doors')
     }
-    // --- Everything else --- ChamberView (rest, trap, event, etc.)
+    // --- Rest chamber --- interactable in doors view
+    else if (content && chamber.type === 'rest') {
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { restAvailable: true, restHealPercent: content.hpRecovery || 0.25, restDescription: content.description })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Everything else --- ChamberView (trap, event, etc.)
     else {
       setGamePhase('chamber')
     }
+  }
+
+  // --- Rest interaction ---
+  function handleRest() {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.restAvailable) return
+    var heal = Math.round(character.maxHp * (chamber.restHealPercent || 0.25))
+    var newHp = Math.min(playerHp + heal, character.maxHp)
+    setPlayerHp(newHp)
+    var newZone = Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { restAvailable: false, restUsed: true, restHealed: heal, cleared: true })
+        return ch
+      })
+    })
+    setZone(newZone)
+    setChambersCleared(chambersCleared + 1)
   }
 
   // --- Keystone press ---
@@ -1497,6 +1526,24 @@ function Game({ character, user, onEndRun }) {
                   </div>
                 )
               })()}
+
+              {/* Rest point */}
+              {currentChamber.restAvailable && !currentChamber.restUsed && (
+                <div className="flex flex-col items-center gap-3">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-ink-dim text-xs italic text-center">{currentChamber.restDescription || 'A sheltered space. The air is still.'}</p>
+                  <button onClick={handleRest}
+                    className="py-3 px-8 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 font-sans text-base">
+                    Rest (+{Math.round((currentChamber.restHealPercent || 0.25) * 100)}% HP)
+                  </button>
+                </div>
+              )}
+              {currentChamber.restUsed && (
+                <div className="flex flex-col items-center gap-2">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-green-400 text-sm font-sans">Rested. Healed {currentChamber.restHealed} HP.</p>
+                </div>
+              )}
 
               {/* NPC in room (merchant/quest) */}
               {currentChamber.npc && !lootingNpcId && !lootingChestId && !lootingCorpseId ? (function() {
