@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { getModifier } from '../lib/classes.js'
 import { d20Attack, d20Flee } from '../lib/dice.js'
 import { generateGardenZone, generateChamberContent, getAdjacentChambers, getDoorDirection } from '../lib/dungeon.js'
+import { db } from '../lib/firebase.js'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, applyConsumable } from '../lib/loot.js'
 import { createBattleState, getCurrentTurnId, getActor, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
@@ -14,6 +17,33 @@ var MAX_LOG_ENTRIES = 6
 
 // Direction labels
 var DIR_LABELS = { N: 'North', S: 'South', E: 'East', W: 'West' }
+
+// Montor whispers — random flavour text between rooms
+// Stage 1: scripted pool. Stage 4: AI-generated based on mood/state.
+var MONTOR_WHISPERS = [
+  "You're still here? Interesting.",
+  "The walls remember your footsteps.",
+  "I can smell your fear. It's... adequate.",
+  "Every door you open was already open. I left them that way.",
+  "The garden grows tired of you.",
+  "Take your time. I have forever.",
+  "That last fight was disappointing. I expected more.",
+  "You remind me of someone. They didn't make it either.",
+  "The deeper you go, the more I see.",
+  "Your gold won't help you where you're headed.",
+  "I wonder — do you loot because you need to, or because you can't help yourself?",
+  "The rats speak of you. Not kindly.",
+  "Something watches from the hedgerows. Not me. Something else.",
+  "You're braver than you look. That's not a compliment.",
+  "Keep going. I'm curious how far you'll get.",
+  "The flowers lean toward you. That's not a good sign.",
+  "I could close these doors any time. Remember that.",
+  "Your heartbeat echoes through my garden. It's... rhythmic.",
+  "The last adventurer made it further than this. Just saying.",
+  "Don't trust the merchant. Actually, don't trust anyone.",
+  null, null, null, null, null, null, null, null, null, null,
+  null, null, null, null, null,
+]
 
 // Map chamber types to centre icon keys (after clearing)
 function getChamberIconKey(type) {
@@ -63,6 +93,63 @@ function Game({ character, user, onEndRun }) {
   var [playerGold, setPlayerGold] = useState(character.gold || 0)
   var [chambersCleared, setChambersCleared] = useState(0)
   var [previousPosition, setPreviousPosition] = useState(null)
+  var [playerInventory, setPlayerInventory] = useState(character.inventory ? character.inventory.slice() : [])
+  var [activeBuffs, setActiveBuffs] = useState([])
+
+  var [showInventoryPanel, setShowInventoryPanel] = useState(false)
+
+  // --- Run tracking (for balance logging) ---
+  var [runStats, setRunStats] = useState({
+    enemiesDefeated: 0,
+    enemiesFled: 0,
+    itemsUsed: 0,
+    damageDealt: 0,
+    damageTaken: 0,
+    critsLanded: 0,
+    critsReceived: 0,
+    killedBy: null,
+    killedByTier: null,
+    killedInChamber: null,
+  })
+
+  // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
+  useEffect(function() {
+    window.domDebug = {
+      giveItems: function() {
+        var debugItems = [
+          { id: 'health_potion', name: 'Health Potion', type: 'consumable', rarity: 'common', effect: 'heal', effectValue: 15, buyPrice: 10, sellPrice: 4, description: 'Tastes foul. Works fast.' },
+          { id: 'health_potion', name: 'Health Potion', type: 'consumable', rarity: 'common', effect: 'heal', effectValue: 15, buyPrice: 10, sellPrice: 4, description: 'Tastes foul. Works fast.' },
+          { id: 'rage_draught', name: 'Rage Draught', type: 'consumable', rarity: 'uncommon', effect: 'stat_buff', effectStat: 'str', effectValue: 4, effectDuration: 3, buyPrice: 18, sellPrice: 7, description: 'Thick, red, tastes of iron.' },
+          { id: 'smoke_bomb', name: 'Smoke Bomb', type: 'consumable', rarity: 'common', effect: 'flee_guaranteed', effectValue: 1, buyPrice: 12, sellPrice: 5, description: 'Crack it. Run.' },
+          { id: 'dagger_common', name: 'Dagger', type: 'weapon', slot: 'weapon', rarity: 'common', damageDie: 4, attackStat: 'str', buyPrice: 8, sellPrice: 3, description: 'Quick and light.' },
+          { id: 'shortsword_common', name: 'Shortsword', type: 'weapon', slot: 'weapon', rarity: 'common', damageDie: 6, attackStat: 'str', buyPrice: 15, sellPrice: 6, description: 'A reliable blade.' },
+          { id: 'leather_common', name: 'Leather Armour', type: 'armour', slot: 'armour', rarity: 'common', defBonus: 2, agiPenalty: 0, buyPrice: 12, sellPrice: 5, description: 'Supple hide.' },
+          { id: 'ring_of_vitality', name: 'Ring of Vitality', type: 'relic', slot: 'relic', rarity: 'uncommon', passiveEffect: 'hp_bonus', passiveValue: 5, buyPrice: 35, sellPrice: 14, description: 'A warm band of copper.' },
+          { id: 'lucky_coin', name: 'Lucky Coin', type: 'relic', slot: 'relic', rarity: 'uncommon', passiveEffect: 'lck_bonus', passiveValue: 2, buyPrice: 30, sellPrice: 12, description: 'Heads you win.' },
+        ]
+        setPlayerInventory(function(prev) { return prev.concat(debugItems) })
+        setPlayerGold(function(g) { return g + 200 })
+        console.log('Added 9 items + 200 gold')
+      },
+      heal: function() { setPlayerHp(character.maxHp); console.log('Healed to full') },
+      gold: function(n) { setPlayerGold(function(g) { return g + (n || 100) }); console.log('Added ' + (n || 100) + ' gold') },
+      hp: function() { console.log('HP: ' + playerHp + '/' + character.maxHp + ' | Gold: ' + playerGold + ' | Items: ' + playerInventory.length) },
+      god: function() { godModeRef.current = !godModeRef.current; console.log('God mode: ' + (godModeRef.current ? 'ON — one-hit kills' : 'OFF')) },
+    }
+    return function() { delete window.domDebug }
+  }, [playerHp, playerGold, playerInventory, character])
+
+  function trackStat(key, value) {
+    setRunStats(function(prev) {
+      var next = Object.assign({}, prev)
+      if (typeof value === 'number') {
+        next[key] = (next[key] || 0) + value
+      } else {
+        next[key] = value
+      }
+      return next
+    })
+  }
 
   // --- Combat state ---
   var [battle, setBattle] = useState(null)
@@ -73,6 +160,11 @@ function Game({ character, user, onEndRun }) {
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null)
   var [enemyRollerKey, setEnemyRollerKey] = useState(0)
   var [lootableCorpses, setLootableCorpses] = useState([])
+  var godModeRef = useRef(false)
+  var [lootingCorpseId, setLootingCorpseId] = useState(null)
+  var [lootingChestId, setLootingChestId] = useState(null)
+  var [lootingNpcId, setLootingNpcId] = useState(null)
+  var [montorWhisper, setMontorWhisper] = useState(null)
   var logRef = useRef(null)
 
   // Init zone — start at entry, show doors
@@ -102,6 +194,11 @@ function Game({ character, user, onEndRun }) {
   // --- Navigation: pick a door ---
   function handlePickDoor(targetId) {
     setPreviousPosition(zone.playerPosition)
+    setLootingCorpseId(null)
+    setLootingChestId(null)
+    setLootingNpcId(null)
+    setShowInventoryPanel(false)
+
     var newZone = Object.assign({}, zone, {
       playerPosition: targetId,
       chambers: zone.chambers.map(function(ch) {
@@ -110,6 +207,13 @@ function Game({ character, user, onEndRun }) {
       })
     })
     setZone(newZone)
+
+    // Montor whisper — random chance on entering a new room
+    var whisper = MONTOR_WHISPERS[Math.floor(Math.random() * MONTOR_WHISPERS.length)]
+    setMontorWhisper(whisper)
+    if (whisper) {
+      setTimeout(function() { setMontorWhisper(null) }, 4000)
+    }
 
     var chamber = newZone.chambers[targetId]
 
@@ -127,6 +231,49 @@ function Game({ character, user, onEndRun }) {
       setTimeout(function() {
         startCombat(content.enemies, newZone, targetId)
       }, 800)
+    } else if (content && (chamber.type === 'loot' || chamber.type === 'hidden')) {
+      // Store chest on the chamber — player interacts in doors view
+      var chestItems = []
+      if (content.item) chestItems.push(content.item)
+      var chest = {
+        id: 'chest_' + targetId,
+        gold: content.gold || 0,
+        items: chestItems,
+        goldTaken: false,
+        itemsTaken: [],
+        opened: false,
+        label: chamber.type === 'hidden' ? 'Hidden Cache' : 'Chest',
+      }
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { chest: chest })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    } else if (content && (chamber.type === 'merchant' || chamber.type === 'quest_npc')) {
+      // Store NPC on the chamber — player interacts in doors view
+      var npc = {
+        id: 'npc_' + targetId,
+        type: chamber.type,
+        name: chamber.type === 'merchant' ? 'Wandering Vendor' : (content.npcName || 'Stranger'),
+        description: content.description,
+        items: content.items || [],       // merchant wares
+        reward: content.reward || null,   // quest reward
+        interacted: false,
+        showSell: false,
+      }
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { npc: npc })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
     } else {
       setGamePhase('chamber')
     }
@@ -141,17 +288,27 @@ function Game({ character, user, onEndRun }) {
       setChamberContent(Object.assign({}, chamberContent, { healed: heal }))
     } else if (action === 'claim_loot') {
       setPlayerGold(playerGold + chamberContent.gold)
+      if (chamberContent.item) {
+        setPlayerInventory(function(prev) { return prev.concat([chamberContent.item]) })
+      }
       setChamberContent(Object.assign({}, chamberContent, { claimed: true }))
+    } else if (action === 'merchant_tab') {
+      setChamberContent(Object.assign({}, chamberContent, { showSell: data === 'sell' }))
     } else if (action === 'buy' && data) {
-      if ((playerGold || 0) >= data.cost) {
-        setPlayerGold(playerGold - data.cost)
-        if (data.effect === 'heal') {
-          var newHp2 = Math.min(playerHp + data.value, character.maxHp)
-          setPlayerHp(newHp2)
-        }
+      var price = data.buyPrice || data.cost || 0
+      if ((playerGold || 0) >= price) {
+        setPlayerGold(playerGold - price)
+        setPlayerInventory(function(prev) { return prev.concat([Object.assign({}, data)]) })
         var remaining = chamberContent.items.filter(function(it) { return it !== data })
         setChamberContent(Object.assign({}, chamberContent, { items: remaining }))
       }
+    } else if (action === 'sell' && data) {
+      setPlayerGold(playerGold + data.sellPrice)
+      setPlayerInventory(function(prev) {
+        var next = prev.slice()
+        next.splice(data.itemIndex, 1)
+        return next
+      })
     } else if (action === 'trigger_trap') {
       var newHp3 = Math.max(0, playerHp - chamberContent.damage)
       setPlayerHp(newHp3)
@@ -166,7 +323,8 @@ function Game({ character, user, onEndRun }) {
       }
       setChamberContent(Object.assign({}, chamberContent, { helped: true }))
     } else if (action === 'descend') {
-      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold })
+      writeRunLog('victory')
+      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length })
       return
     }
   }
@@ -243,8 +401,18 @@ function Game({ character, user, onEndRun }) {
     var pState = updatedBattle.players[user.uid]
     if (pState) setPlayerHp(pState.currentHp)
 
+    // Track damage taken
+    if (r.damage > 0) trackStat('damageTaken', r.damage)
+    if (r.attackRoll && r.attackRoll.tierName === 'crit') trackStat('critsReceived', 1)
+
     var endResult = checkBattleEnd(updatedBattle)
     if (endResult === 'defeat') {
+      // Track death context
+      var killerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
+      trackStat('killedBy', killerEnemy ? killerEnemy.archetypeKey : 'unknown')
+      trackStat('killedByTier', killerEnemy ? killerEnemy.tierKey : 'unknown')
+      var deathChamber = zone ? zone.chambers[zone.playerPosition] : null
+      trackStat('killedInChamber', deathChamber ? deathChamber.type : 'unknown')
       setBattle(updatedBattle)
       setEnemyAttackInfo(null)
       setPlayerHp(0)
@@ -258,10 +426,26 @@ function Game({ character, user, onEndRun }) {
 
     var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
     setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-    if (!(nextActor && nextActor.type === 'enemy')) setSelectedTarget(null)
   }
 
   // === PLAYER TURN ===
+  // Auto-select target: if only one living enemy, select it automatically
+  // Also validate existing selection — if selected target died, pick a live one
+  useEffect(function() {
+    if (combatPhase !== 'playerTurn' || !battle) return
+    var livingEnemies = battle.enemies.filter(function(e) { return !e.isDown })
+    if (livingEnemies.length === 0) return
+
+    // If current selection is still alive, keep it
+    if (selectedTarget && livingEnemies.some(function(e) { return e.id === selectedTarget })) return
+
+    // Auto-select the only living enemy, or clear if multiple
+    if (livingEnemies.length === 1) {
+      setSelectedTarget(livingEnemies[0].id)
+      setPendingAttackResult(null)
+    }
+  }, [combatPhase, battle])
+
   function handleSelectTarget(enemyId) {
     setSelectedTarget(enemyId)
     setPendingAttackResult(null)
@@ -275,7 +459,22 @@ function Game({ character, user, onEndRun }) {
 
   function handlePlayerAttackRoll() {
     var rollResult = d20Attack(strMod, 20)
+    if (godModeRef.current) {
+      rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
+    }
     var attackOut = resolvePlayerAttack(battle, user.uid, selectedTarget, rollResult)
+    if (attackOut && godModeRef.current) {
+      // One-hit kill: set damage to enemy's full HP
+      var target = attackOut.newBattle.enemies.find(function(e) { return e.id === selectedTarget })
+      if (target) {
+        var overkill = target.currentHp + target.maxHp
+        target.currentHp = 0
+        target.isDown = true
+        attackOut.result.damage = overkill
+        attackOut.result.enemyDefeated = true
+        if (attackOut.result.damageBreakdown) attackOut.result.damageBreakdown.final = overkill
+      }
+    }
     if (attackOut) setPendingAttackResult(attackOut)
     return rollResult
   }
@@ -287,6 +486,11 @@ function Game({ character, user, onEndRun }) {
     var logEntry = formatAttackLog(r, 'player')
     addLog({ type: 'player', text: logEntry.text, tier: logEntry.tier })
     setPendingAttackResult(null)
+
+    // Track combat stats
+    if (r.damage > 0) trackStat('damageDealt', r.damage)
+    if (r.attackRoll && r.attackRoll.tierName === 'crit') trackStat('critsLanded', 1)
+    if (r.enemyDefeated) trackStat('enemiesDefeated', 1)
 
     var updatedBattle = attackOut.newBattle
     var endResult = checkBattleEnd(updatedBattle)
@@ -308,7 +512,10 @@ function Game({ character, user, onEndRun }) {
 
     var nextBattle = advanceTurn(updatedBattle)
     setBattle(nextBattle)
-    setSelectedTarget(null)
+
+    // Keep target if still alive, otherwise clear
+    var targetStillAlive = updatedBattle.enemies.some(function(e) { return e.id === selectedTarget && !e.isDown })
+    if (!targetStillAlive) setSelectedTarget(null)
 
     var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
     setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
@@ -356,6 +563,8 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
+    if (fled) trackStat('enemiesFled', 1)
+
     setFleeOutcome({
       narrative: narrative,
       fled: fled,
@@ -398,11 +607,189 @@ function Game({ character, user, onEndRun }) {
     }
   }
 
+  // === USE ITEM IN COMBAT ===
+  function handleUseItem(itemIndex) {
+    var item = playerInventory[itemIndex]
+    if (!item || item.type !== 'consumable') return
+
+    var result = applyConsumable(item, { currentHp: playerHp, maxHp: character.maxHp })
+    if (!result || !result.used) return
+
+    // Apply state changes
+    // Start from battle HP if in combat (source of truth), else playerHp
+    var currentHp = (battle && battle.players[user.uid]) ? battle.players[user.uid].currentHp : playerHp
+    var updatedBattleForItem = battle
+
+    if (result.stateChanges.hpChange !== undefined && result.stateChanges.hpChange !== null) {
+      var newHp = Math.min(currentHp + result.stateChanges.hpChange, character.maxHp)
+      setPlayerHp(newHp)
+      if (battle) {
+        var newPlayers = {}
+        Object.keys(battle.players).forEach(function(uid) {
+          newPlayers[uid] = Object.assign({}, battle.players[uid], {
+            combatStats: Object.assign({}, battle.players[uid].combatStats),
+            statusEffects: battle.players[uid].statusEffects.slice(),
+          })
+          if (uid === user.uid) newPlayers[uid].currentHp = newHp
+        })
+        updatedBattleForItem = Object.assign({}, battle, { players: newPlayers })
+      }
+    }
+    if (result.stateChanges.buff) {
+      setActiveBuffs(function(prev) { return prev.concat([result.stateChanges.buff]) })
+      if (updatedBattleForItem && result.stateChanges.buff.stat) {
+        var buffStat = result.stateChanges.buff.stat
+        var buffVal = result.stateChanges.buff.value
+        var newPlayers2 = {}
+        Object.keys(updatedBattleForItem.players).forEach(function(uid) {
+          newPlayers2[uid] = Object.assign({}, updatedBattleForItem.players[uid], {
+            combatStats: Object.assign({}, updatedBattleForItem.players[uid].combatStats),
+            statusEffects: updatedBattleForItem.players[uid].statusEffects.slice(),
+          })
+          if (uid === user.uid) {
+            newPlayers2[uid].combatStats[buffStat] = (newPlayers2[uid].combatStats[buffStat] || 10) + buffVal
+          }
+        })
+        updatedBattleForItem = Object.assign({}, updatedBattleForItem, { players: newPlayers2 })
+      }
+    }
+    if (updatedBattleForItem !== battle) {
+      setBattle(updatedBattleForItem)
+    }
+    if (result.stateChanges.guaranteedFlee) {
+      // Remove item, then auto-flee successfully
+      setPlayerInventory(function(prev) {
+        var next = prev.slice()
+        next.splice(itemIndex, 1)
+        return next
+      })
+      setBattle(null)
+      setCombatLog([])
+      setChamberContent(null)
+      if (previousPosition !== null) {
+        var newZone = Object.assign({}, zone, { playerPosition: previousPosition })
+        setZone(newZone)
+      }
+      addLog({ type: 'player', text: 'Smoke fills the chamber. You vanish.', tier: 'hit' })
+      setShowInventoryPanel(false)
+      setGamePhase('doors')
+      return
+    }
+
+    // Remove consumed item
+    setPlayerInventory(function(prev) {
+      var next = prev.slice()
+      next.splice(itemIndex, 1)
+      return next
+    })
+    trackStat('itemsUsed', 1)
+    addLog({ type: 'player', text: character.name + ' uses ' + item.name + '. ' + result.description, tier: 'hit' })
+    setShowInventoryPanel(false)
+
+    // Using an item costs your turn — must use updated battle state (with healed HP / buffs applied)
+    var battleAfterItem = updatedBattleForItem || battle
+    if (battleAfterItem) {
+      var nextBattle = advanceTurn(battleAfterItem)
+      setBattle(nextBattle)
+      setSelectedTarget(null)
+      var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
+      setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+    }
+  }
+
+  // === EQUIP ITEM (out of combat) ===
+  function handleEquipItem(itemIndex) {
+    var item = playerInventory[itemIndex]
+    if (!item) return
+
+    var newEquipped = Object.assign({}, character.equipped)
+    var returnItem = null
+
+    if (item.type === 'weapon' && item.slot === 'weapon') {
+      returnItem = newEquipped.weapon
+      newEquipped.weapon = item
+    } else if (item.type === 'armour' && item.slot === 'armour') {
+      returnItem = newEquipped.armour
+      newEquipped.armour = item
+    } else if (item.type === 'relic' && item.slot === 'relic') {
+      if (!newEquipped.relics) newEquipped.relics = []
+      if (newEquipped.relics.length < 3) {
+        newEquipped.relics = newEquipped.relics.concat([item])
+      } else {
+        return // relics full
+      }
+    } else {
+      return
+    }
+
+    // Update character equipped (mutating the prop — Stage 1 ephemeral character)
+    character.equipped = newEquipped
+
+    // Remove equipped item from inventory, add old item back
+    setPlayerInventory(function(prev) {
+      var next = prev.slice()
+      next.splice(itemIndex, 1)
+      if (returnItem) next.push(returnItem)
+      return next
+    })
+  }
+
+  // === WRITE RUN LOG TO FIRESTORE ===
+  function writeRunLog(outcome) {
+    var visitedCount = zone ? zone.chambers.filter(function(ch) { return ch.visited }).length : 0
+    var logDoc = {
+      userId: user.uid,
+      timestamp: serverTimestamp(),
+      outcome: outcome,
+      floorReached: zone ? zone.floorId : 'grounds',
+      zoneReached: zone ? zone.zoneId : 'montors_garden',
+      chambersCleared: chambersCleared,
+      chambersVisited: visitedCount,
+      totalXp: totalXp,
+      totalGold: playerGold,
+      runDurationMs: null,
+      characterClass: character.class || 'knight',
+      characterLevel: character.level || 1,
+      characterMaxHp: character.maxHp,
+      enemiesDefeated: runStats.enemiesDefeated,
+      enemiesFled: runStats.enemiesFled,
+      itemsUsed: runStats.itemsUsed,
+      itemsFound: playerInventory.length,
+      damageDealt: runStats.damageDealt,
+      damageTaken: runStats.damageTaken,
+      critsLanded: runStats.critsLanded,
+      critsReceived: runStats.critsReceived,
+      killedBy: runStats.killedBy,
+      killedByTier: runStats.killedByTier,
+      killedInChamber: runStats.killedInChamber,
+    }
+    addDoc(collection(db, 'runLog'), logDoc).catch(function(err) {
+      console.error('Failed to write run log:', err)
+    })
+  }
+
   function handleCombatVictoryToDoors() {
-    // Generate corpses and store them on the chamber
+    // Generate corpses with loot (gold + items array)
+    var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
+    var lckStat = character.stats.lck || 10
     var corpses = battle.enemies.filter(function(e) { return e.isDown }).map(function(e) {
-      var gold = Math.max(1, Math.round(e.xp * 0.3 + Math.random() * e.xp * 0.4))
-      return { id: e.id, name: e.name, archetypeKey: e.archetypeKey, tierKey: e.tierKey, gold: gold, looted: false }
+      var loot = generateCombatLoot(encounterLevel, lckStat)
+      // Build items array — stronger enemies can drop multiple items
+      var items = []
+      if (loot.item) items.push(loot.item)
+      // Elite/boss: extra roll for a second item
+      if (encounterLevel >= 2) {
+        var loot2 = generateCombatLoot(encounterLevel, lckStat)
+        if (loot2.item) items.push(loot2.item)
+      }
+      return {
+        id: e.id, name: e.name, archetypeKey: e.archetypeKey, tierKey: e.tierKey,
+        gold: Math.max(1, loot.gold + Math.round(e.xp * 0.2)),
+        items: items,
+        goldTaken: false,
+        itemsTaken: [],    // indices of items already taken
+        opened: false,     // has the player looked inside?
+      }
     })
 
     // Store corpses on the chamber in zone state
@@ -419,24 +806,160 @@ function Game({ character, user, onEndRun }) {
     setGamePhase('doors')
   }
 
-  function handleLootCorpse(corpseId) {
+  // Open a corpse to see what's inside
+  function handleOpenCorpse(corpseId) {
+    setLootingCorpseId(corpseId)
+    // Mark as opened
+    updateCorpse(corpseId, function(c) { return Object.assign({}, c, { opened: true }) })
+  }
+
+  // Take gold from opened corpse
+  function handleTakeGold(corpseId) {
     var chamber = zone.chambers[zone.playerPosition]
-    if (!chamber.corpses) return
+    var corpse = chamber.corpses && chamber.corpses.find(function(c) { return c.id === corpseId })
+    if (!corpse || corpse.goldTaken) return
+    setPlayerGold(playerGold + corpse.gold)
+    updateCorpse(corpseId, function(c) { return Object.assign({}, c, { goldTaken: true }) })
+  }
 
-    var goldGained = 0
-    var updatedCorpses = chamber.corpses.map(function(c) {
-      if (c.id === corpseId && !c.looted) {
-        goldGained = c.gold
-        return Object.assign({}, c, { looted: true })
-      }
-      return c
+  // Take a specific item from opened corpse
+  function handleTakeItem(corpseId, itemIndex) {
+    var chamber = zone.chambers[zone.playerPosition]
+    var corpse = chamber.corpses && chamber.corpses.find(function(c) { return c.id === corpseId })
+    if (!corpse || !corpse.items[itemIndex]) return
+    if (corpse.itemsTaken.indexOf(itemIndex) !== -1) return
+    setPlayerInventory(function(prev) { return prev.concat([corpse.items[itemIndex]]) })
+    updateCorpse(corpseId, function(c) {
+      return Object.assign({}, c, { itemsTaken: c.itemsTaken.concat([itemIndex]) })
     })
-    setPlayerGold(playerGold + goldGained)
+  }
 
+  // Close the loot panel (walk away)
+  function handleCloseLoot() {
+    setLootingCorpseId(null)
+  }
+
+  // === NPC INTERACTIONS (merchant/quest) ===
+  function handleOpenNpc() {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.npc) return
+    setLootingNpcId(chamber.npc.id)
+  }
+
+  function handleNpcBuy(item) {
+    var price = item.buyPrice || item.cost || 0
+    if (playerGold < price) return
+    setPlayerGold(playerGold - price)
+    setPlayerInventory(function(prev) { return prev.concat([Object.assign({}, item)]) })
+    updateNpc(function(n) {
+      return Object.assign({}, n, { items: n.items.filter(function(it) { return it !== item }) })
+    })
+  }
+
+  function handleNpcSellToggle() {
+    updateNpc(function(n) { return Object.assign({}, n, { showSell: !n.showSell }) })
+  }
+
+  function handleNpcSell(itemIndex, sellPrice) {
+    setPlayerGold(playerGold + sellPrice)
+    setPlayerInventory(function(prev) {
+      var next = prev.slice()
+      next.splice(itemIndex, 1)
+      return next
+    })
+  }
+
+  function handleNpcHelp() {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.npc || chamber.npc.interacted) return
+    if (chamber.npc.reward && chamber.npc.reward.gold) {
+      setPlayerGold(playerGold + chamber.npc.reward.gold)
+    }
+    updateNpc(function(n) { return Object.assign({}, n, { interacted: true }) })
+  }
+
+  function handleCloseNpc() {
+    setLootingNpcId(null)
+    // Mark cleared
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
-        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { corpses: updatedCorpses })
+        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
         return ch
+      })
+    })
+    setZone(newZone)
+    setChambersCleared(chambersCleared + 1)
+  }
+
+  function updateNpc(updater) {
+    var newZone = Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id !== zone.playerPosition || !ch.npc) return ch
+        return Object.assign({}, ch, { npc: updater(ch.npc) })
+      })
+    })
+    setZone(newZone)
+  }
+
+  // === CHEST INTERACTIONS (loot/hidden chambers) ===
+  function handleOpenChest() {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.chest) return
+    setLootingChestId(chamber.chest.id)
+    updateChest(function(c) { return Object.assign({}, c, { opened: true }) })
+  }
+
+  function handleTakeChestGold() {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.chest || chamber.chest.goldTaken) return
+    setPlayerGold(playerGold + chamber.chest.gold)
+    updateChest(function(c) { return Object.assign({}, c, { goldTaken: true }) })
+  }
+
+  function handleTakeChestItem(itemIndex) {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.chest || !chamber.chest.items[itemIndex]) return
+    if (chamber.chest.itemsTaken.indexOf(itemIndex) !== -1) return
+    setPlayerInventory(function(prev) { return prev.concat([chamber.chest.items[itemIndex]]) })
+    updateChest(function(c) {
+      return Object.assign({}, c, { itemsTaken: c.itemsTaken.concat([itemIndex]) })
+    })
+  }
+
+  function handleCloseChest() {
+    setLootingChestId(null)
+    // Mark chamber cleared when closing chest
+    var newZone = Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
+        return ch
+      })
+    })
+    setZone(newZone)
+    setChambersCleared(chambersCleared + 1)
+  }
+
+  function updateChest(updater) {
+    var newZone = Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id !== zone.playerPosition || !ch.chest) return ch
+        return Object.assign({}, ch, { chest: updater(ch.chest) })
+      })
+    })
+    setZone(newZone)
+  }
+
+  // Helper: update a single corpse in zone state
+  function updateCorpse(corpseId, updater) {
+    var newZone = Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id !== zone.playerPosition) return ch
+        return Object.assign({}, ch, {
+          corpses: ch.corpses.map(function(c) {
+            if (c.id !== corpseId) return c
+            return updater(c)
+          })
+        })
       })
     })
     setZone(newZone)
@@ -464,7 +987,7 @@ function Game({ character, user, onEndRun }) {
           <p className="text-ink text-sm">Chambers cleared: {chambersCleared}</p>
           <p className="text-ink text-sm mt-1">XP earned: <span className="text-gold">{Math.round(totalXp * 0.5)}</span></p>
         </div>
-        <button onClick={function() { onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
+        <button onClick={function() { writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
           className="py-3 px-8 rounded-lg bg-surface border border-border text-ink font-sans text-base">
           Return to Tavern
         </button>
@@ -518,8 +1041,54 @@ function Game({ character, user, onEndRun }) {
           <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">
             {currentChamber.label}
           </span>
-          <span className="text-gold text-xs font-sans">{playerGold}g</span>
+          <div className="flex items-center gap-3">
+            {playerInventory.length > 0 && (
+              <button onClick={function() { setShowInventoryPanel(!showInventoryPanel) }}
+                className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                  (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
+                Bag ({playerInventory.length})
+              </button>
+            )}
+            <span className="text-gold text-xs font-sans">{playerGold}g</span>
+          </div>
         </div>
+
+        {/* Inventory panel (out of combat) */}
+        {showInventoryPanel && (
+          <div className="mb-2 p-3 rounded-lg bg-surface border border-border max-h-48 overflow-y-auto">
+            <div className="flex flex-col gap-1">
+              {playerInventory.map(function(item, idx) {
+                var isEquippable = item.type === 'weapon' || item.type === 'armour' || item.type === 'relic'
+                var isConsumable = item.type === 'consumable'
+                return (
+                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans">
+                    <div className="flex flex-col">
+                      <span className="text-ink">{item.name}</span>
+                      <span className="text-ink-faint text-[10px]">
+                        {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                         item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                         item.type === 'relic' ? item.description :
+                         item.description || ''}
+                      </span>
+                    </div>
+                    {isEquippable && gamePhase === 'doors' && (
+                      <button onClick={function() { handleEquipItem(idx) }}
+                        className="text-xs text-gold border border-gold/40 px-2 py-1 rounded hover:border-gold transition-colors">
+                        Equip
+                      </button>
+                    )}
+                    {isConsumable && gamePhase === 'doors' && (
+                      <button onClick={function() { handleUseItem(idx) }}
+                        className="text-xs text-emerald-400 border border-emerald-500/40 px-2 py-1 rounded hover:border-emerald-400 transition-colors">
+                        Use
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Room layout — doors on edges, content in centre */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -537,38 +1106,313 @@ function Game({ character, user, onEndRun }) {
 
             {/* Centre content — large area */}
             <div className="flex-1 flex flex-col items-center justify-center gap-3 px-2">
-              {/* Lootable corpses from combat */}
-              {currentChamber.corpses && currentChamber.corpses.length > 0 ? (
+              {/* Montor whisper */}
+              {montorWhisper && (
+                <p className="text-ink-faint text-xs italic text-center max-w-xs mb-2 animate-pulse"
+                  style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+                  "{montorWhisper}"
+                </p>
+              )}
+
+              {/* NPC in room (merchant/quest) */}
+              {currentChamber.npc && !lootingNpcId && !lootingChestId && !lootingCorpseId ? (function() {
+                var npc = currentChamber.npc
+                return (
+                  <div className="flex flex-col items-center gap-2">
+                    <button
+                      onClick={handleOpenNpc}
+                      className="flex flex-col items-center gap-1 p-3 rounded-lg border border-blue/40 bg-blue/5 cursor-pointer hover:border-blue transition-all"
+                    >
+                      <ChamberIcon iconKey="npc" theme="garden" scale={4} />
+                      <span className="text-blue text-[9px] font-sans font-bold">
+                        {npc.type === 'merchant' ? 'TRADE' : 'TALK'}
+                      </span>
+                    </button>
+                    <p className="text-ink-dim text-xs italic text-center max-w-xs">{npc.description}</p>
+                  </div>
+                )
+              })() : lootingNpcId && currentChamber.npc ? (function() {
+                var npc = currentChamber.npc
+
+                // Merchant NPC
+                if (npc.type === 'merchant') {
+                  return (
+                    <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+                      <p className="text-ink text-sm font-sans">{npc.name}</p>
+                      <p className="text-gold text-xs font-sans">Your gold: {playerGold}</p>
+                      <div className="flex gap-2">
+                        <button onClick={function() { updateNpc(function(n) { return Object.assign({}, n, { showSell: false }) }) }}
+                          className={'px-4 py-1 rounded text-xs font-sans border transition-colors ' +
+                            (!npc.showSell ? 'border-gold text-gold' : 'border-border text-ink-dim hover:text-ink')}>
+                          Buy
+                        </button>
+                        {playerInventory.length > 0 && (
+                          <button onClick={handleNpcSellToggle}
+                            className={'px-4 py-1 rounded text-xs font-sans border transition-colors ' +
+                              (npc.showSell ? 'border-gold text-gold' : 'border-border text-ink-dim hover:text-ink')}>
+                            Sell
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2 w-full max-h-40 overflow-y-auto">
+                        {!npc.showSell && npc.items.map(function(item, i) {
+                          var price = item.buyPrice || item.cost || 0
+                          var canAfford = playerGold >= price
+                          return (
+                            <div key={'buy-' + i} className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans">
+                              <div className="flex flex-col items-start">
+                                <span className="text-ink">{item.name}</span>
+                                <span className="text-ink-faint text-[10px]">
+                                  {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                                   item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                                   item.description || item.type}
+                                </span>
+                              </div>
+                              <button onClick={function() { if (canAfford) handleNpcBuy(item) }}
+                                disabled={!canAfford}
+                                className={'text-xs px-3 py-1 rounded border transition-colors ' +
+                                  (canAfford ? 'text-gold border-gold/40 hover:border-gold cursor-pointer' : 'text-ink-faint border-border opacity-50')}>
+                                {price}g
+                              </button>
+                            </div>
+                          )
+                        })}
+                        {!npc.showSell && npc.items.length === 0 && (
+                          <p className="text-ink-faint text-xs italic text-center">Sold out.</p>
+                        )}
+                        {npc.showSell && playerInventory.map(function(item, i) {
+                          var sellPrice = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+                          return (
+                            <div key={'sell-' + i} className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans">
+                              <div className="flex flex-col items-start">
+                                <span className="text-ink">{item.name}</span>
+                                <span className="text-ink-faint text-[10px]">
+                                  {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                                   item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                                   item.description || item.type}
+                                </span>
+                              </div>
+                              <button onClick={function() { handleNpcSell(i, sellPrice) }}
+                                className="text-xs text-gold px-3 py-1 rounded border border-gold/40 hover:border-gold cursor-pointer transition-colors">
+                                Sell {sellPrice}g
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <button onClick={handleCloseNpc}
+                        className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
+                        Leave
+                      </button>
+                    </div>
+                  )
+                }
+
+                // Quest NPC
+                return (
+                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+                    <p className="text-ink text-sm font-sans">{npc.name}</p>
+                    <p className="text-ink-dim text-xs italic text-center">{npc.description}</p>
+                    {!npc.interacted ? (
+                      <div className="flex flex-col gap-2 w-full">
+                        <button onClick={handleNpcHelp}
+                          className="w-full p-3 rounded-lg border border-blue/40 bg-surface text-sm font-sans text-blue hover:border-blue transition-colors">
+                          Help them {npc.reward && npc.reward.gold ? '(reward: ' + npc.reward.gold + 'g)' : ''}
+                        </button>
+                        <button onClick={handleCloseNpc}
+                          className="w-full p-3 rounded-lg border border-border bg-surface text-sm font-sans text-ink-dim hover:text-ink transition-colors">
+                          Ignore and leave
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-blue text-sm">They thank you.</p>
+                        {npc.reward && npc.reward.gold && (
+                          <p className="text-gold text-sm">+{npc.reward.gold} gold</p>
+                        )}
+                        <button onClick={handleCloseNpc}
+                          className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
+                          Continue
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()
+
+              : /* Chest in room (loot/hidden chambers) */
+              currentChamber.chest && !lootingChestId && !lootingCorpseId ? (function() {
+                var chest = currentChamber.chest
+                var isFullyLooted = chest.goldTaken && chest.items.length === chest.itemsTaken.length
+                return (
+                  <div className="flex flex-col items-center gap-2">
+                    <button
+                      onClick={function() { if (!isFullyLooted) handleOpenChest() }}
+                      disabled={isFullyLooted}
+                      className={
+                        'flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ' +
+                        (isFullyLooted
+                          ? 'border-border opacity-30'
+                          : chest.opened
+                            ? 'border-gold/30 bg-surface cursor-pointer hover:border-gold'
+                            : 'border-gold/40 bg-gold-glow cursor-pointer hover:border-gold animate-pulse')
+                      }
+                    >
+                      <ChamberIcon iconKey="chest" theme="garden" scale={4} />
+                      {isFullyLooted ? (
+                        <span className="text-ink-faint text-[9px] font-sans">empty</span>
+                      ) : chest.opened ? (
+                        <span className="text-gold text-[9px] font-sans">search</span>
+                      ) : (
+                        <span className="text-gold text-[9px] font-sans font-bold">OPEN</span>
+                      )}
+                    </button>
+                  </div>
+                )
+              })() : lootingChestId && currentChamber.chest ? (function() {
+                var chest = currentChamber.chest
+                return (
+                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+                    <p className="text-ink text-sm font-sans">{chest.label}</p>
+                    <div className="flex flex-col gap-2 w-full">
+                      {chest.gold > 0 && (
+                        <div className="flex items-center justify-between p-3 rounded-lg border border-gold/30 bg-surface text-sm font-sans">
+                          <span className="text-gold">{chest.gold} gold</span>
+                          {chest.goldTaken ? (
+                            <span className="text-ink-faint text-xs">taken</span>
+                          ) : (
+                            <button onClick={handleTakeChestGold}
+                              className="text-xs text-gold border border-gold/40 px-3 py-1 rounded hover:border-gold transition-colors">
+                              Take
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {chest.items.map(function(item, idx) {
+                        var taken = chest.itemsTaken.indexOf(idx) !== -1
+                        return (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
+                            <div className="flex flex-col">
+                              <span className="text-ink">{item.name}</span>
+                              <span className="text-ink-faint text-[10px]">
+                                {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                                 item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                                 item.description || item.type}
+                              </span>
+                            </div>
+                            {taken ? (
+                              <span className="text-ink-faint text-xs">taken</span>
+                            ) : (
+                              <button onClick={function() { handleTakeChestItem(idx) }}
+                                className="text-xs text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded hover:border-emerald-400 transition-colors">
+                                Take
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                      {chest.items.length === 0 && chest.gold === 0 && (
+                        <p className="text-ink-faint text-xs italic">Empty.</p>
+                      )}
+                    </div>
+                    <button onClick={handleCloseChest}
+                      className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
+                      {chest.goldTaken || chest.itemsTaken.length > 0 ? 'Done' : 'Leave it'}
+                    </button>
+                  </div>
+                )
+              })()
+
+              : /* Lootable corpses from combat */
+              currentChamber.corpses && currentChamber.corpses.length > 0 && !lootingCorpseId ? (
                 <div className="flex flex-col items-center gap-2">
                   <div className="flex flex-wrap justify-center gap-2">
                     {currentChamber.corpses.map(function(corpse) {
                       var corpseIcon = 'corpse_' + corpse.archetypeKey
+                      var isFullyLooted = corpse.goldTaken && corpse.items.length === corpse.itemsTaken.length
                       return (
                         <button key={corpse.id}
-                          onClick={function() { if (!corpse.looted) handleLootCorpse(corpse.id) }}
-                          disabled={corpse.looted}
+                          onClick={function() { if (!isFullyLooted) handleOpenCorpse(corpse.id) }}
+                          disabled={isFullyLooted}
                           className={
                             'flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ' +
-                            (corpse.looted
+                            (isFullyLooted
                               ? 'border-border opacity-30'
-                              : 'border-gold/40 bg-gold-glow cursor-pointer hover:border-gold animate-pulse')
+                              : corpse.opened
+                                ? 'border-gold/30 bg-surface cursor-pointer hover:border-gold'
+                                : 'border-gold/40 bg-gold-glow cursor-pointer hover:border-gold animate-pulse')
                           }
                         >
                           <ChamberIcon iconKey={corpseIcon} theme="garden" scale={3} />
-                          {corpse.looted ? (
+                          {isFullyLooted ? (
                             <span className="text-ink-faint text-[8px] font-sans">looted</span>
+                          ) : corpse.opened ? (
+                            <span className="text-gold text-[8px] font-sans">search</span>
                           ) : (
                             <span className="text-gold text-[8px] font-sans font-bold">LOOT</span>
-                          )}
-                          {corpse.looted && (
-                            <span className="text-gold text-[9px] font-sans">+{corpse.gold}g</span>
                           )}
                         </button>
                       )
                     })}
                   </div>
                 </div>
-              ) : showCentre ? (
+              ) : lootingCorpseId && currentChamber.corpses ? (function() {
+                var corpse = currentChamber.corpses.find(function(c) { return c.id === lootingCorpseId })
+                if (!corpse) return null
+                var allItemsTaken = corpse.items.length === corpse.itemsTaken.length
+                return (
+                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+                    <p className="text-ink text-sm font-sans">{corpse.name}</p>
+                    <div className="flex flex-col gap-2 w-full">
+                      {/* Gold */}
+                      {corpse.gold > 0 && (
+                        <div className="flex items-center justify-between p-3 rounded-lg border border-gold/30 bg-surface text-sm font-sans">
+                          <span className="text-gold">{corpse.gold} gold</span>
+                          {corpse.goldTaken ? (
+                            <span className="text-ink-faint text-xs">taken</span>
+                          ) : (
+                            <button onClick={function() { handleTakeGold(corpse.id) }}
+                              className="text-xs text-gold border border-gold/40 px-3 py-1 rounded hover:border-gold transition-colors">
+                              Take
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {/* Items */}
+                      {corpse.items.map(function(item, idx) {
+                        var taken = corpse.itemsTaken.indexOf(idx) !== -1
+                        return (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
+                            <div className="flex flex-col">
+                              <span className="text-ink">{item.name}</span>
+                              <span className="text-ink-faint text-[10px]">
+                                {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                                 item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                                 item.description || item.type}
+                              </span>
+                            </div>
+                            {taken ? (
+                              <span className="text-ink-faint text-xs">taken</span>
+                            ) : (
+                              <button onClick={function() { handleTakeItem(corpse.id, idx) }}
+                                className="text-xs text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded hover:border-emerald-400 transition-colors">
+                                Take
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                      {corpse.items.length === 0 && !corpse.gold && (
+                        <p className="text-ink-faint text-xs italic text-center">Nothing here.</p>
+                      )}
+                    </div>
+                    <button onClick={handleCloseLoot}
+                      className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
+                      {corpse.goldTaken || corpse.itemsTaken.length > 0 ? 'Done' : 'Leave it'}
+                    </button>
+                  </div>
+                )
+              })() : showCentre ? (
                 <div className="flex flex-col items-center gap-2">
                   <ChamberIcon iconKey={centreIconKey} theme="garden" scale={4} />
                   <span className="text-ink-faint text-[10px] font-sans uppercase">
@@ -633,7 +1477,7 @@ function Game({ character, user, onEndRun }) {
           <ChamberView
             chamber={chamberNow}
             content={chamberContent}
-            playerState={{ gold: playerGold, currentHp: playerHp, maxHp: character.maxHp }}
+            playerState={{ gold: playerGold, currentHp: playerHp, maxHp: character.maxHp, inventory: playerInventory }}
             onAction={handleChamberAction}
             onContinue={handleChamberContinue}
           />
@@ -790,22 +1634,42 @@ function Game({ character, user, onEndRun }) {
             </div>
           )}
 
-          {isPlayerTurn && !selectedTarget && (
-            <div className="flex flex-col items-center gap-3">
-              <div className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center">
-                <p className="text-gold text-lg font-display">Your Turn</p>
-                <p className="text-ink text-sm">Choose an enemy above to attack</p>
+          {isPlayerTurn && showInventoryPanel && (
+            <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+              <p className="text-ink text-sm font-sans">Choose an item to use:</p>
+              <div className="flex flex-col gap-2 w-full">
+                {playerInventory.map(function(item, idx) {
+                  if (item.type !== 'consumable') return null
+                  return (
+                    <button key={idx}
+                      onClick={function() { handleUseItem(idx) }}
+                      className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans text-ink hover:border-emerald-400 cursor-pointer transition-colors"
+                    >
+                      <div className="flex flex-col items-start">
+                        <span>{item.name}</span>
+                        <span className="text-ink-faint text-xs">{item.description || ''}</span>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
-              <button onClick={handleFlee}
-                className="py-2 px-6 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
-                Flee
+              <button onClick={function() { setShowInventoryPanel(false) }}
+                className="text-ink-dim text-sm hover:text-ink transition-colors">
+                Cancel
               </button>
             </div>
           )}
 
-          {isPlayerTurn && selectedTarget && (function() {
+          {isPlayerTurn && !showInventoryPanel && !selectedTarget && (
+            <div className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center">
+              <p className="text-gold text-lg font-display">Your Turn</p>
+              <p className="text-ink text-sm">Choose an enemy above to attack</p>
+            </div>
+          )}
+
+          {isPlayerTurn && !showInventoryPanel && selectedTarget && (function() {
             var targetEnemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
-            var weaponDie = 8
+            var weaponDie = (character.equipped && character.equipped.weapon) ? (character.equipped.weapon.damageDie || character.equipped.weapon.die || 8) : 8
             return (
               <div className="flex flex-col items-center gap-3">
                 <CombatRoller
@@ -822,15 +1686,25 @@ function Game({ character, user, onEndRun }) {
                   attackerName={character.name}
                   targetName={targetEnemy.name}
                 />
-                {!pendingAttackResult && (
-                  <button onClick={function() { setSelectedTarget(null) }}
-                    className="text-ink-dim text-sm hover:text-ink transition-colors">
-                    Change target
-                  </button>
-                )}
               </div>
             )
           })()}
+
+          {/* Use Item / Flee — always visible on player turn unless mid-roll or inventory open */}
+          {isPlayerTurn && !showInventoryPanel && !pendingAttackResult && (
+            <div className="flex gap-3 mt-1">
+              {playerInventory.some(function(it) { return it.type === 'consumable' }) && (
+                <button onClick={function() { setShowInventoryPanel(true) }}
+                  className="py-2 px-5 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-sm hover:border-emerald-400 transition-colors">
+                  Use Item
+                </button>
+              )}
+              <button onClick={handleFlee}
+                className="py-2 px-5 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
+                Flee
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Party bar */}
@@ -867,10 +1741,13 @@ function Game({ character, user, onEndRun }) {
             </div>
             <div className="flex gap-2 mt-1 text-[10px] font-sans text-ink-faint">
               {character.equipped && character.equipped.weapon && (
-                <span>{character.equipped.weapon.name}</span>
+                <span>{character.equipped.weapon.name} (d{character.equipped.weapon.damageDie || character.equipped.weapon.die})</span>
               )}
               {character.equipped && character.equipped.armour && (
-                <span>{character.equipped.armour.name}</span>
+                <span>{character.equipped.armour.name} (+{character.equipped.armour.defBonus})</span>
+              )}
+              {playerInventory.length > 0 && (
+                <span className="text-emerald-400">{playerInventory.length} items</span>
               )}
             </div>
           </div>

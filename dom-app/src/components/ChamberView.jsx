@@ -30,30 +30,87 @@ function ChamberView({ chamber, content, playerState, onAction, onContinue }) {
 
   // --- Merchant chamber ---
   if (chamber.type === 'merchant') {
+    var showSell = content.showSell
     return (
       <div className="flex flex-col items-center gap-4 p-4 text-center">
         <p className="text-ink text-base italic">{content.description}</p>
-        <div className="flex flex-col gap-2 w-full max-w-xs">
-          {content.items && content.items.map(function(item, i) {
-            var canAfford = (playerState.gold || 0) >= item.cost
+        <p className="text-gold text-xs font-sans">Your gold: {playerState.gold || 0}</p>
+
+        {/* Tab toggle: Buy / Sell */}
+        <div className="flex gap-2">
+          <button onClick={function() { onAction('merchant_tab', 'buy') }}
+            className={'px-4 py-1 rounded text-xs font-sans border transition-colors ' +
+              (!showSell ? 'border-gold text-gold' : 'border-border text-ink-dim hover:text-ink')}>
+            Buy
+          </button>
+          {playerState.inventory && playerState.inventory.length > 0 && (
+            <button onClick={function() { onAction('merchant_tab', 'sell') }}
+              className={'px-4 py-1 rounded text-xs font-sans border transition-colors ' +
+                (showSell ? 'border-gold text-gold' : 'border-border text-ink-dim hover:text-ink')}>
+              Sell
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2 w-full max-w-xs max-h-48 overflow-y-auto">
+          {!showSell && content.items && content.items.map(function(item, i) {
+            var price = item.buyPrice || item.cost || 0
+            var canAfford = (playerState.gold || 0) >= price
             return (
-              <button key={i}
-                onClick={function() { if (canAfford) onAction('buy', item) }}
-                disabled={!canAfford}
-                className={
-                  'flex items-center justify-between p-3 rounded-lg border text-sm font-sans ' +
-                  (canAfford
-                    ? 'bg-surface border-border-hl text-ink hover:border-gold cursor-pointer'
-                    : 'bg-surface border-border text-ink-faint opacity-50')
-                }
+              <div key={'buy-' + i}
+                className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans"
               >
-                <span>{item.name}</span>
-                <span className="text-gold">{item.cost}g</span>
-              </button>
+                <div className="flex flex-col items-start">
+                  <span className="text-ink">{item.name}</span>
+                  <span className="text-ink-faint text-[10px]">
+                    {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                     item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                     item.description || item.type}
+                  </span>
+                </div>
+                <button
+                  onClick={function() { if (canAfford) onAction('buy', item) }}
+                  disabled={!canAfford}
+                  className={
+                    'text-xs px-3 py-1 rounded border transition-colors ' +
+                    (canAfford
+                      ? 'text-gold border-gold/40 hover:border-gold cursor-pointer'
+                      : 'text-ink-faint border-border opacity-50')
+                  }
+                >
+                  {price}g
+                </button>
+              </div>
             )
           })}
+          {showSell && playerState.inventory && playerState.inventory.map(function(item, i) {
+            var sellPrice = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+            return (
+              <div key={'sell-' + i}
+                className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans"
+              >
+                <div className="flex flex-col items-start">
+                  <span className="text-ink">{item.name}</span>
+                  <span className="text-ink-faint text-[10px]">
+                    {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                     item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                     item.description || item.type}
+                  </span>
+                </div>
+                <button
+                  onClick={function() { onAction('sell', { itemIndex: i, sellPrice: sellPrice }) }}
+                  className="text-xs text-gold px-3 py-1 rounded border border-gold/40 hover:border-gold cursor-pointer transition-colors"
+                >
+                  Sell {sellPrice}g
+                </button>
+              </div>
+            )
+          })}
+          {showSell && (!playerState.inventory || playerState.inventory.length === 0) && (
+            <p className="text-ink-faint text-xs italic">Nothing to sell.</p>
+          )}
         </div>
-        <p className="text-ink-dim text-xs font-sans">Your gold: {playerState.gold || 0}</p>
+
         <button onClick={onContinue}
           className="py-2 px-6 rounded-lg bg-surface border border-border text-ink font-sans text-sm">
           Leave
@@ -76,6 +133,9 @@ function ChamberView({ chamber, content, playerState, onAction, onContinue }) {
         ) : (
           <div className="flex flex-col items-center gap-2">
             <p className="text-gold text-lg font-display">+{content.gold} gold</p>
+            {content.item && (
+              <p className="text-emerald-400 text-sm font-sans">Found: <span className="font-semibold">{content.item.name}</span></p>
+            )}
             <button onClick={onContinue}
               className="py-2 px-6 rounded-lg bg-surface border border-border text-ink font-sans text-sm">
               Continue

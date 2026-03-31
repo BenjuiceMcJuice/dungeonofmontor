@@ -23,8 +23,15 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-29 | First production deploy to GitHub Pages | ✅ Done |
 | 2026-03-30 | Design docs v0.4 — Conditions spec, Dungeon Architecture, visual layout | ✅ Done |
 | 2026-03-31 | 4x4 dungeon grid — Montor's Garden zone with maze navigation | ✅ Done |
-|            | Sprint 4 — Items + loot + basic inventory | ⬜ |
-|            | Sprint 5 — Full run loop (boss, run summary) | ⬜ |
+| 2026-03-31 | Dev → main merge + deploy (grid, 4-tier combat, landing v3) | ✅ Done |
+| 2026-03-31 | Architecture review — data model audit, Firebase migration plan | ✅ Done |
+|            | **Architecture — Data-driven engine** | |
+|            | Write complete Firestore schemas for all content collections | ⬜ |
+|            | Seed Firebase with Garden data (floors, zones, enemies, items) | ⬜ |
+|            | Refactor engine to read content from Firestore, not hardcoded JS | ⬜ |
+|            | **Stage 1 — The Crawl (continued)** | |
+| 2026-03-31 | Sprint 4 — Items, loot tables, inventory, consumables in combat | ✅ Done |
+|            | Sprint 5 — Boss encounters + floor transition + run completion | ⬜ |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
 
 ---

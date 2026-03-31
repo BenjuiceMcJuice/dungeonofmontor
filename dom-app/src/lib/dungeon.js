@@ -3,6 +3,7 @@
 // All 16 chambers are always reachable. Doors generated randomly but fully connected.
 
 import { generateCombatEnemies, generateBoss } from './enemies.js'
+import { getMerchantItems, generateChestLoot } from './loot.js'
 
 // --- Chamber template pool for Montor's Garden (Floor 0) ---
 
@@ -181,15 +182,12 @@ function generateChamberContent(chamber, difficulty) {
     content.hpRecovery = 0.25 // 25% of max HP restored
     content.description = 'A crumbling gazebo offers shelter. The air is still.'
   } else if (chamber.type === 'merchant') {
-    content.items = [
-      { name: 'Health Potion', type: 'consumable', effect: 'heal', value: 15, cost: 10 },
-      { name: 'Rage Draught', type: 'consumable', effect: 'rage', value: 3, cost: 15 },
-      { name: 'Smoke Bomb', type: 'consumable', effect: 'flee', value: 1, cost: 8 },
-    ]
+    content.items = getMerchantItems()
     content.description = 'A hooded figure sits cross-legged beside a threadbare mat of wares.'
   } else if (chamber.type === 'loot') {
-    // Simple loot — just gold for now, items in Sprint 4
-    content.gold = 5 + Math.floor(Math.random() * 16) // 5-20 gold
+    var chestLoot = generateChestLoot(10)
+    content.gold = chestLoot.gold
+    content.item = chestLoot.item
     content.description = 'A rotting chest sits half-buried in the soil.'
   } else if (chamber.type === 'trap') {
     content.damage = 3 + Math.floor(Math.random() * 5) // 3-7 damage
@@ -201,8 +199,9 @@ function generateChamberContent(chamber, difficulty) {
   } else if (chamber.type === 'event') {
     content.description = 'The air thickens. You feel watched. The garden itself seems to breathe.'
   } else if (chamber.type === 'hidden') {
-    // Hidden chambers contain better loot
-    content.gold = 10 + Math.floor(Math.random() * 21) // 10-30 gold
+    var hiddenLoot = generateChestLoot(10)
+    content.gold = hiddenLoot.gold + 5 // hidden always gives a bit extra
+    content.item = hiddenLoot.item
     content.description = 'Behind the foliage, a narrow gap reveals a forgotten alcove.'
   } else if (chamber.type === 'stairwell_entry') {
     content.description = 'The entrance to the garden. Overgrown walls rise on all sides. There is no going back.'
