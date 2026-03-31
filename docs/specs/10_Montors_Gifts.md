@@ -228,57 +228,60 @@ In Stage 1, characters are ephemeral (fresh each run). Gifts still activate and 
 
 ---
 
-## 7. Stacking & Fusion
+## 7. Replacing & Upgrading
 
-Applying a Gift to a slot that already has a boon doesn't replace it — it **upgrades** it. Two outcomes depending on whether the elements match:
+### Applying to an empty slot
+You get the base version of the boon.
 
-### Same element → Tier Upgrade
+### Applying to an occupied slot
+The old boon is **replaced** by the new one — but because the slot was already empowered, you get the **stronger version** of the new boon.
 
-Applying the same Gift type to a filled slot makes it stronger:
-
-| Boon | Base (first application) | Upgraded (second application) |
+| Boon | Base (empty slot) | Upgraded (replacing an existing boon) |
 |---|---|---|
-| Thornhide | Reflect 2 damage | Reflect 3 damage + attackers get POISON |
-| Ironhide | Reduce all damage by 2 | Reduce by 3 + immune to DAZE |
-| Venomblood | Immune to POISON, poison heals | Poison heals double + all YOUR attacks apply NAUSEA |
-| Regenerate | Heal 2 HP per chamber | Heal 3 HP + revive once at 1 HP on death |
-| Fireheart | Immune to BURN/FROST, +2 damage | +4 damage + all attacks apply BURN |
-| Phase | 25% dodge | 35% dodge + dodged attacks damage attacker |
+| **Thornhide** | Reflect 2 damage | Reflect 3 + attackers get POISON |
+| **Ironhide** | Reduce damage by 2 | Reduce by 3 + immune to DAZE |
+| **Venomblood** | Immune to POISON, poison heals | Poison heals double + YOUR attacks apply NAUSEA |
+| **Regenerate** | Heal 2 HP per chamber | Heal 3 HP + revive once at 1 HP |
+| **Fireheart** | Immune to BURN/FROST, +2 damage | +4 damage + all attacks apply BURN |
+| **Phase** | 25% dodge | 35% dodge + dodged attacks damage attacker |
+| **Pollen Sense** | See trap rooms before entering | See traps + see hidden rooms |
+| **Earthmind** | Immune to DAZE and FEAR | Immune to all Mind conditions |
+| **Gutterwise** | Merchants 50% off, loot rolls twice | Merchants 75% off, loot rolls three times |
+| **Bloodthirst** | Kills heal 3 HP | Kills heal 5 HP + crits heal 3 HP |
+| **Forgemind** | Crits deal x2.5 | Crits deal x3 + first attack each combat guaranteed Hit |
+| **Void Sight** | See all rooms on map, immune to BLIND | See everything + immune to all visibility effects + enemies visible through fog |
 
-### Different element → Fusion
+The old boon is gone. The choice to replace is permanent. But the reward is a strictly better version of the new boon.
 
-Applying a different Gift type to a filled slot creates a new, more powerful combined boon. Like Hades boon swaps — the fusion is unique and stronger than either parent.
+---
 
-#### Body Fusions
+## 8. Cross-Slot Fusions (Body + Mind)
 
-| Existing | + New | Fusion | Effect |
-|---|---|---|---|
-| Thornhide (Petal) | + Ironhide (Stone) | **Briarwall** | Reflect 2 AND reduce damage by 2 |
-| Thornhide (Petal) | + Venomblood (Bile) | **Toxic Thorns** | Reflect 2 + attackers get POISON |
-| Thornhide (Petal) | + Regenerate (Blood) | **Living Armour** | Reflect 2 + heal 1 per chamber |
-| Ironhide (Stone) | + Venomblood (Bile) | **Corrosive Shell** | Reduce damage by 2 + attackers get POISON |
-| Ironhide (Stone) | + Fireheart (Ember) | **Molten Shield** | Reduce damage by 2 + immune to BURN/FROST + attackers take 2 fire |
-| Regenerate (Blood) | + Phase (Void) | **Undying** | Heal 2/chamber + 20% dodge + revive once at 10% HP |
-| Fireheart (Ember) | + Phase (Void) | **Inferno Ghost** | Immune to BURN/FROST + 25% dodge + dodged attacks BURN attacker |
+When you have BOTH a Body boon AND a Mind boon active simultaneously, a **fusion bonus** activates on top of both. This is free — no sacrifice, no roll. It's the reward for investing in both slots.
 
-#### Mind Fusions
+| Body boon | Mind boon | Fusion bonus |
+|---|---|---|
+| Thornhide | Pollen Sense | Traps also trigger on enemies in the room |
+| Thornhide | Earthmind | Reflected damage ignores DEF |
+| Thornhide | Bloodthirst | Reflected damage counts as a "kill" for healing if it finishes an enemy |
+| Ironhide | Earthmind | Also reflect 1 damage on all hits |
+| Ironhide | Forgemind | Damage reduction applies AFTER crit multiplier (crits still hurt, but less) |
+| Venomblood | Gutterwise | Poisoned enemies drop double gold |
+| Venomblood | Bloodthirst | Poison heals grant +1 STR for that combat |
+| Regenerate | Pollen Sense | Chamber healing doubled in safe rooms |
+| Regenerate | Void Sight | Heal 1 HP per room REVEALED on the map (not just entered) |
+| Fireheart | Forgemind | Crits apply BURN + BURN damage is doubled |
+| Fireheart | Bloodthirst | Fire kills heal double |
+| Phase | Void Sight | Dodged attacks damage the attacker for 3 HP |
+| Phase | Earthmind | Dodging an attack also dodges any condition it would apply |
 
-| Existing | + New | Fusion | Effect |
-|---|---|---|---|
-| Pollen Sense (Petal) | + Earthmind (Stone) | **True Sight** | See traps + immune to DAZE/FEAR + +1 all rolls |
-| Pollen Sense (Petal) | + Gutterwise (Bile) | **Scavenger's Eye** | See traps + merchants 50% off + loot rolls twice |
-| Earthmind (Stone) | + Bloodthirst (Blood) | **Stone Berserker** | Immune to FEAR/DAZE + kills heal 5 HP |
-| Bloodthirst (Blood) | + Forgemind (Ember) | **Blood Forge** | Kills heal 3 HP + crits deal x3 |
-| Forgemind (Ember) | + Void Sight (Void) | **Omniscient Destroyer** | Crits x2.5 + see all rooms + immune to BLIND |
-| Gutterwise (Bile) | + Void Sight (Void) | **Omniscience** | See everything + merchants free + loot rolls three times |
+Not every combination has a unique fusion. Unlisted pairs still benefit from having both boons — they just don't get an extra bonus.
 
-> Not every combination needs a unique fusion — some can default to "keep the stronger one + minor bonus from the other." Full fusion table to be completed during implementation.
-
-### Stacking rules
-- **Fusions are permanent** — same persistence rules as base boons
-- **Fusions can't fuse further** — ceiling at one fusion per slot
-- **Tier upgrades stack once** — can't triple-stack the same element
-- A fused boon CAN be tier-upgraded if you apply the same element as one of its parents
+### Fusion rules
+- **Automatic** — activates as soon as both slots are filled, no action needed
+- **Updates when a boon changes** — replace Body boon, fusion recalculates with new pairing
+- **Persists across runs** alongside the boons themselves (Stage 2+)
+- **Upgraded boons fuse the same way** — the fusion table doesn't distinguish base vs upgraded
 
 ---
 
