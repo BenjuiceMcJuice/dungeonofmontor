@@ -1,0 +1,339 @@
+// Conditions engine — apply, tick, remove, check
+// Conditions are temporary effects on players and enemies during combat
+// One per slot (body/mind) — new condition in same slot replaces old
+// See docs/specs/09_Firestore_Data_Model.md §14a for full schema
+
+import { roll } from './dice.js'
+import { getModifier } from './classes.js'
+
+// ============================================================
+// CONDITION CATALOGUE
+// ============================================================
+
+var CONDITIONS = {
+  // --- BODY ---
+  BLEED: {
+    id: 'BLEED', slot: 'body', name: 'Bleeding',
+    turns: 3, damagePerTurn: 2,
+    description: 'Losing blood. 2 damage per turn.',
+  },
+  POISON: {
+    id: 'POISON', slot: 'body', name: 'Poisoned',
+    turns: 2, damagePerTurn: 3,
+    statModifier: { stat: 'str', value: -1 },
+    description: 'Weakened. 3 damage per turn, -1 STR.',
+  },
+  BURN: {
+    id: 'BURN', slot: 'body', name: 'Burning',
+    turns: 1, damagePerTurn: 4,
+    description: 'On fire. 4 damage next turn.',
+  },
+  FROST: {
+    id: 'FROST', slot: 'body', name: 'Frozen',
+    turns: 2,
+    statModifier: { stat: 'agi', value: -3 },
+    description: 'Sluggish. -3 AGI for 2 turns.',
+  },
+  NAUSEA: {
+    id: 'NAUSEA', slot: 'body', name: 'Nauseous',
+    turns: 2, skipChance: 0.3,
+    description: 'Retching. 30% chance to skip action.',
+  },
+  SLUGGISH: {
+    id: 'SLUGGISH', slot: 'body', name: 'Sluggish',
+    turns: 2,
+    statModifier: { stat: 'agi', value: -5 },
+    skipFleeChance: 0.5,
+    description: 'Heavy. -5 AGI, 50% chance can\'t flee.',
+  },
+
+  // --- MIND ---
+  FEAR: {
+    id: 'FEAR', slot: 'mind', name: 'Afraid',
+    turns: 2,
+    allRollsMod: -2,
+    fleeIfLowHp: true, // flee if HP < 50%
+    description: 'Terrified. -2 all rolls. Flee if HP low.',
+  },
+  FRENZY: {
+    id: 'FRENZY', slot: 'mind', name: 'Frenzied',
+    turns: 3,
+    statModifier: { stat: 'str', value: 3 },
+    defPenalty: -2,
+    attacksRandom: true,
+    description: '+3 STR, -2 DEF. Attacks random target.',
+  },
+  CHARM: {
+    id: 'CHARM', slot: 'mind', name: 'Charmed',
+    turns: 2, skipChance: 0.5,
+    description: 'Enthralled. 50% chance to skip action.',
+  },
+  DAZE: {
+    id: 'DAZE', slot: 'mind', name: 'Dazed',
+    turns: 1, forceTier: 3,
+    description: 'Stunned. Next attack is a glancing blow.',
+  },
+  BORED: {
+    id: 'BORED', slot: 'mind', name: 'Bored',
+    turns: 2, allRollsMod: -2,
+    description: '-2 to all rolls. Montor is unimpressed.',
+  },
+  SAD: {
+    id: 'SAD', slot: 'mind', name: 'Sad',
+    turns: 2, blockItems: true,
+    description: 'Can\'t use items. What\'s the point?',
+  },
+  BLIND: {
+    id: 'BLIND', slot: 'mind', name: 'Blind',
+    turns: 2, missChance: 0.5,
+    description: '50% miss chance.',
+  },
+  BLOODLUST: {
+    id: 'BLOODLUST', slot: 'mind', name: 'Bloodlust',
+    turns: null, // lasts entire combat
+    healPerKill: 3,
+    damagePerNoKill: 3,
+    canFlee: false,
+    description: 'Kill to heal 3. No kill = lose 3. Can\'t flee.',
+  },
+}
+
+// ============================================================
+// APPLY / REMOVE
+// ============================================================
+
+// Apply a condition to a combatant's statusEffects array
+// One per slot — replaces existing condition in same slot
+function applyCondition(statusEffects, conditionId, source) {
+  var def = CONDITIONS[conditionId]
+  if (!def) return statusEffects
+
+  var condition = {
+    id: def.id,
+    slot: def.slot,
+    name: def.name,
+    source: source || 'unknown',
+    turnsRemaining: def.turns,
+    // Copy all mechanical fields
+    damagePerTurn: def.damagePerTurn || 0,
+    statModifier: def.statModifier ? Object.assign({}, def.statModifier) : null,
+    skipChance: def.skipChance || 0,
+    skipFleeChance: def.skipFleeChance || 0,
+    forceTier: def.forceTier || null,
+    missChance: def.missChance || 0,
+    allRollsMod: def.allRollsMod || 0,
+    attacksRandom: def.attacksRandom || false,
+    fleeIfLowHp: def.fleeIfLowHp || false,
+    blockItems: def.blockItems || false,
+    canFlee: def.canFlee !== undefined ? def.canFlee : true,
+    healPerKill: def.healPerKill || 0,
+    damagePerNoKill: def.damagePerNoKill || 0,
+    defPenalty: def.defPenalty || 0,
+  }
+
+  // Remove existing condition in same slot, add new one
+  var filtered = statusEffects.filter(function(c) { return c.slot !== def.slot })
+  return filtered.concat([condition])
+}
+
+// Remove a condition by ID
+function removeCondition(statusEffects, conditionId) {
+  return statusEffects.filter(function(c) { return c.id !== conditionId })
+}
+
+// Remove all conditions in a slot
+function clearSlot(statusEffects, slot) {
+  return statusEffects.filter(function(c) { return c.slot !== slot })
+}
+
+// Check if entity has a specific condition
+function hasCondition(statusEffects, conditionId) {
+  return statusEffects.some(function(c) { return c.id === conditionId })
+}
+
+// Get condition in a slot (or null)
+function getConditionInSlot(statusEffects, slot) {
+  return statusEffects.find(function(c) { return c.slot === slot }) || null
+}
+
+// ============================================================
+// TICK — called at start of each combatant's turn
+// ============================================================
+
+// Returns { newEffects, damage, skipped, narrative }
+function tickConditions(statusEffects, currentHp, maxHp) {
+  var damage = 0
+  var skipped = false
+  var narratives = []
+  var newEffects = []
+
+  for (var i = 0; i < statusEffects.length; i++) {
+    var c = Object.assign({}, statusEffects[i])
+
+    // Damage per turn
+    if (c.damagePerTurn > 0) {
+      damage += c.damagePerTurn
+      narratives.push(c.name + ': ' + c.damagePerTurn + ' damage.')
+    }
+
+    // Skip chance
+    if (c.skipChance > 0 && !skipped) {
+      if (Math.random() < c.skipChance) {
+        skipped = true
+        narratives.push(c.name + ': turn skipped!')
+      }
+    }
+
+    // FEAR: flee if HP < 50% (for enemies — players get -2 rolls instead)
+    if (c.fleeIfLowHp && currentHp < maxHp * 0.5) {
+      narratives.push(c.name + ': paralysed with fear.')
+      skipped = true
+    }
+
+    // Tick down duration
+    if (c.turnsRemaining !== null) {
+      c.turnsRemaining--
+      if (c.turnsRemaining <= 0) {
+        narratives.push(c.name + ' wears off.')
+        continue // don't add to newEffects — it's expired
+      }
+    }
+
+    newEffects.push(c)
+  }
+
+  return {
+    newEffects: newEffects,
+    damage: damage,
+    skipped: skipped,
+    narrative: narratives.join(' '),
+  }
+}
+
+// ============================================================
+// COMBAT MODIFIERS — read active conditions for roll adjustments
+// ============================================================
+
+// Get total modifier to all rolls from conditions
+function getAllRollsMod(statusEffects) {
+  var mod = 0
+  for (var i = 0; i < statusEffects.length; i++) {
+    if (statusEffects[i].allRollsMod) mod += statusEffects[i].allRollsMod
+  }
+  return mod
+}
+
+// Get total stat modifier from conditions for a specific stat
+function getConditionStatMod(statusEffects, stat) {
+  var mod = 0
+  for (var i = 0; i < statusEffects.length; i++) {
+    var c = statusEffects[i]
+    if (c.statModifier && c.statModifier.stat === stat) mod += c.statModifier.value
+    if (stat === 'def' && c.defPenalty) mod += c.defPenalty
+  }
+  return mod
+}
+
+// Check if next attack is forced to a specific tier
+function getForcedTier(statusEffects) {
+  for (var i = 0; i < statusEffects.length; i++) {
+    if (statusEffects[i].forceTier) return statusEffects[i].forceTier
+  }
+  return null
+}
+
+// Get extra miss chance from conditions
+function getMissChance(statusEffects) {
+  var chance = 0
+  for (var i = 0; i < statusEffects.length; i++) {
+    if (statusEffects[i].missChance) chance = Math.max(chance, statusEffects[i].missChance)
+  }
+  return chance
+}
+
+// Check if items are blocked
+function areItemsBlocked(statusEffects) {
+  return statusEffects.some(function(c) { return c.blockItems })
+}
+
+// Check if flee is blocked
+function isFleeBlocked(statusEffects) {
+  return statusEffects.some(function(c) { return c.canFlee === false })
+}
+
+// Check if attacks must target randomly
+function mustAttackRandom(statusEffects) {
+  return statusEffects.some(function(c) { return c.attacksRandom })
+}
+
+// BLOODLUST: heal on kill, damage on no-kill
+function getBloodlustEffect(statusEffects) {
+  var c = statusEffects.find(function(c) { return c.id === 'BLOODLUST' })
+  if (!c) return null
+  return { healPerKill: c.healPerKill, damagePerNoKill: c.damagePerNoKill }
+}
+
+// ============================================================
+// CONDITION APPLICATION — chance to apply on attack
+// ============================================================
+
+// Roll to see if a condition applies on hit
+// Base chance from attack tier, modified by INT
+function rollConditionApplication(attackTier, intStat, conditionChance) {
+  var basePct = 0
+  if (attackTier === 1) basePct = 0.80      // crit
+  else if (attackTier === 2) basePct = 0.40  // hit
+  else if (attackTier === 3) basePct = 0.05  // glancing
+  else return false                          // miss
+
+  // INT modifier adds to the percentage
+  var intMod = intStat ? getModifier(intStat) : 0
+  var finalPct = basePct + (intMod * 0.05)   // each +1 INT mod = +5% chance
+
+  // Additional condition-specific chance modifier
+  if (conditionChance) finalPct *= conditionChance
+
+  return Math.random() < Math.min(finalPct, 0.95) // cap at 95%
+}
+
+// ============================================================
+// ENEMY INNATE CONDITIONS
+// ============================================================
+
+// Which conditions each enemy archetype can apply
+var ENEMY_CONDITIONS = {
+  rat:    { conditionId: 'BLEED',  chance: 1.0 },   // rats cause bleeding
+  slug:   { conditionId: 'NAUSEA', chance: 1.0 },   // slugs cause nausea
+  orc:    { conditionId: 'FEAR',   chance: 0.5 },    // orcs can intimidate (50% base)
+  rock:   { conditionId: 'DAZE',   chance: 1.0 },    // rocks stun you
+  wraith: { conditionId: 'BLIND',  chance: 0.7 },    // wraiths blind you
+}
+
+function getEnemyCondition(archetypeKey) {
+  return ENEMY_CONDITIONS[archetypeKey] || null
+}
+
+// ============================================================
+// EXPORTS
+// ============================================================
+
+export {
+  CONDITIONS,
+  ENEMY_CONDITIONS,
+  applyCondition,
+  removeCondition,
+  clearSlot,
+  hasCondition,
+  getConditionInSlot,
+  tickConditions,
+  getAllRollsMod,
+  getConditionStatMod,
+  getForcedTier,
+  getMissChance,
+  areItemsBlocked,
+  isFleeBlocked,
+  mustAttackRandom,
+  getBloodlustEffect,
+  rollConditionApplication,
+  getEnemyCondition,
+}

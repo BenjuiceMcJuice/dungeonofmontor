@@ -5,7 +5,8 @@ import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentC
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, applyConsumable } from '../lib/loot.js'
-import { createBattleState, getCurrentTurnId, getActor, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
+import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
+import { isFleeBlocked, areItemsBlocked } from '../lib/conditions.js'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
 import CombatRoller from '../components/CombatRoller.jsx'
@@ -491,7 +492,39 @@ function Game({ character, user, onEndRun }) {
   useEffect(function() {
     if (combatPhase !== 'enemyWindup' || !battle || gamePhase !== 'combat') return
     var currentId = getCurrentTurnId(battle)
-    var attackOut = resolveEnemyAttack(battle, currentId)
+
+    // Tick conditions on enemy's turn start
+    var tickResult = tickTurnStart(battle, currentId)
+    var tickedBattle = tickResult.newBattle
+    if (tickResult.damage > 0) {
+      addLog({ type: 'condition', text: tickResult.narrative, tier: 'glancing' })
+    }
+    if (tickResult.died) {
+      setBattle(tickedBattle)
+      var endCheck = checkBattleEnd(tickedBattle)
+      if (endCheck === 'victory') {
+        var xpGained = calculateXp(tickedBattle)
+        setTotalXp(totalXp + xpGained)
+        setCombatPhase('victory')
+        return
+      }
+      // Enemy died from conditions — skip their turn
+      var nextB = advanceTurn(tickedBattle)
+      setBattle(nextB)
+      var nextA = getActor(nextB, getCurrentTurnId(nextB))
+      setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      return
+    }
+    if (tickResult.skipped) {
+      addLog({ type: 'condition', text: tickResult.narrative, tier: 'miss' })
+      var nextB2 = advanceTurn(tickedBattle)
+      setBattle(nextB2)
+      var nextA2 = getActor(nextB2, getCurrentTurnId(nextB2))
+      setCombatPhase(nextA2 && nextA2.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      return
+    }
+
+    var attackOut = resolveEnemyAttack(tickedBattle, currentId)
     if (attackOut) {
       setEnemyAttackInfo({ attackOut: attackOut })
       setEnemyRollerKey(function(k) { return k + 1 })
@@ -511,6 +544,11 @@ function Game({ character, user, onEndRun }) {
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'enemy')
     addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
+
+    // Log condition applied
+    if (r.conditionApplied) {
+      addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
+    }
 
     var updatedBattle = attackOut.newBattle
     var pState = updatedBattle.players[user.uid]
@@ -544,6 +582,45 @@ function Game({ character, user, onEndRun }) {
   }
 
   // === PLAYER TURN ===
+  // Tick player conditions at turn start
+  var [playerConditionTicked, setPlayerConditionTicked] = useState(false)
+  useEffect(function() {
+    if (combatPhase !== 'playerTurn' || !battle || playerConditionTicked) return
+    var playerUid = user.uid
+    var player = battle.players[playerUid]
+    if (!player || !player.statusEffects || player.statusEffects.length === 0) {
+      setPlayerConditionTicked(true)
+      return
+    }
+
+    var tickResult = tickTurnStart(battle, playerUid)
+    if (tickResult.damage > 0 || tickResult.narrative) {
+      addLog({ type: 'condition', text: tickResult.narrative, tier: 'glancing' })
+    }
+    setBattle(tickResult.newBattle)
+    setPlayerHp(tickResult.newBattle.players[playerUid].currentHp)
+
+    if (tickResult.died) {
+      setPlayerHp(0)
+      setGamePhase('defeat')
+      return
+    }
+    if (tickResult.skipped) {
+      var nextB = advanceTurn(tickResult.newBattle)
+      setBattle(nextB)
+      var nextA = getActor(nextB, getCurrentTurnId(nextB))
+      setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      setPlayerConditionTicked(false)
+      return
+    }
+    setPlayerConditionTicked(true)
+  }, [combatPhase, battle, playerConditionTicked])
+
+  // Reset condition tick flag when combat phase changes away from playerTurn
+  useEffect(function() {
+    if (combatPhase !== 'playerTurn') setPlayerConditionTicked(false)
+  }, [combatPhase])
+
   // Auto-select target: if only one living enemy, select it automatically
   // Also validate existing selection — if selected target died, pick a live one
   useEffect(function() {
@@ -600,6 +677,9 @@ function Game({ character, user, onEndRun }) {
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'player')
     addLog({ type: 'player', text: logEntry.text, tier: logEntry.tier })
+    if (r.conditionApplied) {
+      addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
+    }
     setPendingAttackResult(null)
 
     // Track combat stats
@@ -1818,6 +1898,13 @@ function Game({ character, user, onEndRun }) {
                   <span>DEF {enemy.stats.def}</span>
                   <span>AGI {enemy.stats.agi}</span>
                 </div>
+                {enemy.statusEffects && enemy.statusEffects.length > 0 && (
+                  <div className="flex gap-1 flex-wrap mt-0.5">
+                    {enemy.statusEffects.map(function(c, ci) {
+                      return <span key={ci} className="text-[8px] font-sans px-1 rounded bg-red-500/20 text-red-300">{c.name} ({c.turnsRemaining || '~'})</span>
+                    })}
+                  </div>
+                )}
               </button>
             )
           })}
@@ -1922,20 +2009,32 @@ function Game({ character, user, onEndRun }) {
           })()}
 
           {/* Use Item / Flee — always visible on player turn unless mid-roll or inventory open */}
-          {isPlayerTurn && !showInventoryPanel && !pendingAttackResult && (
-            <div className="flex gap-3 mt-1">
-              {playerInventory.some(function(it) { return it.type === 'consumable' }) && (
-                <button onClick={function() { setShowInventoryPanel(true) }}
-                  className="py-2 px-5 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-sm hover:border-emerald-400 transition-colors">
-                  Use Item
-                </button>
-              )}
-              <button onClick={handleFlee}
-                className="py-2 px-5 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
-                Flee
-              </button>
-            </div>
-          )}
+          {isPlayerTurn && !showInventoryPanel && !pendingAttackResult && (function() {
+            var playerEffects = (battle && battle.players[user.uid]) ? battle.players[user.uid].statusEffects : []
+            var fleeBlocked = isFleeBlocked(playerEffects)
+            var itemsBlocked = areItemsBlocked(playerEffects)
+            return (
+              <div className="flex gap-3 mt-1">
+                {playerInventory.some(function(it) { return it.type === 'consumable' }) && !itemsBlocked && (
+                  <button onClick={function() { setShowInventoryPanel(true) }}
+                    className="py-2 px-5 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-sm hover:border-emerald-400 transition-colors">
+                    Use Item
+                  </button>
+                )}
+                {itemsBlocked && (
+                  <span className="py-2 px-5 text-ink-faint font-sans text-sm italic">Items blocked</span>
+                )}
+                {!fleeBlocked ? (
+                  <button onClick={handleFlee}
+                    className="py-2 px-5 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
+                    Flee
+                  </button>
+                ) : (
+                  <span className="py-2 px-5 text-red-400 font-sans text-sm italic">Can't flee</span>
+                )}
+              </div>
+            )
+          })()}
         </div>
 
         {/* Party bar */}
@@ -1961,6 +2060,13 @@ function Game({ character, user, onEndRun }) {
                 <span className="text-[10px] font-sans text-ink-dim">
                   STR {character.stats.str} DEF {character.stats.def} AGI {character.stats.agi}
                 </span>
+                {battle && battle.players[user.uid] && battle.players[user.uid].statusEffects.length > 0 && (
+                  <div className="flex gap-1">
+                    {battle.players[user.uid].statusEffects.map(function(c, ci) {
+                      return <span key={ci} className="text-[8px] font-sans px-1 rounded bg-amber-500/20 text-amber-300">{c.name} ({c.turnsRemaining || '~'})</span>
+                    })}
+                  </div>
+                )}
               </div>
               <span className="text-ink text-xs font-sans shrink-0">{playerHp}/{character.maxHp}</span>
             </div>

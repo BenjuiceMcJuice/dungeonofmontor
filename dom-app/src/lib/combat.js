@@ -3,6 +3,7 @@
 // Uses 4-tier attack resolution: Crit / Hit / Glancing Blow / Miss
 import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
+import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, getMissChance } from './conditions.js'
 
 // Deep-clone battle state for immutable updates
 function cloneBattle(bs) {
@@ -15,7 +16,7 @@ function cloneBattle(bs) {
       return acc
     }, {}),
     enemies: bs.enemies.map(function(e) {
-      return Object.assign({}, e, { stats: Object.assign({}, e.stats) })
+      return Object.assign({}, e, { stats: Object.assign({}, e.stats), statusEffects: e.statusEffects ? e.statusEffects.slice() : [] })
     }),
     turnOrder: bs.turnOrder.slice(),
     turnOrderDetails: bs.turnOrderDetails.slice(),
@@ -58,6 +59,7 @@ function createBattleState(players, enemies) {
     var agiMod = getModifier(e.stats.agi)
     var initRoll = rollWithMod(20, agiMod)
     e.initiativeRoll = initRoll.total
+    if (!e.statusEffects) e.statusEffects = []
     turnOrder.push({ id: e.id, type: 'enemy', initiative: initRoll.total, agi: e.stats.agi })
     return e
   })
@@ -120,6 +122,36 @@ function calculateTierDamage(weaponRoll, strMod, tier, defStat, critMultiplier) 
   }
 }
 
+// Tick conditions at start of a combatant's turn
+// Returns { newBattle, damage, skipped, narrative, died }
+function tickTurnStart(battleState, actorId) {
+  var bs = cloneBattle(battleState)
+  var actor = getActor(bs, actorId)
+  if (!actor || actor.data.isDown) return { newBattle: bs, damage: 0, skipped: false, narrative: '', died: false }
+
+  var entity = actor.data
+  var effects = entity.statusEffects || []
+  if (effects.length === 0) return { newBattle: bs, damage: 0, skipped: false, narrative: '', died: false }
+
+  var result = tickConditions(effects, entity.currentHp, entity.maxHp)
+  entity.statusEffects = result.newEffects
+  entity.currentHp = Math.max(0, entity.currentHp - result.damage)
+
+  var died = false
+  if (entity.currentHp <= 0) {
+    entity.isDown = true
+    died = true
+  }
+
+  return {
+    newBattle: bs,
+    damage: result.damage,
+    skipped: result.skipped,
+    narrative: result.narrative,
+    died: died,
+  }
+}
+
 // Resolve player attack — 4-tier system
 function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult) {
   var bs = cloneBattle(battleState)
@@ -127,11 +159,29 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   var enemy = bs.enemies.find(function(e) { return e.id === targetEnemyId })
   if (!player || !enemy || player.isDown || enemy.isDown) return null
 
-  var strMod = getModifier(player.combatStats.str)
+  var condStatMod = getConditionStatMod(player.statusEffects, 'str')
+  var strMod = getModifier(player.combatStats.str) + condStatMod
+  var rollsMod = getAllRollsMod(player.statusEffects)
+
+  // Check for forced tier (DAZE)
+  var forcedTier = getForcedTier(player.statusEffects)
+
+  // Check for extra miss chance (BLIND)
+  var missChance = getMissChance(player.statusEffects)
 
   // If no pre-rolled result provided, roll now
   if (!attackResult) {
-    attackResult = d20Attack(strMod, 20)
+    attackResult = d20Attack(strMod + rollsMod, 20)
+  }
+
+  // Apply forced tier
+  if (forcedTier && attackResult.tier < forcedTier) {
+    attackResult = Object.assign({}, attackResult, { tier: forcedTier, tierName: forcedTier === 3 ? 'glancing' : attackResult.tierName })
+  }
+
+  // Apply miss chance
+  if (missChance > 0 && attackResult.tier <= 3 && Math.random() < missChance) {
+    attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
   }
 
   var result = {
@@ -142,6 +192,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     attackRoll: attackResult,
     damage: 0,
     enemyDefeated: false,
+    conditionApplied: null,
   }
 
   // Calculate damage based on tier
@@ -152,11 +203,22 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     }
 
     var dmgResult = rollDamage(weaponDie, strMod)
-    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, enemy.stats.def, 2.0)
+    var defWithConditions = enemy.stats.def + getConditionStatMod(enemy.statusEffects || [], 'def')
+    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, Math.max(0, defWithConditions), 2.0)
 
     enemy.currentHp = Math.max(0, enemy.currentHp - breakdown.final)
     result.damage = breakdown.final
     result.damageBreakdown = breakdown
+
+    // Try to apply weapon condition on hit
+    var weapon = player.equipped && player.equipped.weapon
+    if (weapon && weapon.conditionOnHit) {
+      var intStat = player.combatStats.int || 10
+      if (rollConditionApplication(attackResult.tier, intStat, weapon.conditionChance || 1.0)) {
+        enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon')
+        result.conditionApplied = weapon.conditionOnHit
+      }
+    }
 
     if (enemy.currentHp <= 0) {
       enemy.isDown = true
@@ -178,8 +240,20 @@ function resolveEnemyAttack(battleState, enemyId) {
 
   var target = livingPlayers[Math.floor(Math.random() * livingPlayers.length)]
 
-  var strMod = getModifier(enemy.stats.str)
-  var attackResult = d20Attack(strMod, 20)
+  var condStatMod = getConditionStatMod(enemy.statusEffects || [], 'str')
+  var strMod = getModifier(enemy.stats.str) + condStatMod
+  var rollsMod = getAllRollsMod(enemy.statusEffects || [])
+  var forcedTier = getForcedTier(enemy.statusEffects || [])
+  var missChance = getMissChance(enemy.statusEffects || [])
+
+  var attackResult = d20Attack(strMod + rollsMod, 20)
+
+  if (forcedTier && attackResult.tier < forcedTier) {
+    attackResult = Object.assign({}, attackResult, { tier: forcedTier, tierName: forcedTier === 3 ? 'glancing' : attackResult.tierName })
+  }
+  if (missChance > 0 && attackResult.tier <= 3 && Math.random() < missChance) {
+    attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
+  }
 
   var result = {
     attacker: enemy.name,
@@ -189,15 +263,27 @@ function resolveEnemyAttack(battleState, enemyId) {
     attackRoll: attackResult,
     damage: 0,
     playerDowned: false,
+    conditionApplied: null,
   }
 
   if (attackResult.tier <= 3) {
     var dmgResult = rollDamage(enemy.weaponDie, strMod)
-    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, target.combatStats.def, 2.0)
+    var defWithConditions = target.combatStats.def + getConditionStatMod(target.statusEffects, 'def')
+    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, Math.max(0, defWithConditions), 2.0)
 
     target.currentHp = Math.max(0, target.currentHp - breakdown.final)
     result.damage = breakdown.final
     result.damageBreakdown = breakdown
+
+    // Enemy innate condition application
+    var enemyCond = getEnemyCondition(enemy.archetypeKey)
+    if (enemyCond) {
+      var enemyInt = enemy.stats.int || 10
+      if (rollConditionApplication(attackResult.tier, enemyInt, enemyCond.chance)) {
+        target.statusEffects = applyCondition(target.statusEffects, enemyCond.conditionId, 'enemy')
+        result.conditionApplied = enemyCond.conditionId
+      }
+    }
 
     if (target.currentHp <= 0) {
       target.isDown = true
@@ -244,4 +330,4 @@ function calculateXp(battleState) {
   return xp
 }
 
-export { createBattleState, getCurrentTurnId, getActor, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp }
+export { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp }
