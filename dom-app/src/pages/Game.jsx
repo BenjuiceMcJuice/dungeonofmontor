@@ -99,6 +99,61 @@ function Game({ character, user, onEndRun }) {
   var [activeBuffs, setActiveBuffs] = useState([])
   var [hasZoneKey, setHasZoneKey] = useState(false)
   var [floorsCompleted, setFloorsCompleted] = useState([])
+  var [runLevel, setRunLevel] = useState(0)
+  var [pendingLevelUp, setPendingLevelUp] = useState(null) // { hpGain, statPick } or null
+
+  // XP thresholds for in-run levelling
+  var XP_THRESHOLDS = [
+    { xp: 50,  hpGain: 5, statPick: false },
+    { xp: 120, hpGain: 0, statPick: true },
+    { xp: 250, hpGain: 5, statPick: true },
+    { xp: 400, hpGain: 0, statPick: true },
+  ]
+
+  function checkLevelUp(newXp) {
+    if (runLevel >= XP_THRESHOLDS.length) return false
+    var threshold = XP_THRESHOLDS[runLevel]
+    if (newXp >= threshold.xp) {
+      // Apply HP gain immediately
+      if (threshold.hpGain > 0) {
+        character.maxHp += threshold.hpGain
+        setPlayerHp(function(hp) { return Math.min(hp + threshold.hpGain, character.maxHp) })
+      }
+      if (threshold.statPick) {
+        setPendingLevelUp({ hpGain: threshold.hpGain, statPick: true, level: runLevel + 1 })
+      } else {
+        setPendingLevelUp({ hpGain: threshold.hpGain, statPick: false, level: runLevel + 1 })
+      }
+      setRunLevel(runLevel + 1)
+      return true
+    }
+    return false
+  }
+
+  function handleStatPick(stat) {
+    character.stats[stat] = (character.stats[stat] || 10) + 1
+    // Also update battle state if in combat
+    if (battle && battle.players[user.uid]) {
+      var bs = Object.assign({}, battle)
+      var newPlayers = {}
+      Object.keys(bs.players).forEach(function(uid) {
+        newPlayers[uid] = Object.assign({}, bs.players[uid], {
+          combatStats: Object.assign({}, bs.players[uid].combatStats),
+          statusEffects: bs.players[uid].statusEffects.slice(),
+        })
+        if (uid === user.uid) {
+          newPlayers[uid].combatStats[stat] = (newPlayers[uid].combatStats[stat] || 10) + 1
+        }
+      })
+      bs.players = newPlayers
+      setBattle(bs)
+    }
+    setPendingLevelUp(null)
+  }
+
+  function handleLevelUpDismiss() {
+    setPendingLevelUp(null)
+  }
 
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
 
@@ -504,7 +559,9 @@ function Game({ character, user, onEndRun }) {
       var endCheck = checkBattleEnd(tickedBattle)
       if (endCheck === 'victory') {
         var xpGained = calculateXp(tickedBattle)
-        setTotalXp(totalXp + xpGained)
+        var newXp = totalXp + xpGained
+        setTotalXp(newXp)
+        checkLevelUp(newXp)
         setCombatPhase('victory')
         return
       }
@@ -691,7 +748,9 @@ function Game({ character, user, onEndRun }) {
     var endResult = checkBattleEnd(updatedBattle)
     if (endResult === 'victory') {
       var xpGained = calculateXp(updatedBattle)
-      setTotalXp(totalXp + xpGained)
+      var newXp = totalXp + xpGained
+      setTotalXp(newXp)
+      checkLevelUp(newXp)
       setBattle(updatedBattle)
       setCombatPhase('victory')
       var newZone = Object.assign({}, zone, {
@@ -1848,13 +1907,47 @@ function Game({ character, user, onEndRun }) {
           <h1 className="font-display text-4xl text-gold">Victory</h1>
           <p className="text-ink text-base italic">The chamber falls silent.</p>
           <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
-            <p className="text-ink text-sm">XP earned: <span className="text-gold font-display text-xl">{totalXp}</span></p>
-            <p className="text-ink-dim text-sm mt-1">HP remaining: {playerHp}/{character.maxHp}</p>
+            <p className="text-ink text-sm">XP: <span className="text-gold font-display text-xl">{totalXp}</span></p>
+            <p className="text-ink-dim text-sm mt-1">HP: {playerHp}/{character.maxHp}</p>
           </div>
-          <button onClick={handleCombatVictoryToDoors}
-            className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
-            Continue
-          </button>
+
+          {/* Level up! */}
+          {pendingLevelUp && (
+            <div className="bg-surface border-2 border-gold rounded-lg p-5 w-full max-w-xs">
+              <p className="text-gold font-display text-xl mb-2">Level Up!</p>
+              {pendingLevelUp.hpGain > 0 && (
+                <p className="text-green-400 text-sm mb-2">+{pendingLevelUp.hpGain} max HP</p>
+              )}
+              {pendingLevelUp.statPick ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-ink text-sm mb-1">Choose a stat to increase:</p>
+                  {['str', 'def', 'agi', 'wis', 'int'].map(function(stat) {
+                    return (
+                      <button key={stat}
+                        onClick={function() { handleStatPick(stat) }}
+                        className="flex items-center justify-between p-2 rounded border border-border-hl bg-raised text-sm font-sans hover:border-gold transition-colors cursor-pointer"
+                      >
+                        <span className="text-ink uppercase font-semibold">{stat}</span>
+                        <span className="text-ink-dim">{character.stats[stat]} → <span className="text-gold">{character.stats[stat] + 1}</span></span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <button onClick={handleLevelUpDismiss}
+                  className="py-2 px-6 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-sm">
+                  Continue
+                </button>
+              )}
+            </div>
+          )}
+
+          {!pendingLevelUp && (
+            <button onClick={handleCombatVictoryToDoors}
+              className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
+              Continue
+            </button>
+          )}
         </div>
       )
     }
