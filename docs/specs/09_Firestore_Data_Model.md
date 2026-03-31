@@ -856,15 +856,174 @@ Active run state. One doc per active run. Deleted or archived on run end.
     itemsLeftBehind: number,        // items available but not taken
   },
 
-  // Active conditions (Body/Mind/Soul slots)
-  activeConditions: [
-    {
-      slot: string,                 // "body" | "mind" | "soul"
-      conditionId: string,
-      source: string,               // "combat" | "montor_offer" | "montor_curse" | "trap" | "zone_effect"
-      turnsRemaining: number | null, // null = until cured/run end
-    }
-  ],
+  // Active conditions (Body/Mind slots — one per slot max)
+  activeConditions: {
+    body: Condition | null,
+    mind: Condition | null,
+    soul: Condition | null,         // Soul conditions persist across runs (Stage 2+)
+  },
+
+  // Active boons from Montor's Gifts (one per slot, persist across runs in Stage 2+)
+  activeBoons: {
+    body: Boon | null,
+    mind: Boon | null,
+    weapon: Boon | null,
+    item: Boon | null,
+  },
+  activeFusion: string | null,      // fusion bonus ID if Body + Mind boons synergise
+
+  // Carried gifts (not yet activated — lost on run end)
+  carriedGifts: [string],           // e.g. ["petal", "stone"]
+
+  // In-run level (XP thresholds reached this run)
+  runLevel: number,                 // 0 = base, increments on XP thresholds
+  statPicks: { [stat]: number },    // stat increases chosen at level-up, e.g. { str: 1, wis: 1 }
+},
+}
+```
+
+---
+
+## 14a. Condition Schema
+
+Conditions are temporary negative effects applied during combat, by traps, or by Montor. One per slot (Body/Mind/Soul). Applied to players and enemies.
+
+```javascript
+// Condition — stored on run.activeConditions and on BattleState.players/enemies
+{
+  id: string,                       // e.g. "BLEED", "POISON", "FEAR"
+  slot: string,                     // "body" | "mind" | "soul"
+  name: string,                     // display name
+  source: string,                   // "weapon" | "enemy" | "trap" | "zone" | "montor" | "boon"
+  turnsRemaining: number | null,    // null = persistent until cured/run end
+
+  // Mechanical effects (one or more)
+  damagePerTurn: number | null,     // HP lost each turn (BLEED=2, POISON=3, BURN=4)
+  statModifier: {                   // temporary stat changes while active
+    stat: string,                   // e.g. "agi", "str", "def"
+    value: number,                  // e.g. -3 for FROST AGI penalty
+  } | null,
+  skipChance: number | null,        // 0.0-1.0 chance to skip action (NAUSEA=0.3, CHARM=0.5)
+  forceTier: number | null,         // force next attack to this tier (DAZE: tier 3 = glancing)
+  missChance: number | null,        // 0.0-1.0 extra miss chance (BLIND=0.5)
+  canFlee: boolean,                 // false for BLOODLUST
+  healPerKill: number | null,       // BLOODLUST: heal on kill
+  damagePerNoKill: number | null,   // BLOODLUST: damage if turn passes without killing
+}
+```
+
+### Condition Catalogue (Stage 1 — Body + Mind)
+
+**Body conditions:**
+
+| ID | Name | Turns | Effect | Applied by |
+|---|---|---|---|---|
+| BLEED | Bleeding | 3 | 2 damage/turn | Weapons, traps |
+| POISON | Poisoned | 2 | 3 damage/turn, -1 STR | Slugs, poison weapons |
+| BURN | Burning | 1 | 4 damage next turn | Fire weapons, Boiler Room |
+| FROST | Frozen | 2 | -3 AGI | Ice weapons, Deep zone |
+| NAUSEA | Nauseous | 2 | 30% skip action | Slugs, gas traps |
+| SLUGGISH | Sluggish | 2 | Act last, 50% can't flee | Heavy hits |
+
+**Mind conditions:**
+
+| ID | Name | Turns | Effect | Applied by |
+|---|---|---|---|---|
+| FEAR | Afraid | 2 | -2 all rolls, flee if HP<50% | Boss auras, Wraith |
+| FRENZY | Frenzied | 3 | +3 STR, -2 DEF, attacks random target | Rage Draught, orc warcry |
+| CHARM | Charmed | 2 | 50% skip action each turn | Future: charm weapons, Montor |
+| DAZE | Dazed | 1 | Next attack forced to glancing (tier 3) | Stun weapons, big hits |
+| BORED | Bored | 2 | -2 all rolls | Montor only |
+| SAD | Sad | 2 | Can't use items | Montor, ally death |
+| BLIND | Blind | 2 | 50% miss chance | Darkness zone, flash traps |
+| BLOODLUST | Bloodlust | Combat | Kill=heal 3, no kill=lose 3, can't flee | Rare weapons, Montor |
+
+---
+
+## 14b. Boon Schema
+
+Boons are permanent positive effects from Montor's Gifts. One per slot (Body, Mind, Weapon, Item). Persist across runs in Stage 2+.
+
+```javascript
+// Boon — stored on run.activeBoons and character doc (Stage 2+)
+{
+  id: string,                       // e.g. "thornhide", "ironhide_upgraded"
+  slot: string,                     // "body" | "mind" | "weapon" | "item"
+  name: string,                     // display name
+  giftSource: string,               // which gift created it: "petal", "stone", etc.
+  upgraded: boolean,                // true if applied to an already-filled slot
+
+  // Effects vary per boon — see 10_Montors_Gifts.md for full table
+  effects: {
+    damageReflect: number | null,   // damage reflected to attackers
+    damageReduction: number | null, // flat damage reduction
+    healPerChamber: number | null,  // HP healed per chamber entered
+    statBonus: { stat: string, value: number } | null,
+    conditionImmunity: [string],    // condition IDs this boon makes you immune to
+    conditionOnHit: string | null,  // condition applied on YOUR attacks
+    critMultiplier: number | null,  // override crit multiplier
+    dodgeChance: number | null,     // % chance to dodge attacks
+    lootBonus: number | null,       // extra loot table rolls
+    merchantDiscount: number | null, // 0.0-1.0 discount
+    healPerKill: number | null,     // HP healed on enemy kill
+    reviveOnce: boolean,            // survive lethal hit once per combat
+    // ... extend as new boons are designed
+  },
+}
+```
+
+---
+
+## 14c. Gift Schema
+
+Gifts are carried items found by breaking Montor's treasures on each floor.
+
+```javascript
+// Gift — stored on run.carriedGifts (simple ID string)
+// Full gift data is in code/Firestore content, not on the run doc
+{
+  id: string,                       // "petal" | "stone" | "bile" | "blood" | "ember" | "void_shard"
+  name: string,                     // "Petal" | "Stone" | etc.
+  floorId: string,                  // floor it came from
+  treasureName: string,             // "Montor's Favourite Gnome" etc.
+  colour: string,                   // hex colour for UI
+  bodyBoon: string,                 // boon ID when applied to Body
+  mindBoon: string,                 // boon ID when applied to Mind
+  weaponBoon: string,               // boon ID when applied to Weapon
+  itemBoon: string,                 // boon ID when applied to Item
+}
+```
+
+---
+
+## 14d. In-Run Levelling Schema
+
+```javascript
+// Stored on run doc
+{
+  runLevel: number,                 // current in-run level (0 = base)
+  totalXp: number,                  // XP accumulated this run
+  statPicks: {                      // stats increased via level-up choices
+    str: number,
+    def: number,
+    agi: number,
+    wis: number,
+    int: number,
+  },
+}
+
+// XP thresholds (stored in /defaultValues for tuning)
+{
+  id: "xp_thresholds",
+  category: "progression",
+  values: {
+    levels: [
+      { xp: 50,  reward: "hp", hpGain: 5 },
+      { xp: 120, reward: "stat_pick" },
+      { xp: 250, reward: "hp_and_stat", hpGain: 5 },
+      { xp: 400, reward: "stat_pick_and_boon_upgrade" },
+    ]
+  }
 }
 ```
 
