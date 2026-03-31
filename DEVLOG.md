@@ -32,6 +32,11 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 |            | **Stage 1 — The Crawl (continued)** | |
 | 2026-03-31 | Sprint 4 — Items, loot tables, inventory, consumables in combat | ✅ Done |
 | 2026-03-31 | Sprint 5 — Multi-floor progression, keystone, boss, zone doors, safe room, Floor -1 | ✅ Done |
+| 2026-03-31 | Conditions system — 14 conditions, combat integration, enemy innate conditions | ✅ Done |
+| 2026-03-31 | Item expansion — 30+ items, enchanted weapons, condition relics, Montor uniques | ✅ Done |
+| 2026-03-31 | In-run levelling — XP thresholds, HP boost, stat pick UI | ✅ Done |
+| 2026-03-31 | Balance pass — DEF/3, min damage 2, enemy stat reductions, boss 3x HP | ✅ Done |
+| 2026-03-31 | Montor's Gifts spec — 6 gifts, treasures, sacrifices, boons, fusions (design only) | ✅ Done |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
 
 ---
