@@ -9,7 +9,9 @@ import { getModifier } from './classes.js'
 // Stage 1 subset: 3 weapons, 2 armours, 3 consumables, 2 relics
 
 var ITEMS = {
-  // Weapons
+  // ============================================================
+  // WEAPONS — plain
+  // ============================================================
   dagger_common: {
     id: 'dagger_common', name: 'Dagger', type: 'weapon', slot: 'weapon',
     rarity: 'common', damageDie: 4, attackStat: 'str',
@@ -28,8 +30,62 @@ var ITEMS = {
     buyPrice: 25, sellPrice: 10,
     description: 'A sturdy blade. Gets the job done.',
   },
+  warhammer: {
+    id: 'warhammer', name: 'Warhammer', type: 'weapon', slot: 'weapon',
+    rarity: 'uncommon', damageDie: 10, attackStat: 'str', agiPenalty: -2,
+    buyPrice: 40, sellPrice: 16,
+    description: 'Slow. Heavy. The last thing they see.',
+  },
 
-  // Armour
+  // ============================================================
+  // WEAPONS — with conditions
+  // ============================================================
+  venomfang_dagger: {
+    id: 'venomfang_dagger', name: 'Venomfang Dagger', type: 'weapon', slot: 'weapon',
+    rarity: 'uncommon', damageDie: 4, attackStat: 'str',
+    conditionOnHit: 'POISON', conditionChance: 1.0,
+    buyPrice: 22, sellPrice: 9,
+    description: 'The blade weeps green. Every cut festers.',
+  },
+  thorn_blade: {
+    id: 'thorn_blade', name: 'Thorn Blade', type: 'weapon', slot: 'weapon',
+    rarity: 'uncommon', damageDie: 6, attackStat: 'str',
+    conditionOnHit: 'BLEED', conditionChance: 1.0,
+    buyPrice: 28, sellPrice: 11,
+    description: 'Grown, not forged. Thorns line the edge.',
+  },
+  frost_edge: {
+    id: 'frost_edge', name: 'Frost Edge', type: 'weapon', slot: 'weapon',
+    rarity: 'rare', damageDie: 6, attackStat: 'str',
+    conditionOnHit: 'FROST', conditionChance: 1.0,
+    buyPrice: 45, sellPrice: 18,
+    description: 'Cold enough to see your breath. Theirs too.',
+  },
+  ember_mace: {
+    id: 'ember_mace', name: 'Ember Mace', type: 'weapon', slot: 'weapon',
+    rarity: 'rare', damageDie: 8, attackStat: 'str',
+    conditionOnHit: 'BURN', conditionChance: 1.0,
+    buyPrice: 55, sellPrice: 22,
+    description: 'The head glows. It never cools.',
+  },
+  dread_blade: {
+    id: 'dread_blade', name: 'Dread Blade', type: 'weapon', slot: 'weapon',
+    rarity: 'rare', damageDie: 8, attackStat: 'str',
+    conditionOnHit: 'FEAR', conditionChance: 0.7,
+    buyPrice: 50, sellPrice: 20,
+    description: 'The edge hums. Enemies flinch before you swing.',
+  },
+  stun_maul: {
+    id: 'stun_maul', name: 'Stun Maul', type: 'weapon', slot: 'weapon',
+    rarity: 'uncommon', damageDie: 8, attackStat: 'str', agiPenalty: -1,
+    conditionOnHit: 'DAZE', conditionChance: 1.0,
+    buyPrice: 35, sellPrice: 14,
+    description: 'One good hit and they forget where they are.',
+  },
+
+  // ============================================================
+  // ARMOUR
+  // ============================================================
   leather_common: {
     id: 'leather_common', name: 'Leather Armour', type: 'armour', slot: 'armour',
     rarity: 'common', defBonus: 2, agiPenalty: 0,
@@ -42,13 +98,35 @@ var ITEMS = {
     buyPrice: 30, sellPrice: 12,
     description: 'Heavy but protective. You hear yourself coming.',
   },
+  spiked_plate: {
+    id: 'spiked_plate', name: 'Spiked Plate', type: 'armour', slot: 'armour',
+    rarity: 'rare', defBonus: 5, agiPenalty: -2,
+    passiveEffect: 'damage_reflect', passiveValue: 1,
+    buyPrice: 60, sellPrice: 24,
+    description: 'Hurts to wear. Hurts them more.',
+  },
+  shadow_cloak: {
+    id: 'shadow_cloak', name: 'Shadow Cloak', type: 'armour', slot: 'armour',
+    rarity: 'rare', defBonus: 1, agiPenalty: 0,
+    passiveEffect: 'dodge_chance', passiveValue: 0.15,
+    buyPrice: 50, sellPrice: 20,
+    description: 'You\'re harder to see. And to hit.',
+  },
 
-  // Consumables
+  // ============================================================
+  // CONSUMABLES
+  // ============================================================
   health_potion: {
     id: 'health_potion', name: 'Health Potion', type: 'consumable',
     rarity: 'common', effect: 'heal', effectValue: 15,
     buyPrice: 10, sellPrice: 4,
     description: 'Tastes foul. Works fast.',
+  },
+  greater_health_potion: {
+    id: 'greater_health_potion', name: 'Greater Health Potion', type: 'consumable',
+    rarity: 'uncommon', effect: 'heal', effectValue: 30,
+    buyPrice: 25, sellPrice: 10,
+    description: 'Tastes worse. Works better.',
   },
   rage_draught: {
     id: 'rage_draught', name: 'Rage Draught', type: 'consumable',
@@ -62,8 +140,34 @@ var ITEMS = {
     buyPrice: 12, sellPrice: 5,
     description: 'Crack it. Run. Ask questions never.',
   },
+  antidote: {
+    id: 'antidote', name: 'Antidote', type: 'consumable',
+    rarity: 'common', effect: 'cure_body', effectValue: 1,
+    buyPrice: 8, sellPrice: 3,
+    description: 'Chalky. Bitter. Clears the body.',
+  },
+  smelling_salts: {
+    id: 'smelling_salts', name: 'Smelling Salts', type: 'consumable',
+    rarity: 'common', effect: 'cure_mind', effectValue: 1,
+    buyPrice: 8, sellPrice: 3,
+    description: 'One sniff and your head clears. Violently.',
+  },
+  firebomb: {
+    id: 'firebomb', name: 'Firebomb', type: 'consumable',
+    rarity: 'uncommon', effect: 'damage_all_enemies', effectValue: 6,
+    buyPrice: 20, sellPrice: 8,
+    description: 'Lob it. Everyone burns.',
+  },
+  fortify_draught: {
+    id: 'fortify_draught', name: 'Fortify Draught', type: 'consumable',
+    rarity: 'uncommon', effect: 'stat_buff', effectStat: 'def', effectValue: 4, effectDuration: 3,
+    buyPrice: 18, sellPrice: 7,
+    description: 'Your skin hardens. Temporarily.',
+  },
 
-  // Relics (passive while equipped)
+  // ============================================================
+  // RELICS — passive while equipped (max 3 slots)
+  // ============================================================
   ring_of_vitality: {
     id: 'ring_of_vitality', name: 'Ring of Vitality', type: 'relic', slot: 'relic',
     rarity: 'uncommon', passiveEffect: 'hp_bonus', passiveValue: 5,
@@ -75,6 +179,69 @@ var ITEMS = {
     rarity: 'uncommon', passiveEffect: 'lck_bonus', passiveValue: 2,
     buyPrice: 30, sellPrice: 12,
     description: 'Heads you win. Tails — well, you still feel lucky.',
+  },
+  bleed_ward: {
+    id: 'bleed_ward', name: 'Clotting Amulet', type: 'relic', slot: 'relic',
+    rarity: 'uncommon', passiveEffect: 'condition_immunity', passiveCondition: 'BLEED',
+    buyPrice: 25, sellPrice: 10,
+    description: 'Your blood thickens. Wounds close faster than they should.',
+  },
+  poison_ward: {
+    id: 'poison_ward', name: 'Antivenom Charm', type: 'relic', slot: 'relic',
+    rarity: 'uncommon', passiveEffect: 'condition_immunity', passiveCondition: 'POISON',
+    buyPrice: 25, sellPrice: 10,
+    description: 'Smells of herbs. Poison slides off you.',
+  },
+  fear_ward: {
+    id: 'fear_ward', name: 'Courage Stone', type: 'relic', slot: 'relic',
+    rarity: 'rare', passiveEffect: 'condition_immunity', passiveCondition: 'FEAR',
+    buyPrice: 40, sellPrice: 16,
+    description: 'Cold and heavy in your pocket. Fear can\'t find you.',
+  },
+  crit_ring: {
+    id: 'crit_ring', name: 'Keen Edge Ring', type: 'relic', slot: 'relic',
+    rarity: 'rare', passiveEffect: 'crit_bonus', passiveValue: 1,
+    buyPrice: 55, sellPrice: 22,
+    description: 'Crits on 19+. Your blade finds the gaps.',
+  },
+  vampiric_ring: {
+    id: 'vampiric_ring', name: 'Vampiric Ring', type: 'relic', slot: 'relic',
+    rarity: 'epic', passiveEffect: 'lifesteal', passiveValue: 0.1,
+    buyPrice: 80, sellPrice: 32,
+    description: 'Heal 10% of damage dealt. The ring drinks.',
+  },
+
+  // ============================================================
+  // UNIQUE / WEIRD items — Montor's personal collection
+  // ============================================================
+  montors_lottery_ticket: {
+    id: 'montors_lottery_ticket', name: "Montor's Lottery Ticket", type: 'relic', slot: 'relic',
+    rarity: 'epic',
+    passiveEffect: 'lottery', passiveValue: 0,
+    lotteryNumbers: null, // generated on pickup: 3 random numbers 1-20
+    buyPrice: 100, sellPrice: 1,
+    description: 'Three numbers scratched in ink. If any die matches... "jackpot."',
+  },
+  montors_monocle: {
+    id: 'montors_monocle', name: "Montor's Monocle", type: 'relic', slot: 'relic',
+    rarity: 'epic',
+    passiveEffect: 'see_enemy_hp_exact', passiveValue: 1,
+    buyPrice: 70, sellPrice: 28,
+    description: 'See their exact HP. Knowledge is half the battle. Montor wants it back.',
+  },
+  loaded_dice: {
+    id: 'loaded_dice', name: 'Loaded Dice', type: 'relic', slot: 'relic',
+    rarity: 'rare',
+    passiveEffect: 'reroll_ones', passiveValue: 1,
+    buyPrice: 60, sellPrice: 24,
+    description: 'Ones become twos. Not exactly fair, is it?',
+  },
+  mirror_shield: {
+    id: 'mirror_shield', name: 'Mirror Shard', type: 'relic', slot: 'relic',
+    rarity: 'rare',
+    passiveEffect: 'reflect_conditions', passiveValue: 0.25,
+    buyPrice: 45, sellPrice: 18,
+    description: '25% chance to reflect applied conditions back at the attacker.',
   },
 }
 
@@ -110,18 +277,21 @@ function rollRarity(lckStat) {
 // Defines what items can drop per zone, with weights
 
 var LOOT_TABLES = {
+  // --- Garden (Floor 0) ---
   garden_standard: {
     id: 'garden_standard',
     goldMin: 2, goldMax: 8,
     itemDropChance: 0.3,
     entries: [
-      { itemId: 'health_potion',    weight: 40, minRarity: 'common' },
-      { itemId: 'dagger_common',    weight: 20, minRarity: 'common' },
+      { itemId: 'health_potion',    weight: 35, minRarity: 'common' },
+      { itemId: 'dagger_common',    weight: 15, minRarity: 'common' },
       { itemId: 'smoke_bomb',       weight: 15, minRarity: 'common' },
+      { itemId: 'antidote',         weight: 10, minRarity: 'common' },
       { itemId: 'leather_common',   weight: 10, minRarity: 'uncommon' },
-      { itemId: 'lucky_coin',       weight: 5,  minRarity: 'rare' },
-      { itemId: 'ring_of_vitality', weight: 5,  minRarity: 'rare' },
-      { itemId: 'rage_draught',     weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'venomfang_dagger', weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'thorn_blade',      weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'bleed_ward',       weight: 3,  minRarity: 'rare' },
+      { itemId: 'lucky_coin',       weight: 2,  minRarity: 'rare' },
     ],
   },
   garden_elite: {
@@ -129,28 +299,110 @@ var LOOT_TABLES = {
     goldMin: 5, goldMax: 15,
     itemDropChance: 0.5,
     entries: [
-      { itemId: 'health_potion',      weight: 30, minRarity: 'common' },
-      { itemId: 'shortsword_common',  weight: 20, minRarity: 'common' },
+      { itemId: 'health_potion',      weight: 25, minRarity: 'common' },
+      { itemId: 'shortsword_common',  weight: 15, minRarity: 'common' },
+      { itemId: 'thorn_blade',        weight: 10, minRarity: 'common' },
       { itemId: 'chainmail_common',   weight: 10, minRarity: 'uncommon' },
-      { itemId: 'rage_draught',       weight: 15, minRarity: 'common' },
-      { itemId: 'ring_of_vitality',   weight: 10, minRarity: 'uncommon' },
-      { itemId: 'lucky_coin',         weight: 10, minRarity: 'uncommon' },
-      { itemId: 'smoke_bomb',         weight: 5,  minRarity: 'common' },
+      { itemId: 'rage_draught',       weight: 10, minRarity: 'common' },
+      { itemId: 'venomfang_dagger',   weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'ring_of_vitality',   weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'poison_ward',        weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'stun_maul',          weight: 5,  minRarity: 'rare' },
+      { itemId: 'loaded_dice',        weight: 3,  minRarity: 'rare' },
+      { itemId: 'crit_ring',          weight: 2,  minRarity: 'epic' },
+      { itemId: 'mirror_shield',      weight: 2,  minRarity: 'rare' },
     ],
   },
   garden_chest: {
     id: 'garden_chest',
-    goldMin: 5, goldMax: 20,
-    itemDropChance: 0.7,
+    goldMin: 8, goldMax: 25,
+    itemDropChance: 0.8,
+    entries: [
+      { itemId: 'health_potion',        weight: 15, minRarity: 'common' },
+      { itemId: 'shortsword_common',    weight: 10, minRarity: 'common' },
+      { itemId: 'longsword_common',     weight: 10, minRarity: 'common' },
+      { itemId: 'chainmail_common',     weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'thorn_blade',          weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'frost_edge',           weight: 5,  minRarity: 'rare' },
+      { itemId: 'rage_draught',         weight: 8,  minRarity: 'common' },
+      { itemId: 'ring_of_vitality',     weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'lucky_coin',           weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'fear_ward',            weight: 3,  minRarity: 'rare' },
+      { itemId: 'crit_ring',            weight: 3,  minRarity: 'rare' },
+      { itemId: 'shadow_cloak',         weight: 3,  minRarity: 'rare' },
+      { itemId: 'loaded_dice',          weight: 3,  minRarity: 'rare' },
+      { itemId: 'greater_health_potion', weight: 5, minRarity: 'uncommon' },
+      { itemId: 'fortify_draught',      weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'firebomb',             weight: 4,  minRarity: 'uncommon' },
+    ],
+  },
+
+  // --- Underground (Floor -1) — better drops ---
+  underground_standard: {
+    id: 'underground_standard',
+    goldMin: 4, goldMax: 12,
+    itemDropChance: 0.35,
     entries: [
       { itemId: 'health_potion',      weight: 25, minRarity: 'common' },
-      { itemId: 'shortsword_common',  weight: 15, minRarity: 'common' },
-      { itemId: 'longsword_common',   weight: 10, minRarity: 'uncommon' },
-      { itemId: 'chainmail_common',   weight: 10, minRarity: 'uncommon' },
-      { itemId: 'rage_draught',       weight: 15, minRarity: 'common' },
-      { itemId: 'ring_of_vitality',   weight: 10, minRarity: 'uncommon' },
-      { itemId: 'lucky_coin',         weight: 10, minRarity: 'uncommon' },
-      { itemId: 'smoke_bomb',         weight: 5,  minRarity: 'common' },
+      { itemId: 'shortsword_common',  weight: 10, minRarity: 'common' },
+      { itemId: 'antidote',           weight: 10, minRarity: 'common' },
+      { itemId: 'smelling_salts',     weight: 10, minRarity: 'common' },
+      { itemId: 'thorn_blade',        weight: 8,  minRarity: 'common' },
+      { itemId: 'chainmail_common',   weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'venomfang_dagger',   weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'frost_edge',         weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'stun_maul',          weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'bleed_ward',         weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'fear_ward',          weight: 4,  minRarity: 'rare' },
+      { itemId: 'loaded_dice',        weight: 3,  minRarity: 'rare' },
+      { itemId: 'mirror_shield',      weight: 2,  minRarity: 'rare' },
+    ],
+  },
+  underground_elite: {
+    id: 'underground_elite',
+    goldMin: 8, goldMax: 20,
+    itemDropChance: 0.55,
+    entries: [
+      { itemId: 'greater_health_potion', weight: 15, minRarity: 'common' },
+      { itemId: 'longsword_common',    weight: 10, minRarity: 'common' },
+      { itemId: 'warhammer',           weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'ember_mace',          weight: 5,  minRarity: 'rare' },
+      { itemId: 'dread_blade',         weight: 5,  minRarity: 'rare' },
+      { itemId: 'frost_edge',          weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'spiked_plate',        weight: 5,  minRarity: 'rare' },
+      { itemId: 'shadow_cloak',        weight: 5,  minRarity: 'rare' },
+      { itemId: 'rage_draught',        weight: 8,  minRarity: 'common' },
+      { itemId: 'fortify_draught',     weight: 8,  minRarity: 'common' },
+      { itemId: 'firebomb',            weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'crit_ring',           weight: 4,  minRarity: 'rare' },
+      { itemId: 'vampiric_ring',       weight: 2,  minRarity: 'epic' },
+      { itemId: 'montors_monocle',     weight: 1,  minRarity: 'epic' },
+      { itemId: 'montors_lottery_ticket', weight: 1, minRarity: 'epic' },
+    ],
+  },
+  underground_chest: {
+    id: 'underground_chest',
+    goldMin: 12, goldMax: 35,
+    itemDropChance: 0.85,
+    entries: [
+      { itemId: 'greater_health_potion', weight: 10, minRarity: 'common' },
+      { itemId: 'warhammer',           weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'ember_mace',          weight: 6,  minRarity: 'rare' },
+      { itemId: 'dread_blade',         weight: 6,  minRarity: 'rare' },
+      { itemId: 'frost_edge',          weight: 8,  minRarity: 'uncommon' },
+      { itemId: 'spiked_plate',        weight: 6,  minRarity: 'rare' },
+      { itemId: 'shadow_cloak',        weight: 6,  minRarity: 'rare' },
+      { itemId: 'crit_ring',           weight: 5,  minRarity: 'rare' },
+      { itemId: 'vampiric_ring',       weight: 3,  minRarity: 'epic' },
+      { itemId: 'fear_ward',           weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'poison_ward',         weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'loaded_dice',         weight: 4,  minRarity: 'rare' },
+      { itemId: 'mirror_shield',       weight: 4,  minRarity: 'rare' },
+      { itemId: 'montors_monocle',     weight: 2,  minRarity: 'epic' },
+      { itemId: 'montors_lottery_ticket', weight: 2, minRarity: 'epic' },
+      { itemId: 'firebomb',            weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'fortify_draught',     weight: 5,  minRarity: 'uncommon' },
+      { itemId: 'rage_draught',        weight: 6,  minRarity: 'common' },
     ],
   },
 }
@@ -200,9 +452,12 @@ function rollGold(tableId) {
 }
 
 // Generate full loot from a combat encounter
-// Returns { gold: number, item: Item|null }
-function generateCombatLoot(encounterLevel, lckStat) {
-  var tableId = encounterLevel >= 2 ? 'garden_elite' : 'garden_standard'
+// floorId determines which loot table set to use
+function generateCombatLoot(encounterLevel, lckStat, floorId) {
+  var prefix = getFloorLootPrefix(floorId)
+  var tableId = encounterLevel >= 2 ? prefix + '_elite' : prefix + '_standard'
+  // Fall back to garden if table doesn't exist
+  if (!LOOT_TABLES[tableId]) tableId = encounterLevel >= 2 ? 'garden_elite' : 'garden_standard'
   return {
     gold: rollGold(tableId),
     item: rollDrop(tableId, lckStat),
@@ -210,11 +465,21 @@ function generateCombatLoot(encounterLevel, lckStat) {
 }
 
 // Generate loot for a chest/hidden chamber
-function generateChestLoot(lckStat) {
+function generateChestLoot(lckStat, floorId) {
+  var prefix = getFloorLootPrefix(floorId)
+  var tableId = prefix + '_chest'
+  if (!LOOT_TABLES[tableId]) tableId = 'garden_chest'
   return {
-    gold: rollGold('garden_chest'),
-    item: rollDrop('garden_chest', lckStat),
+    gold: rollGold(tableId),
+    item: rollDrop(tableId, lckStat),
   }
+}
+
+// Map floor IDs to loot table prefixes
+function getFloorLootPrefix(floorId) {
+  if (floorId === 'underground') return 'underground'
+  // Future floors: add mappings here
+  return 'garden'
 }
 
 // Get a specific item by ID (for merchant, equipping, etc.)

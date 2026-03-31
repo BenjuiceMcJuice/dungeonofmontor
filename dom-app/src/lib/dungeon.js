@@ -388,7 +388,7 @@ function generateChamberContent(chamber, difficulty, zoneDef) {
     content.items = getMerchantItems()
     content.description = 'A hooded figure sits cross-legged beside a threadbare mat of wares.'
   } else if (chamber.type === 'loot') {
-    var chestLoot = generateChestLoot(10)
+    var chestLoot = generateChestLoot(10, zd.floorId)
     content.gold = chestLoot.gold
     content.item = chestLoot.item
     content.description = 'A rotting chest sits half-buried.'
@@ -402,7 +402,7 @@ function generateChamberContent(chamber, difficulty, zoneDef) {
   } else if (chamber.type === 'event') {
     content.description = 'The air thickens. You feel watched.'
   } else if (chamber.type === 'hidden') {
-    var hiddenLoot = generateChestLoot(10)
+    var hiddenLoot = generateChestLoot(10, zd.floorId)
     content.gold = hiddenLoot.gold + 5
     content.item = hiddenLoot.item
     content.description = 'A narrow gap reveals a forgotten alcove.'

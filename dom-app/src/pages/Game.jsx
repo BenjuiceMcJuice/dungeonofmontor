@@ -968,13 +968,14 @@ function Game({ character, user, onEndRun }) {
     var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
     var lckStat = character.stats.lck || 10
     var corpses = battle.enemies.filter(function(e) { return e.isDown }).map(function(e) {
-      var loot = generateCombatLoot(encounterLevel, lckStat)
+      var currentFloorId = zone ? zone.floorId : 'grounds'
+      var loot = generateCombatLoot(encounterLevel, lckStat, currentFloorId)
       // Build items array — stronger enemies can drop multiple items
       var items = []
       if (loot.item) items.push(loot.item)
       // Elite/boss: extra roll for a second item
       if (encounterLevel >= 2) {
-        var loot2 = generateCombatLoot(encounterLevel, lckStat)
+        var loot2 = generateCombatLoot(encounterLevel, lckStat, currentFloorId)
         if (loot2.item) items.push(loot2.item)
       }
       return {

@@ -34,9 +34,9 @@ var DIFFICULTY_MULTIPLIERS = {
 // One canonical name per archetype per tier — name should tell you what it is
 // Variants with effects (slime, parasite, etc.) added later via conditions system
 var NAME_POOLS = {
-  rat:    { dust: ['Dungeon Rat'], slate: ['Iron Rat'], iron: ['Plague Rat'], crimson: ['Blood Rat'], void: ['Void Rat'] },
+  rat:    { dust: ['Dungeon Rat'], slate: ['Sewer Rat'], iron: ['Plague Rat'], crimson: ['Blood Rat'], void: ['Void Rat'] },
   orc:    { dust: ['Orc Grunt'], slate: ['Orc Brute'], iron: ['Orc Warlord'], crimson: ['Orc Berserker'], void: ['Orc Champion'] },
-  rock:   { dust: ['Rock Golem'], slate: ['Stone Golem'], iron: ['Iron Golem'], crimson: ['Magma Golem'], void: ['Void Golem'] },
+  rock:   { dust: ['Rock Golem'], slate: ['Stone Golem'], iron: ['Steel Golem'], crimson: ['Magma Golem'], void: ['Void Golem'] },
   slug:   { dust: ['Ashslug'], slate: ['Venomslug'], iron: ['Bile Slug'], crimson: ['Blood Slug'], void: ['Void Slug'] },
   wraith: { dust: ['Wisp'], slate: ['Shade'], iron: ['Wraith'], crimson: ['Banshee'], void: ['Void Wraith'] },
 }
