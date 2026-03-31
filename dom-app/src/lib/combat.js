@@ -108,8 +108,8 @@ function calculateTierDamage(weaponRoll, strMod, tier, defStat, critMultiplier) 
   if (tier === 1) { afterTier = Math.round(raw * (critMultiplier || 2.0)); tierMul = 'x' + (critMultiplier || 2.0) }
   if (tier === 3) { afterTier = Math.max(Math.round(raw / 2), 1); tierMul = 'x0.5' }
 
-  var defReduction = Math.floor(defStat / 2)
-  var final_ = Math.max(afterTier - defReduction, 1)
+  var defReduction = Math.floor(defStat / 3)
+  var final_ = Math.max(afterTier - defReduction, 2)
 
   return {
     final: final_,
@@ -136,6 +136,21 @@ function tickTurnStart(battleState, actorId) {
   var result = tickConditions(effects, entity.currentHp, entity.maxHp)
   entity.statusEffects = result.newEffects
   entity.currentHp = Math.max(0, entity.currentHp - result.damage)
+
+  // BURN AoE — spread fire damage to other enemies (or players if enemy burned)
+  if (result.aoeDamage > 0) {
+    if (actor.type === 'enemy') {
+      // Burn spreads to other living enemies
+      bs.enemies.forEach(function(e) {
+        if (e.id !== actorId && !e.isDown) {
+          e.currentHp = Math.max(0, e.currentHp - result.aoeDamage)
+          if (e.currentHp <= 0) e.isDown = true
+        }
+      })
+    } else {
+      // Burn on player spreads to... nothing in solo. Future: party members.
+    }
+  }
 
   var died = false
   if (entity.currentHp <= 0) {

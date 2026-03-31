@@ -6,10 +6,10 @@ import { roll } from './dice.js'
 
 // Base stats per archetype — tuned so Dust tier (0.8x) stays above 8
 var ARCHETYPES = {
-  rat:    { hp: 12, str: 10, agi: 14, def: 8,  int: 6,  weaponDie: 4,  xp: 10 },
+  rat:    { hp: 10, str: 8,  agi: 14, def: 6,  int: 6,  weaponDie: 4,  xp: 10 },
   orc:    { hp: 35, str: 16, agi: 8,  def: 14, int: 8,  weaponDie: 8,  xp: 30 },
   rock:   { hp: 50, str: 14, agi: 6,  def: 18, int: 6,  weaponDie: 10, xp: 40 },
-  slug:   { hp: 20, str: 10, agi: 6,  def: 6,  int: 6,  weaponDie: 6,  xp: 20 },
+  slug:   { hp: 16, str: 8,  agi: 6,  def: 4,  int: 6,  weaponDie: 4,  xp: 15 },
   wraith: { hp: 22, str: 12, agi: 12, def: 8,  int: 16, weaponDie: 6,  xp: 35 },
 }
 

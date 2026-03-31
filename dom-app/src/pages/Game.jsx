@@ -190,7 +190,20 @@ function Game({ character, user, onEndRun }) {
         setPlayerGold(function(g) { return g + 200 })
         console.log('Added 9 items + 200 gold')
       },
-      heal: function() { setPlayerHp(character.maxHp); console.log('Healed to full') },
+      heal: function() {
+        setPlayerHp(character.maxHp)
+        if (battle && battle.players[user.uid]) {
+          var bs = Object.assign({}, battle)
+          var np = {}
+          Object.keys(bs.players).forEach(function(uid) {
+            np[uid] = Object.assign({}, bs.players[uid], { combatStats: Object.assign({}, bs.players[uid].combatStats), statusEffects: bs.players[uid].statusEffects.slice() })
+            if (uid === user.uid) np[uid].currentHp = character.maxHp
+          })
+          bs.players = np
+          setBattle(bs)
+        }
+        console.log('Healed to ' + character.maxHp)
+      },
       gold: function(n) { setPlayerGold(function(g) { return g + (n || 100) }); console.log('Added ' + (n || 100) + ' gold') },
       hp: function() { console.log('HP: ' + playerHp + '/' + character.maxHp + ' | Gold: ' + playerGold + ' | Items: ' + playerInventory.length) },
       god: function() { godModeRef.current = !godModeRef.current; console.log('God mode: ' + (godModeRef.current ? 'ON — one-hit kills' : 'OFF')) },

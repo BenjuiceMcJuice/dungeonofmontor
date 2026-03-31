@@ -33,8 +33,8 @@ var ZONES = {
     enemyTypes: ['rat', 'slug'], enemyTiers: ['dust'],
     bossType: 'slug', bossTier: 'slate', bossName: 'The Overgrowth',
     encounterPools: {
-      1: { types: ['rat', 'slug'], tiers: ['dust'], count: [1, 2] },
-      2: { types: ['rat', 'slug', 'rat'], tiers: ['dust'], count: [2, 3] },
+      1: { types: ['rat', 'slug'], tiers: ['dust'], count: [1, 1] },
+      2: { types: ['rat', 'slug', 'rat'], tiers: ['dust'], count: [1, 2] },
       3: { types: ['rat', 'slug'], tiers: ['slate'], count: [1, 1] },
     },
     templates: [

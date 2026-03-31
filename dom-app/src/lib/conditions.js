@@ -14,19 +14,25 @@ var CONDITIONS = {
   // --- BODY ---
   BLEED: {
     id: 'BLEED', slot: 'body', name: 'Bleeding',
-    turns: 3, damagePerTurn: 2,
-    description: 'Losing blood. 2 damage per turn.',
+    turns: null, // lasts until cured or combat ends
+    damagePerTurn: 1, // starts at 1, stacks add +1 each
+    stackable: true, maxStacks: 5,
+    description: 'Bleeding. Stacks — each hit adds +1 damage/turn.',
   },
   POISON: {
     id: 'POISON', slot: 'body', name: 'Poisoned',
-    turns: 2, damagePerTurn: 3,
-    statModifier: { stat: 'str', value: -1 },
-    description: 'Weakened. 3 damage per turn, -1 STR.',
+    turns: 3, damagePerTurn: 2,
+    statDrain: true, // each tick drains a different stat: STR → AGI → DEF
+    statDrainValue: -1,
+    description: 'Poisoned. 2 damage/turn + drains a stat each turn.',
   },
   BURN: {
     id: 'BURN', slot: 'body', name: 'Burning',
-    turns: 1, damagePerTurn: 4,
-    description: 'On fire. 4 damage next turn.',
+    turns: 1, damagePerTurn: 0,
+    burstDamage: 5, // one big hit next turn
+    aoe: true, // spreads to adjacent enemies/allies
+    aoeDamage: 3,
+    description: 'On fire. 5 burst damage next turn. Spreads to adjacent.',
   },
   FROST: {
     id: 'FROST', slot: 'body', name: 'Frozen',
@@ -108,14 +114,39 @@ function applyCondition(statusEffects, conditionId, source) {
   var def = CONDITIONS[conditionId]
   if (!def) return statusEffects
 
+  // BLEED stacks — increase damage instead of replacing
+  if (def.stackable) {
+    var existing = statusEffects.find(function(c) { return c.id === def.id })
+    if (existing) {
+      var maxStacks = def.maxStacks || 5
+      var currentStacks = existing.stacks || 1
+      if (currentStacks >= maxStacks) return statusEffects // capped
+      return statusEffects.map(function(c) {
+        if (c.id !== def.id) return c
+        return Object.assign({}, c, {
+          stacks: currentStacks + 1,
+          damagePerTurn: (currentStacks + 1), // each stack = +1 damage/turn
+          name: 'Bleeding x' + (currentStacks + 1),
+        })
+      })
+    }
+  }
+
   var condition = {
     id: def.id,
     slot: def.slot,
     name: def.name,
     source: source || 'unknown',
     turnsRemaining: def.turns,
+    stacks: 1,
     // Copy all mechanical fields
     damagePerTurn: def.damagePerTurn || 0,
+    burstDamage: def.burstDamage || 0,
+    aoe: def.aoe || false,
+    aoeDamage: def.aoeDamage || 0,
+    statDrain: def.statDrain || false,
+    statDrainValue: def.statDrainValue || 0,
+    statDrainIndex: 0, // tracks which stat to drain next: 0=str, 1=agi, 2=def
     statModifier: def.statModifier ? Object.assign({}, def.statModifier) : null,
     skipChance: def.skipChance || 0,
     skipFleeChance: def.skipFleeChance || 0,
@@ -131,7 +162,7 @@ function applyCondition(statusEffects, conditionId, source) {
     defPenalty: def.defPenalty || 0,
   }
 
-  // Remove existing condition in same slot, add new one
+  // Non-stackable: remove existing condition in same slot, add new one
   var filtered = statusEffects.filter(function(c) { return c.slot !== def.slot })
   return filtered.concat([condition])
 }
@@ -161,22 +192,46 @@ function getConditionInSlot(statusEffects, slot) {
 // ============================================================
 
 // Returns { newEffects, damage, skipped, narrative }
+// Returns { newEffects, damage, skipped, narrative, aoeDamage }
 function tickConditions(statusEffects, currentHp, maxHp) {
   var damage = 0
   var skipped = false
   var narratives = []
   var newEffects = []
+  var aoeDamage = 0
 
   for (var i = 0; i < statusEffects.length; i++) {
     var c = Object.assign({}, statusEffects[i])
 
-    // Damage per turn
-    if (c.damagePerTurn > 0) {
+    // BLEED — stacking DoT, lasts until cured
+    if (c.damagePerTurn > 0 && !c.burstDamage) {
       damage += c.damagePerTurn
       narratives.push(c.name + ': ' + c.damagePerTurn + ' damage.')
     }
 
-    // Skip chance
+    // BURN — burst damage, one big hit, then gone. AoE to adjacent.
+    if (c.burstDamage > 0) {
+      damage += c.burstDamage
+      narratives.push('BURN: ' + c.burstDamage + ' burst damage!')
+      if (c.aoe) {
+        aoeDamage = c.aoeDamage || 3
+        narratives.push('Fire spreads! ' + aoeDamage + ' to adjacent.')
+      }
+    }
+
+    // POISON — stat drain each tick (STR → AGI → DEF cycle)
+    if (c.statDrain) {
+      var drainStats = ['str', 'agi', 'def']
+      var drainIdx = c.statDrainIndex || 0
+      var drainStat = drainStats[drainIdx % drainStats.length]
+      narratives.push('Poison drains ' + drainStat.toUpperCase() + '.')
+      c.statDrainIndex = drainIdx + 1
+      // The actual stat modification is applied via getConditionStatMod
+      if (!c.drainedStats) c.drainedStats = {}
+      c.drainedStats[drainStat] = (c.drainedStats[drainStat] || 0) + (c.statDrainValue || -1)
+    }
+
+    // Skip chance (NAUSEA, CHARM)
     if (c.skipChance > 0 && !skipped) {
       if (Math.random() < c.skipChance) {
         skipped = true
@@ -184,18 +239,18 @@ function tickConditions(statusEffects, currentHp, maxHp) {
       }
     }
 
-    // FEAR: flee if HP < 50% (for enemies — players get -2 rolls instead)
+    // FEAR: flee if HP < 50%
     if (c.fleeIfLowHp && currentHp < maxHp * 0.5) {
       narratives.push(c.name + ': paralysed with fear.')
       skipped = true
     }
 
-    // Tick down duration
+    // Tick down duration (null = permanent until cured)
     if (c.turnsRemaining !== null) {
       c.turnsRemaining--
       if (c.turnsRemaining <= 0) {
         narratives.push(c.name + ' wears off.')
-        continue // don't add to newEffects — it's expired
+        continue // expired
       }
     }
 
@@ -207,6 +262,7 @@ function tickConditions(statusEffects, currentHp, maxHp) {
     damage: damage,
     skipped: skipped,
     narrative: narratives.join(' '),
+    aoeDamage: aoeDamage,
   }
 }
 
@@ -230,6 +286,8 @@ function getConditionStatMod(statusEffects, stat) {
     var c = statusEffects[i]
     if (c.statModifier && c.statModifier.stat === stat) mod += c.statModifier.value
     if (stat === 'def' && c.defPenalty) mod += c.defPenalty
+    // Poison accumulated stat drain
+    if (c.drainedStats && c.drainedStats[stat]) mod += c.drainedStats[stat]
   }
   return mod
 }
