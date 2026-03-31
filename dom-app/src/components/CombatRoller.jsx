@@ -1,25 +1,56 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
-// Two-dice combat roller: d20 attack → pause → weapon damage die
-// Shows both dice side by side. Damage die only appears on hit.
-// States: idle → attackRolling → attackResult → damageRolling → damageResult
-// resolvedDamage: if provided, this is the actual damage to display (from combat.js)
-// The damage die animation is visual only — the final number comes from resolvedDamage
-function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage }) {
+var DEF_VERBS = ['deflects', 'absorbs', 'blocks', 'shrugs off']
+function pickVerb(arr) { return arr[Math.floor(Math.random() * arr.length)] }
+
+// Colour by tier — not damage amount
+function getTierColour(tierName) {
+  if (tierName === 'crit') return 'text-crimson'      // crimson
+  if (tierName === 'hit') return 'text-amber-500'      // orange
+  if (tierName === 'glancing') return 'text-yellow-400' // yellow
+  return 'text-ink-dim'
+}
+
+// Inline style colour by tier (for CSS color property)
+function getTierHex(tierName) {
+  if (tierName === 'crit') return '#c0392b'
+  if (tierName === 'hit') return '#f59e0b'
+  if (tierName === 'glancing') return '#facc15'
+  return '#9d94b0'
+}
+
+// Font size scales with damage — bigger hit = bigger number
+function getDamageFontSize(dmg) {
+  if (dmg >= 12) return '4rem'
+  if (dmg >= 8) return '3.2rem'
+  if (dmg >= 5) return '2.6rem'
+  if (dmg >= 3) return '2.2rem'
+  return '1.8rem'
+}
+
+function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage, damageBreakdown, attackerName, targetName }) {
+  var resolvedDamageRef = useRef(resolvedDamage)
+  resolvedDamageRef.current = resolvedDamage
+  var breakdownRef = useRef(damageBreakdown)
+  breakdownRef.current = damageBreakdown
+
   var accentBorder = colour === 'red' ? 'border-red-400' : 'border-gold'
   var accentBg = colour === 'red' ? 'bg-red-400/10' : 'bg-gold-glow'
   var accentText = colour === 'red' ? 'text-red-400' : 'text-gold'
-  var dimText = colour === 'red' ? 'text-red-400' : 'text-ink-dim'
 
   var [phase, setPhase] = useState('idle')
   var [attackDisplay, setAttackDisplay] = useState(null)
   var [attackResult, setAttackResult] = useState(null)
   var [damageDisplay, setDamageDisplay] = useState(null)
-  var [damageTotal, setDamageTotal] = useState(null)
   var [isHit, setIsHit] = useState(false)
   var [started, setStarted] = useState(false)
+  var [narrative, setNarrative] = useState('')
+  var [finalDamage, setFinalDamage] = useState(null)
+  var [finalTier, setFinalTier] = useState(null)
 
-  // Auto-roll on mount if autoRoll is true (for enemy turns)
+  var who = attackerName || 'Attacker'
+  var target = targetName || 'target'
+
   useEffect(function() {
     if (autoRoll && !started) {
       setStarted(true)
@@ -32,10 +63,11 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
     setPhase('attackRolling')
     setAttackResult(null)
     setDamageDisplay(null)
-    setDamageTotal(null)
     setIsHit(false)
+    setNarrative(who + ' attacks ' + target + '...')
+    setFinalDamage(null)
+    setFinalTier(null)
 
-    // Animate d20
     var ticks = 0
     var interval = setInterval(function() {
       setAttackDisplay(Math.floor(Math.random() * 20) + 1)
@@ -46,11 +78,21 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
         setAttackResult(result)
         setAttackDisplay(result.roll)
 
-        var hit = result.crit || (!result.fumble && result.success)
+        var hit = result.tier <= 3
         setIsHit(hit)
         setPhase('attackResult')
 
-        // If hit, pause then roll damage
+        // Update narrative with tier outcome
+        if (result.tierName === 'crit') {
+          setNarrative(who + ' attacks ' + target + '... critical strike!')
+        } else if (result.tierName === 'hit') {
+          setNarrative(who + ' attacks ' + target + '... clean hit!')
+        } else if (result.tierName === 'glancing') {
+          setNarrative(who + ' attacks ' + target + '... glancing blow!')
+        } else {
+          setNarrative(who + ' swings at ' + target + '... misses!')
+        }
+
         if (hit) {
           setTimeout(function() {
             setPhase('damageRolling')
@@ -60,10 +102,37 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
               dTicks++
               if (dTicks >= 8) {
                 clearInterval(dInterval)
-                // Roll actual damage
-                var actualDmg = resolvedDamage != null ? resolvedDamage : Math.max(Math.floor(Math.random() * damageDie) + 1 + damageMod, 1)
-                setDamageDisplay(actualDmg)
-                setDamageTotal(actualDmg)
+                var bd = breakdownRef.current
+                var dmg = resolvedDamageRef.current != null ? resolvedDamageRef.current : 1
+
+                // Die face shows raw weapon roll
+                if (bd) {
+                  setDamageDisplay(bd.weaponRoll)
+                } else {
+                  setDamageDisplay(dmg)
+                }
+
+                // Build full narrative
+                var defVerb = pickVerb(DEF_VERBS)
+                var tierLabel = result.tierName === 'crit' ? 'critical strike' : result.tierName === 'glancing' ? 'glancing blow' : 'clean hit'
+                var sentence = who + ' attacks ' + target + '... ' + tierLabel + '!'
+
+                if (bd) {
+                  var hitValue = bd.tierMul !== 'x1' ? bd.afterTier : bd.raw
+                  sentence += ' Hits for ' + hitValue + '...'
+                  if (bd.defReduction > 0) {
+                    if (bd.defReduction >= hitValue) {
+                      // DEF exceeds hit — armour tanked it, only minimum damage gets through
+                      sentence += ' ' + target + "'s armour absorbs most of the blow."
+                    } else {
+                      sentence += ' ' + target + ' ' + defVerb + ' ' + bd.defReduction + '.'
+                    }
+                  }
+                }
+
+                setNarrative(sentence)
+                setFinalDamage(dmg)
+                setFinalTier(result.tierName)
                 setPhase('damageResult')
               }
             }, 60)
@@ -73,118 +142,87 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, tn, damageDie, dama
     }, 60)
   }
 
-  // Outcome text
-  var outcomeText = ''
-  var outcomeColor = 'text-ink'
-  if (attackResult) {
-    if (attackResult.crit) { outcomeText = 'Critical Hit!'; outcomeColor = accentText }
-    else if (attackResult.fumble) { outcomeText = 'Fumble!'; outcomeColor = colour === 'red' ? 'text-green-400' : 'text-red-400' }
-    else if (attackResult.success) { outcomeText = 'Hit!'; outcomeColor = accentText }
-    else { outcomeText = 'Missed'; outcomeColor = colour === 'red' ? 'text-green-400' : 'text-ink-dim' }
-  }
+  var showContinue = (phase === 'attackResult' && !isHit) || phase === 'damageResult'
 
-  var showContinue = phase === 'attackResult' && !isHit || phase === 'damageResult'
+  function getAttackDieClass() {
+    if (phase === 'attackRolling') return accentBorder + ' ' + accentBg + ' ' + accentText + ' animate-pulse scale-110'
+    if (!attackResult) return 'border-border-hl bg-raised text-ink-dim'
+    if (attackResult.tierName === 'crit') return accentBorder + ' ' + accentBg + ' ' + accentText + ' scale-110'
+    if (attackResult.tierName === 'miss') return 'border-border bg-surface text-ink-dim'
+    if (attackResult.tierName === 'glancing') return 'border-amber-400 bg-amber-400/10 text-amber-400'
+    return accentBorder + ' bg-surface ' + accentText
+  }
 
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Dice row */}
       <div className="flex items-center justify-center gap-4">
-        {/* d20 attack die */}
         <div className="flex flex-col items-center gap-1">
-          <div
-            className={
-              'w-16 h-16 rounded-xl flex items-center justify-center font-display text-2xl border-2 transition-all ' +
-              (phase === 'attackRolling'
-                ? accentBorder + ' ' + accentBg + ' ' + accentText + ' animate-pulse scale-110'
-                : attackResult
-                  ? (attackResult.crit
-                      ? accentBorder + ' ' + accentBg + ' ' + accentText + ' scale-110'
-                      : attackResult.fumble
-                        ? 'border-border bg-surface text-ink-dim'
-                        : attackResult.success
-                          ? accentBorder + ' bg-surface ' + accentText
-                          : 'border-border bg-surface text-ink-dim')
-                  : 'border-border-hl bg-raised text-ink-dim')
-            }
-          >
+          <div className={'w-14 h-14 rounded-xl flex items-center justify-center font-display text-xl border-2 transition-all ' + getAttackDieClass()}>
             {attackDisplay !== null ? attackDisplay : 'd20'}
           </div>
-          <span className="text-ink-dim text-xs">Attack</span>
+          <span className="text-ink-dim text-[10px]">d20</span>
         </div>
 
-        {/* Damage die — only visible on hit */}
         {(phase === 'damageRolling' || phase === 'damageResult') && (
           <div className="flex flex-col items-center gap-1">
-            <div
-              className={
-                'w-16 h-16 rounded-xl flex items-center justify-center font-display text-2xl border-2 transition-all ' +
-                (phase === 'damageRolling'
-                  ? accentBorder + ' ' + accentBg + ' ' + accentText + ' animate-pulse scale-110'
-                  : accentBorder + ' bg-surface ' + accentText)
-              }
-            >
+            <div className={
+              'w-14 h-14 rounded-xl flex items-center justify-center font-display text-xl border-2 transition-all ' +
+              (phase === 'damageRolling'
+                ? accentBorder + ' ' + accentBg + ' ' + accentText + ' animate-pulse scale-110'
+                : accentBorder + ' bg-surface ' + accentText)
+            }>
               {damageDisplay !== null ? damageDisplay : '?'}
             </div>
-            <span className="text-ink-dim text-xs">d{damageDie} Damage</span>
+            <span className="text-ink-dim text-[10px]">d{damageDie}</span>
           </div>
         )}
 
-        {/* Empty slot placeholder when damage die not yet shown */}
         {phase !== 'damageRolling' && phase !== 'damageResult' && phase !== 'idle' && isHit && (
           <div className="flex flex-col items-center gap-1">
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center border-2 border-border-hl bg-raised text-ink-faint font-display text-lg opacity-30">
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center border-2 border-border-hl bg-raised text-ink-faint font-display text-lg opacity-30">
               d{damageDie}
             </div>
-            <span className="text-ink-faint text-xs">Damage</span>
+            <span className="text-ink-faint text-[10px]">d{damageDie}</span>
           </div>
         )}
       </div>
 
-      {/* Result text */}
-      {attackResult && (
+      {/* Narrative sentence */}
+      {narrative && (
+        <p className="text-ink text-base font-sans text-center max-w-xs leading-relaxed italic">
+          {narrative}
+        </p>
+      )}
+
+      {/* Damage number — colour by tier, size by damage amount */}
+      {finalDamage !== null && finalTier && (
         <div className="text-center">
-          <p className={'text-lg font-display ' + outcomeColor}>{outcomeText}</p>
-          <p className="text-ink-dim text-xs">
-            Rolled {attackResult.roll} (needed {tn - attackMod} or higher)
+          <p className="font-display" style={{ fontSize: getDamageFontSize(finalDamage), color: getTierHex(finalTier), lineHeight: 1.1 }}>
+            {finalDamage}
+          </p>
+          <p className="text-xs font-sans uppercase tracking-widest mt-1" style={{ color: getTierHex(finalTier) }}>
+            damage
           </p>
         </div>
       )}
 
-      {/* Damage total */}
-      {phase === 'damageResult' && damageTotal !== null && (
-        <div className="text-center">
-          <p className={'text-xl font-display ' + accentText}>
-            {damageTotal} damage
-          </p>
-          {attackResult && attackResult.crit && (
-            <p className="text-ink-dim text-xs">Critical -- double damage!</p>
-          )}
-        </div>
-      )}
-
-      {/* Roll button — hidden for autoRoll (enemy turns) */}
+      {/* Roll button */}
       {phase === 'idle' && !autoRoll && (
-        <button
-          onClick={handleRoll}
+        <button onClick={handleRoll}
           className={
             'py-3 px-8 rounded-lg font-sans text-base font-semibold transition-all ' +
             (colour === 'red'
               ? 'bg-red-400/20 border border-red-400 text-red-400'
               : 'bg-gold text-bg hover:opacity-90 active:scale-95')
-          }
-        >
+          }>
           {buttonLabel || 'Attack!'}
         </button>
       )}
 
-      {/* Continue */}
       {showContinue && (
-        <button
-          onClick={function() {
-            if (onComplete) onComplete(attackResult, damageTotal || 0)
-          }}
-          className="py-2 px-6 rounded-lg bg-surface border border-border-hl text-ink font-sans text-sm hover:bg-raised transition-colors"
-        >
+        <button onClick={function() { if (onComplete) onComplete(attackResult, 0) }}
+          className="py-2 px-6 rounded-lg bg-surface border border-border-hl text-ink font-sans text-sm hover:bg-raised transition-colors">
           Continue
         </button>
       )}

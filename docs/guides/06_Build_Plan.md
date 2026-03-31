@@ -580,7 +580,9 @@ When you're ready to start building, give Claude Code:
 3. The UI specification doc (04) — tab structure and screen states
 4. The game mechanics doc (02) — dice, combat, items
 5. The sprite sheet HTML (06_Sprite_Sheet.html) — enemy grid data to extract
-6. Tell it: *"Start with Stage 1 Sprint 1. Build the Firebase scaffold and design system. Do not build features from later stages."*
+6. The conditions spec (07) — full Body/Mind/Soul condition system, persistence rules, gold banking
+7. The dungeon architecture doc (08) — floor themes, room types, environmental mechanics
+8. Tell it: *"Start with Stage 1 Sprint 1. Build the Firebase scaffold and design system. Do not build features from later stages."*
 
 The constraint on scope is important. Claude Code will want to build everything. Your job is to hold the line on stages.
 

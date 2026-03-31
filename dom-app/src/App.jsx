@@ -5,12 +5,13 @@ import Home from './pages/Home.jsx'
 import Tavern from './pages/Tavern.jsx'
 import Game from './pages/Game.jsx'
 import Results from './pages/Results.jsx'
+import LandingScene from './components/LandingScene.jsx'
 import './App.css'
 
-// Screens: home (auth) → tavern (start run) → game (dungeon) → results → tavern
+// Screens: home (auth) → landing (scene + name) → game (dungeon) → results → landing
 function App() {
   var { user, loading, error, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } = useAuth()
-  var [screen, setScreen] = useState('tavern') // tavern | game | results
+  var [screen, setScreen] = useState('landing') // landing | game | results
   var [character, setCharacter] = useState(null)
   var [runResult, setRunResult] = useState(null)
 
@@ -62,18 +63,16 @@ function App() {
         onReturnToTavern={function() {
           setCharacter(null)
           setRunResult(null)
-          setScreen('tavern')
+          setScreen('landing')
         }}
       />
     )
   }
 
-  // Default: tavern
+  // Default: landing scene
   return (
-    <Tavern
-      user={user}
-      onSignOut={signOut}
-      onStartRun={function(name) {
+    <LandingScene
+      onEnter={function(name) {
         var knight = generateKnight(name)
         setCharacter(knight)
         setScreen('game')
