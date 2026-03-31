@@ -147,8 +147,8 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   // Calculate damage based on tier
   if (attackResult.tier <= 3) {
     var weaponDie = 6
-    if (player.equipped && player.equipped.weapon && player.equipped.weapon.die) {
-      weaponDie = player.equipped.weapon.die
+    if (player.equipped && player.equipped.weapon) {
+      weaponDie = player.equipped.weapon.damageDie || player.equipped.weapon.die || 6
     }
 
     var dmgResult = rollDamage(weaponDie, strMod)

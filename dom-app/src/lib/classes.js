@@ -67,9 +67,9 @@ function generateKnight(name) {
     scars: [],
     titles: [],
     equipped: {
-      weapon: { name: 'Longsword', die: 8, stat: 'str', rarity: 'common' },
+      weapon: { id: 'longsword_common', name: 'Longsword', type: 'weapon', slot: 'weapon', damageDie: 8, attackStat: 'str', rarity: 'common', buyPrice: 25, sellPrice: 10, description: 'A sturdy blade. Gets the job done.' },
       offhand: null,
-      armour: { name: 'Chainmail', defBonus: 4, agiPenalty: -1, rarity: 'common' },
+      armour: { id: 'chainmail_common', name: 'Chainmail', type: 'armour', slot: 'armour', defBonus: 4, agiPenalty: -1, rarity: 'common', buyPrice: 30, sellPrice: 12, description: 'Heavy but protective.' },
       relics: [],
     },
     inventory: [],

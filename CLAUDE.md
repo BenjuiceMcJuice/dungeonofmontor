@@ -74,5 +74,6 @@ Rules:
 | `docs/specs/06_Sprite_Sheet.html` | **CURRENT** | All 5 enemy sprite grids as renderable HTML — extract into sprites.js |
 | `docs/specs/07_Conditions_and_Persistence.md` | **CURRENT** | Body/Mind/Soul condition slots, duration types, synergies, soul morphing, persistence across runs, gold banking |
 | `docs/specs/08_Dungeon_Architecture.md` | **CURRENT** | 10 dungeon floors, room types, environmental mechanics, navigation, Montor's Zone |
+| `docs/specs/09_Firestore_Data_Model.md` | **CURRENT** | Complete Firestore schemas for all content collections — living doc, update as fields emerge |
 | `docs/specs/conditions_table.html` | **CURRENT** | Interactive HTML reference for all 22 conditions (Body 8, Mind 8, Soul 6) — like sprite sheet but for conditions |
 | `docs/guides/06_Build_Plan.md` | **CURRENT** | 5-stage build plan with sprint breakdown (The Crawl → The Long Game) |
