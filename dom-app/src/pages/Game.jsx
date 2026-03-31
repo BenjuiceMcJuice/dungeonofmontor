@@ -1074,14 +1074,24 @@ function Game({ character, user, onEndRun }) {
       // Build items array — stronger enemies can drop multiple items
       var items = []
       if (loot.item) items.push(loot.item)
-      // Elite/boss: extra roll for a second item
+      // Elite: extra roll for a second item
       if (encounterLevel >= 2) {
         var loot2 = generateCombatLoot(encounterLevel, lckStat, currentFloorId)
         if (loot2.item) items.push(loot2.item)
       }
+      // Boss: guaranteed item + extra roll from chest table (best loot)
+      if (e.isBoss) {
+        var bossLoot = generateChestLoot(lckStat, currentFloorId)
+        if (bossLoot.item) items.push(bossLoot.item)
+        // If still no items, force one
+        if (items.length === 0) {
+          var forcedLoot = generateChestLoot(lckStat, currentFloorId)
+          if (forcedLoot.item) items.push(forcedLoot.item)
+        }
+      }
       return {
         id: e.id, name: e.name, archetypeKey: e.archetypeKey, tierKey: e.tierKey,
-        gold: Math.max(1, loot.gold + Math.round(e.xp * 0.2)),
+        gold: Math.max(1, loot.gold + Math.round(e.xp * (e.isBoss ? 0.5 : 0.2))),
         items: items,
         goldTaken: false,
         itemsTaken: [],    // indices of items already taken

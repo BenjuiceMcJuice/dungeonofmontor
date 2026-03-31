@@ -113,8 +113,14 @@ function generateBoss(difficulty, archetypeKey, tierKey, bossName) {
   var type = archetypeKey || 'orc'
   var tier = tierKey || 'void'
   var boss = generateEnemy(type, tier, difficulty)
+  // Bosses are beefier — 3x HP, +2 STR, +2 DEF
+  boss.maxHp = boss.maxHp * 3
+  boss.currentHp = boss.maxHp
+  boss.stats.str = boss.stats.str + 2
+  boss.stats.def = boss.stats.def + 2
   boss.name = bossName || 'The Unbroken'
-  boss.xp = tier === 'dust' ? 30 : tier === 'slate' ? 50 : tier === 'iron' ? 70 : 80
+  boss.xp = tier === 'dust' ? 40 : tier === 'slate' ? 60 : tier === 'iron' ? 80 : 100
+  boss.isBoss = true
   return boss
 }
 
