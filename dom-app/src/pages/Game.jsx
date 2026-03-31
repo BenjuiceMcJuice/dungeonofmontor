@@ -1395,9 +1395,10 @@ function Game({ character, user, onEndRun }) {
       <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">
-            {currentChamber.label}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
+            <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{currentChamber.label}</span>
+          </div>
           <div className="flex items-center gap-3">
             {playerInventory.length > 0 && (
               <button onClick={function() { setShowInventoryPanel(!showInventoryPanel) }}
@@ -2029,7 +2030,10 @@ function Game({ character, user, onEndRun }) {
       <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-ink-dim text-xs uppercase tracking-widest">{combatChamber.label} -- Round {battle.round}</span>
+          <div className="flex flex-col items-start">
+            <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
+            <span className="text-ink-dim text-xs uppercase tracking-widest">{combatChamber.label} -- Round {battle.round}</span>
+          </div>
         </div>
 
         {/* Enemies */}
