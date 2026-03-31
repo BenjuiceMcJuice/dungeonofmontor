@@ -91,9 +91,10 @@ var ENCOUNTER_POOLS = {
   4: { types: ['orc', 'rock', 'wraith'], tiers: ['slate', 'iron'], count: [1, 2] },
 }
 
-function generateCombatEnemies(difficulty, encounterLevel) {
+function generateCombatEnemies(difficulty, encounterLevel, zonePools) {
   var level = encounterLevel || 1
-  var pool = ENCOUNTER_POOLS[level] || ENCOUNTER_POOLS[1]
+  var pools = zonePools || ENCOUNTER_POOLS
+  var pool = pools[level] || pools[1] || ENCOUNTER_POOLS[1]
 
   var minCount = pool.count[0]
   var maxCount = pool.count[1]

@@ -31,7 +31,7 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 |            | Refactor engine to read content from Firestore, not hardcoded JS | ⬜ |
 |            | **Stage 1 — The Crawl (continued)** | |
 | 2026-03-31 | Sprint 4 — Items, loot tables, inventory, consumables in combat | ✅ Done |
-|            | Sprint 5 — Boss encounters + floor transition + run completion | ⬜ |
+| 2026-03-31 | Sprint 5 — Multi-floor progression, keystone, boss, zone doors, safe room, Floor -1 | ✅ Done |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
 
 ---

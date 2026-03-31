@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getModifier } from '../lib/classes.js'
 import { d20Attack, d20Flee } from '../lib/dice.js'
-import { generateGardenZone, generateChamberContent, getAdjacentChambers, getDoorDirection } from '../lib/dungeon.js'
+import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentChambers, getDoorDirection, ZONES, FLOORS } from '../lib/dungeon.js'
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, applyConsumable } from '../lib/loot.js'
@@ -84,8 +84,9 @@ function formatAttackLog(r, type) {
 
 function Game({ character, user, onEndRun }) {
   // --- Dungeon state ---
+  var [floor, setFloor] = useState(null)
   var [zone, setZone] = useState(null)
-  // Phases: doors | entering | chamber | combat | victory | defeat
+  // Phases: doors | entering | chamber | combat | victory | defeat | safe_room | floor_transition
   var [gamePhase, setGamePhase] = useState('doors')
   var [chamberContent, setChamberContent] = useState(null)
   var [totalXp, setTotalXp] = useState(0)
@@ -95,6 +96,8 @@ function Game({ character, user, onEndRun }) {
   var [previousPosition, setPreviousPosition] = useState(null)
   var [playerInventory, setPlayerInventory] = useState(character.inventory ? character.inventory.slice() : [])
   var [activeBuffs, setActiveBuffs] = useState([])
+  var [hasZoneKey, setHasZoneKey] = useState(false)
+  var [floorsCompleted, setFloorsCompleted] = useState([])
 
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
 
@@ -167,11 +170,13 @@ function Game({ character, user, onEndRun }) {
   var [montorWhisper, setMontorWhisper] = useState(null)
   var logRef = useRef(null)
 
-  // Init zone — start at entry, show doors
+  // Init floor — start at Garden
   useEffect(function() {
     window.scrollTo(0, 0)
-    var z = generateGardenZone()
-    setZone(z)
+    var f = generateFloor('grounds')
+    setFloor(f)
+    setZone(f.zones[0])
+    setHasZoneKey(false)
     setGamePhase('doors')
   }, [])
 
@@ -223,16 +228,51 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
-    var content = generateChamberContent(chamber, 'seasoned')
+    var zoneDef = ZONES[newZone.zoneId] || null
+    var content = generateChamberContent(chamber, 'seasoned', zoneDef)
     setChamberContent(content)
 
+    // --- Combat chambers ---
     if (content && content.enemies) {
       setGamePhase('entering')
       setTimeout(function() {
         startCombat(content.enemies, newZone, targetId)
       }, 800)
-    } else if (content && (chamber.type === 'loot' || chamber.type === 'hidden')) {
-      // Store chest on the chamber — player interacts in doors view
+    }
+    // --- Keystone chamber --- press to unlock stairwell
+    else if (chamber.type === 'keystone') {
+      // Auto-mark as keystone in doors view — player interacts there
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { isKeystone: true })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Zone door --- locked until key obtained
+    else if (chamber.type === 'zone_door') {
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { isZoneDoor: true })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Stairwell descent --- locked until keystone pressed + boss defeated
+    else if (chamber.type === 'stairwell_descent') {
+      // Handled in doors view — shows locked/unlocked state
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Loot / Hidden --- chest entity
+    else if (content && (chamber.type === 'loot' || chamber.type === 'hidden')) {
       var chestItems = []
       if (content.item) chestItems.push(content.item)
       var chest = {
@@ -253,15 +293,16 @@ function Game({ character, user, onEndRun }) {
       setZone(newZone)
       setChamberContent(null)
       setGamePhase('doors')
-    } else if (content && (chamber.type === 'merchant' || chamber.type === 'quest_npc')) {
-      // Store NPC on the chamber — player interacts in doors view
+    }
+    // --- Merchant / Quest NPC --- NPC entity
+    else if (content && (chamber.type === 'merchant' || chamber.type === 'quest_npc')) {
       var npc = {
         id: 'npc_' + targetId,
         type: chamber.type,
         name: chamber.type === 'merchant' ? 'Wandering Vendor' : (content.npcName || 'Stranger'),
         description: content.description,
-        items: content.items || [],       // merchant wares
-        reward: content.reward || null,   // quest reward
+        items: content.items || [],
+        reward: content.reward || null,
         interacted: false,
         showSell: false,
       }
@@ -274,9 +315,84 @@ function Game({ character, user, onEndRun }) {
       setZone(newZone)
       setChamberContent(null)
       setGamePhase('doors')
-    } else {
+    }
+    // --- Everything else --- ChamberView (rest, trap, event, etc.)
+    else {
       setGamePhase('chamber')
     }
+  }
+
+  // --- Keystone press ---
+  function handlePressKeystone() {
+    var newZone = Object.assign({}, zone, { keystonePressed: true })
+    newZone.chambers = newZone.chambers.map(function(ch) {
+      if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
+      return ch
+    })
+    setZone(newZone)
+    setChambersCleared(chambersCleared + 1)
+  }
+
+  // --- Zone door ---
+  function handleOpenZoneDoor() {
+    if (!hasZoneKey) return
+    if (!floor || !floor.zones) return
+    // Move to next zone
+    var nextZoneIndex = (floor.currentZoneIndex + 1) % floor.zones.length
+    if (nextZoneIndex === floor.currentZoneIndex) return // only one zone
+    var nextZone = floor.zones[nextZoneIndex]
+    setFloor(Object.assign({}, floor, { currentZoneIndex: nextZoneIndex }))
+    setZone(nextZone)
+    setHasZoneKey(false)
+    setPreviousPosition(null)
+    setLootingCorpseId(null)
+    setLootingChestId(null)
+    setLootingNpcId(null)
+  }
+
+  // --- Stairwell descent --- triggers floor transition
+  function handleDescendStairwell() {
+    if (!zone.keystonePressed) return  // locked
+    // Check if boss is cleared (boss chamber must be cleared)
+    var bossCleared = zone.chambers.every(function(ch) {
+      return ch.type !== 'boss' || ch.cleared
+    })
+    if (!bossCleared) return  // boss not defeated
+
+    // Floor transition → safe room
+    setFloorsCompleted(function(prev) { return prev.concat([zone.floorId]) })
+    setGamePhase('floor_transition')
+  }
+
+  // --- Floor transition: move to next floor or victory ---
+  function handleFloorTransitionContinue() {
+    // Determine next floor
+    var floorOrder = ['grounds', 'underground']  // expand as floors are added
+    var currentIdx = floorOrder.indexOf(floor.floorId)
+    var nextFloorId = floorOrder[currentIdx + 1]
+
+    if (!nextFloorId || !FLOORS[nextFloorId]) {
+      // No more floors — victory!
+      writeRunLog('victory')
+      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length, floorsCompleted: floorsCompleted.length + 1 })
+      return
+    }
+
+    // Generate next floor
+    var nextFloor = generateFloor(nextFloorId)
+    setFloor(nextFloor)
+    setZone(nextFloor.zones[0])
+    setHasZoneKey(false)
+    setPreviousPosition(null)
+    setLootingCorpseId(null)
+    setLootingChestId(null)
+    setLootingNpcId(null)
+    setGamePhase('safe_room')
+  }
+
+  // --- Safe room: Montor's audience chamber ---
+  function handleSafeRoomContinue() {
+    setGamePhase('doors')
   }
 
   // --- Chamber interaction actions ---
@@ -323,8 +439,7 @@ function Game({ character, user, onEndRun }) {
       }
       setChamberContent(Object.assign({}, chamberContent, { helped: true }))
     } else if (action === 'descend') {
-      writeRunLog('victory')
-      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length })
+      handleDescendStairwell()
       return
     }
   }
@@ -792,6 +907,13 @@ function Game({ character, user, onEndRun }) {
       }
     })
 
+    // Mini-boss drops zone key
+    if (chamberContent && (chamberContent.dropsZoneKey || chamberContent.isBoss)) {
+      if (floor && floor.zones && floor.zones.length > 1 && !hasZoneKey) {
+        setHasZoneKey(true)
+      }
+    }
+
     // Store corpses on the chamber in zone state
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
@@ -977,6 +1099,49 @@ function Game({ character, user, onEndRun }) {
     )
   }
 
+  // --- Floor transition ---
+  if (gamePhase === 'floor_transition') {
+    return (
+      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+        <p className="text-ink text-lg italic max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+          {floor ? floor.transitionText : 'You descend deeper...'}
+        </p>
+        <button onClick={handleFloorTransitionContinue}
+          className="py-3 px-8 rounded-lg bg-surface border border-border text-ink font-sans text-base hover:border-gold transition-colors">
+          Continue
+        </button>
+      </div>
+    )
+  }
+
+  // --- Safe room (Montor's audience chamber) ---
+  if (gamePhase === 'safe_room') {
+    return (
+      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-8 bg-raised">
+        <h2 className="font-display text-2xl text-gold">{floor ? floor.floorName : 'Unknown Depth'}</h2>
+        <div className="max-w-sm">
+          <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
+          </p>
+          <p className="text-ink-faint text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            "{floor ? floor.montorLine : 'I see you.'}"
+          </p>
+        </div>
+        <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs text-sm text-ink-dim">
+          <p>HP: <span className="text-ink">{playerHp}/{character.maxHp}</span></p>
+          <p>Gold: <span className="text-gold">{playerGold}</span></p>
+          <p>Items: <span className="text-emerald-400">{playerInventory.length}</span></p>
+          <p>Chambers cleared: <span className="text-ink">{chambersCleared}</span></p>
+          <p>XP: <span className="text-ink">{totalXp}</span></p>
+        </div>
+        <button onClick={handleSafeRoomContinue}
+          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-lg hover:border-gold transition-colors">
+          Enter {floor ? floor.floorName : 'the depths'}
+        </button>
+      </div>
+    )
+  }
+
   // --- Defeat ---
   if (gamePhase === 'defeat') {
     return (
@@ -1113,6 +1278,72 @@ function Game({ character, user, onEndRun }) {
                   "{montorWhisper}"
                 </p>
               )}
+
+              {/* Keystone pedestal */}
+              {currentChamber.isKeystone && !currentChamber.cleared && (
+                <div className="flex flex-col items-center gap-3">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  {zone.keystonePressed ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-gold text-sm font-sans">The keystone is pressed. Something shifts deep below.</p>
+                      <button onClick={function() { handlePressKeystone() }}
+                        className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm">
+                        Continue
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-ink text-sm italic">A stone pedestal. A carved slot awaits a heavy hand.</p>
+                      <button onClick={function() { handlePressKeystone() }}
+                        className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base animate-pulse">
+                        Press the Keystone
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Zone door (locked/unlocked) */}
+              {currentChamber.isZoneDoor && !currentChamber.cleared && (
+                <div className="flex flex-col items-center gap-3">
+                  <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-ink text-sm italic">A heavy door. {hasZoneKey ? 'Your key fits the lock.' : 'Locked. You need a key.'}</p>
+                  {hasZoneKey ? (
+                    <button onClick={handleOpenZoneDoor}
+                      className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
+                      Open Door
+                    </button>
+                  ) : (
+                    <p className="text-red-400 text-xs font-sans">Find the key to proceed.</p>
+                  )}
+                </div>
+              )}
+
+              {/* Stairwell descent (locked until keystone + boss) */}
+              {currentChamber.type === 'stairwell_descent' && !currentChamber.cleared && (function() {
+                var bossCleared = zone.chambers.every(function(ch) { return ch.type !== 'boss' || ch.cleared })
+                var canDescend = zone.keystonePressed && bossCleared
+                return (
+                  <div className="flex flex-col items-center gap-3">
+                    <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
+                    {canDescend ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-gold text-sm italic">The way down is open.</p>
+                        <button onClick={handleDescendStairwell}
+                          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-lg">
+                          Descend
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-ink text-sm italic">Stone steps spiral downward. The way is sealed.</p>
+                        {!zone.keystonePressed && <p className="text-red-400 text-xs font-sans">The keystone has not been pressed.</p>}
+                        {zone.keystonePressed && !bossCleared && <p className="text-red-400 text-xs font-sans">The guardian still blocks the way.</p>}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
 
               {/* NPC in room (merchant/quest) */}
               {currentChamber.npc && !lootingNpcId && !lootingChestId && !lootingCorpseId ? (function() {
