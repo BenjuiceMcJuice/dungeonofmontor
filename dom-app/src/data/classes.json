@@ -27,14 +27,19 @@
   ],
   "statPointsTotal": 70,
   "startingKnight": {
-    "stats": {
-      "str": 14, "def": 10, "vit": 10, "end": 8,
-      "agi": 10, "per": 4, "wil": 3,
-      "int": 2, "wis": 1, "lck": 2,
-      "cha": 1, "res": 2, "sth": 1, "cun": 2
+    "baseStats": {
+      "str": 8, "def": 8, "agi": 8, "int": 6, "lck": 6,
+      "per": 6, "end": 6, "wis": 6, "cha": 6,
+      "vit": 4, "res": 4, "sth": 4, "cun": 4, "wil": 4
     },
+    "freeStatPoints": 10,
+    "allocatableStats": ["str", "def", "agi", "int", "lck", "per", "end", "wis", "cha"],
     "maxHp": 45,
-    "weaponId": "longsword_common",
-    "armourId": "chainmail_common"
+    "startingGold": 50,
+    "starterShopItems": [
+      "dagger_common", "shortsword_common", "longsword_common", "mace_common",
+      "leather_common", "chainmail_common", "wooden_shield",
+      "health_potion", "health_potion", "smoke_bomb", "rage_draught"
+    ]
   }
 }

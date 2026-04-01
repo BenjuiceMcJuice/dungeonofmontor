@@ -18,10 +18,11 @@ function getMaxHp(cls, stats) {
   return cls.baseHp + (stats.vit * 5) + (stats.end * 2)
 }
 
-// Generate a Knight with stats and equipment from JSON data
+// Generate a Knight with base stats, no equipment, and starting gold
+// Stats are allocated on the Preparation screen before the run
 function generateKnight(name) {
   var start = classData.startingKnight
-  var stats = Object.assign({}, start.stats)
+  var stats = Object.assign({}, start.baseStats)
 
   return {
     name: name,
@@ -34,13 +35,13 @@ function generateKnight(name) {
     scars: [],
     titles: [],
     equipped: {
-      weapon: ITEMS[start.weaponId] ? Object.assign({}, ITEMS[start.weaponId]) : null,
+      weapon: null,
       offhand: null,
-      armour: ITEMS[start.armourId] ? Object.assign({}, ITEMS[start.armourId]) : null,
+      armour: null,
       relics: [],
     },
     inventory: [],
-    gold: 0,
+    gold: start.startingGold || 50,
   }
 }
 

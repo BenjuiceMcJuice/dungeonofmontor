@@ -12,6 +12,7 @@ import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
 import CombatRoller from '../components/CombatRoller.jsx'
+import StatPicker from '../components/StatPicker.jsx'
 import ChamberView from '../components/ChamberView.jsx'
 import DoorSprite from '../components/DoorSprite.jsx'
 import ChamberIcon from '../components/ChamberIcon.jsx'
@@ -2198,42 +2199,16 @@ function Game({ character, user, onEndRun }) {
 
           {/* Level up! */}
           {pendingLevelUp && (
-            <div className="bg-surface border-2 border-gold rounded-lg p-5 w-full max-w-xs" onClick={function(e) { e.stopPropagation() }}>
-              <p className="text-gold font-display text-xl mb-2">Level Up!</p>
+            <div className="w-full max-w-xs" onClick={function(e) { e.stopPropagation() }}>
+              <p className="text-gold font-display text-xl mb-2 text-center">Level Up!</p>
               {pendingLevelUp.hpGain > 0 && (
-                <p className="text-green-400 text-sm mb-2">+{pendingLevelUp.hpGain} max HP</p>
+                <p className="text-green-400 text-sm mb-2 text-center">+{pendingLevelUp.hpGain} max HP</p>
               )}
               {pendingLevelUp.statPick ? (
-                <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto">
-                  <p className="text-ink text-sm mb-1">Choose a stat to increase:</p>
-                  {[
-                    { id: 'str', hint: 'Attack damage' },
-                    { id: 'def', hint: 'Damage reduction, shield block' },
-                    { id: 'agi', hint: 'Initiative, double strike' },
-                    { id: 'int', hint: 'Condition application' },
-                    { id: 'lck', hint: 'Loot rarity' },
-                    { id: 'per', hint: 'Searching, spotting' },
-                    { id: 'end', hint: 'Carry capacity' },
-                    { id: 'wis', hint: 'Gift power' },
-                    { id: 'cha', hint: 'Merchant prices' },
-                  ].map(function(s) {
-                    return (
-                      <button key={s.id}
-                        onClick={function() { handleStatPick(s.id) }}
-                        className="flex items-center justify-between p-2 rounded border border-border-hl bg-raised text-sm font-sans hover:border-gold transition-colors cursor-pointer"
-                      >
-                        <div className="flex flex-col items-start">
-                          <span className="text-ink uppercase font-semibold">{s.id}</span>
-                          <span className="text-ink-faint text-[10px]">{s.hint}</span>
-                        </div>
-                        <span className="text-ink-dim">{character.stats[s.id]} → <span className="text-gold">{character.stats[s.id] + 1}</span></span>
-                      </button>
-                    )
-                  })}
-                </div>
+                <StatPicker stats={character.stats} onPick={handleStatPick} mode="levelup" />
               ) : (
                 <button onClick={handleLevelUpDismiss}
-                  className="py-2 px-6 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-sm">
+                  className="w-full py-2 px-6 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-sm">
                   Continue
                 </button>
               )}

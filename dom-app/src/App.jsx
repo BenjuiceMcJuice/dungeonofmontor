@@ -5,13 +5,14 @@ import Home from './pages/Home.jsx'
 import Tavern from './pages/Tavern.jsx'
 import Game from './pages/Game.jsx'
 import Results from './pages/Results.jsx'
+import Preparation from './pages/Preparation.jsx'
 import LandingScene from './components/LandingScene.jsx'
 import './App.css'
 
-// Screens: home (auth) → landing (scene + name) → game (dungeon) → results → landing
+// Screens: home (auth) → landing (scene + name) → prep (stats + shop) → game (dungeon) → results → landing
 function App() {
   var { user, loading, error, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } = useAuth()
-  var [screen, setScreen] = useState('landing') // landing | game | results
+  var [screen, setScreen] = useState('landing') // landing | prep | game | results
   var [character, setCharacter] = useState(null)
   var [runResult, setRunResult] = useState(null)
 
@@ -42,6 +43,18 @@ function App() {
   }
 
   // Signed in — route by screen
+  if (screen === 'prep' && character) {
+    return (
+      <Preparation
+        character={character}
+        onReady={function(preparedCharacter) {
+          setCharacter(preparedCharacter)
+          setScreen('game')
+        }}
+      />
+    )
+  }
+
   if (screen === 'game' && character) {
     return (
       <Game
@@ -75,7 +88,7 @@ function App() {
       onEnter={function(name) {
         var knight = generateKnight(name)
         setCharacter(knight)
-        setScreen('game')
+        setScreen('prep')
       }}
     />
   )
