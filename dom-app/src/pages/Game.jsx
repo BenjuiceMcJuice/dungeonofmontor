@@ -644,7 +644,19 @@ function Game({ character, user, onEndRun }) {
     var attackOut = enemyAttackInfo.attackOut
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'enemy')
-    addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
+    if (r.blocked) {
+      addLog({ type: 'player', text: 'Shield block! Attack negated!', tier: 'crit' })
+    } else if (r.dodged) {
+      addLog({ type: 'player', text: 'Dodged! Attack evaded!', tier: 'crit' })
+    } else {
+      addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
+    }
+    if (r.reflectDamage) {
+      addLog({ type: 'player', text: 'Reflected ' + r.reflectDamage + ' damage back!' + (r.reflectKill ? ' It dies!' : ''), tier: 'hit' })
+    }
+    if (r.conditionBlocked) {
+      addLog({ type: 'player', text: r.conditionBlocked + ' blocked by immunity!', tier: 'hit' })
+    }
 
     // Log condition applied
     if (r.conditionApplied) {
@@ -804,6 +816,15 @@ function Game({ character, user, onEndRun }) {
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'player')
     addLog({ type: 'player', text: logEntry.text, tier: logEntry.tier })
+    if (r.doubleStrike) {
+      addLog({ type: 'player', text: 'Double strike! ' + r.doubleStrikeDamage + ' bonus damage!', tier: 'crit' })
+    }
+    if (r.lifestealHeal) {
+      addLog({ type: 'player', text: 'Lifesteal: healed ' + r.lifestealHeal + ' HP.', tier: 'hit' })
+    }
+    if (r.rerolled) {
+      addLog({ type: 'player', text: 'Loaded Dice: rerolled a 1!', tier: 'hit' })
+    }
     if (r.conditionApplied) {
       addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
     }
@@ -1368,14 +1389,11 @@ function Game({ character, user, onEndRun }) {
   // --- Floor transition ---
   if (gamePhase === 'floor_transition') {
     return (
-      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+      <div onClick={handleFloorTransitionContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
         <p className="text-ink text-lg italic max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
           {floor ? floor.transitionText : 'You descend deeper...'}
         </p>
-        <button onClick={handleFloorTransitionContinue}
-          className="py-3 px-8 rounded-lg bg-surface border border-border text-ink font-sans text-base hover:border-gold transition-colors">
-          Continue
-        </button>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
       </div>
     )
   }
@@ -1383,7 +1401,7 @@ function Game({ character, user, onEndRun }) {
   // --- Safe room (Montor's audience chamber) ---
   if (gamePhase === 'safe_room') {
     return (
-      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-8 bg-raised">
+      <div onClick={handleSafeRoomContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-8 bg-raised cursor-pointer">
         <h2 className="font-display text-2xl text-gold">{floor ? floor.floorName : 'Unknown Depth'}</h2>
         <div className="max-w-sm">
           <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
@@ -1400,10 +1418,7 @@ function Game({ character, user, onEndRun }) {
           <p>Chambers cleared: <span className="text-ink">{chambersCleared}</span></p>
           <p>XP: <span className="text-ink">{totalXp}</span></p>
         </div>
-        <button onClick={handleSafeRoomContinue}
-          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-lg hover:border-gold transition-colors">
-          Enter {floor ? floor.floorName : 'the depths'}
-        </button>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
       </div>
     )
   }
@@ -1411,17 +1426,15 @@ function Game({ character, user, onEndRun }) {
   // --- Defeat ---
   if (gamePhase === 'defeat') {
     return (
-      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+      <div onClick={function() { writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
+        className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
         <h1 className="font-display text-4xl text-red-400">Defeated</h1>
         <p className="text-ink text-lg italic">Darkness swallows you whole.</p>
         <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
           <p className="text-ink text-sm">Chambers cleared: {chambersCleared}</p>
           <p className="text-ink text-sm mt-1">XP earned: <span className="text-gold">{Math.round(totalXp * 0.5)}</span></p>
         </div>
-        <button onClick={function() { writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
-          className="py-3 px-8 rounded-lg bg-surface border border-border text-ink font-sans text-base">
-          Return to Tavern
-        </button>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to return</p>
       </div>
     )
   }
@@ -2147,7 +2160,7 @@ function Game({ character, user, onEndRun }) {
       : 'Blocked!'
 
     return (
-      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-5 bg-raised">
+      <div onClick={handleFleeResultContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-5 bg-raised cursor-pointer">
         <p className={'font-display text-2xl ' + fleeColour}>{fleeTitle}</p>
         <p className="text-ink text-base italic max-w-xs">{fleeOutcome.narrative}</p>
 
@@ -2162,10 +2175,7 @@ function Game({ character, user, onEndRun }) {
           </div>
         )}
 
-        <button onClick={handleFleeResultContinue}
-          className="py-3 px-8 rounded-lg bg-surface border border-border-hl text-ink font-sans text-base">
-          {fleeOutcome.fled ? 'Continue' : 'Back to fight'}
-        </button>
+        <p className="text-ink-faint text-xs font-sans">{fleeOutcome.fled ? 'Tap anywhere to continue' : 'Tap anywhere to return to fight'}</p>
 
         {renderPartyBar()}
       </div>
@@ -2177,7 +2187,8 @@ function Game({ character, user, onEndRun }) {
     // Combat victory — show doors after
     if (combatPhase === 'victory') {
       return (
-        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+        <div onClick={pendingLevelUp ? undefined : handleCombatVictoryToDoors}
+          className={'h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised' + (pendingLevelUp ? '' : ' cursor-pointer')}>
           <h1 className="font-display text-4xl text-gold">Victory</h1>
           <p className="text-ink text-base italic">The chamber falls silent.</p>
           <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
@@ -2187,22 +2198,35 @@ function Game({ character, user, onEndRun }) {
 
           {/* Level up! */}
           {pendingLevelUp && (
-            <div className="bg-surface border-2 border-gold rounded-lg p-5 w-full max-w-xs">
+            <div className="bg-surface border-2 border-gold rounded-lg p-5 w-full max-w-xs" onClick={function(e) { e.stopPropagation() }}>
               <p className="text-gold font-display text-xl mb-2">Level Up!</p>
               {pendingLevelUp.hpGain > 0 && (
                 <p className="text-green-400 text-sm mb-2">+{pendingLevelUp.hpGain} max HP</p>
               )}
               {pendingLevelUp.statPick ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto">
                   <p className="text-ink text-sm mb-1">Choose a stat to increase:</p>
-                  {['str', 'def', 'agi', 'wis', 'int'].map(function(stat) {
+                  {[
+                    { id: 'str', hint: 'Attack damage' },
+                    { id: 'def', hint: 'Damage reduction, shield block' },
+                    { id: 'agi', hint: 'Initiative, double strike' },
+                    { id: 'int', hint: 'Condition application' },
+                    { id: 'lck', hint: 'Loot rarity' },
+                    { id: 'per', hint: 'Searching, spotting' },
+                    { id: 'end', hint: 'Carry capacity' },
+                    { id: 'wis', hint: 'Gift power' },
+                    { id: 'cha', hint: 'Merchant prices' },
+                  ].map(function(s) {
                     return (
-                      <button key={stat}
-                        onClick={function() { handleStatPick(stat) }}
+                      <button key={s.id}
+                        onClick={function() { handleStatPick(s.id) }}
                         className="flex items-center justify-between p-2 rounded border border-border-hl bg-raised text-sm font-sans hover:border-gold transition-colors cursor-pointer"
                       >
-                        <span className="text-ink uppercase font-semibold">{stat}</span>
-                        <span className="text-ink-dim">{character.stats[stat]} → <span className="text-gold">{character.stats[stat] + 1}</span></span>
+                        <div className="flex flex-col items-start">
+                          <span className="text-ink uppercase font-semibold">{s.id}</span>
+                          <span className="text-ink-faint text-[10px]">{s.hint}</span>
+                        </div>
+                        <span className="text-ink-dim">{character.stats[s.id]} → <span className="text-gold">{character.stats[s.id] + 1}</span></span>
                       </button>
                     )
                   })}
@@ -2217,10 +2241,7 @@ function Game({ character, user, onEndRun }) {
           )}
 
           {!pendingLevelUp && (
-            <button onClick={handleCombatVictoryToDoors}
-              className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
-              Continue
-            </button>
+            <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
           )}
         </div>
       )
@@ -2378,8 +2399,10 @@ function Game({ character, user, onEndRun }) {
                   damageMod={strMod}
                   colour="gold"
                   buttonLabel={'Attack ' + targetEnemy.name}
-                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage : null}
+                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage - (pendingAttackResult.result.doubleStrikeDamage || 0) : null}
                   damageBreakdown={pendingAttackResult ? pendingAttackResult.result.damageBreakdown : null}
+                  doubleStrike={pendingAttackResult ? pendingAttackResult.result.doubleStrike : false}
+                  doubleStrikeDamage={pendingAttackResult ? pendingAttackResult.result.doubleStrikeDamage : 0}
                   attackerName={character.name}
                   targetName={targetEnemy.name}
                 />
