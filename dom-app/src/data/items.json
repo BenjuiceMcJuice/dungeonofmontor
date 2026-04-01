@@ -159,6 +159,12 @@
     "buyPrice": 10, "sellPrice": 4,
     "description": "Found in a cupboard. Unlabelled. Heals 15 HP somehow."
   },
+  "montors_marvelous_medicine": {
+    "id": "montors_marvelous_medicine", "name": "Montor's Marvellous Medicine", "type": "consumable",
+    "rarity": "common", "effect": "random_effect", "effectValue": 0,
+    "buyPrice": 5, "sellPrice": 2,
+    "description": "Unlabelled bottle. Could be anything. Montor swears it's fine."
+  },
   "greater_health_potion": {
     "id": "greater_health_potion", "name": "Suspiciously Good Red Liquid", "type": "consumable",
     "rarity": "uncommon", "effect": "heal", "effectValue": 30,

@@ -14,7 +14,8 @@
       "goldMin": 2, "goldMax": 8,
       "itemDropChance": 0.4,
       "entries": [
-        { "itemId": "health_potion",             "weight": 45, "minRarity": "common" },
+        { "itemId": "health_potion",             "weight": 40, "minRarity": "common" },
+        { "itemId": "montors_marvelous_medicine","weight": 10, "minRarity": "common" },
         { "itemId": "dagger_common",             "weight": 10, "minRarity": "common" },
         { "itemId": "mace_common",               "weight": 8,  "minRarity": "common" },
         { "itemId": "wooden_shield",             "weight": 6,  "minRarity": "common" },
@@ -82,7 +83,8 @@
       "goldMin": 4, "goldMax": 12,
       "itemDropChance": 0.35,
       "entries": [
-        { "itemId": "health_potion",             "weight": 25, "minRarity": "common" },
+        { "itemId": "health_potion",             "weight": 20, "minRarity": "common" },
+        { "itemId": "montors_marvelous_medicine","weight": 8,  "minRarity": "common" },
         { "itemId": "shortsword_common",         "weight": 10, "minRarity": "common" },
         { "itemId": "antidote",                  "weight": 10, "minRarity": "common" },
         { "itemId": "smelling_salts",            "weight": 10, "minRarity": "common" },
