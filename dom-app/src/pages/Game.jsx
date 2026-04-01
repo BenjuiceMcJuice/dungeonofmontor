@@ -242,7 +242,7 @@ function Game({ character, user, onEndRun }) {
   }, [])
 
   useEffect(function() {
-    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
+    // logRef scroll removed — now showing last 2 entries only
   }, [combatLog])
 
   // --- Get available doors from current position ---
@@ -2443,72 +2443,98 @@ function Game({ character, user, onEndRun }) {
           </div>
         </div>
 
-        {/* Enemies */}
-        <div className="flex flex-wrap justify-center gap-2 mb-2">
-          {battle.enemies.map(function(enemy) {
-            var isTarget = selectedTarget === enemy.id
-            var isDead = enemy.isDown
-            var isActing = activeEnemyId === enemy.id
-            return (
-              <button key={enemy.id}
-                onClick={function() {
-                  if (isDead || !isPlayerTurn || pendingAttackResult) return
-                  if (isTarget) {
-                    // Already selected — clicking again triggers attack roll directly
-                    handlePlayerAttackDirect(enemy.id)
-                  } else {
-                    handleSelectTarget(enemy.id)
-                  }
-                }}
-                disabled={isDead || !isPlayerTurn}
-                className={
-                  'flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ' +
-                  (isDead ? 'opacity-20 border-transparent' :
-                   isActing ? 'border-red-400 bg-red-400/10 scale-105' :
-                   isTarget ? 'border-gold bg-gold-glow' :
-                   isPlayerTurn ? 'border-border-hl hover:border-ink-faint cursor-pointer' :
-                   'border-border')
-                }>
-                <SpriteRenderer spriteKey={enemy.archetypeKey} tierKey={enemy.tierKey} scale={3} />
-                <span className="font-display text-sm text-ink">{enemy.name}</span>
-                <div className="w-20 bg-bg rounded-full h-2">
-                  <div className="bg-red-500 rounded-full h-2 transition-all duration-300"
-                    style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }} />
-                </div>
-                <span className="text-ink text-xs font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
-                <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
-                  <span>STR {enemy.stats.str}</span>
-                  <span>DEF {enemy.stats.def}</span>
-                </div>
-                {enemy.statusEffects && enemy.statusEffects.length > 0 && (
-                  <div className="flex gap-1 flex-wrap mt-0.5 items-center">
-                    {enemy.statusEffects.map(function(c, ci) {
-                      return (
-                        <div key={ci} className="flex items-center gap-0.5 px-1 rounded bg-red-500/20">
-                          <ConditionIcon conditionId={c.id} scale={2} />
-                          <span className="text-[8px] font-sans text-red-300">{c.turnsRemaining || '~'}</span>
+        {/* Enemies — compact when 3+ */}
+        {(function() {
+          var livingEnemies = battle.enemies.filter(function(e) { return !e.isDown })
+          var compact = battle.enemies.length >= 3
+          return (
+            <div className={'flex flex-wrap justify-center gap-1.5 mb-2' + (compact ? ' gap-1' : '')}>
+              {battle.enemies.map(function(enemy) {
+                var isTarget = selectedTarget === enemy.id
+                var isDead = enemy.isDown
+                var isActing = activeEnemyId === enemy.id
+                return (
+                  <button key={enemy.id}
+                    onClick={function() {
+                      if (isDead || !isPlayerTurn || pendingAttackResult) return
+                      if (isTarget) {
+                        handlePlayerAttackDirect(enemy.id)
+                      } else {
+                        handleSelectTarget(enemy.id)
+                      }
+                    }}
+                    disabled={isDead || !isPlayerTurn}
+                    className={
+                      (compact
+                        ? 'flex items-center gap-1.5 px-2 py-1.5 rounded-lg border-2 transition-all '
+                        : 'flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ') +
+                      (isDead ? 'opacity-20 border-transparent' :
+                       isActing ? 'border-red-400 bg-red-400/10 scale-105' :
+                       isTarget ? 'border-gold bg-gold-glow' :
+                       isPlayerTurn ? 'border-border-hl hover:border-ink-faint cursor-pointer' :
+                       'border-border')
+                    }>
+                    <SpriteRenderer spriteKey={enemy.archetypeKey} tierKey={enemy.tierKey} scale={compact ? 2 : 3} />
+                    {compact ? (
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="font-display text-xs text-ink truncate">{enemy.name}</span>
+                        <div className="w-16 bg-bg rounded-full h-1.5">
+                          <div className="bg-red-500 rounded-full h-1.5 transition-all duration-300"
+                            style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }} />
                         </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </button>
-            )
-          })}
-        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-ink text-[9px] font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
+                          {enemy.statusEffects && enemy.statusEffects.map(function(c, ci) {
+                            return <ConditionIcon key={ci} conditionId={c.id} scale={2} />
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="font-display text-sm text-ink">{enemy.name}</span>
+                        <div className="w-20 bg-bg rounded-full h-2">
+                          <div className="bg-red-500 rounded-full h-2 transition-all duration-300"
+                            style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }} />
+                        </div>
+                        <span className="text-ink text-xs font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
+                        <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
+                          <span>STR {enemy.stats.str}</span>
+                          <span>DEF {enemy.stats.def}</span>
+                        </div>
+                        {enemy.statusEffects && enemy.statusEffects.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mt-0.5 items-center">
+                            {enemy.statusEffects.map(function(c, ci) {
+                              return (
+                                <div key={ci} className="flex items-center gap-0.5 px-1 rounded bg-red-500/20">
+                                  <ConditionIcon conditionId={c.id} scale={2} />
+                                  <span className="text-[8px] font-sans text-red-300">{c.turnsRemaining || '~'}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )
+        })()}
 
-        {/* Combat log */}
-        <div ref={logRef} data-scrollable className="bg-surface border border-border rounded-lg p-2 mb-2 max-h-24 overflow-y-auto shrink-0">
-          {combatLog.length === 0 && <p className="text-ink-dim text-sm italic">The battle begins...</p>}
-          {combatLog.map(function(entry, i) {
-            var logColour = 'text-ink-dim'
-            if (entry.tier === 'crit') logColour = 'text-crimson'
-            else if (entry.tier === 'hit') logColour = 'text-amber-500'
-            else if (entry.tier === 'glancing') logColour = 'text-yellow-400/80'
-            else if (entry.tier === 'miss') logColour = 'text-ink-faint'
-            return <p key={i} className={'text-xs leading-relaxed mb-1 ' + logColour}>{entry.text}</p>
-          })}
-        </div>
+        {/* Last action — replaces scrolling combat log */}
+        {combatLog.length > 0 && (
+          <div className="mb-2 shrink-0">
+            {combatLog.slice(-2).map(function(entry, i) {
+              var logColour = 'text-ink-dim'
+              if (entry.tier === 'crit') logColour = 'text-crimson'
+              else if (entry.tier === 'hit') logColour = 'text-amber-500'
+              else if (entry.tier === 'glancing') logColour = 'text-yellow-400/80'
+              else if (entry.tier === 'miss') logColour = 'text-ink-faint'
+              return <p key={i} className={'text-xs text-center leading-relaxed ' + logColour}>{entry.text}</p>
+            })}
+          </div>
+        )}
 
         {/* Action area */}
         <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
