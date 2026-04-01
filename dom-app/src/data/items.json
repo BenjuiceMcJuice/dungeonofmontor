@@ -40,7 +40,7 @@
   "montors_pruning_shears": {
     "id": "montors_pruning_shears", "name": "Montor's Pruning Shears", "type": "weapon", "slot": "weapon",
     "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.2, "defIgnore": 0,
-    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
     "conditionOnHit": "BLEED", "conditionChance": 1.0,
     "giftPower": "petal",
     "buyPrice": 28, "sellPrice": 11,
