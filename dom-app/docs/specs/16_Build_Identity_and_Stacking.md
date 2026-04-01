@@ -182,20 +182,32 @@ Shields shouldn't just block — they should be part of the build.
 
 ---
 
-## 5. Gift Body Slot — Condition Amplification
+## 5. Gift Slot Effects — Aligned to Theme
 
-When a Gift is equipped in the Body slot, it should amplify the matching condition:
+Each gift can be applied to 5 slots. Effects align to the gift's core theme.
+See `docs/specs/10_Montors_Gifts.md` for full details and partial versions.
 
-| Gift | Body slot amplification |
+| Gift | Theme | Body | Mind | Weapon | Shield |
+|---|---|---|---|---|---|
+| **Petal** | Healing | Regen 2/chamber | +2 PER, searches find something | Heal 2 on hit | Block heals 3 HP |
+| **Stone** | Defence | +3 DEF | Survive at 1 HP once | +50% DEF ignore (blunt) | +10% block, block DAZEs |
+| **Bile** | Poison | POISON immune, 10% on hit | Enemies -1 all rolls | POISON + double stat drain | Block POISONs attacker |
+| **Blood** | Bleed | 5% lifesteal, BLEED +1/stack | FEAR immune, BLOODLUST <25% | BLEED + heal per stack | Block causes BLEED |
+| **Ember** | Fire | +2 damage, BURN immune | +2 INT, conditions +1 turn | BURN + burst +3 | Reflect 3 fire on block |
+| **Void** | Chaos | +1 all stats, +5 HP | Reroll 1 die/chamber | Random condition on crit | 5% instant-kill on block |
+
+### Same-Gift Fusion (Body + Mind)
+| Gift | Fusion |
 |---|---|
-| Petal | Regen 2/chamber + BLEED you apply heals you for 1 per stack |
-| Stone | +3 DEF + DAZE you apply lasts 1 extra turn |
-| Bile | POISON immune + POISON you apply drains 2 stats per tick (not 1) |
-| Blood | 5% lifesteal + BLEED you apply does +1 damage per stack |
-| Ember | +2 damage + BURN you apply does +3 burst damage (8 total instead of 5) |
-| Void | +5 HP + all conditions you apply last 1 extra turn |
+| **Petal** | Full heal + cure all on rest rooms |
+| **Stone** | Reflect 50% damage back when below 25% HP |
+| **Bile** | All enemies start POISONED |
+| **Blood** | Kills heal 20%, BLEED stacks uncapped |
+| **Ember** | Crits BURN all enemies, conditions unresistable |
+| **Void** | 3 rerolls/chamber, nat 1s auto-reroll |
 
-This means: find a BLEED weapon → activate Blood gift in Body slot → your BLEED now does +1 per stack → combined with Bandage Soaker relic → BLEED does +2 per stack → deadly.
+### Build synergy example
+BLEED build: Blood gift Body (BLEED +1/stack) + Blood gift Mind (BLOODLUST) = **Crimson Feast fusion** (kills heal 20%, unlimited stacks) + Pruning Shears (BLEED weapon) + Thorn Shield (BLEED on block) = everything bleeds, you heal from it, stacks go forever.
 
 ---
 

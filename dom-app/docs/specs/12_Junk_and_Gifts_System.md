@@ -275,37 +275,39 @@ When the player enters a safe room (rest chamber) while carrying a treasure:
    - Refuse: keep the treasure (it's still just junk weight in your bag), try again at next safe room
 4. **WIS governs gift power** — higher WIS = stronger boon
 
-### Gift Boons — Equippable Body/Mind Powers
+### Gift Boons — 5-Slot System
 
-Gifts are equippable powers in two slots: **Body** and **Mind**. Like equipment but for your soul.
+Gifts can be applied to **5 slots**: Body, Mind, Weapon, Shield, Item. Each gift's effects align to its core theme. See `docs/specs/10_Montors_Gifts.md` for full details, partial versions, and upgrade paths.
 
 **Flow:**
-1. Find a treasure → activate at safe room → receive a Gift boon
-2. Gift goes into Body or Mind slot (your choice)
-3. You can swap/change gifts at any safe room or when descending a floor
-4. At the start of subsequent runs (Stage 2+), you choose which discovered gifts to equip
+1. Find a treasure in a junk pile → carry it to a safe room
+2. Montor demands a sacrifice (LCK governs severity)
+3. Accept → choose which slot to apply the gift to
+4. Roll d20 + WIS to determine boon power (full/partial/fail)
+5. You can swap/change gifts at any safe room or when descending a floor
 
-**Body Gift effects (physical powers):**
-| Gift | Body effect |
+**Gift effects summary:**
+
+| Gift | Theme | Body | Mind | Weapon | Shield |
+|---|---|---|---|---|---|
+| **Petal** | Healing | Regen 2/chamber | +2 PER, always find | Heal 2 on hit | Block heals 3 |
+| **Stone** | Defence | +3 DEF | Survive at 1 HP once | +50% DEF ignore | Block DAZEs |
+| **Bile** | Poison | POISON immune, 10% on hit | Enemies -1 all rolls | POISON + 2x drain | Block POISONs |
+| **Blood** | Bleed | 5% lifesteal, BLEED +1 | FEAR immune, BLOODLUST | BLEED + heal/stack | Block BLEEDs |
+| **Ember** | Fire | +2 damage, BURN immune | +2 INT, conditions +1 turn | BURN + burst +3 | Reflect 3 fire |
+| **Void** | Chaos | +1 all stats, +5 HP | Reroll 1 die/chamber | Random condition on crit | 5% instant-kill |
+
+**Same-gift fusion (Body + Mind):**
+| Gift | Fusion |
 |---|---|
-| Petal | Regen 2 HP per chamber |
-| Stone | +3 DEF permanently |
-| Bile | POISON immunity + 10% chance to poison on any hit |
-| Blood | Lifesteal 5% on all damage |
-| Ember | +2 damage, attacks can BURN (10% chance) |
-| Void | +5 max HP, +1 all combat stats |
+| Petal | Full heal + cure all on rest rooms |
+| Stone | Reflect 50% damage when below 25% HP |
+| Bile | All enemies start POISONED |
+| Blood | Kills heal 20%, BLEED stacks uncapped |
+| Ember | Crits BURN all enemies, conditions unresistable |
+| Void | 3 rerolls/chamber, nat 1s auto-reroll |
 
-**Mind Gift effects (mental powers):**
-| Gift | Mind effect |
-|---|---|
-| Petal | +2 PER, junk searches always find something |
-| Stone | DAZE immunity + can't be knocked below 1 HP once per combat |
-| Bile | Enemies start combat with -1 all rolls (your stench) |
-| Blood | FEAR immunity + BLOODLUST when below 25% HP (auto) |
-| Ember | +2 INT, conditions last 1 extra turn on enemies |
-| Void | Reroll one die per chamber (the dice power!) |
-
-**The Void Mind gift is the Balatro moment** — one reroll per chamber. That's the dice manipulation power you wanted, earned by finding Montor's deepest treasure.
+**The Void Mind gift is the Balatro moment** — one reroll per chamber. Earned by finding Montor's deepest treasure.
 
 **Swapping at floor transitions:**
 When you descend to a new floor, you get the option to swap your equipped gifts before continuing. This lets you adapt your build as the dungeon changes.

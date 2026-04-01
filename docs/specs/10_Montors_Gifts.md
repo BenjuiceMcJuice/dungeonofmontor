@@ -131,58 +131,73 @@ This creates memorable moments tied to dice luck. Design details TBD — noted h
 
 ## 4. Gift Effects by Application
 
+Each gift can be applied to 5 slots: **Body, Mind, Weapon, Shield, Item**. The effects align with the gift's core theme:
+
+- **Petal** = Nature, healing, restoration
+- **Stone** = Solid, heavy, blunt force, defence
+- **Bile** = Toxic, weakening, POISON, stat drain
+- **Blood** = Violence, BLEED, lifesteal, hunger
+- **Ember** = Fire, BURN, raw damage, destruction
+- **Void** = Chaos, dice manipulation, luck, reality-bending
+
 ### PETAL (Floor 0 — The Grounds)
 
 | Apply to | Effect | Partial version |
 |---|---|---|
-| **Body** | **Thornhide** — attackers take 2 damage when they hit you | 1 damage |
-| **Mind** | **Pollen Sense** — see trap rooms before entering them | See traps but not type |
-| **Weapon** | **Venomcoat** — weapon applies POISON on hit | 5% chance only |
-| **Item** | **Bloom Ring** — heal 1 HP per chamber entered | Heal 1 HP every 2 chambers |
+| **Body** | **Bloomheart** — regen 2 HP per chamber entered | 1 HP per chamber |
+| **Mind** | **Pollen Sense** — searches always find something, +2 PER | +1 PER only |
+| **Weapon** | **Lifethorn** — heal 2 HP on each hit | Heal 1 HP on hit |
+| **Shield** | **Bark Shield** — blocking heals you 3 HP | Heals 1 HP on block |
+| **Item** | **Bloom Ring** — cure all conditions on entering a rest room | Cure body conditions only |
 
 ### STONE (Floor -1 — The Underground)
 
 | Apply to | Effect | Partial version |
 |---|---|---|
-| **Body** | **Ironhide** — reduce all damage taken by 2 | Reduce by 1 |
-| **Mind** | **Earthmind** — immune to DAZE and FEAR | Immune to DAZE only |
-| **Weapon** | **Frostbite** — weapon applies FROST on hit (-3 AGI) | -1 AGI |
+| **Body** | **Ironhide** — +3 DEF permanently | +1 DEF |
+| **Mind** | **Earthmind** — can't be one-shot (survive at 1 HP once per combat) | Once per floor |
+| **Weapon** | **Stonecrusher** — weapon gains +50% DEF ignore (blunt force) | +25% DEF ignore |
+| **Shield** | **Wallguard** — +10% block chance, blocking DAZEs the attacker | +5% block only |
 | **Item** | **Stoneguard Ring** — glancing blows deal 0 damage to you | 50% chance |
 
 ### BILE (Floor -2 — The Underbelly)
 
 | Apply to | Effect | Partial version |
 |---|---|---|
-| **Body** | **Venomblood** — immune to POISON/NAUSEA, poison heals you | Immune only, no heal |
-| **Mind** | **Gutterwise** — merchants 50% off, loot tables roll twice | 25% off only |
-| **Weapon** | **Acidcoat** — weapon applies BLEED on hit (ignores armour) | BLEED but doesn't ignore armour |
-| **Item** | **Rot Ring** — enemies start combat with -1 STR | -1 STR 50% chance |
+| **Body** | **Venomblood** — POISON immune, 10% chance to POISON on any hit | Immune only |
+| **Mind** | **Gutterwise** — enemies start combat at -1 all rolls | -1 first round only |
+| **Weapon** | **Acidcoat** — weapon applies POISON on hit, POISON drains 2 stats per tick | POISON on hit only |
+| **Shield** | **Toxin Buckler** — blocking POISONs the attacker | 50% chance |
+| **Item** | **Rot Ring** — POISONED enemies also lose -1 DEF per tick | -1 DEF on first tick only |
 
 ### BLOOD (Floor -3 — The Quarters)
 
 | Apply to | Effect | Partial version |
 |---|---|---|
-| **Body** | **Regenerate** — heal 2 HP per chamber entered | 1 HP |
-| **Mind** | **Bloodthirst** — killing an enemy heals 3 HP | Heals 1 HP |
-| **Weapon** | **Lifedrink** — weapon heals you for 25% of damage dealt | 10% |
-| **Item** | **Heartstone Ring** — +10 max HP | +5 max HP |
+| **Body** | **Bloodheart** — 5% lifesteal on all damage, BLEED you apply does +1 per stack | Lifesteal only |
+| **Mind** | **Bloodthirst** — FEAR immune, BLOODLUST activates below 25% HP | FEAR immune only |
+| **Weapon** | **Lifedrink** — weapon applies BLEED on hit, heals you 1 HP per BLEED stack on target | BLEED on hit only |
+| **Shield** | **Thorn Guard** — blocking causes BLEED on the attacker | 50% chance |
+| **Item** | **Heartstone Ring** — +10 max HP, kills heal 3 HP | +5 max HP only |
 
 ### EMBER (Floor -4 — The Works)
 
 | Apply to | Effect | Partial version |
 |---|---|---|
-| **Body** | **Fireheart** — immune to BURN/FROST, +2 damage on all attacks | Immune only, no damage bonus |
-| **Mind** | **Forgemind** — crits deal x2.5 instead of x2 | x2.25 |
-| **Weapon** | **Flamecoat** — weapon applies BURN on hit | 5% chance only |
-| **Item** | **Cinder Ring** — enemies take 1 fire damage per turn | Every other turn |
+| **Body** | **Fireheart** — +2 damage on all attacks, BURN immune | +1 damage only |
+| **Mind** | **Forgemind** — +2 INT, all conditions you apply last 1 extra turn | +1 INT only |
+| **Weapon** | **Flamecoat** — weapon applies BURN on hit, BURN burst damage +3 (8 total) | BURN on hit only |
+| **Shield** | **Ember Buckler** — blocking reflects 3 fire damage back | 1 fire damage |
+| **Item** | **Cinder Ring** — crits apply BURN to ALL enemies (AoE) | BURN on target only |
 
 ### VOID SHARD (Floor -5 — The Deep)
 
 | Apply to | Effect | Partial version |
 |---|---|---|
-| **Body** | **Phase** — 25% chance to dodge any attack completely | 10% chance |
-| **Mind** | **Void Sight** — see all rooms on map, immune to BLIND | Immune to BLIND only |
-| **Weapon** | **Nullblade** — weapon ignores DEF entirely | Ignores half DEF |
+| **Body** | **Phase** — +1 all combat stats, +5 max HP | +5 max HP only |
+| **Mind** | **Void Sight** — reroll one die per chamber (the dice power) | Reroll once per floor |
+| **Weapon** | **Nullblade** — random condition on crit (any condition in the game) | 50% chance |
+| **Shield** | **Void Buckler** — 5% chance blocking instant-kills the attacker | 2% chance |
 | **Item** | **Void Ring** — on death, revive once at 25% HP | Revive at 10% HP |
 
 ---
@@ -238,18 +253,18 @@ The old boon is **replaced** by the new one — but because the slot was already
 
 | Boon | Base (empty slot) | Upgraded (replacing an existing boon) |
 |---|---|---|
-| **Thornhide** | Reflect 2 damage | Reflect 3 + attackers get POISON |
-| **Ironhide** | Reduce damage by 2 | Reduce by 3 + immune to DAZE |
-| **Venomblood** | Immune to POISON, poison heals | Poison heals double + YOUR attacks apply NAUSEA |
-| **Regenerate** | Heal 2 HP per chamber | Heal 3 HP + revive once at 1 HP |
-| **Fireheart** | Immune to BURN/FROST, +2 damage | +4 damage + all attacks apply BURN |
-| **Phase** | 25% dodge | 35% dodge + dodged attacks damage attacker |
-| **Pollen Sense** | See trap rooms before entering | See traps + see hidden rooms |
-| **Earthmind** | Immune to DAZE and FEAR | Immune to all Mind conditions |
-| **Gutterwise** | Merchants 50% off, loot rolls twice | Merchants 75% off, loot rolls three times |
-| **Bloodthirst** | Kills heal 3 HP | Kills heal 5 HP + crits heal 3 HP |
-| **Forgemind** | Crits deal x2.5 | Crits deal x3 + first attack each combat guaranteed Hit |
-| **Void Sight** | See all rooms on map, immune to BLIND | See everything + immune to all visibility effects + enemies visible through fog |
+| **Bloomheart** | Regen 2 HP/chamber | Regen 3 HP + cure one condition per chamber |
+| **Ironhide** | +3 DEF | +5 DEF + immune to DAZE |
+| **Venomblood** | POISON immune, 10% poison on hit | Poison heals you + YOUR attacks apply NAUSEA too |
+| **Bloodheart** | 5% lifesteal, BLEED +1/stack | 10% lifesteal, BLEED +2/stack |
+| **Fireheart** | +2 damage, BURN immune | +4 damage + all attacks apply BURN |
+| **Phase** | +1 all stats, +5 HP | +2 all stats, +10 HP |
+| **Pollen Sense** | Searches always find something, +2 PER | +4 PER + reveal all hidden rooms on floor |
+| **Earthmind** | Survive at 1 HP once/combat | Survive at 1 HP once/combat + immune to all Mind conditions |
+| **Gutterwise** | Enemies -1 all rolls | Enemies -2 all rolls + POISONED enemies drop double gold |
+| **Bloodthirst** | FEAR immune, BLOODLUST below 25% | FEAR immune + BLOODLUST always active + kills heal 5 HP |
+| **Forgemind** | +2 INT, conditions +1 turn | +4 INT, conditions +2 turns, crits deal x2.5 |
+| **Void Sight** | Reroll one die/chamber | Reroll two dice/chamber + nat 1s auto-reroll |
 
 The old boon is gone. The choice to replace is permanent. But the reward is a strictly better version of the new boon.
 
@@ -259,21 +274,29 @@ The old boon is gone. The choice to replace is permanent. But the reward is a st
 
 When you have BOTH a Body boon AND a Mind boon active simultaneously, a **fusion bonus** activates on top of both. This is free — no sacrifice, no roll. It's the reward for investing in both slots.
 
-| Body boon | Mind boon | Fusion bonus |
+### Same-Gift Fusion (Body + Mind of the same gift)
+The ultimate reward for committing to one gift. Both slots = a powerful bonus effect.
+
+| Gift | Body + Mind fusion |
+|---|---|
+| **Petal** | **Full Bloom** — full heal + cure all conditions on entering any rest room |
+| **Stone** | **Avalanche** — when hit below 25% HP, reflect 50% of damage back for 1 turn |
+| **Bile** | **Pandemic** — all enemies start combat POISONED |
+| **Blood** | **Crimson Feast** — kills heal 20% HP, BLEED stacks uncapped |
+| **Ember** | **Inferno** — crits BURN all enemies (AoE), conditions can't be resisted |
+| **Void** | **Reality Break** — 3 rerolls per chamber, nat 1s auto-reroll |
+
+### Cross-Gift Fusion (Body + Mind of different gifts)
+Interesting but less powerful than same-gift fusion. Some highlights:
+
+| Body | Mind | Fusion bonus |
 |---|---|---|
-| Thornhide | Pollen Sense | Traps also trigger on enemies in the room |
-| Thornhide | Earthmind | Reflected damage ignores DEF |
-| Thornhide | Bloodthirst | Reflected damage counts as a "kill" for healing if it finishes an enemy |
-| Ironhide | Earthmind | Also reflect 1 damage on all hits |
-| Ironhide | Forgemind | Damage reduction applies AFTER crit multiplier (crits still hurt, but less) |
-| Venomblood | Gutterwise | Poisoned enemies drop double gold |
-| Venomblood | Bloodthirst | Poison heals grant +1 STR for that combat |
-| Regenerate | Pollen Sense | Chamber healing doubled in safe rooms |
-| Regenerate | Void Sight | Heal 1 HP per room REVEALED on the map (not just entered) |
-| Fireheart | Forgemind | Crits apply BURN + BURN damage is doubled |
-| Fireheart | Bloodthirst | Fire kills heal double |
-| Phase | Void Sight | Dodged attacks damage the attacker for 3 HP |
-| Phase | Earthmind | Dodging an attack also dodges any condition it would apply |
+| Ironhide (Stone) | Forgemind (Ember) | Crits ignore DEF entirely |
+| Bloodheart (Blood) | Gutterwise (Bile) | POISONED enemies that BLEED drop double gold |
+| Fireheart (Ember) | Bloodthirst (Blood) | Fire kills heal double, BURN triggers lifesteal |
+| Phase (Void) | Earthmind (Stone) | Dodging an attack also dodges any condition |
+| Bloomheart (Petal) | Void Sight (Void) | Heal 1 HP per room revealed on map |
+| Venomblood (Bile) | Pollen Sense (Petal) | Junk pile searches can't trigger ambushes |
 
 Not every combination has a unique fusion. Unlisted pairs still benefit from having both boons — they just don't get an extra bonus.
 
@@ -326,6 +349,7 @@ Both become worth investing in during in-run levelling, alongside STR/DEF/AGI.
 | Date | Change |
 |---|---|
 | 2026-03-31 | v0.1 — initial Gift system design |
+| 2026-04-01 | v0.2 — 5-slot system (added Shield slot), effects aligned to gift themes, same-gift fusions redesigned, upgrade table updated |
 
 ---
 
