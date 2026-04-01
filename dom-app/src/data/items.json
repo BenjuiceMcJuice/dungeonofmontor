@@ -104,28 +104,84 @@
     "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
     "rarity": "rare", "damageDie": 8, "attackStat": "str",
     "buyPrice": 45, "sellPrice": 18,
-    "description": "A chef's knife. d8 sword, +2 accuracy. No effect — but perfect for a Gift."
+    "description": "French. Precise. d8, +2 accuracy. He only used it for cheese. A Gift would make it sing."
   },
   "montors_letter_opener": {
     "id": "montors_letter_opener", "name": "Montor's Letter Opener", "type": "weapon", "slot": "weapon",
     "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.3, "defIgnore": 0, "initBonus": 2,
     "rarity": "rare", "damageDie": 4, "attackStat": "str",
     "buyPrice": 35, "sellPrice": 14,
-    "description": "Silver. Sharp. 30% double strike, +2 initiative. No effect — a blank canvas."
+    "description": "Silver. Monogrammed. 30% double strike, +2 initiative. Waiting for a Gift."
   },
-  "montors_doorstop": {
-    "id": "montors_doorstop", "name": "Montor's Doorstop", "type": "weapon", "slot": "weapon",
+  "montors_candlestick": {
+    "id": "montors_candlestick", "name": "Montor's Candlestick", "type": "weapon", "slot": "weapon",
     "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.6, "agiPenalty": -1,
     "rarity": "rare", "damageDie": 8, "attackStat": "str",
     "buyPrice": 40, "sellPrice": 16,
-    "description": "Cast iron. d8 mace, ignores 60% DEF. No effect — waiting for a Gift."
+    "description": "Solid brass. d8, ignores 60% DEF. Colonel Montor. In the dungeon. With this."
   },
-  "montors_walking_stick": {
-    "id": "montors_walking_stick", "name": "Montor's Walking Stick", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.2, "accuracyBonus": 1,
+  "montors_umbrella": {
+    "id": "montors_umbrella", "name": "Montor's Umbrella", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.15, "accuracyBonus": 1,
     "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
     "buyPrice": 25, "sellPrice": 10,
-    "description": "Sturdy oak. d6, +1 accuracy, 20% DEF ignore. His mum gave it to him."
+    "description": "Hidden blade inside. d6, +1 accuracy, 15% DEF ignore. He takes it everywhere."
+  },
+  "montors_cheese_wire": {
+    "id": "montors_cheese_wire", "name": "Montor's Cheese Wire", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0.3, "initBonus": 1,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 38, "sellPrice": 15,
+    "description": "Thin. Silent. d4, 25% double strike, ignores 30% DEF. Cuts through anything."
+  },
+  "montors_mums_ladle": {
+    "id": "montors_mums_ladle", "name": "Montor's Mum's Ladle", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5, "agiPenalty": -1,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "She could stir a pot and crack a skull in the same motion. d6, 50% DEF ignore."
+  },
+  "montors_pestle": {
+    "id": "montors_pestle", "name": "Montor's Pestle", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.7, "agiPenalty": -2,
+    "rarity": "rare", "damageDie": 10, "attackStat": "str",
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Marble. d10, ignores 70% DEF, -2 AGI. He ground spices with it. And other things."
+  },
+  "montors_nail_file": {
+    "id": "montors_nail_file", "name": "Montor's Nail File", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.35, "defIgnore": 0, "initBonus": 2,
+    "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Tiny. Vicious. 35% double strike, +2 initiative. He was very particular about his nails."
+  },
+  "montors_curtain_rod": {
+    "id": "montors_curtain_rod", "name": "Montor's Curtain Rod", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "Long reach. Surprisingly whippy. d6, +2 accuracy. The curtains are on the floor now."
+  },
+  "montors_grandfather_clock_hand": {
+    "id": "montors_grandfather_clock_hand", "name": "Montor's Grandfather Clock Hand", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.3, "accuracyBonus": 1, "agiPenalty": -2,
+    "rarity": "epic", "damageDie": 12, "attackStat": "str",
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "The minute hand. Six feet of brass. d12, 30% DEF ignore, -2 AGI. Time stops for no one."
+  },
+  "montors_skeleton_key": {
+    "id": "montors_skeleton_key", "name": "Montor's Skeleton Key", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.4, "defIgnore": 0.5, "initBonus": 3,
+    "rarity": "epic", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 90, "sellPrice": 36,
+    "description": "Opens anything. Including enemies. d4, 40% double strike, 50% DEF ignore, +3 init. Broken."
+  },
+  "montors_family_heirloom": {
+    "id": "montors_family_heirloom", "name": "Montor's Family Heirloom", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0.15, "defIgnore": 0.25, "accuracyBonus": 3,
+    "rarity": "legendary", "damageDie": 10, "attackStat": "str",
+    "buyPrice": 200, "sellPrice": 80,
+    "description": "His grandmother forged it. d10, +3 accuracy, 15% double strike, 25% DEF ignore. It hums when you hold it."
   },
 
   "wooden_shield": {
