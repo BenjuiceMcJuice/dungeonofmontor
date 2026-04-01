@@ -78,7 +78,7 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
     var info = STAT_INFO[selectedStat]
     var currentVal = stats[selectedStat] || 0
     return (
-      <div className="flex flex-col gap-3 w-full max-w-xs">
+      <div className="flex flex-col gap-3 w-full max-w-sm">
         <div className="bg-surface border-2 border-gold rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -110,14 +110,14 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
 
   // Stat list
   return (
-    <div className="flex flex-col gap-1.5 w-full max-w-xs">
+    <div className="flex flex-col gap-1.5 w-full max-w-sm">
       {isAllocate && freePoints !== undefined && (
         <p className="text-gold text-sm font-sans text-center mb-1">Points remaining: <span className="font-display text-lg">{freePoints}</span></p>
       )}
       {isLevelUp && (
         <p className="text-ink text-sm mb-1">Tap a stat to see what it does:</p>
       )}
-      <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto">
+      <div className="grid grid-cols-2 gap-1.5">
         {statOrder.map(function(id) {
           var info = STAT_INFO[id]
           var val = stats[id] || 0
@@ -129,10 +129,10 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
                 (disabled ? 'border-border bg-raised text-ink-faint opacity-50' : 'border-border-hl bg-raised hover:border-gold cursor-pointer')}
             >
               <div className="flex flex-col items-start">
-                <span className="text-ink uppercase font-semibold">{info.abbrev}</span>
-                <span className="text-ink-faint text-[10px]">{info.summary}</span>
+                <span className="text-ink uppercase font-semibold text-xs">{info.abbrev}</span>
+                <span className="text-ink-faint text-[9px] leading-tight">{info.summary}</span>
               </div>
-              <span className="text-ink-dim">{val}</span>
+              <span className="text-ink font-display text-base">{val}</span>
             </button>
           )
         })}
