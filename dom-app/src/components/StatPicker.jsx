@@ -18,15 +18,15 @@ var STAT_INFO = {
   },
   agi: {
     name: 'Agility', abbrev: 'AGI', group: 'Combat',
-    summary: 'Initiative order and double strike.',
-    detail: 'Higher AGI = you go first in combat. Daggers get double strike chance scaling with AGI (+5% per modifier). Armour agiPenalty reduces this.',
-    tip: 'Best for: Dagger builds, going first.',
+    summary: 'Initiative, dodge, and double strike.',
+    detail: 'Higher AGI = go first, +2% dodge chance per modifier (all builds), +5% dagger double strike per modifier. Armour agiPenalty reduces this.',
+    tip: 'Best for: Dagger builds, evasion builds.',
   },
   int: {
     name: 'Intellect', abbrev: 'INT', group: 'Mental',
-    summary: 'Condition application chance.',
-    detail: 'When your enchanted weapon hits, INT determines how likely the condition (POISON, BLEED, etc.) applies. +5% chance per modifier.',
-    tip: 'Best for: Enchanted weapon builds.',
+    summary: 'Condition chance + enchanted weapon damage.',
+    detail: 'Enchanted weapons get +1 damage per INT modifier AND +5% condition application chance per modifier. Smart fighters hit harder with special weapons.',
+    tip: "Best for: Montor's enchanted weapon builds.",
   },
   lck: {
     name: 'Luck', abbrev: 'LCK', group: 'Fortune',
@@ -52,6 +52,12 @@ var STAT_INFO = {
     detail: "When activating Montor's Gifts at safe rooms, WIS determines how powerful the boon is. Higher WIS = stronger permanent abilities.",
     tip: 'Best for: Gift hunters, long runs.',
   },
+  vit: {
+    name: 'Vitality', abbrev: 'VIT', group: 'Body',
+    summary: 'Max HP.',
+    detail: 'Max HP = 25 + (VIT × 3). Each +1 VIT gives +3 max HP. Survive longer, take more risks.',
+    tip: 'Best for: Survival builds, tanking without DEF.',
+  },
   cha: {
     name: 'Charisma', abbrev: 'CHA', group: 'Fortune',
     summary: 'Merchant prices.',
@@ -65,7 +71,7 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
   var isLevelUp = mode === 'levelup'
   var isAllocate = mode === 'allocate'
 
-  var statOrder = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha']
+  var statOrder = ['str', 'def', 'agi', 'vit', 'int', 'lck', 'per', 'end', 'wis', 'cha']
 
   // Info panel — shown when a stat is tapped
   if (selectedStat) {
