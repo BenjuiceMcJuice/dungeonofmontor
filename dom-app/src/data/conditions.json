@@ -27,8 +27,9 @@
       "id": "FROST", "slot": "body", "name": "Frozen",
       "turns": 2,
       "statModifier": { "stat": "agi", "value": -3 },
+      "defPenalty": -3,
       "intPenalty": -2,
-      "description": "Frozen. -3 AGI, -2 INT — numb body, foggy mind."
+      "description": "Frozen. -3 AGI, -3 DEF, -2 INT — numb, brittle, foggy."
     },
     "NAUSEA": {
       "id": "NAUSEA", "slot": "body", "name": "Nauseous",
