@@ -30,9 +30,9 @@ var STAT_INFO = {
   },
   lck: {
     name: 'Luck', abbrev: 'LCK', group: 'Fortune',
-    summary: 'Loot rarity rolls.',
-    detail: 'Added to d100 rarity roll when loot drops. Higher LCK = more uncommon, rare, and epic items from combat and chests.',
-    tip: 'Best for: Treasure hunters.',
+    summary: 'Crit chance and loot rarity.',
+    detail: 'Each +1 modifier lowers your crit threshold by 1 (base 20). Also added to loot rarity rolls. Higher LCK = more crits + better drops.',
+    tip: 'Best for: High-variance builds, treasure hunters.',
   },
   per: {
     name: 'Perception', abbrev: 'PER', group: 'Mental',

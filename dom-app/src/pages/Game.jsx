@@ -764,7 +764,9 @@ function Game({ character, user, onEndRun }) {
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
   // Effective crit threshold — lowered by crit_bonus relics (Keen Edge Ring = 19+)
-  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus')
+  // Crit threshold: base 20, lowered by LCK modifier and crit_bonus relics
+  var lckMod = getModifier(character.stats.lck || 10)
+  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus') - lckMod
 
   // Direct attack — click enemy card to attack without going through CombatRoller button
   function handlePlayerAttackDirect(enemyId) {

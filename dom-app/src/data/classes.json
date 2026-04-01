@@ -28,7 +28,7 @@
   "statPointsTotal": 70,
   "startingKnight": {
     "baseStats": {
-      "str": 8, "def": 8, "agi": 8, "int": 6, "lck": 6,
+      "str": 8, "def": 8, "agi": 8, "int": 6, "lck": 10,
       "per": 6, "end": 6, "wis": 6, "cha": 6,
       "vit": 4, "res": 4, "sth": 4, "cun": 4, "wil": 4
     },
