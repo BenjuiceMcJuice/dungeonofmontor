@@ -2506,9 +2506,15 @@ function Game({ character, user, onEndRun }) {
           )}
 
           {isPlayerTurn && showInventoryPanel && (
-            <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-              <p className="text-ink text-sm font-sans">Choose an item to use:</p>
-              <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <div className="flex items-center justify-between w-full">
+                <p className="text-ink text-sm font-sans">Choose an item to use:</p>
+                <button onClick={function() { setShowInventoryPanel(false) }}
+                  className="text-ink-dim text-xs border border-border px-2 py-1 rounded hover:text-ink transition-colors">
+                  Cancel
+                </button>
+              </div>
+              <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
                   return (
@@ -2524,10 +2530,6 @@ function Game({ character, user, onEndRun }) {
                   )
                 })}
               </div>
-              <button onClick={function() { setShowInventoryPanel(false) }}
-                className="text-ink-dim text-sm hover:text-ink transition-colors">
-                Cancel
-              </button>
             </div>
           )}
 
