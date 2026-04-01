@@ -371,9 +371,9 @@ function LandingScene({ onEnter }) {
                 value={name} onChange={function(e) { setName(e.target.value) }}
                 onKeyDown={function(e) { if (e.key === 'Enter') handleStart() }}
                 style={{
-                  fontFamily: pixelFont, fontSize: '10px', background: '#060410', border: '2px solid #2a1a30',
-                  color: '#d4c8a0', padding: '12px 14px', outline: 'none', letterSpacing: '2px',
-                  borderBottom: '2px solid #7a3a9a',
+                  fontFamily: pixelFont, fontSize: '16px', background: '#060410', border: '2px solid #2a1a30',
+                  color: '#d4c8a0', padding: '10px 14px', outline: 'none', letterSpacing: '2px',
+                  borderBottom: '2px solid #7a3a9a', borderRadius: 0,
                 }}
               />
               <div className="flex justify-center">
