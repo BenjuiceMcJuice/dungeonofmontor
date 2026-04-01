@@ -56,10 +56,26 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-01 | StatPicker component — reusable, tap-to-inspect, confirm/back flow | ✅ Done |
 | 2026-04-01 | Starting screen — stat allocation (10 pts) + pre-run merchant (50g) | ✅ Done |
 | 2026-04-01 | First production deploy to main — wider testing | ✅ Done |
+| 2026-04-01 | Full stat rebalance — VIT HP, DEF/2, AGI dodge, INT enchant dmg, LCK crits | ✅ Done |
+| 2026-04-01 | Dual wield daggers — offhand attack, -2 accuracy, no crits | ✅ Done |
+| 2026-04-01 | 9 level-ups (was 4), condition rates boosted, 3+ enemies per zone | ✅ Done |
+| 2026-04-01 | Full 7-floor dungeon — 13 zones, 12 enemy types, 208 chambers | ✅ Done |
+| 2026-04-01 | 7 new enemy sprites + 7 corpse sprites | ✅ Done |
+| 2026-04-01 | 50+ Montor-themed items across 3 quality tiers (junk/enchanted/premium) | ✅ Done |
+| 2026-04-01 | Condition icons (14 pixel sprites), combat HUD redesign | ✅ Done |
+| 2026-04-01 | Equip-when-stunned, full-screen inventory, item detail panel | ✅ Done |
+| 2026-04-01 | Weapon balance — daggers init+, swords accuracy+, maces AGI penalty | ✅ Done |
+| 2026-04-01 | Equipment AGI penalties wired into combat stats (weapon + armour) | ✅ Done |
+| 2026-04-01 | Font consistency (pixel for art, clean for UI) | ✅ Done |
+| 2026-04-01 | Bug fixes — chamber clearing, chest exploit, buff durations, iOS zoom | ✅ Done |
+| 2026-04-01 | Docs reorganised into dom-app/docs/ with INDEX.md | ✅ Done |
+| 2026-04-01 | Design specs: build identity, gift system v0.2, Montor AI, junk/gifts | ✅ Done |
 |            | **Next up** | |
-|            | Junk piles — room interaction, PER rolls, XP for searching | ⬜ |
+|            | Junk piles — room interaction, search intensity, PER rolls, XP, dodgy consumables | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
-|            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
+|            | Montor's Gift system — find treasures in junk, activate at safe rooms | ⬜ |
+|            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
+|            | CHA merchant pricing | ⬜ |
 
 ---
 

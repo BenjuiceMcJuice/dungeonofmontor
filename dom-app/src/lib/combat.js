@@ -34,7 +34,19 @@ function createBattleState(players, enemies) {
 
   players.forEach(function(p) {
     var char = p.character
-    var agiMod = getModifier(char.stats.agi)
+
+    // Apply all equipment penalties/bonuses to combat stats
+    var combatStats = Object.assign({}, char.stats)
+    if (char.equipped) {
+      var w = char.equipped.weapon
+      var a = char.equipped.armour
+      var o = char.equipped.offhand
+      if (w && w.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + w.agiPenalty)
+      if (a && a.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + a.agiPenalty)
+      if (o && o.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + o.agiPenalty)
+    }
+
+    var agiMod = getModifier(combatStats.agi)
     var weaponInitBonus = (char.equipped && char.equipped.weapon && char.equipped.weapon.initBonus) || 0
     var initRoll = rollWithMod(20, agiMod + weaponInitBonus)
 
@@ -45,7 +57,7 @@ function createBattleState(players, enemies) {
       level: char.level,
       currentHp: char.maxHp,
       maxHp: char.maxHp,
-      combatStats: Object.assign({}, char.stats),
+      combatStats: combatStats,
       equipped: Object.assign({}, char.equipped),
       activeInventory: char.inventory ? char.inventory.slice() : [],
       statusEffects: [],
@@ -53,7 +65,7 @@ function createBattleState(players, enemies) {
       isDown: false,
     }
 
-    turnOrder.push({ id: p.uid, type: 'player', initiative: initRoll.total, agi: char.stats.agi })
+    turnOrder.push({ id: p.uid, type: 'player', initiative: initRoll.total, agi: combatStats.agi })
   })
 
   var enemyStates = enemies.map(function(e) {
@@ -185,9 +197,10 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   // Check for extra miss chance (BLIND)
   var missChance = getMissChance(player.statusEffects)
 
-  // If no pre-rolled result provided, roll now
+  // If no pre-rolled result provided, roll now (includes weapon accuracy bonus)
   if (!attackResult) {
-    attackResult = d20Attack(strMod + rollsMod, 20)
+    var accBonus = (player.equipped && player.equipped.weapon && player.equipped.weapon.accuracyBonus) || 0
+    attackResult = d20Attack(strMod + rollsMod + accBonus, 20)
   }
 
   // Apply forced tier
