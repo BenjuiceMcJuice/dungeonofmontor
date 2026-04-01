@@ -92,10 +92,21 @@ function generateChestLoot(lckStat, floorId) {
   }
 }
 
-// Map floor IDs to loot table prefixes
+// Map floor IDs to loot table prefixes — uses floorId directly, falls back to closest available
 function getFloorLootPrefix(floorId) {
-  if (floorId === 'underground') return 'underground'
-  // Future floors: add mappings here
+  if (LOOT_TABLES[floorId + '_standard']) return floorId
+  // Fallback chain for floors without their own tables
+  var fallbacks = {
+    'grounds': 'garden',
+    'underground': 'underground',
+    'underbelly': 'underbelly',
+    'quarters': 'quarters',
+    'works': 'works',
+    'deep': 'deep',
+    'domain': 'domain',
+  }
+  var prefix = fallbacks[floorId]
+  if (prefix && LOOT_TABLES[prefix + '_standard']) return prefix
   return 'garden'
 }
 

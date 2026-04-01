@@ -275,8 +275,40 @@ When the player enters a safe room (rest chamber) while carrying a treasure:
    - Refuse: keep the treasure (it's still just junk weight in your bag), try again at next safe room
 4. **WIS governs gift power** — higher WIS = stronger boon
 
-### Gift Boons (apply to Body / Mind / Weapon / Item slot)
-The player chooses which slot to apply the gift to. Each treasure + slot combination produces a different boon. See `docs/specs/10_Montors_Gifts.md` for the full matrix.
+### Gift Boons — Equippable Body/Mind Powers
+
+Gifts are equippable powers in two slots: **Body** and **Mind**. Like equipment but for your soul.
+
+**Flow:**
+1. Find a treasure → activate at safe room → receive a Gift boon
+2. Gift goes into Body or Mind slot (your choice)
+3. You can swap/change gifts at any safe room or when descending a floor
+4. At the start of subsequent runs (Stage 2+), you choose which discovered gifts to equip
+
+**Body Gift effects (physical powers):**
+| Gift | Body effect |
+|---|---|
+| Petal | Regen 2 HP per chamber |
+| Stone | +3 DEF permanently |
+| Bile | POISON immunity + 10% chance to poison on any hit |
+| Blood | Lifesteal 5% on all damage |
+| Ember | +2 damage, attacks can BURN (10% chance) |
+| Void | +5 max HP, +1 all combat stats |
+
+**Mind Gift effects (mental powers):**
+| Gift | Mind effect |
+|---|---|
+| Petal | +2 PER, junk searches always find something |
+| Stone | DAZE immunity + can't be knocked below 1 HP once per combat |
+| Bile | Enemies start combat with -1 all rolls (your stench) |
+| Blood | FEAR immunity + BLOODLUST when below 25% HP (auto) |
+| Ember | +2 INT, conditions last 1 extra turn on enemies |
+| Void | Reroll one die per chamber (the dice power!) |
+
+**The Void Mind gift is the Balatro moment** — one reroll per chamber. That's the dice manipulation power you wanted, earned by finding Montor's deepest treasure.
+
+**Swapping at floor transitions:**
+When you descend to a new floor, you get the option to swap your equipped gifts before continuing. This lets you adapt your build as the dungeon changes.
 
 ### Key Design Principles
 - **Gifts are earned through exploration, not combat** — the fighter who rushes to the boss misses them
@@ -358,7 +390,40 @@ Add to zones.json per zone:
 
 ---
 
-## 7. Implementation Order
+## 7. Junk-as-Currency NPCs
+
+Special NPCs (not merchants) who accept junk as payment. Found in rest rooms or special chambers.
+
+### The Collector
+Montor's Mum. Or her ghost. Or a portrait that moves. She values junk because it reminds her of home.
+
+| Junk cost | Reward |
+|---|---|
+| 5 junk | Dodgy Red Liquid (health potion) |
+| 10 junk | Montor's Garden Charm (regen relic) |
+| 15 junk | Random Montor weapon (uncommon+) |
+| 25 junk | Random Montor relic (rare+) |
+| 50 junk | Montor's Mum's Blessing (unique — +1 all stats for run) |
+
+### The Bin Man
+A chamber entity in the Underbelly. Takes junk off your hands in bulk.
+
+| Junk cost | Reward |
+|---|---|
+| 3 junk | 10 gold |
+| 10 junk | 50 gold + random consumable |
+| 20 junk | 100 gold + heal to full |
+
+### Design Notes
+- Junk becomes a secondary currency alongside gold
+- Gold buys from merchants (Montor's staff). Junk buys from special NPCs.
+- This makes the hoarder build viable: collect junk → trade for powerful items
+- END stat matters: can you carry enough junk to reach 50?
+- The 50-junk reward (Mum's Blessing) is an endgame goal — you'd need to search almost every pile across multiple floors
+
+---
+
+## 8. Implementation Order
 
 1. **Add weight field to all items** in items.json
 2. **Add carry capacity to Game.jsx** (UI: show weight/capacity in inventory)
