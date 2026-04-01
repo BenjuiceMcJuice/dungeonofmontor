@@ -24,7 +24,7 @@ function applyCondition(statusEffects, conditionId, source) {
       var maxStacks = def.maxStacks || 5
       var currentStacks = existing.stacks || 1
       if (currentStacks >= maxStacks) return statusEffects // capped
-      return statusEffects.map(function(c) {
+      var newEffects = statusEffects.map(function(c) {
         if (c.id !== def.id) return c
         return Object.assign({}, c, {
           stacks: currentStacks + 1,
@@ -32,6 +32,14 @@ function applyCondition(statusEffects, conditionId, source) {
           name: 'Bleeding x' + (currentStacks + 1),
         })
       })
+      // Trigger FEAR at stack threshold (e.g. 3+ stacks of BLEED)
+      if (def.triggerFear && (currentStacks + 1) >= def.triggerFear) {
+        var hasFear = newEffects.some(function(c) { return c.id === 'FEAR' })
+        if (!hasFear) {
+          newEffects = applyCondition(newEffects, 'FEAR', 'bleed_panic')
+        }
+      }
+      return newEffects
     }
   }
 
@@ -63,6 +71,9 @@ function applyCondition(statusEffects, conditionId, source) {
     healPerKill: def.healPerKill || 0,
     damagePerNoKill: def.damagePerNoKill || 0,
     defPenalty: def.defPenalty || 0,
+    intPenalty: def.intPenalty || 0,
+    regenPenalty: def.regenPenalty || 0,
+    triggerFear: def.triggerFear || 0,
   }
 
   // Non-stackable: remove existing condition in same slot, add new one
@@ -189,6 +200,7 @@ function getConditionStatMod(statusEffects, stat) {
     var c = statusEffects[i]
     if (c.statModifier && c.statModifier.stat === stat) mod += c.statModifier.value
     if (stat === 'def' && c.defPenalty) mod += c.defPenalty
+    if (stat === 'int' && c.intPenalty) mod += c.intPenalty
     // Poison accumulated stat drain
     if (c.drainedStats && c.drainedStats[stat]) mod += c.drainedStats[stat]
   }

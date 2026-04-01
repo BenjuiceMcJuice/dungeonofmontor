@@ -166,6 +166,8 @@ function Game({ character, user, onEndRun }) {
     killedInChamber: null,
   })
 
+  var godModeRef = useRef(false)
+
   // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
   useEffect(function() {
     window.domDebug = {
@@ -227,7 +229,6 @@ function Game({ character, user, onEndRun }) {
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null)
   var [enemyRollerKey, setEnemyRollerKey] = useState(0)
   var [lootableCorpses, setLootableCorpses] = useState([])
-  var godModeRef = useRef(false)
   var [lootingCorpseId, setLootingCorpseId] = useState(null)
   var [lootingChestId, setLootingChestId] = useState(null)
   var [lootingNpcId, setLootingNpcId] = useState(null)

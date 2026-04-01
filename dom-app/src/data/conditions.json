@@ -5,45 +5,51 @@
       "turns": null,
       "damagePerTurn": 1,
       "stackable": true, "maxStacks": 5,
-      "description": "Bleeding. Stacks — each hit adds +1 damage/turn."
+      "triggerFear": 3,
+      "description": "Bleeding. Stacks — +1 damage/turn per stack. At 3+ stacks: triggers FEAR."
     },
     "POISON": {
       "id": "POISON", "slot": "body", "name": "Poisoned",
       "turns": 3, "damagePerTurn": 2,
       "statDrain": true, "statDrainValue": -1,
-      "description": "Poisoned. 2 damage/turn + drains a stat each turn."
+      "intPenalty": -2,
+      "description": "Poisoned. 2 dmg/turn, drains a stat each turn. -2 INT — can't think straight."
     },
     "BURN": {
       "id": "BURN", "slot": "body", "name": "Burning",
       "turns": 1, "damagePerTurn": 0,
       "burstDamage": 5,
       "aoe": true, "aoeDamage": 3,
-      "description": "On fire. 5 burst damage next turn. Spreads to adjacent."
+      "skipChance": 0.3,
+      "description": "On fire. 5 burst damage + 3 AoE. 30% chance to skip turn — flailing in panic."
     },
     "FROST": {
       "id": "FROST", "slot": "body", "name": "Frozen",
       "turns": 2,
       "statModifier": { "stat": "agi", "value": -3 },
-      "description": "Sluggish. -3 AGI for 2 turns."
+      "intPenalty": -2,
+      "description": "Frozen. -3 AGI, -2 INT — numb body, foggy mind."
     },
     "NAUSEA": {
       "id": "NAUSEA", "slot": "body", "name": "Nauseous",
       "turns": 2, "skipChance": 0.3,
-      "description": "Retching. 30% chance to skip action."
+      "allRollsMod": -1,
+      "description": "Retching. 30% skip chance. -1 all rolls — miserable and distracted."
     },
     "SLUGGISH": {
       "id": "SLUGGISH", "slot": "body", "name": "Sluggish",
       "turns": 2,
       "statModifier": { "stat": "agi", "value": -5 },
       "skipFleeChance": 0.5,
-      "description": "Heavy. -5 AGI, 50% chance can't flee."
+      "blockItems": true,
+      "description": "Heavy. -5 AGI, 50% can't flee, can't use items — too weighed down to rummage."
     },
     "FEAR": {
       "id": "FEAR", "slot": "mind", "name": "Afraid",
       "turns": 2,
       "allRollsMod": -2,
       "fleeIfLowHp": true,
-      "description": "Terrified. -2 all rolls. Flee if HP low."
+      "description": "Terrified. -2 all rolls. Paralysed if HP low."
     },
     "FRENZY": {
       "id": "FRENZY", "slot": "mind", "name": "Frenzied",
@@ -51,32 +57,37 @@
       "statModifier": { "stat": "str", "value": 3 },
       "defPenalty": -2,
       "attacksRandom": true,
-      "description": "+3 STR, -2 DEF. Attacks random target."
+      "description": "Berserk. +3 STR, -2 DEF, attacks random target."
     },
     "CHARM": {
       "id": "CHARM", "slot": "mind", "name": "Charmed",
       "turns": 2, "skipChance": 0.5,
-      "description": "Enthralled. 50% chance to skip action."
+      "defPenalty": -2,
+      "description": "Enthralled. 50% skip chance. -2 DEF — guard's down."
     },
     "DAZE": {
       "id": "DAZE", "slot": "mind", "name": "Dazed",
       "turns": 1, "forceTier": 3,
-      "description": "Stunned. Next attack is a glancing blow."
+      "statModifier": { "stat": "agi", "value": -2 },
+      "description": "Stunned. Glancing blows only. -2 AGI — staggering."
     },
     "BORED": {
       "id": "BORED", "slot": "mind", "name": "Bored",
       "turns": 2, "allRollsMod": -2,
-      "description": "-2 to all rolls. Montor is unimpressed."
+      "skipChance": 0.1,
+      "description": "-2 all rolls. 10% chance to skip — yawning mid-fight."
     },
     "SAD": {
       "id": "SAD", "slot": "mind", "name": "Sad",
       "turns": 2, "blockItems": true,
-      "description": "Can't use items. What's the point?"
+      "regenPenalty": -1,
+      "description": "Can't use items. -1 regen — body gives up healing. What's the point?"
     },
     "BLIND": {
       "id": "BLIND", "slot": "mind", "name": "Blind",
       "turns": 2, "missChance": 0.5,
-      "description": "50% miss chance."
+      "defPenalty": -1,
+      "description": "50% miss chance. -1 DEF — can't see attacks coming."
     },
     "BLOODLUST": {
       "id": "BLOODLUST", "slot": "mind", "name": "Bloodlust",
@@ -84,7 +95,7 @@
       "healPerKill": 3,
       "damagePerNoKill": 3,
       "canFlee": false,
-      "description": "Kill to heal 3. No kill = lose 3. Can't flee."
+      "description": "Kill to heal 3. No kill = lose 3. Can't flee. Body and mind consumed."
     }
   },
   "enemyConditions": {
