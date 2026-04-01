@@ -49,7 +49,10 @@
         { "itemId": "montors_thimble",           "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_hand_mirror",       "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_garden_charm",      "weight": 5,  "minRarity": "uncommon" },
-        { "itemId": "greater_health_potion",     "weight": 5,  "minRarity": "uncommon" }
+        { "itemId": "greater_health_potion",     "weight": 5,  "minRarity": "uncommon" },
+        { "itemId": "montors_fireplace_poker",   "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_mums_bread_knife",  "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_mums_rolling_pin",  "weight": 2,  "minRarity": "rare" }
       ]
     },
     "garden_chest": {
@@ -75,7 +78,12 @@
         { "itemId": "montors_bath_bomb",         "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_garden_charm",      "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_greenhouse_key",    "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_last_stand_brooch", "weight": 2,  "minRarity": "rare" }
+        { "itemId": "montors_last_stand_brooch", "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_fireplace_poker",   "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_mums_bread_knife",  "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_mums_rolling_pin",  "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_pot_lid",           "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_void_cleaver",      "weight": 1,  "minRarity": "epic" }
       ]
     },
     "underground_standard": {
