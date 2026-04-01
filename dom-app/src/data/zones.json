@@ -3,14 +3,51 @@
     "grounds": {
       "id": "grounds", "name": "The Grounds", "order": 0,
       "zones": ["montors_garden"],
+      "nextFloor": "underground",
       "transitionText": "You step through the gates. They close behind you.",
       "montorLine": "Welcome to my garden. Mind the flowers — they bite."
     },
     "underground": {
-      "id": "underground", "name": "The Underground", "order": -1,
+      "id": "underground", "name": "The Underground", "order": 1,
       "zones": ["great_hall", "kitchen"],
+      "nextFloor": "underbelly",
       "transitionText": "The stone steps wind downward. The air grows cold and damp.",
       "montorLine": "You made it past the garden. How... persistent. Down here, things are less polite."
+    },
+    "underbelly": {
+      "id": "underbelly", "name": "The Underbelly", "order": 2,
+      "zones": ["sewers", "cistern"],
+      "nextFloor": "quarters",
+      "transitionText": "The walls are wet. Something drips. Something moves.",
+      "montorLine": "The plumbing. Nobody comes down here. Nobody should."
+    },
+    "quarters": {
+      "id": "quarters", "name": "The Quarters", "order": 3,
+      "zones": ["bedroom", "study"],
+      "nextFloor": "works",
+      "transitionText": "Carpet underfoot. Portraits on the walls. Eyes that follow you.",
+      "montorLine": "These are my private rooms. You are not welcome here. You were never welcome anywhere."
+    },
+    "works": {
+      "id": "works", "name": "The Works", "order": 4,
+      "zones": ["forge", "workshop"],
+      "nextFloor": "deep",
+      "transitionText": "Heat. The sound of grinding. Something is being built — or was, long ago.",
+      "montorLine": "I made things here. Beautiful things. You wouldn't understand."
+    },
+    "deep": {
+      "id": "deep", "name": "The Deep", "order": 5,
+      "zones": ["caverns", "chasm"],
+      "nextFloor": "domain",
+      "transitionText": "The walls become rock. Natural. Ancient. Older than Montor. Older than anything.",
+      "montorLine": "This was here before me. It'll be here after. I just... borrowed it."
+    },
+    "domain": {
+      "id": "domain", "name": "Montor's Domain", "order": 6,
+      "zones": ["throne_room"],
+      "nextFloor": null,
+      "transitionText": "A door. The last door. His door.",
+      "montorLine": "You're here. Finally. I've been waiting. Sit down. Let's talk."
     }
   },
   "zones": {
@@ -105,6 +142,285 @@
         { "type": "hidden",           "label": "Behind the Furnace",    "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Service Hatch",         "safe": true,  "icon": "▣" },
         { "type": "combat_standard",  "label": "Drain Grate",           "safe": false, "icon": "⚔" }
+      ]
+    },
+    "sewers": {
+      "id": "sewers", "name": "The Sewers", "floorId": "underbelly",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["rat", "slug", "spider"], "enemyTiers": ["slate", "iron"],
+      "bossType": "spider", "bossTier": "iron", "bossName": "The Broodmother",
+      "merchantName": "The Ratcatcher", "merchantRole": "Lives down here by choice. Apparently.",
+      "merchantGreeting": "Found this in a wall. Don't ask which wall.",
+      "encounterPools": {
+        "1": { "types": ["rat", "spider"], "tiers": ["slate"], "count": [1, 2] },
+        "2": { "types": ["rat", "slug", "spider"], "tiers": ["slate", "iron"], "count": [2, 3] },
+        "3": { "types": ["spider", "slug"], "tiers": ["iron"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Drain Mouth",          "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Dry Ledge",             "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Flooded Tunnel",        "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Rat Nest",              "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Dripping Junction",     "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Collapsed Pipe",        "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Web Gallery",           "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Egg Chamber",           "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Valve Wheel",           "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Ratcatcher's Nook",     "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Slime Pool",            "safe": false, "icon": "!" },
+        { "type": "trap",             "label": "Weakened Floor",         "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Washed-Up Crate",       "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Grate",      "safe": true,  "icon": "◇" },
+        { "type": "zone_door",        "label": "Sluice Gate",           "safe": true,  "icon": "▣" },
+        { "type": "combat_standard",  "label": "Overflow Channel",      "safe": false, "icon": "⚔" }
+      ]
+    },
+    "cistern": {
+      "id": "cistern", "name": "The Cistern", "floorId": "underbelly",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["slug", "spider", "bat"], "enemyTiers": ["slate", "iron"],
+      "bossType": "slug", "bossTier": "crimson", "bossName": "The Bile King",
+      "merchantName": "The Plumber", "merchantRole": "Montor's pipe specialist",
+      "merchantGreeting": "I fix things. Montor breaks them. Circle of life.",
+      "encounterPools": {
+        "1": { "types": ["slug", "bat"], "tiers": ["slate"], "count": [2, 3] },
+        "2": { "types": ["slug", "spider", "bat"], "tiers": ["slate", "iron"], "count": [2, 3] },
+        "3": { "types": ["spider", "slug"], "tiers": ["iron"], "count": [2, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Overflow Pipe",         "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Pump Room",             "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Reservoir Edge",        "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Stagnant Pool",         "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Filter Grate",          "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Drowned Steps",         "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Bile Pit",              "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Nesting Chamber",       "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Control Valve",         "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Plumber's Corner",      "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Acid Drip",             "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Sunken Chest",          "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Waterfall",  "safe": true,  "icon": "◇" },
+        { "type": "boss",             "label": "The Deep Pool",         "safe": false, "icon": "☠" },
+        { "type": "stairwell_descent","label": "Drain Down",            "safe": true,  "icon": "▼" },
+        { "type": "combat_standard",  "label": "Pipe Junction",         "safe": false, "icon": "⚔" }
+      ]
+    },
+    "bedroom": {
+      "id": "bedroom", "name": "The Bedroom", "floorId": "quarters",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["mimic", "shade", "hound"], "enemyTiers": ["iron", "crimson"],
+      "bossType": "shade", "bossTier": "crimson", "bossName": "Montor's Mum's Ghost",
+      "merchantName": "The Maid", "merchantRole": "Montor's housekeeper. Still tidying.",
+      "merchantGreeting": "He never makes his bed. Here, take something useful.",
+      "encounterPools": {
+        "1": { "types": ["mimic", "hound"], "tiers": ["iron"], "count": [1, 1] },
+        "2": { "types": ["mimic", "shade", "hound"], "tiers": ["iron"], "count": [1, 2] },
+        "3": { "types": ["shade", "mimic"], "tiers": ["iron", "crimson"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Landing Rug",           "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Montor's Bed",          "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Wardrobe Row",          "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Laundry Heap",          "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Curtain Alcove",        "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Under the Bed",         "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Mirror Room",           "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Hound's Den",           "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Music Box",             "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Maid's Cupboard",       "safe": true,  "icon": "⚒" },
+        { "type": "quest_npc",        "label": "Portrait Gallery",      "safe": true,  "icon": "?" },
+        { "type": "trap",             "label": "Loose Floorboard",      "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Jewellery Box",         "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Headboard",  "safe": true,  "icon": "◇" },
+        { "type": "zone_door",        "label": "Study Door",            "safe": true,  "icon": "▣" },
+        { "type": "combat_standard",  "label": "Dressing Room",         "safe": false, "icon": "⚔" }
+      ]
+    },
+    "study": {
+      "id": "study", "name": "The Study", "floorId": "quarters",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["shade", "wraith", "mimic"], "enemyTiers": ["iron", "crimson"],
+      "bossType": "wraith", "bossTier": "crimson", "bossName": "The Librarian",
+      "merchantName": "The Tutor", "merchantRole": "Taught young Montor. Regrets it.",
+      "merchantGreeting": "He was a gifted student. Gifted and terrible.",
+      "encounterPools": {
+        "1": { "types": ["shade", "mimic"], "tiers": ["iron"], "count": [1, 2] },
+        "2": { "types": ["shade", "wraith", "mimic"], "tiers": ["iron", "crimson"], "count": [2, 2] },
+        "3": { "types": ["wraith", "shade"], "tiers": ["crimson"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Doorway",               "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Reading Chair",          "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Bookshelf Maze",        "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Map Room",              "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Scroll Archive",        "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Writing Desk",          "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Forbidden Section",     "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Locked Cabinet",        "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Hidden Lever",          "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Tutor's Desk",          "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Ink Trap",              "safe": false, "icon": "!" },
+        { "type": "trap",             "label": "Book Avalanche",        "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Secret Drawer",         "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Globe",      "safe": true,  "icon": "◇" },
+        { "type": "boss",             "label": "The Librarian's Post",  "safe": false, "icon": "☠" },
+        { "type": "stairwell_descent","label": "Trapdoor Down",         "safe": true,  "icon": "▼" }
+      ]
+    },
+    "forge": {
+      "id": "forge", "name": "The Forge", "floorId": "works",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["automaton", "rock", "orc"], "enemyTiers": ["iron", "crimson"],
+      "bossType": "automaton", "bossTier": "crimson", "bossName": "The Masterwork",
+      "merchantName": "The Blacksmith", "merchantRole": "Built things for Montor. Still does.",
+      "merchantGreeting": "I forge. He hoards. Take something before he locks it away.",
+      "encounterPools": {
+        "1": { "types": ["orc", "rock"], "tiers": ["iron"], "count": [1, 2] },
+        "2": { "types": ["automaton", "orc", "rock"], "tiers": ["iron", "crimson"], "count": [1, 2] },
+        "3": { "types": ["automaton", "rock"], "tiers": ["crimson"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Heat Vent",             "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Cooling Tank",           "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Anvil Row",             "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Molten Channel",        "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Bellows Chamber",       "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Slag Heap",             "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Crucible Room",         "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Assembly Floor",        "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Master Switch",         "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Smith's Counter",       "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Steam Burst",           "safe": false, "icon": "!" },
+        { "type": "trap",             "label": "Falling Ingots",        "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Finished Goods Rack",   "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Furnace",    "safe": true,  "icon": "◇" },
+        { "type": "zone_door",        "label": "Workshop Door",         "safe": true,  "icon": "▣" },
+        { "type": "combat_standard",  "label": "Coal Chute",            "safe": false, "icon": "⚔" }
+      ]
+    },
+    "workshop": {
+      "id": "workshop", "name": "The Workshop", "floorId": "works",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["automaton", "mimic", "rock"], "enemyTiers": ["iron", "crimson"],
+      "bossType": "automaton", "bossTier": "void", "bossName": "Montor's Masterpiece",
+      "merchantName": "The Apprentice", "merchantRole": "Learning. Slowly. Montor's not patient.",
+      "merchantGreeting": "He threw this at me. You can have it.",
+      "encounterPools": {
+        "1": { "types": ["automaton", "mimic"], "tiers": ["iron"], "count": [1, 2] },
+        "2": { "types": ["automaton", "mimic", "rock"], "tiers": ["iron", "crimson"], "count": [2, 2] },
+        "3": { "types": ["automaton"], "tiers": ["crimson"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Tool Rack",             "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Break Room",            "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Workbench Row",         "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Parts Storage",         "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Testing Floor",         "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Gear Room",             "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Prototype Bay",         "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Failed Experiments",    "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Power Lever",           "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Apprentice's Bench",    "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Spring Trap",           "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Reject Bin",            "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Blueprint",  "safe": true,  "icon": "◇" },
+        { "type": "boss",             "label": "The Display Case",      "safe": false, "icon": "☠" },
+        { "type": "stairwell_descent","label": "Maintenance Shaft",     "safe": true,  "icon": "▼" },
+        { "type": "combat_standard",  "label": "Conveyor Belt",         "safe": false, "icon": "⚔" }
+      ]
+    },
+    "caverns": {
+      "id": "caverns", "name": "The Caverns", "floorId": "deep",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["bat", "rock", "wraith", "spider"], "enemyTiers": ["crimson", "void"],
+      "bossType": "rock", "bossTier": "void", "bossName": "The Ancient One",
+      "merchantName": "The Hermit", "merchantRole": "Lived here before Montor. Doesn't talk much.",
+      "merchantGreeting": "...",
+      "encounterPools": {
+        "1": { "types": ["bat", "spider"], "tiers": ["crimson"], "count": [2, 3] },
+        "2": { "types": ["rock", "wraith", "bat"], "tiers": ["crimson"], "count": [2, 3] },
+        "3": { "types": ["rock", "wraith"], "tiers": ["crimson", "void"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Cave Mouth",            "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Glowing Mushrooms",     "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Stalactite Forest",     "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Bat Colony",            "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Crystal Vein",          "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Narrow Squeeze",        "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Nest of Shadows",       "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "The Hollow",            "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Ancient Rune",          "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Hermit's Alcove",       "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Loose Rockfall",        "safe": false, "icon": "!" },
+        { "type": "trap",             "label": "Gas Pocket",            "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Fossil Bed",            "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Waterfall",  "safe": true,  "icon": "◇" },
+        { "type": "zone_door",        "label": "Chasm Bridge",          "safe": true,  "icon": "▣" },
+        { "type": "combat_standard",  "label": "Echo Chamber",          "safe": false, "icon": "⚔" }
+      ]
+    },
+    "chasm": {
+      "id": "chasm", "name": "The Chasm", "floorId": "deep",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["wraith", "shade", "bat"], "enemyTiers": ["crimson", "void"],
+      "bossType": "shade", "bossTier": "void", "bossName": "The Abyss Watcher",
+      "merchantName": "The Prospector", "merchantRole": "Came looking for gold. Found worse.",
+      "merchantGreeting": "Turn back. You won't. None of you do. Fine. Buy something.",
+      "encounterPools": {
+        "1": { "types": ["wraith", "bat"], "tiers": ["crimson"], "count": [1, 2] },
+        "2": { "types": ["shade", "wraith", "bat"], "tiers": ["crimson", "void"], "count": [2, 3] },
+        "3": { "types": ["shade", "wraith"], "tiers": ["void"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Ledge Path",            "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Sheltered Outcrop",     "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Rope Bridge",           "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Wind Tunnel",           "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Crumbling Ledge",       "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "The Overhang",          "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Void Rift",             "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "The Whispering Dark",   "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Void Crystal",          "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Prospector's Camp",     "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Crumbling Edge",        "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Abandoned Pack",        "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Inside the Fissure",    "safe": true,  "icon": "◇" },
+        { "type": "boss",             "label": "Edge of the Abyss",     "safe": false, "icon": "☠" },
+        { "type": "stairwell_descent","label": "The Final Descent",     "safe": true,  "icon": "▼" },
+        { "type": "combat_standard",  "label": "Hanging Passage",       "safe": false, "icon": "⚔" }
+      ]
+    },
+    "throne_room": {
+      "id": "throne_room", "name": "Montor's Throne Room", "floorId": "domain",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["shade", "automaton", "hound"], "enemyTiers": ["void"],
+      "bossType": "shade", "bossTier": "void", "bossName": "Montor",
+      "merchantName": null, "merchantRole": null,
+      "merchantGreeting": null,
+      "encounterPools": {
+        "1": { "types": ["hound", "shade"], "tiers": ["void"], "count": [1, 1] },
+        "2": { "types": ["shade", "automaton"], "tiers": ["void"], "count": [1, 2] },
+        "3": { "types": ["automaton", "shade", "hound"], "tiers": ["void"], "count": [2, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "The Threshold",         "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Montor's Waiting Room", "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Trophy Hall",           "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Collection Room",       "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "The Gallery",           "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Guard Station",         "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Vault Door",            "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Montor's Champion",     "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Montor's Lock",         "safe": true,  "icon": "⚷" },
+        { "type": "quest_npc",        "label": "A Familiar Face",       "safe": true,  "icon": "?" },
+        { "type": "trap",             "label": "Final Test",            "safe": false, "icon": "!" },
+        { "type": "trap",             "label": "Void Snare",            "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Montor's Vault",        "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Throne",     "safe": true,  "icon": "◇" },
+        { "type": "boss",             "label": "The Throne",            "safe": false, "icon": "☠" },
+        { "type": "combat_standard",  "label": "Antechamber",           "safe": false, "icon": "⚔" }
       ]
     }
   }

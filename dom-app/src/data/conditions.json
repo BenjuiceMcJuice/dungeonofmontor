@@ -99,10 +99,16 @@
     }
   },
   "enemyConditions": {
-    "rat":    { "conditionId": "BLEED",  "chance": 1.0 },
-    "slug":   { "conditionId": "NAUSEA", "chance": 1.0 },
-    "orc":    { "conditionId": "FEAR",   "chance": 0.5 },
-    "rock":   { "conditionId": "DAZE",   "chance": 1.0 },
-    "wraith": { "conditionId": "BLIND",  "chance": 0.7 }
+    "rat":       { "conditionId": "BLEED",    "chance": 1.0 },
+    "slug":      { "conditionId": "NAUSEA",   "chance": 1.0 },
+    "orc":       { "conditionId": "FEAR",     "chance": 0.5 },
+    "rock":      { "conditionId": "DAZE",     "chance": 1.0 },
+    "wraith":    { "conditionId": "BLIND",    "chance": 0.7 },
+    "spider":    { "conditionId": "POISON",   "chance": 0.8 },
+    "mimic":     { "conditionId": "FEAR",     "chance": 0.6 },
+    "bat":       { "conditionId": "BLIND",    "chance": 0.5 },
+    "hound":     { "conditionId": "BLEED",    "chance": 0.8 },
+    "automaton": { "conditionId": "DAZE",     "chance": 0.9 },
+    "shade":     { "conditionId": "SAD",      "chance": 0.7 }
   }
 }

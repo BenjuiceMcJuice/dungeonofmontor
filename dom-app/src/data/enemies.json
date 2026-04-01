@@ -1,10 +1,16 @@
 {
   "archetypes": {
-    "rat":    { "hp": 10, "str": 8,  "agi": 14, "def": 6,  "int": 6,  "weaponDie": 4,  "xp": 10 },
-    "orc":    { "hp": 35, "str": 16, "agi": 8,  "def": 14, "int": 8,  "weaponDie": 8,  "xp": 30 },
-    "rock":   { "hp": 50, "str": 14, "agi": 6,  "def": 18, "int": 6,  "weaponDie": 10, "xp": 40 },
-    "slug":   { "hp": 16, "str": 8,  "agi": 6,  "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 15 },
-    "wraith": { "hp": 22, "str": 12, "agi": 12, "def": 8,  "int": 16, "weaponDie": 6,  "xp": 35 }
+    "rat":      { "hp": 10, "str": 8,  "agi": 14, "def": 6,  "int": 6,  "weaponDie": 4,  "xp": 10 },
+    "slug":     { "hp": 16, "str": 8,  "agi": 6,  "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 15 },
+    "orc":      { "hp": 35, "str": 16, "agi": 8,  "def": 14, "int": 8,  "weaponDie": 8,  "xp": 30 },
+    "rock":     { "hp": 50, "str": 14, "agi": 6,  "def": 18, "int": 6,  "weaponDie": 10, "xp": 40 },
+    "wraith":   { "hp": 22, "str": 12, "agi": 12, "def": 8,  "int": 16, "weaponDie": 6,  "xp": 35 },
+    "spider":   { "hp": 14, "str": 10, "agi": 16, "def": 4,  "int": 10, "weaponDie": 4,  "xp": 20 },
+    "mimic":    { "hp": 40, "str": 14, "agi": 4,  "def": 16, "int": 12, "weaponDie": 8,  "xp": 45 },
+    "bat":      { "hp": 8,  "str": 6,  "agi": 18, "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 12 },
+    "hound":    { "hp": 28, "str": 14, "agi": 14, "def": 10, "int": 8,  "weaponDie": 6,  "xp": 30 },
+    "automaton":{ "hp": 55, "str": 16, "agi": 4,  "def": 20, "int": 4,  "weaponDie": 10, "xp": 50 },
+    "shade":    { "hp": 30, "str": 14, "agi": 14, "def": 6,  "int": 18, "weaponDie": 8,  "xp": 45 }
   },
   "tierMultipliers": {
     "dust":    0.8,
@@ -20,11 +26,17 @@
     "legendary": 1.2
   },
   "namePools": {
-    "rat":    { "dust": ["Dungeon Rat"], "slate": ["Sewer Rat"], "iron": ["Plague Rat"], "crimson": ["Blood Rat"], "void": ["Void Rat"] },
-    "orc":    { "dust": ["Orc Grunt"], "slate": ["Orc Brute"], "iron": ["Orc Warlord"], "crimson": ["Orc Berserker"], "void": ["Orc Champion"] },
-    "rock":   { "dust": ["Rock Golem"], "slate": ["Stone Golem"], "iron": ["Steel Golem"], "crimson": ["Magma Golem"], "void": ["Void Golem"] },
-    "slug":   { "dust": ["Ashslug"], "slate": ["Venomslug"], "iron": ["Bile Slug"], "crimson": ["Blood Slug"], "void": ["Void Slug"] },
-    "wraith": { "dust": ["Wisp"], "slate": ["Shade"], "iron": ["Wraith"], "crimson": ["Banshee"], "void": ["Void Wraith"] }
+    "rat":       { "dust": ["Dungeon Rat"], "slate": ["Sewer Rat"], "iron": ["Plague Rat"], "crimson": ["Blood Rat"], "void": ["Void Rat"] },
+    "slug":      { "dust": ["Ashslug"], "slate": ["Venomslug"], "iron": ["Bile Slug"], "crimson": ["Blood Slug"], "void": ["Void Slug"] },
+    "orc":       { "dust": ["Orc Grunt"], "slate": ["Orc Brute"], "iron": ["Orc Warlord"], "crimson": ["Orc Berserker"], "void": ["Orc Champion"] },
+    "rock":      { "dust": ["Rock Golem"], "slate": ["Stone Golem"], "iron": ["Steel Golem"], "crimson": ["Magma Golem"], "void": ["Void Golem"] },
+    "wraith":    { "dust": ["Wisp"], "slate": ["Shade"], "iron": ["Wraith"], "crimson": ["Banshee"], "void": ["Void Wraith"] },
+    "spider":    { "dust": ["Cobweb Spinner"], "slate": ["Sewer Spider"], "iron": ["Tunnel Weaver"], "crimson": ["Blood Spider"], "void": ["Void Spider"] },
+    "mimic":     { "dust": ["Suspicious Crate"], "slate": ["Creaking Chest"], "iron": ["Hungry Wardrobe"], "crimson": ["Living Throne"], "void": ["Void Mimic"] },
+    "bat":       { "dust": ["Cave Bat"], "slate": ["Screech Bat"], "iron": ["Plague Bat"], "crimson": ["Blood Bat"], "void": ["Void Bat"] },
+    "hound":     { "dust": ["Montor's Puppy"], "slate": ["Guard Dog"], "iron": ["War Hound"], "crimson": ["Hellhound"], "void": ["Void Hound"] },
+    "automaton": { "dust": ["Broken Tinker"], "slate": ["Clockwork Sentry"], "iron": ["Forge Guardian"], "crimson": ["Overcharged Engine"], "void": ["Void Construct"] },
+    "shade":     { "dust": ["Faint Echo"], "slate": ["Lost Servant"], "iron": ["Vengeful Spirit"], "crimson": ["Screaming Shade"], "void": ["Void Phantom"] }
   },
   "encounterPools": {
     "1": { "types": ["rat", "slug"], "tiers": ["dust"], "count": [1, 2] },

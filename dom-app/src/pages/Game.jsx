@@ -468,10 +468,9 @@ function Game({ character, user, onEndRun }) {
 
   // --- Floor transition: move to next floor or victory ---
   function handleFloorTransitionContinue() {
-    // Determine next floor
-    var floorOrder = ['grounds', 'underground']  // expand as floors are added
-    var currentIdx = floorOrder.indexOf(floor.floorId)
-    var nextFloorId = floorOrder[currentIdx + 1]
+    // Determine next floor from data
+    var currentFloorDef = FLOORS[floor.floorId]
+    var nextFloorId = currentFloorDef ? currentFloorDef.nextFloor : null
 
     if (!nextFloorId || !FLOORS[nextFloorId]) {
       // No more floors — victory!

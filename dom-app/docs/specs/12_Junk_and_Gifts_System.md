@@ -358,7 +358,40 @@ Add to zones.json per zone:
 
 ---
 
-## 7. Implementation Order
+## 7. Junk-as-Currency NPCs
+
+Special NPCs (not merchants) who accept junk as payment. Found in rest rooms or special chambers.
+
+### The Collector
+Montor's Mum. Or her ghost. Or a portrait that moves. She values junk because it reminds her of home.
+
+| Junk cost | Reward |
+|---|---|
+| 5 junk | Dodgy Red Liquid (health potion) |
+| 10 junk | Montor's Garden Charm (regen relic) |
+| 15 junk | Random Montor weapon (uncommon+) |
+| 25 junk | Random Montor relic (rare+) |
+| 50 junk | Montor's Mum's Blessing (unique — +1 all stats for run) |
+
+### The Bin Man
+A chamber entity in the Underbelly. Takes junk off your hands in bulk.
+
+| Junk cost | Reward |
+|---|---|
+| 3 junk | 10 gold |
+| 10 junk | 50 gold + random consumable |
+| 20 junk | 100 gold + heal to full |
+
+### Design Notes
+- Junk becomes a secondary currency alongside gold
+- Gold buys from merchants (Montor's staff). Junk buys from special NPCs.
+- This makes the hoarder build viable: collect junk → trade for powerful items
+- END stat matters: can you carry enough junk to reach 50?
+- The 50-junk reward (Mum's Blessing) is an endgame goal — you'd need to search almost every pile across multiple floors
+
+---
+
+## 8. Implementation Order
 
 1. **Add weight field to all items** in items.json
 2. **Add carry capacity to Game.jsx** (UI: show weight/capacity in inventory)
