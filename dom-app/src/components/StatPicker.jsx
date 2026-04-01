@@ -18,21 +18,21 @@ var STAT_INFO = {
   },
   agi: {
     name: 'Agility', abbrev: 'AGI', group: 'Combat',
-    summary: 'Initiative order and double strike.',
-    detail: 'Higher AGI = you go first in combat. Daggers get double strike chance scaling with AGI (+5% per modifier). Armour agiPenalty reduces this.',
-    tip: 'Best for: Dagger builds, going first.',
+    summary: 'Initiative, dodge, and double strike.',
+    detail: 'Higher AGI = go first, +2% dodge chance per modifier (all builds), +5% dagger double strike per modifier. Armour agiPenalty reduces this.',
+    tip: 'Best for: Dagger builds, evasion builds.',
   },
   int: {
     name: 'Intellect', abbrev: 'INT', group: 'Mental',
-    summary: 'Condition application chance.',
-    detail: 'When your enchanted weapon hits, INT determines how likely the condition (POISON, BLEED, etc.) applies. +5% chance per modifier.',
-    tip: 'Best for: Enchanted weapon builds.',
+    summary: 'Condition chance + enchanted weapon damage.',
+    detail: 'Enchanted weapons get +1 damage per INT modifier AND +5% condition application chance per modifier. Smart fighters hit harder with special weapons.',
+    tip: "Best for: Montor's enchanted weapon builds.",
   },
   lck: {
     name: 'Luck', abbrev: 'LCK', group: 'Fortune',
-    summary: 'Loot rarity rolls.',
-    detail: 'Added to d100 rarity roll when loot drops. Higher LCK = more uncommon, rare, and epic items from combat and chests.',
-    tip: 'Best for: Treasure hunters.',
+    summary: 'Crit chance and loot rarity.',
+    detail: 'Each +1 modifier lowers your crit threshold by 1 (base 20). Also added to loot rarity rolls. Higher LCK = more crits + better drops.',
+    tip: 'Best for: High-variance builds, treasure hunters.',
   },
   per: {
     name: 'Perception', abbrev: 'PER', group: 'Mental',
@@ -52,6 +52,12 @@ var STAT_INFO = {
     detail: "When activating Montor's Gifts at safe rooms, WIS determines how powerful the boon is. Higher WIS = stronger permanent abilities.",
     tip: 'Best for: Gift hunters, long runs.',
   },
+  vit: {
+    name: 'Vitality', abbrev: 'VIT', group: 'Body',
+    summary: 'Max HP.',
+    detail: 'Max HP = 25 + (VIT × 3). Each +1 VIT gives +3 max HP. Survive longer, take more risks.',
+    tip: 'Best for: Survival builds, tanking without DEF.',
+  },
   cha: {
     name: 'Charisma', abbrev: 'CHA', group: 'Fortune',
     summary: 'Merchant prices.',
@@ -65,14 +71,14 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
   var isLevelUp = mode === 'levelup'
   var isAllocate = mode === 'allocate'
 
-  var statOrder = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha']
+  var statOrder = ['str', 'def', 'agi', 'vit', 'int', 'lck', 'per', 'end', 'wis', 'cha']
 
   // Info panel — shown when a stat is tapped
   if (selectedStat) {
     var info = STAT_INFO[selectedStat]
     var currentVal = stats[selectedStat] || 0
     return (
-      <div className="flex flex-col gap-3 w-full max-w-xs">
+      <div className="flex flex-col gap-3 w-full max-w-sm">
         <div className="bg-surface border-2 border-gold rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -104,14 +110,14 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
 
   // Stat list
   return (
-    <div className="flex flex-col gap-1.5 w-full max-w-xs">
+    <div className="flex flex-col gap-1.5 w-full max-w-sm">
       {isAllocate && freePoints !== undefined && (
         <p className="text-gold text-sm font-sans text-center mb-1">Points remaining: <span className="font-display text-lg">{freePoints}</span></p>
       )}
       {isLevelUp && (
         <p className="text-ink text-sm mb-1">Tap a stat to see what it does:</p>
       )}
-      <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto">
+      <div className="grid grid-cols-2 gap-1.5">
         {statOrder.map(function(id) {
           var info = STAT_INFO[id]
           var val = stats[id] || 0
@@ -123,10 +129,10 @@ function StatPicker({ stats, onPick, onCancel, mode, freePoints }) {
                 (disabled ? 'border-border bg-raised text-ink-faint opacity-50' : 'border-border-hl bg-raised hover:border-gold cursor-pointer')}
             >
               <div className="flex flex-col items-start">
-                <span className="text-ink uppercase font-semibold">{info.abbrev}</span>
-                <span className="text-ink-faint text-[10px]">{info.summary}</span>
+                <span className="text-ink uppercase font-semibold text-xs">{info.abbrev}</span>
+                <span className="text-ink-faint text-[9px] leading-tight">{info.summary}</span>
               </div>
-              <span className="text-ink-dim">{val}</span>
+              <span className="text-ink font-display text-base">{val}</span>
             </button>
           )
         })}

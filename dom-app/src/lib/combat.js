@@ -108,7 +108,7 @@ function calculateTierDamage(weaponRoll, strMod, tier, defStat, critMultiplier) 
   if (tier === 1) { afterTier = Math.round(raw * (critMultiplier || 2.0)); tierMul = 'x' + (critMultiplier || 2.0) }
   if (tier === 3) { afterTier = Math.max(Math.round(raw / 2), 1); tierMul = 'x0.5' }
 
-  var defReduction = Math.floor(defStat / 3)
+  var defReduction = Math.floor(defStat / 2)
   var final_ = Math.max(afterTier - defReduction, 2)
 
   return {
@@ -232,6 +232,13 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
 
     var weapon = player.equipped && player.equipped.weapon
 
+    // INT bonus — enchanted weapons deal extra damage per INT modifier
+    var intDmgBonus = 0
+    if (weapon && weapon.conditionOnHit) {
+      var intMod = getModifier(player.combatStats.int || 10)
+      intDmgBonus = Math.max(0, intMod)
+    }
+
     // DEF ignore — maces bypass a % of enemy DEF
     var defWithConditions = enemy.stats.def + getConditionStatMod(enemy.statusEffects || [], 'def')
     var effectiveDef = Math.max(0, defWithConditions)
@@ -239,11 +246,12 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       effectiveDef = Math.max(0, Math.round(effectiveDef * (1 - weapon.defIgnore)))
     }
 
-    var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, effectiveDef, 2.0)
+    var breakdown = calculateTierDamage(dmgResult.roll, strMod + intDmgBonus, attackResult.tier, effectiveDef, 2.0)
 
     enemy.currentHp = Math.max(0, enemy.currentHp - breakdown.final)
     result.damage = breakdown.final
     result.damageBreakdown = breakdown
+    if (intDmgBonus > 0) result.intBonus = intDmgBonus
 
     // Try to apply weapon condition on hit
     if (weapon && weapon.conditionOnHit) {
@@ -285,6 +293,34 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.isDown = true
           result.enemyDefeated = true
         }
+      }
+    }
+
+    // Dual wield — offhand dagger gets a bonus attack (-2 accuracy, no crits)
+    if (!enemy.isDown && player.equipped && player.equipped.offhand && player.equipped.offhand.type === 'weapon') {
+      var offhand = player.equipped.offhand
+      var offhandRoll = d20Attack(strMod + rollsMod - 2, 99) // critThreshold 99 = no crits
+      if (offhandRoll.tier <= 3) {
+        var offDmg = rollDamage(offhand.damageDie || 4, strMod)
+        var offBreakdown = calculateTierDamage(offDmg.roll, strMod, offhandRoll.tier, effectiveDef, 1.0)
+        enemy.currentHp = Math.max(0, enemy.currentHp - offBreakdown.final)
+        result.damage += offBreakdown.final
+        result.offhandHit = true
+        result.offhandDamage = offBreakdown.final
+        // Offhand can apply its own condition
+        if (offhand.conditionOnHit) {
+          var offInt = player.combatStats.int || 10
+          if (rollConditionApplication(offhandRoll.tier, offInt, offhand.conditionChance || 1.0)) {
+            enemy.statusEffects = applyCondition(enemy.statusEffects || [], offhand.conditionOnHit, 'offhand_weapon')
+            result.offhandCondition = offhand.conditionOnHit
+          }
+        }
+        if (enemy.currentHp <= 0) {
+          enemy.isDown = true
+          result.enemyDefeated = true
+        }
+      } else {
+        result.offhandMiss = true
       }
     }
   }
@@ -345,10 +381,11 @@ function resolveEnemyAttack(battleState, enemyId) {
       return { newBattle: bs, result: result }
     }
 
-    // Dodge chance — Shadow Cloak etc.
-    var dodgeChance = 0
+    // Dodge chance — AGI base (2% per mod) + equipment (Shadow Cloak etc.)
+    var agiDodge = getModifier(target.combatStats.agi || 10) * 0.02
+    var dodgeChance = Math.max(0, agiDodge)
     if (target.equipped && target.equipped.armour && target.equipped.armour.passiveEffect === 'dodge_chance') {
-      dodgeChance = target.equipped.armour.passiveValue || 0
+      dodgeChance += target.equipped.armour.passiveValue || 0
     }
     if (target.equipped && target.equipped.relics) {
       for (var di = 0; di < target.equipped.relics.length; di++) {
@@ -357,7 +394,7 @@ function resolveEnemyAttack(battleState, enemyId) {
         }
       }
     }
-    if (dodgeChance > 0 && Math.random() < dodgeChance) {
+    if (dodgeChance > 0 && Math.random() < Math.min(dodgeChance, 0.35)) {
       attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
       result.attackRoll = attackResult
       result.dodged = true

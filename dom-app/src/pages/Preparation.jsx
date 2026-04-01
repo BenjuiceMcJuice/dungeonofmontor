@@ -1,6 +1,7 @@
 // Preparation — pre-run screen: allocate stats + buy starter gear
 import { useState } from 'react'
 import StatPicker from '../components/StatPicker.jsx'
+import { getMaxHp } from '../lib/classes.js'
 import classData from '../data/classes.json'
 import ITEMS from '../data/items.json'
 
@@ -21,6 +22,8 @@ function Preparation({ character, onReady }) {
   function handleStatPick(statId) {
     if (freePoints <= 0) return
     character.stats[statId] = (character.stats[statId] || 0) + 1
+    // Recalculate maxHp when VIT changes
+    character.maxHp = getMaxHp(character.stats)
     setFreePoints(freePoints - 1)
   }
 

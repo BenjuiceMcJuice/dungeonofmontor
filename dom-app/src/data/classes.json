@@ -28,13 +28,12 @@
   "statPointsTotal": 70,
   "startingKnight": {
     "baseStats": {
-      "str": 8, "def": 8, "agi": 8, "int": 6, "lck": 6,
+      "str": 10, "def": 10, "agi": 10, "int": 8, "lck": 10,
       "per": 6, "end": 6, "wis": 6, "cha": 6,
-      "vit": 4, "res": 4, "sth": 4, "cun": 4, "wil": 4
+      "vit": 8, "res": 4, "sth": 4, "cun": 4, "wil": 4
     },
-    "freeStatPoints": 10,
-    "allocatableStats": ["str", "def", "agi", "int", "lck", "per", "end", "wis", "cha"],
-    "maxHp": 45,
+    "freeStatPoints": 8,
+    "allocatableStats": ["str", "def", "agi", "int", "lck", "per", "end", "wis", "cha", "vit"],
     "startingGold": 50,
     "starterShopItems": [
       "dagger_common", "shortsword_common", "longsword_common", "mace_common",

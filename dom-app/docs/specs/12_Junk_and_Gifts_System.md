@@ -35,6 +35,25 @@ Each pile is one interaction. Player taps "Search" and a roll determines the out
 | 18-19 | **Good find** — an uncommon+ item from the floor's loot table | 12 |
 | 20 (nat) | **Treasure** — a Montor's Treasure (see §4) OR a rare+ item | 15 |
 
+### Search Intensity — Deep Clean / Tidy Up / Sweep Under the Carpet
+
+Each junk pile can be searched at three intensity levels. Higher intensity = better rewards but more risk and time.
+
+| Level | Name | Roll bonus | Risk | Time | Best for |
+|---|---|---|---|---|---|
+| Light | Sweep Under the Carpet | +0 | Low (ambush on nat 1 only) | Quick | Safe rooms, low HP |
+| Medium | Tidy Up | +2 | Medium (ambush on 1-3) | Normal | Standard exploration |
+| Deep | Deep Clean | +5 | High (ambush on 1-5, tougher enemies) | Slow | Treasure hunting, high PER builds |
+
+**Deep Clean specifics:**
+- +5 to PER roll — much better chance of finding treasures
+- Ambush on 1-5 (25% chance) instead of just nat 1
+- Ambush spawns encounter level +1 enemies (tougher than normal room)
+- But: guaranteed 5 XP even on ambush
+- And: treasure threshold lowered (18+ instead of nat 20)
+
+**This makes PER + Deep Clean the treasure hunting build.** PER 14 (+2) with Deep Clean = effective roll bonus of +7. Treasure on 13+ natural. Very strong but very risky.
+
 ### XP for Searching
 Every search grants XP regardless of outcome (except ambush). This promotes exploring and rummaging. A thorough player who searches everything levels faster than one who rushes to the boss.
 
@@ -119,6 +138,100 @@ Named, flavoured items that are technically worthless but:
 | Montor's Price Tag Gun | Junk sells for 5g instead of 1-2g at merchants | "Everything has value. Montor said so." |
 
 **The hoarder build:** High END + PER + junk relics = you search everything, carry everything, and get stronger from it. You become Montor.
+
+### Dodgy Consumables (found in junk piles)
+
+Food and drink found in Montor's dungeon. Questionable freshness. END and VIT influence whether they help or hurt.
+
+**Mechanic:** When consumed, roll d20 + END modifier.
+- 12+: **Benefit** — heal or stat buff
+- 6-11: **Nothing** — "Tastes awful. Does nothing."
+- 2-5: **Mild harm** — lose 3-5 HP or 1-turn debuff
+- 1 (nat): **Severe harm** — NAUSEA condition + 5 HP loss
+
+Higher END = better stomach = more likely to benefit. Makes END useful beyond carry capacity.
+
+**Garden dodgy consumables:**
+| Item | Benefit (12+) | Harm (2-5) |
+|---|---|---|
+| Suspicious Berries | Heal 8 HP | -3 HP, NAUSEA |
+| Montor's Garden Salad | +2 AGI for 3 turns | -2 AGI for 2 turns |
+| Muddy Water | Heal 5 HP, cure body | SLUGGISH for 2 turns |
+| Old Birdseed | +1 PER for 3 turns | "Just tastes like nothing" |
+| Compost Tea | Heal 10 HP | NAUSEA for 2 turns |
+
+**Great Hall dodgy consumables:**
+| Item | Benefit (12+) | Harm (2-5) |
+|---|---|---|
+| Stale Banquet Wine | +2 STR, -1 DEF for 3 turns | DAZE for 1 turn |
+| Dusty Cheese | Heal 6 HP | -4 HP |
+| Old Feast Leftovers | Heal 12 HP | NAUSEA + -5 HP |
+| Candle Wax Snack | +2 DEF for 3 turns | "Waxy but harmless" |
+| Ink Pot Dregs | +2 INT for 3 turns | BLIND for 1 turn |
+
+**Kitchen dodgy consumables:**
+| Item | Benefit (12+) | Harm (2-5) |
+|---|---|---|
+| Mystery Stew | Heal 15 HP | POISON for 2 turns |
+| Rat Jerky | Heal 5 HP (always works, even on fail — it's just jerky) | — |
+| The Cook's Special | +3 to random stat for 3 turns | -2 to random stat for 2 turns |
+| Out-of-Date Pie | Heal 10 HP + cure body | NAUSEA + SLUGGISH |
+| Spice Jar Dregs | +1 all rolls for 2 turns | BURN for 1 turn (it's spicy) |
+
+**Rat Jerky is the safe option** — always heals 5 HP regardless of roll. Low reward, no risk. The safe player's choice.
+
+---
+
+## 3b. Chamber Events (floor-appropriate environmental effects)
+
+Random events that affect the room when you enter. Not every room has one — maybe 30% chance. They create atmosphere and mechanical variety.
+
+### Event Mechanic
+On entering a non-combat chamber, 30% chance of a room event. Events can be positive, negative, or neutral. Some are stat-dependent (PER to notice, WIS to benefit, END to resist).
+
+### Garden Events
+| Event | Effect | Stat check |
+|---|---|---|
+| High Pollen Count | -1 all rolls this chamber. "Your eyes water. Everything's fuzzy." | END 12+ resists |
+| Morning Dew | Heal 3 HP. "The air is fresh. You breathe deeply." | — |
+| Overgrown Path | Movement costs: must clear brambles. Lose 2 HP or PER check to find clear route | PER 12+ avoids |
+| Butterfly Swarm | +1 LCK this chamber. "They settle on your shoulders. Feels... lucky." | — |
+| Sudden Rain | All enemies in next combat have -2 AGI. "Everything's slippery." | — |
+| Montor's Sprinklers | Heal 5 HP but -2 AGI this chamber. "Cold. Very cold." | — |
+| Night Falls | Visibility reduced. Hidden items easier to miss (-2 PER). But enemies can't see you either (+2 AGI first turn of combat) | — |
+| Sunrise | +1 all rolls this chamber. "Light streams through the canopy." | — |
+
+### Great Hall Events
+| Event | Effect | Stat check |
+|---|---|---|
+| Echoing Footsteps | Next combat: enemies get a free first strike. "They heard you coming." | AGI 12+ = you're quiet enough |
+| Dusty Air | -1 PER this chamber. Searching is harder. "Can barely see." | — |
+| Grand Echo | Montor whisper guaranteed. "The acoustics are perfect." | WIS 12+ = you understand a hint |
+| Collapsed Section | Room has fewer searchable piles (1 instead of 2-3) | — |
+| Ancient Fireplace | Rest opportunity: heal 10% HP. "Still warm somehow." | — |
+| Draught | All BURN conditions extinguished (player and enemies). "A cold wind." | — |
+| Cobweb Curtain | First enemy in next combat starts with BLIND. "It walked through the webs." | — |
+
+### Kitchen Events
+| Event | Effect | Stat check |
+|---|---|---|
+| Steam Vents | BURN risk: 3 damage unless AGI check. "The pipes hiss." | AGI 12+ dodges |
+| Grease Fire | All enemies in next combat start with BURN. "The kitchen's on fire. Again." | — |
+| Horrible Smell | -2 CHA this chamber (merchants charge more). "Something died in the pantry." | END 12+ resists |
+| Rat Feast | Extra junk pile in this room (rats were hoarding too). "They've been busy." | — |
+| Hot Oven | Rest opportunity: heal 10% + cure FROST. "Stand near the oven. Thaw out." | — |
+| Slippery Floor | -3 AGI in next combat. "Grease everywhere." | — |
+| The Cook's Radio | +1 all rolls this chamber. "Somehow there's music. It helps." | — |
+
+### Day/Night Cycle (Garden only)
+The Garden is outdoors — it has weather and time of day. Underground floors are always dark.
+
+Cycle shifts every 8 chambers entered in the Garden:
+- **Day (chambers 1-8):** Normal. Bright. Standard visibility. Slugs are stronger in daylight (+2 STR — they're garden creatures, this is their turf).
+- **Dusk (chambers 9-12):** -1 PER. Shadows lengthen. Slugs normal. Rats gain +1 AGI (they come out at dusk).
+- **Night (chambers 13-16+):** -2 PER. Slugs are weaker (-2 STR, -2 DEF — they retreat at night). Rats gain +2 AGI. Hidden items harder to find.
+
+**The trade-off:** Rush the Garden in daytime = fight tougher slugs but see better. Take your time = slugs weaken but searching is harder and rats are faster.
 
 ---
 

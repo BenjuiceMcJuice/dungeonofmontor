@@ -151,6 +151,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
+  var [showCharPanel, setShowCharPanel] = useState(false)
   var [inventoryTab, setInventoryTab] = useState('weapons')
 
   // --- Run tracking (for balance logging) ---
@@ -764,7 +765,9 @@ function Game({ character, user, onEndRun }) {
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
   // Effective crit threshold — lowered by crit_bonus relics (Keen Edge Ring = 19+)
-  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus')
+  // Crit threshold: base 20, lowered by LCK modifier and crit_bonus relics
+  var lckMod = getModifier(character.stats.lck || 10)
+  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus') - lckMod
 
   // Direct attack — click enemy card to attack without going through CombatRoller button
   function handlePlayerAttackDirect(enemyId) {
@@ -825,6 +828,14 @@ function Game({ character, user, onEndRun }) {
     }
     if (r.rerolled) {
       addLog({ type: 'player', text: 'Loaded Dice: rerolled a 1!', tier: 'hit' })
+    }
+    if (r.offhandHit) {
+      addLog({ type: 'player', text: 'Off-hand strike! ' + r.offhandDamage + ' bonus damage!', tier: 'hit' })
+    } else if (r.offhandMiss) {
+      addLog({ type: 'player', text: 'Off-hand swings... misses.', tier: 'miss' })
+    }
+    if (r.offhandCondition) {
+      addLog({ type: 'condition', text: r.target + ' is now ' + r.offhandCondition + '! (off-hand)', tier: 'hit' })
     }
     if (r.conditionApplied) {
       addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
@@ -1052,8 +1063,13 @@ function Game({ character, user, onEndRun }) {
     var returnItem = null
 
     if (item.type === 'weapon' && item.slot === 'weapon') {
-      returnItem = newEquipped.weapon
-      newEquipped.weapon = item
+      // Daggers can dual wield — if main hand already has a dagger and offhand is empty
+      if (item.weaponType === 'dagger' && newEquipped.weapon && newEquipped.weapon.weaponType === 'dagger' && !newEquipped.offhand) {
+        newEquipped.offhand = item
+      } else {
+        returnItem = newEquipped.weapon
+        newEquipped.weapon = item
+      }
     } else if (item.type === 'armour' && item.slot === 'offhand') {
       returnItem = newEquipped.offhand
       newEquipped.offhand = item
@@ -1487,9 +1503,14 @@ function Game({ character, user, onEndRun }) {
             <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
             <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{currentChamber.label}</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) setShowInventoryPanel(false) }}
+              className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
+              Stats
+            </button>
             {playerInventory.length > 0 && (
-              <button onClick={function() { setShowInventoryPanel(!showInventoryPanel) }}
+              <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) setShowCharPanel(false) }}
                 className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
                   (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
                 Bag ({playerInventory.length})
@@ -1498,6 +1519,59 @@ function Game({ character, user, onEndRun }) {
             <span className="text-gold text-xs font-sans">{playerGold}g</span>
           </div>
         </div>
+
+        {/* Character stats panel */}
+        {showCharPanel && (function() {
+          var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
+          var statRows = [
+            { id: 'str', label: 'STR', hint: 'Attack + damage' },
+            { id: 'def', label: 'DEF', hint: 'Damage reduction' },
+            { id: 'agi', label: 'AGI', hint: 'Initiative + dodge' },
+            { id: 'vit', label: 'VIT', hint: 'Max HP' },
+            { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
+            { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
+            { id: 'per', label: 'PER', hint: 'Searching' },
+            { id: 'end', label: 'END', hint: 'Carry capacity' },
+            { id: 'wis', label: 'WIS', hint: 'Gift power' },
+            { id: 'cha', label: 'CHA', hint: 'Prices' },
+          ]
+          var w = character.equipped && character.equipped.weapon
+          var a = character.equipped && character.equipped.armour
+          var o = character.equipped && character.equipped.offhand
+          var totalDef = (character.stats.def || 10) + (a ? a.defBonus || 0 : 0) + (o ? o.defBonus || 0 : 0)
+          return (
+            <div className="mb-2 rounded-lg bg-surface border border-border overflow-hidden">
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-display text-base text-gold">{character.name}</span>
+                  <span className="text-ink-dim text-xs font-sans">Level {character.level || 1} Knight</span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mb-3">
+                  <div className="text-xs font-sans"><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">DEF total:</span> <span className="text-ink">{totalDef} (reduces {Math.floor(totalDef / 2)})</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Weapon:</span> <span className="text-ink">{w ? w.name : 'None'}</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Armour:</span> <span className="text-ink">{a ? a.name : 'None'}</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Crit:</span> <span className="text-ink">{critThreshold}+ (nat d20)</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Dodge:</span> <span className="text-ink">{Math.round(Math.max(0, getModifier(character.stats.agi || 10) * 0.02 + getPassiveTotal(character.equipped, 'dodge_chance')) * 100)}%</span></div>
+                </div>
+                <div className="grid grid-cols-5 gap-1">
+                  {statRows.map(function(s) {
+                    var val = character.stats[s.id] || 0
+                    return (
+                      <div key={s.id} className="flex flex-col items-center p-1.5 rounded bg-raised border border-border">
+                        <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
+                        <span className="text-ink font-display text-sm">{val}</span>
+                        <span className="text-ink-dim text-[9px]">{mod(val)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Inventory panel (out of combat) — tabbed by category */}
         {showInventoryPanel && (function() {
@@ -1545,20 +1619,39 @@ function Game({ character, user, onEndRun }) {
 
               {/* Currently equipped (weapons/armour tabs) */}
               {activeTab.id === 'weapons' && character.equipped && character.equipped.weapon && (
-                <div className="mx-3 mt-2 p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-gold uppercase tracking-wide">Equipped</span>
-                      <span className="text-ink">{character.equipped.weapon.name}</span>
-                      <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg</span>
+                <div className="mx-3 mt-2 flex flex-col gap-1">
+                  <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gold uppercase tracking-wide">Main Hand</span>
+                        <span className="text-ink">{character.equipped.weapon.name}</span>
+                        <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg ({character.equipped.weapon.weaponType || 'weapon'})</span>
+                      </div>
+                      {gamePhase === 'doors' && (
+                        <button onClick={handleUnequipWeapon}
+                          className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                          Unequip
+                        </button>
+                      )}
                     </div>
-                    {gamePhase === 'doors' && (
-                      <button onClick={handleUnequipWeapon}
-                        className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
-                        Unequip
-                      </button>
-                    )}
                   </div>
+                  {character.equipped.offhand && character.equipped.offhand.type === 'weapon' && (
+                    <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-emerald-400 uppercase tracking-wide">Off Hand (Dual Wield)</span>
+                          <span className="text-ink">{character.equipped.offhand.name}</span>
+                          <span className="text-ink-faint text-[10px]">d{character.equipped.offhand.damageDie || character.equipped.offhand.die} dmg, -2 accuracy, no crits</span>
+                        </div>
+                        {gamePhase === 'doors' && (
+                          <button onClick={handleUnequipOffhand}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {activeTab.id === 'armour' && (
@@ -2374,10 +2467,12 @@ function Game({ character, user, onEndRun }) {
                   damageMod={strMod}
                   colour="gold"
                   buttonLabel={'Attack ' + targetEnemy.name}
-                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage - (pendingAttackResult.result.doubleStrikeDamage || 0) : null}
+                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage - (pendingAttackResult.result.doubleStrikeDamage || 0) - (pendingAttackResult.result.offhandDamage || 0) : null}
                   damageBreakdown={pendingAttackResult ? pendingAttackResult.result.damageBreakdown : null}
                   doubleStrike={pendingAttackResult ? pendingAttackResult.result.doubleStrike : false}
                   doubleStrikeDamage={pendingAttackResult ? pendingAttackResult.result.doubleStrikeDamage : 0}
+                  offhandHit={pendingAttackResult ? pendingAttackResult.result.offhandHit : false}
+                  offhandDamage={pendingAttackResult ? pendingAttackResult.result.offhandDamage : 0}
                   attackerName={character.name}
                   targetName={targetEnemy.name}
                 />

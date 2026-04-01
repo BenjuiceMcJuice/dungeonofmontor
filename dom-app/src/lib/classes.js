@@ -13,9 +13,9 @@ function getModifier(value) {
   return Math.floor((value - 10) / 2)
 }
 
-// Max HP: classBaseHP + (VIT * 5) + (END * 2)
-function getMaxHp(cls, stats) {
-  return cls.baseHp + (stats.vit * 5) + (stats.end * 2)
+// Max HP: 25 + (VIT * 3)
+function getMaxHp(stats) {
+  return 25 + ((stats.vit || 8) * 3)
 }
 
 // Generate a Knight with base stats, no equipment, and starting gold
@@ -30,7 +30,7 @@ function generateKnight(name) {
     level: 1,
     xp: 0,
     stats: stats,
-    maxHp: start.maxHp,
+    maxHp: getMaxHp(stats),
     abilities: [],
     scars: [],
     titles: [],
