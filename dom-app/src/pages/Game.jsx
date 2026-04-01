@@ -826,6 +826,14 @@ function Game({ character, user, onEndRun }) {
     if (r.rerolled) {
       addLog({ type: 'player', text: 'Loaded Dice: rerolled a 1!', tier: 'hit' })
     }
+    if (r.offhandHit) {
+      addLog({ type: 'player', text: 'Off-hand strike! ' + r.offhandDamage + ' bonus damage!', tier: 'hit' })
+    } else if (r.offhandMiss) {
+      addLog({ type: 'player', text: 'Off-hand swings... misses.', tier: 'miss' })
+    }
+    if (r.offhandCondition) {
+      addLog({ type: 'condition', text: r.target + ' is now ' + r.offhandCondition + '! (off-hand)', tier: 'hit' })
+    }
     if (r.conditionApplied) {
       addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
     }
@@ -1052,8 +1060,13 @@ function Game({ character, user, onEndRun }) {
     var returnItem = null
 
     if (item.type === 'weapon' && item.slot === 'weapon') {
-      returnItem = newEquipped.weapon
-      newEquipped.weapon = item
+      // Daggers can dual wield — if main hand already has a dagger and offhand is empty
+      if (item.weaponType === 'dagger' && newEquipped.weapon && newEquipped.weapon.weaponType === 'dagger' && !newEquipped.offhand) {
+        newEquipped.offhand = item
+      } else {
+        returnItem = newEquipped.weapon
+        newEquipped.weapon = item
+      }
     } else if (item.type === 'armour' && item.slot === 'offhand') {
       returnItem = newEquipped.offhand
       newEquipped.offhand = item
@@ -1545,20 +1558,39 @@ function Game({ character, user, onEndRun }) {
 
               {/* Currently equipped (weapons/armour tabs) */}
               {activeTab.id === 'weapons' && character.equipped && character.equipped.weapon && (
-                <div className="mx-3 mt-2 p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-gold uppercase tracking-wide">Equipped</span>
-                      <span className="text-ink">{character.equipped.weapon.name}</span>
-                      <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg</span>
+                <div className="mx-3 mt-2 flex flex-col gap-1">
+                  <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gold uppercase tracking-wide">Main Hand</span>
+                        <span className="text-ink">{character.equipped.weapon.name}</span>
+                        <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg ({character.equipped.weapon.weaponType || 'weapon'})</span>
+                      </div>
+                      {gamePhase === 'doors' && (
+                        <button onClick={handleUnequipWeapon}
+                          className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                          Unequip
+                        </button>
+                      )}
                     </div>
-                    {gamePhase === 'doors' && (
-                      <button onClick={handleUnequipWeapon}
-                        className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
-                        Unequip
-                      </button>
-                    )}
                   </div>
+                  {character.equipped.offhand && character.equipped.offhand.type === 'weapon' && (
+                    <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-emerald-400 uppercase tracking-wide">Off Hand (Dual Wield)</span>
+                          <span className="text-ink">{character.equipped.offhand.name}</span>
+                          <span className="text-ink-faint text-[10px]">d{character.equipped.offhand.damageDie || character.equipped.offhand.die} dmg, -2 accuracy, no crits</span>
+                        </div>
+                        {gamePhase === 'doors' && (
+                          <button onClick={handleUnequipOffhand}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {activeTab.id === 'armour' && (
@@ -2374,10 +2406,12 @@ function Game({ character, user, onEndRun }) {
                   damageMod={strMod}
                   colour="gold"
                   buttonLabel={'Attack ' + targetEnemy.name}
-                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage - (pendingAttackResult.result.doubleStrikeDamage || 0) : null}
+                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage - (pendingAttackResult.result.doubleStrikeDamage || 0) - (pendingAttackResult.result.offhandDamage || 0) : null}
                   damageBreakdown={pendingAttackResult ? pendingAttackResult.result.damageBreakdown : null}
                   doubleStrike={pendingAttackResult ? pendingAttackResult.result.doubleStrike : false}
                   doubleStrikeDamage={pendingAttackResult ? pendingAttackResult.result.doubleStrikeDamage : 0}
+                  offhandHit={pendingAttackResult ? pendingAttackResult.result.offhandHit : false}
+                  offhandDamage={pendingAttackResult ? pendingAttackResult.result.offhandDamage : 0}
                   attackerName={character.name}
                   targetName={targetEnemy.name}
                 />

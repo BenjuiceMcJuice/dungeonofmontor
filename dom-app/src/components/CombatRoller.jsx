@@ -28,7 +28,7 @@ function getDamageFontSize(dmg) {
   return '1.8rem'
 }
 
-function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage, damageBreakdown, doubleStrike, doubleStrikeDamage, attackerName, targetName }) {
+function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage, damageBreakdown, doubleStrike, doubleStrikeDamage, offhandHit, offhandDamage, attackerName, targetName }) {
   var resolvedDamageRef = useRef(resolvedDamage)
   resolvedDamageRef.current = resolvedDamage
   var breakdownRef = useRef(damageBreakdown)
@@ -37,6 +37,10 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
   doubleStrikeRef.current = doubleStrike
   var doubleStrikeDamageRef = useRef(doubleStrikeDamage)
   doubleStrikeDamageRef.current = doubleStrikeDamage
+  var offhandHitRef = useRef(offhandHit)
+  offhandHitRef.current = offhandHit
+  var offhandDamageRef = useRef(offhandDamage)
+  offhandDamageRef.current = offhandDamage
 
   var accentBorder = colour === 'red' ? 'border-red-400' : 'border-gold'
   var accentBg = colour === 'red' ? 'bg-red-400/10' : 'bg-gold-glow'
@@ -229,6 +233,16 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
           <p className="text-emerald-400 font-display text-xs uppercase tracking-widest">Double Strike!</p>
           <p className="font-display text-emerald-400" style={{ fontSize: getDamageFontSize(doubleStrikeDamageRef.current), lineHeight: 1.1 }}>
             +{doubleStrikeDamageRef.current}
+          </p>
+        </div>
+      )}
+
+      {/* Off-hand hit flash */}
+      {showContinue && offhandHitRef.current && offhandDamageRef.current > 0 && (
+        <div className="text-center">
+          <p className="text-blue font-display text-xs uppercase tracking-widest">Off-Hand!</p>
+          <p className="font-display text-blue" style={{ fontSize: getDamageFontSize(offhandDamageRef.current), lineHeight: 1.1 }}>
+            +{offhandDamageRef.current}
           </p>
         </div>
       )}

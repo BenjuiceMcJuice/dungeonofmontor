@@ -287,6 +287,34 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
         }
       }
     }
+
+    // Dual wield — offhand dagger gets a bonus attack (-2 accuracy, no crits)
+    if (!enemy.isDown && player.equipped && player.equipped.offhand && player.equipped.offhand.type === 'weapon') {
+      var offhand = player.equipped.offhand
+      var offhandRoll = d20Attack(strMod + rollsMod - 2, 99) // critThreshold 99 = no crits
+      if (offhandRoll.tier <= 3) {
+        var offDmg = rollDamage(offhand.damageDie || 4, strMod)
+        var offBreakdown = calculateTierDamage(offDmg.roll, strMod, offhandRoll.tier, effectiveDef, 1.0)
+        enemy.currentHp = Math.max(0, enemy.currentHp - offBreakdown.final)
+        result.damage += offBreakdown.final
+        result.offhandHit = true
+        result.offhandDamage = offBreakdown.final
+        // Offhand can apply its own condition
+        if (offhand.conditionOnHit) {
+          var offInt = player.combatStats.int || 10
+          if (rollConditionApplication(offhandRoll.tier, offInt, offhand.conditionChance || 1.0)) {
+            enemy.statusEffects = applyCondition(enemy.statusEffects || [], offhand.conditionOnHit, 'offhand_weapon')
+            result.offhandCondition = offhand.conditionOnHit
+          }
+        }
+        if (enemy.currentHp <= 0) {
+          enemy.isDown = true
+          result.enemyDefeated = true
+        }
+      } else {
+        result.offhandMiss = true
+      }
+    }
   }
 
   return { newBattle: bs, result: result }
