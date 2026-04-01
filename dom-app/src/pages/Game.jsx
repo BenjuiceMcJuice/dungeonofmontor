@@ -154,6 +154,7 @@ function Game({ character, user, onEndRun }) {
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
   var [showCharPanel, setShowCharPanel] = useState(false)
   var [inventoryTab, setInventoryTab] = useState('weapons')
+  var [selectedItemIdx, setSelectedItemIdx] = useState(null)
 
   // --- Run tracking (for balance logging) ---
   var [runStats, setRunStats] = useState({
@@ -287,8 +288,8 @@ function Game({ character, user, onEndRun }) {
 
     var chamber = newZone.chambers[targetId]
 
-    // If already cleared, just show doors again (backtracking)
-    if (chamber.cleared) {
+    // If already cleared or has corpses (fought), just show doors (backtracking)
+    if (chamber.cleared || chamber.corpses) {
       setGamePhase('doors')
       return
     }
@@ -1248,10 +1249,10 @@ function Game({ character, user, onEndRun }) {
       }
     }
 
-    // Store corpses on the chamber in zone state
+    // Store corpses on the chamber in zone state + ensure cleared
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
-        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { corpses: corpses })
+        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { corpses: corpses, cleared: true })
         return ch
       })
     })
@@ -1390,11 +1391,12 @@ function Game({ character, user, onEndRun }) {
 
   function handleCloseChest() {
     setLootingChestId(null)
-    // Mark chamber cleared when closing chest
+    // Mark chamber cleared + chest fully looted to prevent re-opening
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
-        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
-        return ch
+        if (ch.id !== zone.playerPosition) return ch
+        var updatedChest = ch.chest ? Object.assign({}, ch.chest, { goldTaken: true }) : ch.chest
+        return Object.assign({}, ch, { cleared: true, chest: updatedChest })
       })
     })
     setZone(newZone)
@@ -1751,44 +1753,88 @@ function Game({ character, user, onEndRun }) {
               )}
 
               {/* Bag contents for active tab */}
-              <div className="p-3 max-h-40 overflow-y-auto">
+              <div className="p-3 max-h-48 overflow-y-auto">
                 {filteredItems.length === 0 && (
                   <p className="text-ink-faint text-xs text-center py-2">Nothing here.</p>
                 )}
-                <div className="flex flex-col gap-1">
-                  {filteredItems.map(function(entry) {
-                    var item = entry.item
-                    var idx = entry.idx
-                    var isEquippable = item.type === 'weapon' || item.type === 'armour' || item.type === 'relic'
-                    var isConsumable = item.type === 'consumable'
-                    return (
-                      <div key={idx} className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans">
-                        <div className="flex flex-col">
-                          <span className="text-ink">{item.name}</span>
-                          <span className="text-ink-faint text-[10px]">
-                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' + (item.weaponType ? ' (' + item.weaponType + ')' : '') :
-                             item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
-                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                             item.type === 'relic' ? item.description :
-                             item.description || ''}
-                          </span>
-                        </div>
+
+                {/* Item detail panel */}
+                {selectedItemIdx !== null && playerInventory[selectedItemIdx] && (function() {
+                  var detailItem = playerInventory[selectedItemIdx]
+                  var isEquippable = detailItem.type === 'weapon' || detailItem.type === 'armour' || detailItem.type === 'relic'
+                  var isConsumable = detailItem.type === 'consumable'
+                  return (
+                    <div className="mb-2 p-3 rounded-lg bg-raised border-2 border-gold/30">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gold font-display text-sm">{detailItem.name}</span>
+                        <span className="text-ink-faint text-[10px] uppercase">{detailItem.rarity || ''}</span>
+                      </div>
+                      <p className="text-ink text-xs italic mb-2">{detailItem.description || ''}</p>
+                      <div className="flex flex-col gap-1 text-[10px] text-ink-dim mb-2">
+                        {detailItem.type === 'weapon' && <span>Type: {detailItem.weaponType || 'weapon'} | Damage: d{detailItem.damageDie || detailItem.die} | Speed: {detailItem.speed || 'normal'}</span>}
+                        {detailItem.type === 'weapon' && detailItem.defIgnore > 0 && <span>Ignores {Math.round(detailItem.defIgnore * 100)}% of enemy DEF</span>}
+                        {detailItem.type === 'weapon' && detailItem.doubleStrikeBase > 0 && <span>{Math.round(detailItem.doubleStrikeBase * 100)}% double strike chance (scales with AGI)</span>}
+                        {detailItem.conditionOnHit && <span>Applies {detailItem.conditionOnHit} on hit</span>}
+                        {detailItem.type === 'armour' && <span>DEF: +{detailItem.defBonus}{detailItem.agiPenalty ? ' | AGI: ' + detailItem.agiPenalty : ''}</span>}
+                        {detailItem.passiveEffect && <span>Passive: {detailItem.passiveEffect}{detailItem.passiveValue ? ' (' + detailItem.passiveValue + ')' : ''}{detailItem.passiveCondition ? ' — ' + detailItem.passiveCondition : ''}</span>}
+                        {detailItem.giftPower && <span>Gift: {Array.isArray(detailItem.giftPower) ? detailItem.giftPower.join(' + ') : detailItem.giftPower}</span>}
+                        {detailItem.effect === 'heal' && <span>Heals {detailItem.effectValue} HP</span>}
+                        {detailItem.effect === 'stat_buff' && <span>+{detailItem.effectValue} {(detailItem.effectStat || '').toUpperCase()} for {detailItem.effectDuration} turns</span>}
+                        {detailItem.effect === 'random_effect' && <span>Random effect — could be anything</span>}
+                        {detailItem.effect === 'cure_body' && <span>Cures body conditions (BLEED, POISON, etc.)</span>}
+                        {detailItem.effect === 'cure_mind' && <span>Cures mind conditions (FEAR, DAZE, etc.)</span>}
+                        {detailItem.effect === 'damage_all_enemies' && <span>{detailItem.effectValue} damage to all enemies</span>}
+                        {detailItem.effect === 'flee_guaranteed' && <span>Guaranteed escape from combat</span>}
+                        {detailItem.buyPrice && <span>Value: {detailItem.sellPrice || Math.round(detailItem.buyPrice * 0.4)}g</span>}
+                      </div>
+                      <div className="flex gap-2">
                         {isEquippable && gamePhase === 'doors' && (
-                          <button onClick={function() { handleEquipItem(idx) }}
-                            className="text-xs text-gold border border-gold/40 px-2 py-1 rounded hover:border-gold transition-colors">
+                          <button onClick={function() { handleEquipItem(selectedItemIdx); setSelectedItemIdx(null) }}
+                            className="flex-1 text-xs text-gold border border-gold/40 py-1 rounded hover:border-gold transition-colors">
                             Equip
                           </button>
                         )}
                         {isConsumable && gamePhase === 'doors' && (
-                          <button onClick={function() { handleUseItem(idx) }}
-                            className="text-xs text-emerald-400 border border-emerald-500/40 px-2 py-1 rounded hover:border-emerald-400 transition-colors">
+                          <button onClick={function() { handleUseItem(selectedItemIdx); setSelectedItemIdx(null) }}
+                            className="flex-1 text-xs text-emerald-400 border border-emerald-500/40 py-1 rounded hover:border-emerald-400 transition-colors">
                             Use
                           </button>
                         )}
+                        <button onClick={function() { setSelectedItemIdx(null) }}
+                          className="flex-1 text-xs text-ink-dim border border-border py-1 rounded hover:text-ink transition-colors">
+                          Back
+                        </button>
                       </div>
-                    )
-                  })}
-                </div>
+                    </div>
+                  )
+                })()}
+
+                {selectedItemIdx === null && (
+                  <div className="flex flex-col gap-1">
+                    {filteredItems.map(function(entry) {
+                      var item = entry.item
+                      var idx = entry.idx
+                      return (
+                        <button key={idx} onClick={function() { setSelectedItemIdx(idx) }}
+                          className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans hover:border-gold border border-transparent transition-colors text-left cursor-pointer">
+                          <div className="flex flex-col">
+                            <span className="text-ink">{item.name}</span>
+                            <span className="text-ink-faint text-[10px]">
+                              {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
+                               item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
+                               item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                               item.type === 'relic' ? (item.passiveEffect || '').replace(/_/g, ' ') :
+                               item.effect === 'heal' ? 'Heal ' + item.effectValue :
+                               item.effect === 'random_effect' ? '???' :
+                               item.type}
+                            </span>
+                          </div>
+                          <span className="text-ink-faint text-[10px]">{'>'}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )
@@ -2031,7 +2077,7 @@ function Game({ character, user, onEndRun }) {
               : /* Chest in room (loot/hidden chambers) */
               currentChamber.chest && !lootingChestId && !lootingCorpseId ? (function() {
                 var chest = currentChamber.chest
-                var isFullyLooted = chest.goldTaken && chest.items.length === chest.itemsTaken.length
+                var isFullyLooted = chest.goldTaken && (chest.items.length === 0 || chest.items.length === chest.itemsTaken.length)
                 return (
                   <div className="flex flex-col items-center gap-2">
                     <button
@@ -2429,9 +2475,12 @@ function Game({ character, user, onEndRun }) {
 
         {/* Action area */}
         <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
-          {combatPhase === 'enemyWindup' && enemyResult && (
+          {combatPhase === 'enemyWindup' && (
             <div className="flex flex-col items-center gap-2 p-3 border-2 border-red-400/30 rounded-lg bg-red-400/5">
-              <p className="text-red-400 text-lg font-display">{enemyResult.attacker}</p>
+              <p className="text-red-400 text-xs font-sans uppercase tracking-wide">Enemy Turn</p>
+              {enemyResult && (
+                <p className="text-red-400 text-lg font-display">{enemyResult.attacker}</p>
+              )}
               <p className="text-ink text-sm italic">prepares to strike...</p>
             </div>
           )}

@@ -205,6 +205,25 @@ function applyConsumable(item, playerState) {
   } else if (item.effect === 'damage_all_enemies') {
     result.description = item.effectValue + ' damage to all enemies!'
     result.stateChanges.damageAllEnemies = item.effectValue
+  } else if (item.effect === 'random_effect') {
+    var effects = [
+      { desc: 'Healed 20 HP!', changes: { hpChange: 20 } },
+      { desc: 'Healed 10 HP!', changes: { hpChange: 10 } },
+      { desc: 'Healed 5 HP. Barely.', changes: { hpChange: 5 } },
+      { desc: '+3 STR for 3 turns! Muscles!', changes: { buff: { stat: 'str', value: 3, turnsRemaining: 3 } } },
+      { desc: '+3 DEF for 3 turns! Tough!', changes: { buff: { stat: 'def', value: 3, turnsRemaining: 3 } } },
+      { desc: '+3 AGI for 3 turns! Fast!', changes: { buff: { stat: 'agi', value: 3, turnsRemaining: 3 } } },
+      { desc: 'Cured body condition!', changes: { cureSlot: 'body' } },
+      { desc: 'Cured mind condition!', changes: { cureSlot: 'mind' } },
+      { desc: 'Lost 5 HP. Ouch.', changes: { hpChange: -5 } },
+      { desc: 'Lost 10 HP! That was not medicine!', changes: { hpChange: -10 } },
+      { desc: 'Nothing happened. Tastes like water.', changes: {} },
+      { desc: 'Nothing happened. Tastes like regret.', changes: {} },
+      { desc: '6 damage to all enemies! It exploded!', changes: { damageAllEnemies: 6 } },
+    ]
+    var pick = effects[Math.floor(Math.random() * effects.length)]
+    result.description = pick.desc
+    result.stateChanges = pick.changes
   } else {
     result.used = false
   }
