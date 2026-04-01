@@ -249,7 +249,7 @@
     "rarity": "uncommon", "passiveEffect": "lck_bonus", "passiveValue": 2,
     "giftPower": "petal",
     "buyPrice": 30, "sellPrice": 12,
-    "description": "Found in the fountain. Montor threw it in and wished for peace. Didn't work."
+    "description": "+2 LCK — better loot rarity and crit chance. Found in the fountain."
   },
   "montors_mums_bandage": {
     "id": "montors_mums_bandage", "name": "Montor's Mum's Bandage", "type": "relic", "slot": "relic",

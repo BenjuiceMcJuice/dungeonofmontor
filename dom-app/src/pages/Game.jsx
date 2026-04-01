@@ -1611,7 +1611,7 @@ function Game({ character, user, onEndRun }) {
           )
         })()}
 
-        {/* Inventory panel (out of combat) — tabbed by category */}
+        {/* Inventory panel — full screen overlay */}
         {showInventoryPanel && (function() {
           var tabs = [
             { id: 'weapons', label: 'Weapons', types: ['weapon'] },
@@ -1648,19 +1648,27 @@ function Game({ character, user, onEndRun }) {
           }
 
           return (
-            <div className="mb-2 rounded-lg bg-surface border border-border overflow-hidden">
+            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="font-display text-lg text-gold">Inventory</span>
+                <button onClick={function() { setShowInventoryPanel(false); setSelectedItemIdx(null) }}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Close
+                </button>
+              </div>
               {/* Tab bar */}
               <div className="flex border-b border-border">
                 {tabs.map(function(tab) {
                   var isActive = tab.id === activeTab.id
                   return (
                     <button key={tab.id}
-                      onClick={function() { setInventoryTab(tab.id) }}
-                      className={'flex-1 py-2 text-xs font-sans transition-colors ' +
+                      onClick={function() { setInventoryTab(tab.id); setSelectedItemIdx(null) }}
+                      className={'flex-1 py-2.5 text-sm font-sans transition-colors ' +
                         (isActive ? 'text-gold border-b-2 border-gold bg-raised' : 'text-ink-dim hover:text-ink')}>
                       {tab.label}
                       {tabCounts[tab.id] > 0 && (
-                        <span className="ml-1 text-[10px] opacity-60">({tabCounts[tab.id]})</span>
+                        <span className="ml-1 text-xs opacity-70">({tabCounts[tab.id]})</span>
                       )}
                     </button>
                   )
@@ -1765,7 +1773,7 @@ function Game({ character, user, onEndRun }) {
               )}
 
               {/* Bag contents for active tab */}
-              <div className="p-3 max-h-48 overflow-y-auto">
+              <div className="p-3 flex-1 overflow-y-auto">
                 {filteredItems.length === 0 && (
                   <p className="text-ink-faint text-xs text-center py-2">Nothing here.</p>
                 )}
@@ -1776,13 +1784,13 @@ function Game({ character, user, onEndRun }) {
                   var isEquippable = detailItem.type === 'weapon' || detailItem.type === 'armour' || detailItem.type === 'relic'
                   var isConsumable = detailItem.type === 'consumable'
                   return (
-                    <div className="mb-2 p-3 rounded-lg bg-raised border-2 border-gold/30">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-gold font-display text-sm">{detailItem.name}</span>
-                        <span className="text-ink-faint text-[10px] uppercase">{detailItem.rarity || ''}</span>
+                    <div className="mb-2 p-4 rounded-lg bg-surface border-2 border-gold/40">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-gold font-display text-lg">{detailItem.name}</span>
+                        <span className="text-ink-dim text-xs uppercase">{detailItem.rarity || ''}</span>
                       </div>
-                      <p className="text-ink text-xs italic mb-2">{detailItem.description || ''}</p>
-                      <div className="flex flex-col gap-1 text-[10px] text-ink-dim mb-2">
+                      <p className="text-ink text-sm italic mb-3">{detailItem.description || ''}</p>
+                      <div className="flex flex-col gap-1.5 text-xs text-ink mb-3">
                         {detailItem.type === 'weapon' && <span>Type: {detailItem.weaponType || 'weapon'} | Damage: d{detailItem.damageDie || detailItem.die} | Speed: {detailItem.speed || 'normal'}</span>}
                         {detailItem.type === 'weapon' && detailItem.defIgnore > 0 && <span>Ignores {Math.round(detailItem.defIgnore * 100)}% of enemy DEF</span>}
                         {detailItem.type === 'weapon' && detailItem.doubleStrikeBase > 0 && <span>{Math.round(detailItem.doubleStrikeBase * 100)}% double strike chance (scales with AGI)</span>}
@@ -1828,10 +1836,10 @@ function Game({ character, user, onEndRun }) {
                       var idx = entry.idx
                       return (
                         <button key={idx} onClick={function() { setSelectedItemIdx(idx) }}
-                          className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans hover:border-gold border border-transparent transition-colors text-left cursor-pointer">
+                          className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans hover:border-gold border border-border transition-colors text-left cursor-pointer">
                           <div className="flex flex-col">
-                            <span className="text-ink">{item.name}</span>
-                            <span className="text-ink-faint text-[10px]">
+                            <span className="text-ink font-medium">{item.name}</span>
+                            <span className="text-ink-dim text-xs">
                               {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
                                item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
                                item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
