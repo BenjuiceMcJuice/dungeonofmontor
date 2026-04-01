@@ -13,6 +13,7 @@ import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
 import CombatRoller from '../components/CombatRoller.jsx'
 import StatPicker from '../components/StatPicker.jsx'
+import ConditionIcon from '../components/ConditionIcon.jsx'
 import ChamberView from '../components/ChamberView.jsx'
 import DoorSprite from '../components/DoorSprite.jsx'
 import ChamberIcon from '../components/ChamberIcon.jsx'
@@ -757,10 +758,18 @@ function Game({ character, user, onEndRun }) {
   var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn'
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
-  // Effective crit threshold — lowered by crit_bonus relics (Keen Edge Ring = 19+)
   // Crit threshold: base 20, lowered by LCK modifier and crit_bonus relics
   var lckMod = getModifier(character.stats.lck || 10)
   var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus') - lckMod
+
+  // Can equip: between rooms OR during combat when all enemies stunned
+  var allEnemiesStunned = battle && battle.enemies.every(function(e) {
+    if (e.isDown) return true
+    return e.statusEffects && e.statusEffects.some(function(c) {
+      return c.id === 'DAZE' || c.id === 'FROST' || c.id === 'CHARM'
+    })
+  })
+  var canEquipNow = gamePhase === 'doors' || (gamePhase === 'combat' && isPlayerTurn && allEnemiesStunned)
 
   // Direct attack — click enemy card to attack without going through CombatRoller button
   function handlePlayerAttackDirect(enemyId) {
@@ -1686,7 +1695,7 @@ function Game({ character, user, onEndRun }) {
                         <span className="text-ink">{character.equipped.weapon.name}</span>
                         <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg ({character.equipped.weapon.weaponType || 'weapon'})</span>
                       </div>
-                      {gamePhase === 'doors' && (
+                      {canEquipNow && (
                         <button onClick={handleUnequipWeapon}
                           className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
                           Unequip
@@ -1702,7 +1711,7 @@ function Game({ character, user, onEndRun }) {
                           <span className="text-ink">{character.equipped.offhand.name}</span>
                           <span className="text-ink-faint text-[10px]">d{character.equipped.offhand.damageDie || character.equipped.offhand.die} dmg, -2 accuracy, no crits</span>
                         </div>
-                        {gamePhase === 'doors' && (
+                        {canEquipNow && (
                           <button onClick={handleUnequipOffhand}
                             className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
                             Unequip
@@ -1723,7 +1732,7 @@ function Game({ character, user, onEndRun }) {
                           <span className="text-ink">{character.equipped.armour.name}</span>
                           <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus} DEF</span>
                         </div>
-                        {gamePhase === 'doors' && (
+                        {canEquipNow && (
                           <button onClick={handleUnequipArmour}
                             className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
                             Unequip
@@ -1740,7 +1749,7 @@ function Game({ character, user, onEndRun }) {
                           <span className="text-ink">{character.equipped.offhand.name}</span>
                           <span className="text-ink-faint text-[10px]">+{character.equipped.offhand.defBonus} DEF, {Math.round((character.equipped.offhand.passiveValue || 0) * 100)}% block</span>
                         </div>
-                        {gamePhase === 'doors' && (
+                        {canEquipNow && (
                           <button onClick={handleUnequipOffhand}
                             className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
                             Unequip
@@ -1759,7 +1768,7 @@ function Game({ character, user, onEndRun }) {
                               <span className="text-ink text-xs">{relic.name}</span>
                               <span className="text-ink-faint text-[10px]">{relic.description}</span>
                             </div>
-                            {gamePhase === 'doors' && (
+                            {canEquipNow && (
                               <button onClick={function() { handleUnequipRelic(ri) }}
                                 className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
                                 Unequip
@@ -1809,13 +1818,13 @@ function Game({ character, user, onEndRun }) {
                         {detailItem.buyPrice && <span>Value: {detailItem.sellPrice || Math.round(detailItem.buyPrice * 0.4)}g</span>}
                       </div>
                       <div className="flex gap-2">
-                        {isEquippable && gamePhase === 'doors' && (
+                        {isEquippable && canEquipNow && (
                           <button onClick={function() { handleEquipItem(selectedItemIdx); setSelectedItemIdx(null) }}
                             className="flex-1 text-xs text-gold border border-gold/40 py-1 rounded hover:border-gold transition-colors">
                             Equip
                           </button>
                         )}
-                        {isConsumable && gamePhase === 'doors' && (
+                        {isConsumable && canEquipNow && (
                           <button onClick={function() { handleUseItem(selectedItemIdx); setSelectedItemIdx(null) }}
                             className="flex-1 text-xs text-emerald-400 border border-emerald-500/40 py-1 rounded hover:border-emerald-400 transition-colors">
                             Use
@@ -2470,12 +2479,16 @@ function Game({ character, user, onEndRun }) {
                 <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
                   <span>STR {enemy.stats.str}</span>
                   <span>DEF {enemy.stats.def}</span>
-                  <span>AGI {enemy.stats.agi}</span>
                 </div>
                 {enemy.statusEffects && enemy.statusEffects.length > 0 && (
-                  <div className="flex gap-1 flex-wrap mt-0.5">
+                  <div className="flex gap-1 flex-wrap mt-0.5 items-center">
                     {enemy.statusEffects.map(function(c, ci) {
-                      return <span key={ci} className="text-[8px] font-sans px-1 rounded bg-red-500/20 text-red-300">{c.name} ({c.turnsRemaining || '~'})</span>
+                      return (
+                        <div key={ci} className="flex items-center gap-0.5 px-1 rounded bg-red-500/20">
+                          <ConditionIcon conditionId={c.id} scale={2} />
+                          <span className="text-[8px] font-sans text-red-300">{c.turnsRemaining || '~'}</span>
+                        </div>
+                      )
                     })}
                   </div>
                 )}
@@ -2632,21 +2645,25 @@ function Game({ character, user, onEndRun }) {
   // Shared party bar
   // ============================================================
   function renderPartyBar() {
+    var allStunned = allEnemiesStunned
+
     return (
       <div className="shrink-0 bg-surface border-t border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <PlayerSprite classKey="knight" scale={2} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <span className="font-display text-sm text-ink truncate">{character.name}</span>
-                <span className="text-[10px] font-sans text-ink-dim">
-                  STR {character.stats.str} DEF {character.stats.def} AGI {character.stats.agi}
-                </span>
                 {battle && battle.players[user.uid] && battle.players[user.uid].statusEffects.length > 0 && (
-                  <div className="flex gap-1">
+                  <div className="flex gap-0.5 items-center">
                     {battle.players[user.uid].statusEffects.map(function(c, ci) {
-                      return <span key={ci} className="text-[8px] font-sans px-1 rounded bg-amber-500/20 text-amber-300">{c.name} ({c.turnsRemaining || '~'})</span>
+                      return (
+                        <div key={ci} className="flex items-center gap-0.5 px-1 rounded bg-amber-500/20">
+                          <ConditionIcon conditionId={c.id} scale={2} />
+                          <span className="text-[8px] font-sans text-amber-300">{c.turnsRemaining || '~'}</span>
+                        </div>
+                      )
                     })}
                   </div>
                 )}
@@ -2659,15 +2676,23 @@ function Game({ character, user, onEndRun }) {
                    playerHp / character.maxHp > 0.25 ? 'bg-amber-500' : 'bg-red-500')}
                 style={{ width: Math.max(0, (playerHp / character.maxHp) * 100) + '%' }} />
             </div>
-            <div className="flex gap-2 mt-1 text-[10px] font-sans text-ink-faint">
-              {character.equipped && character.equipped.weapon && (
-                <span>{character.equipped.weapon.name} (d{character.equipped.weapon.damageDie || character.equipped.weapon.die})</span>
-              )}
-              {character.equipped && character.equipped.armour && (
-                <span>{character.equipped.armour.name} (+{character.equipped.armour.defBonus})</span>
-              )}
-              {playerInventory.length > 0 && (
-                <span className="text-emerald-400">{playerInventory.length} items</span>
+            <div className="flex items-center justify-between mt-1">
+              <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
+                {character.equipped && character.equipped.weapon && (
+                  <span className="text-ink">{character.equipped.weapon.name}</span>
+                )}
+                {character.equipped && character.equipped.armour && (
+                  <span>+{character.equipped.armour.defBonus} DEF</span>
+                )}
+                {character.equipped && character.equipped.offhand && (
+                  <span>{character.equipped.offhand.type === 'weapon' ? 'Dual' : 'Shield'}</span>
+                )}
+              </div>
+              {battle && allStunned && gamePhase === 'combat' && isPlayerTurn && (
+                <button onClick={function() { setShowInventoryPanel(!showInventoryPanel) }}
+                  className="text-[9px] font-sans text-gold border border-gold/40 px-1.5 py-0.5 rounded hover:border-gold transition-colors">
+                  Swap Gear
+                </button>
               )}
             </div>
           </div>
