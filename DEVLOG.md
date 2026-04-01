@@ -49,8 +49,14 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-01 | Sprint backlog spec (docs/specs/11) | ✅ Done |
 | 2026-04-01 | Junk & Gifts system spec (docs/specs/12) — junk piles, weight, PER/END/WIS/LCK/CHA activation | ✅ Done |
 | 2026-04-01 | Montor AI conversations & mood system spec (docs/specs/13) | ✅ Done |
+| 2026-04-01 | Dual body+mind conditions — all 14 conditions affect both slots | ✅ Done |
+| 2026-04-01 | Tap-anywhere continue — all transition/continue screens | ✅ Done |
+| 2026-04-01 | Combat log feedback — double strike, dodge, block, reflect, immunity messages | ✅ Done |
+| 2026-04-01 | Level-up expanded — stat pick every level, 9 stats, info hints | ✅ Done |
+| 2026-04-01 | StatPicker component — reusable, tap-to-inspect, confirm/back flow | ✅ Done |
+| 2026-04-01 | Starting screen — stat allocation (10 pts) + pre-run merchant (50g) | ✅ Done |
+| 2026-04-01 | First production deploy to main — wider testing | ✅ Done |
 |            | **Next up** | |
-|            | Starting screen — stat allocation + pre-run merchant | ⬜ |
 |            | Junk piles — room interaction, PER rolls, XP for searching | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
