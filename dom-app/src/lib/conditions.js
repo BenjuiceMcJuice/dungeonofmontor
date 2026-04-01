@@ -77,6 +77,7 @@ function applyCondition(statusEffects, conditionId, source) {
     canFlee: def.canFlee !== undefined ? def.canFlee : true,
     healPerKill: def.healPerKill || 0,
     damagePerNoKill: def.damagePerNoKill || 0,
+    strPenalty: def.strPenalty || 0,
     defPenalty: def.defPenalty || 0,
     intPenalty: def.intPenalty || 0,
     regenPenalty: def.regenPenalty || 0,
@@ -206,6 +207,7 @@ function getConditionStatMod(statusEffects, stat) {
   for (var i = 0; i < statusEffects.length; i++) {
     var c = statusEffects[i]
     if (c.statModifier && c.statModifier.stat === stat) mod += c.statModifier.value
+    if (stat === 'str' && c.strPenalty) mod += c.strPenalty
     if (stat === 'def' && c.defPenalty) mod += c.defPenalty
     if (stat === 'int' && c.intPenalty) mod += c.intPenalty
     // Poison accumulated stat drain
