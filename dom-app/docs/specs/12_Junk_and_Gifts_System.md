@@ -223,14 +223,15 @@ On entering a non-combat chamber, 30% chance of a room event. Events can be posi
 | Slippery Floor | -3 AGI in next combat. "Grease everywhere." | — |
 | The Cook's Radio | +1 all rolls this chamber. "Somehow there's music. It helps." | — |
 
-### Day/Night Cycle
-A global cycle that shifts every 8 chambers entered:
-- **Day (chambers 1-8):** Normal. Bright rooms. Standard visibility.
-- **Dusk (chambers 9-12):** -1 PER globally. Shadows lengthening. Some enemies gain +1 AGI.
-- **Night (chambers 13-16+):** -2 PER globally. Wraiths and shades get +2 STR. But FEAR conditions last 1 fewer turn (darkness numbs fear).
-- Cycle resets on new floor.
+### Day/Night Cycle (Garden only)
+The Garden is outdoors — it has weather and time of day. Underground floors are always dark.
 
-This gives a reason to move quickly (daylight is better for searching) OR slowly (night buffs certain builds). PER builds feel the night pressure most.
+Cycle shifts every 8 chambers entered in the Garden:
+- **Day (chambers 1-8):** Normal. Bright. Standard visibility. Slugs are stronger in daylight (+2 STR — they're garden creatures, this is their turf).
+- **Dusk (chambers 9-12):** -1 PER. Shadows lengthen. Slugs normal. Rats gain +1 AGI (they come out at dusk).
+- **Night (chambers 13-16+):** -2 PER. Slugs are weaker (-2 STR, -2 DEF — they retreat at night). Rats gain +2 AGI. Hidden items harder to find.
+
+**The trade-off:** Rush the Garden in daytime = fight tougher slugs but see better. Take your time = slugs weaken but searching is harder and rats are faster.
 
 ---
 
