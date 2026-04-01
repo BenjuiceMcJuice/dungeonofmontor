@@ -109,6 +109,7 @@
     "bat":       { "conditionId": "BLIND",    "chance": 0.5 },
     "hound":     { "conditionId": "BLEED",    "chance": 0.8 },
     "automaton": { "conditionId": "DAZE",     "chance": 0.9 },
-    "shade":     { "conditionId": "SAD",      "chance": 0.7 }
+    "shade":     { "conditionId": "SAD",      "chance": 0.7 },
+    "moth":      { "conditionId": "BLIND",   "chance": 0.6 }
   }
 }

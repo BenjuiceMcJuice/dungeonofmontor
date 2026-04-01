@@ -10,7 +10,8 @@
     "bat":      { "hp": 8,  "str": 6,  "agi": 18, "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 12 },
     "hound":    { "hp": 28, "str": 14, "agi": 14, "def": 10, "int": 8,  "weaponDie": 6,  "xp": 30 },
     "automaton":{ "hp": 55, "str": 16, "agi": 4,  "def": 20, "int": 4,  "weaponDie": 10, "xp": 50 },
-    "shade":    { "hp": 30, "str": 14, "agi": 14, "def": 6,  "int": 18, "weaponDie": 8,  "xp": 45 }
+    "shade":    { "hp": 30, "str": 14, "agi": 14, "def": 6,  "int": 18, "weaponDie": 8,  "xp": 45 },
+    "moth":     { "hp": 6,  "str": 6,  "agi": 16, "def": 2,  "int": 10, "weaponDie": 4,  "xp": 8 }
   },
   "tierMultipliers": {
     "dust":    0.8,
@@ -36,7 +37,8 @@
     "bat":       { "dust": ["Cave Bat"], "slate": ["Screech Bat"], "iron": ["Plague Bat"], "crimson": ["Blood Bat"], "void": ["Void Bat"] },
     "hound":     { "dust": ["Montor's Puppy"], "slate": ["Guard Dog"], "iron": ["War Hound"], "crimson": ["Hellhound"], "void": ["Void Hound"] },
     "automaton": { "dust": ["Broken Tinker"], "slate": ["Clockwork Sentry"], "iron": ["Forge Guardian"], "crimson": ["Overcharged Engine"], "void": ["Void Construct"] },
-    "shade":     { "dust": ["Faint Echo"], "slate": ["Lost Servant"], "iron": ["Vengeful Spirit"], "crimson": ["Screaming Shade"], "void": ["Void Phantom"] }
+    "shade":     { "dust": ["Faint Echo"], "slate": ["Lost Servant"], "iron": ["Vengeful Spirit"], "crimson": ["Screaming Shade"], "void": ["Void Phantom"] },
+    "moth":      { "dust": ["Dusty Moth"], "slate": ["Night Moth"], "iron": ["Plague Moth"], "crimson": ["Blood Moth"], "void": ["Void Moth"] }
   },
   "encounterPools": {
     "1": { "types": ["rat", "slug"], "tiers": ["dust"], "count": [1, 2] },

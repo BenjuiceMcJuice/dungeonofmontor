@@ -254,9 +254,9 @@ function getBloodlustEffect(statusEffects) {
 // Base chance from attack tier, modified by INT
 function rollConditionApplication(attackTier, intStat, conditionChance) {
   var basePct = 0
-  if (attackTier === 1) basePct = 0.80      // crit
-  else if (attackTier === 2) basePct = 0.40  // hit
-  else if (attackTier === 3) basePct = 0.05  // glancing
+  if (attackTier === 1) basePct = 0.90      // crit — almost guaranteed
+  else if (attackTier === 2) basePct = 0.50  // hit — coin flip
+  else if (attackTier === 3) basePct = 0.20  // glancing — still possible
   else return false                          // miss
 
   // INT modifier adds to the percentage

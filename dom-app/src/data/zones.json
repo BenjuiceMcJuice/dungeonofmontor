@@ -54,13 +54,13 @@
     "montors_garden": {
       "id": "montors_garden", "name": "Montor's Garden", "floorId": "grounds",
       "doorTheme": "garden",
-      "enemyTypes": ["rat", "slug"], "enemyTiers": ["dust"],
+      "enemyTypes": ["rat", "slug", "moth"], "enemyTiers": ["dust"],
       "bossType": "slug", "bossTier": "slate", "bossName": "The Overgrowth",
       "merchantName": "The Gardener", "merchantRole": "Montor's groundskeeper",
       "merchantGreeting": "Psst. Over here. Don't tell him I sold the shears.",
       "encounterPools": {
-        "1": { "types": ["rat", "slug"], "tiers": ["dust"], "count": [1, 1] },
-        "2": { "types": ["rat", "slug", "rat"], "tiers": ["dust"], "count": [1, 2] },
+        "1": { "types": ["rat", "slug", "moth"], "tiers": ["dust"], "count": [1, 1] },
+        "2": { "types": ["rat", "slug", "moth"], "tiers": ["dust"], "count": [1, 2] },
         "3": { "types": ["rat", "slug"], "tiers": ["slate"], "count": [1, 1] }
       },
       "templates": [
@@ -85,14 +85,14 @@
     "great_hall": {
       "id": "great_hall", "name": "The Great Hall", "floorId": "underground",
       "doorTheme": "dungeon",
-      "enemyTypes": ["rat", "orc"], "enemyTiers": ["dust", "slate"],
+      "enemyTypes": ["rat", "orc", "hound"], "enemyTiers": ["dust", "slate"],
       "bossType": "orc", "bossTier": "slate", "bossName": "Ironjaw",
       "merchantName": "The Butler", "merchantRole": "Montor's head of household",
       "merchantGreeting": "Master Montor won't notice one less goblet. Probably.",
       "encounterPools": {
-        "1": { "types": ["rat", "orc"], "tiers": ["dust"], "count": [1, 2] },
-        "2": { "types": ["rat", "orc"], "tiers": ["dust", "slate"], "count": [2, 3] },
-        "3": { "types": ["orc"], "tiers": ["slate"], "count": [1, 2] }
+        "1": { "types": ["rat", "orc", "hound"], "tiers": ["dust"], "count": [1, 2] },
+        "2": { "types": ["rat", "orc", "hound"], "tiers": ["dust", "slate"], "count": [2, 3] },
+        "3": { "types": ["orc", "hound"], "tiers": ["slate"], "count": [1, 2] }
       },
       "templates": [
         { "type": "stairwell_entry",  "label": "Landing",             "safe": true,  "icon": "▽" },

@@ -275,8 +275,40 @@ When the player enters a safe room (rest chamber) while carrying a treasure:
    - Refuse: keep the treasure (it's still just junk weight in your bag), try again at next safe room
 4. **WIS governs gift power** — higher WIS = stronger boon
 
-### Gift Boons (apply to Body / Mind / Weapon / Item slot)
-The player chooses which slot to apply the gift to. Each treasure + slot combination produces a different boon. See `docs/specs/10_Montors_Gifts.md` for the full matrix.
+### Gift Boons — Equippable Body/Mind Powers
+
+Gifts are equippable powers in two slots: **Body** and **Mind**. Like equipment but for your soul.
+
+**Flow:**
+1. Find a treasure → activate at safe room → receive a Gift boon
+2. Gift goes into Body or Mind slot (your choice)
+3. You can swap/change gifts at any safe room or when descending a floor
+4. At the start of subsequent runs (Stage 2+), you choose which discovered gifts to equip
+
+**Body Gift effects (physical powers):**
+| Gift | Body effect |
+|---|---|
+| Petal | Regen 2 HP per chamber |
+| Stone | +3 DEF permanently |
+| Bile | POISON immunity + 10% chance to poison on any hit |
+| Blood | Lifesteal 5% on all damage |
+| Ember | +2 damage, attacks can BURN (10% chance) |
+| Void | +5 max HP, +1 all combat stats |
+
+**Mind Gift effects (mental powers):**
+| Gift | Mind effect |
+|---|---|
+| Petal | +2 PER, junk searches always find something |
+| Stone | DAZE immunity + can't be knocked below 1 HP once per combat |
+| Bile | Enemies start combat with -1 all rolls (your stench) |
+| Blood | FEAR immunity + BLOODLUST when below 25% HP (auto) |
+| Ember | +2 INT, conditions last 1 extra turn on enemies |
+| Void | Reroll one die per chamber (the dice power!) |
+
+**The Void Mind gift is the Balatro moment** — one reroll per chamber. That's the dice manipulation power you wanted, earned by finding Montor's deepest treasure.
+
+**Swapping at floor transitions:**
+When you descend to a new floor, you get the option to swap your equipped gifts before continuing. This lets you adapt your build as the dungeon changes.
 
 ### Key Design Principles
 - **Gifts are earned through exploration, not combat** — the fighter who rushes to the boss misses them
