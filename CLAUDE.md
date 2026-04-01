@@ -60,24 +60,17 @@ Rules:
 - Only update `DEVLOG.md` when a milestone is complete
 - At the start of any new session, read `DEVLOG.md` first, then the most recent log file
 
-## Documentation Index
+## Documentation
 
-| File | Status | Purpose |
-|---|---|---|
-| `DEVLOG.md` | **CURRENT** | Milestone tracker — read first in any session |
-| `docs/guides/sdlc.md` | **CURRENT** | Dev → test → deploy workflow |
-| `docs/strategy/01_Game_Vision.md` | **CURRENT** | Product pitch, audience, design pillars, Montor lore |
-| `docs/specs/02_Game_Mechanics.md` | **CURRENT** | Full rules: stats, dice, combat, items, factions, deities, legacy, dungeon mood, Montor offers/curses |
-| `docs/specs/03_Technical_Architecture.md` | **CURRENT** | Stack, Firebase data model, AI system, token mgmt, build phases |
-| `docs/specs/04_UI_Specification.md` | **CURRENT** | Tab system, screen states, combat UX flow, Montor event state, design system |
-| `docs/specs/05_Characters_and_Assets.md` | **CURRENT** | Enemy archetypes, player classes, power tiers, sprite spec |
-| `docs/specs/06_Sprite_Sheet.html` | **CURRENT** | All 5 enemy sprite grids as renderable HTML — extract into sprites.js |
-| `docs/specs/07_Conditions_and_Persistence.md` | **CURRENT** | Body/Mind/Soul condition slots, duration types, synergies, soul morphing, persistence across runs, gold banking |
-| `docs/specs/08_Dungeon_Architecture.md` | **CURRENT** | 10 dungeon floors, room types, environmental mechanics, navigation, Montor's Zone |
-| `docs/specs/09_Firestore_Data_Model.md` | **CURRENT** | Complete Firestore schemas for all content collections — living doc, update as fields emerge |
-| `docs/specs/10_Montors_Gifts.md` | **CURRENT** | Gift system — one per floor, activate at safe rooms, Body/Mind/Weapon/Item application, WIS rolls |
-| `docs/specs/11_Sprint_Backlog.md` | **CURRENT** | Prioritised backlog — weapon overhaul, starting kit, floor items, junk, dice powers, stat relevance |
-| `docs/specs/12_Junk_and_Gifts_System.md` | **CURRENT** | Junk piles, hoarding, weight/END, PER searching, gift discovery, merchants as staff, CHA pricing |
-| `docs/specs/13_Montor_AI_Conversations.md` | **CURRENT** | AI conversations with Montor, per-run mood system, WIS/CHA/CUN social checks, Stage 4 |
-| `docs/specs/conditions_table.html` | **CURRENT** | Interactive HTML reference for all 22 conditions (Body 8, Mind 8, Soul 6) — like sprite sheet but for conditions |
-| `docs/guides/06_Build_Plan.md` | **CURRENT** | 5-stage build plan with sprint breakdown (The Crawl → The Long Game) |
+All docs live in `dom-app/docs/`. See [dom-app/docs/INDEX.md](dom-app/docs/INDEX.md) for the full index.
+
+| Category | Key docs |
+|---|---|
+| **Vision** | Game Vision, Build Plan (5-stage roadmap) |
+| **Design** | Game Mechanics, Dungeon Architecture, Montor's Gifts, Junk & Gifts, Build Identity, Montor AI |
+| **Technical** | Architecture, UI Spec, Firestore Data Model |
+| **Implementation** | Sprint Backlog, Stat Reference, Balance Analysis |
+| **Guides** | SDLC (git workflow, deploy) |
+| **Archive** | Conditions v0.1 draft, sprite/conditions HTML viewers |
+
+Legacy docs in `docs/` (root) are the originals — `dom-app/docs/` has the reorganised, current versions.

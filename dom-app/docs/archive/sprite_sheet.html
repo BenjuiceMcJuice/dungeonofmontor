@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Chronicles — Sprite Sheet</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0a0a;
+  font-family: monospace;
+  padding: 32px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+h1 { font-size: 10px; letter-spacing: 5px; color: #888; text-align: center; margin-bottom: 4px; }
+.sub { font-size: 7px; letter-spacing: 3px; color: #333; text-align: center; margin-bottom: 32px; }
+.tier-key {
+  display: flex; gap: 20px; margin-bottom: 36px;
+  flex-wrap: wrap; justify-content: center;
+}
+.tier-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.tier-dot { width: 10px; height: 10px; border-radius: 1px; }
+.enemy-block { width: 100%; max-width: 740px; margin-bottom: 52px; }
+.enemy-label {
+  font-size: 8px; letter-spacing: 4px; color: #444; text-transform: uppercase;
+  margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid #1a1a1a;
+}
+.enemy-desc { font-size: 7px; letter-spacing: 1px; color: #2a2a2a; margin-bottom: 12px; line-height: 1.8; }
+.tier-row { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; }
+.sprite-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.tier-name { font-size: 7px; letter-spacing: 1px; text-transform: uppercase; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+</style>
+</head>
+<body>
+
+<h1>CHRONICLES OF THE FALLEN REALM</h1>
+<div class="sub">ENEMY SPRITE SHEET — DUST · SLATE · IRON · CRIMSON · VOID</div>
+<div class="tier-key" id="key"></div>
+<div id="sheet"></div>
+
+<script>
+const K='#000000', _=null, C='C', S='S';
+const PX = 6;
+
+const TIERS = [
+  { name:'Dust',    hex:'#c8c8c8', shadow:'#888888' },
+  { name:'Slate',   hex:'#6a8fa8', shadow:'#3a5a70' },
+  { name:'Iron',    hex:'#4a4e52', shadow:'#222428' },
+  { name:'Crimson', hex:'#6b1a1a', shadow:'#3a0a0a' },
+  { name:'Void',    hex:'#111111', shadow:'#000000' },
+];
+
+// Dark tiers need a bg pad so sprites read
+const DARK_TIERS = new Set(['Iron','Crimson','Void']);
+
+// ── RAT ──────────────────────────────────────────────────────────────────────
+// Front-on. Big rounded ears. Wide-set beady eyes. Pointed snout jutting
+// forward. Plump hunched body. Two stubby front paws. Tail curls out to side.
+// 16 wide × 14 tall
+const RAT = { name:'RAT', desc:'Weak alone. They are never alone.', cols:16, rows:14, grid:[
+  [_,_,K,K,_,_,_,_,_,_,_,K,K,_,_,_],  // ears
+  [_,K,C,C,K,_,_,_,_,_,K,C,C,K,_,_],
+  [_,K,C,C,K,K,K,K,K,K,K,C,C,K,_,_],  // ear base joins head
+  [_,_,K,C,C,C,C,C,C,C,C,C,K,_,_,_],
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,K,_,_],  // wide head
+  [_,K,C,S,K,C,C,S,S,C,C,K,C,K,K,_],  // eyes + snout shadow + tail start
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,K,C,K],  // snout level + tail
+  [K,C,C,C,K,K,C,C,C,C,K,K,C,C,K,K],  // nostrils + lower head
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_],  // body top
+  [K,C,C,S,C,C,C,C,C,C,C,C,S,C,K,_],  // body — shoulder mass
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_],
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,K,_,_],  // belly
+  [_,_,K,C,K,K,_,_,_,_,K,K,C,K,_,_],  // front paws
+  [_,_,K,K,K,_,_,_,_,_,_,K,K,K,_,_],  // paw tips
+]};
+
+// ── ORC ───────────────────────────────────────────────────────────────────────
+// Front-on. Heavy brow ridge. Sunken eyes. Wide flat nose. Jutting lower jaw
+// with upward tusks. Thick neck. Barrel chest with armour strapping.
+// Muscular arms hanging at sides, fists clenched. Wide-planted legs.
+// 18 wide × 24 tall
+const ORC = { name:'ORC', desc:'Brute melee. Slow. Hits like a collapsing wall.', cols:18, rows:24, grid:[
+  [_,_,_,_,K,K,K,K,K,K,K,K,K,K,_,_,_,_],  // head top
+  [_,_,_,K,C,C,C,C,C,C,C,C,C,C,K,_,_,_],
+  [_,_,K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_],  // wide skull
+  [_,_,K,C,S,S,C,C,C,C,C,C,S,S,C,K,_,_],  // heavy brow ridge
+  [_,_,K,C,S,S,K,C,C,C,C,K,S,S,C,K,_,_],  // deep-set eyes under brow
+  [_,_,K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_],
+  [_,_,K,C,C,C,S,S,S,S,S,S,C,C,C,K,_,_],  // flat wide nose bridge
+  [_,_,K,C,C,C,C,K,K,K,K,C,C,C,C,K,_,_],  // nostrils
+  [_,_,K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_],
+  [_,_,K,C,K,C,C,C,C,C,C,C,C,K,C,K,_,_],  // tusks jutting up
+  [_,_,K,C,K,C,K,K,K,K,K,K,C,K,C,K,_,_],  // lower jaw / teeth gap
+  [_,_,_,K,C,C,C,C,C,C,C,C,C,C,K,_,_,_],  // chin — wide jaw
+  [_,_,_,_,K,K,C,C,C,C,C,C,K,K,_,_,_,_],  // thick neck
+  [_,K,K,K,K,C,C,C,C,C,C,C,C,K,K,K,K,_],  // WIDE shoulders
+  [K,C,C,C,K,S,C,C,C,C,C,C,S,K,C,C,C,K],  // chest top — armour shadow
+  [K,C,C,C,K,C,C,S,C,C,S,C,C,K,C,C,C,K],  // chest mid — strap detail
+  [K,C,C,C,K,C,C,C,C,C,C,C,C,K,C,C,C,K],  // chest lower
+  [K,C,C,K,K,C,C,C,C,C,C,C,C,K,K,C,C,K],  // gut — arms begin
+  [K,C,C,K,_,K,C,C,C,C,C,C,K,_,K,C,C,K],  // arms hanging
+  [K,K,C,K,_,K,C,C,C,C,C,C,K,_,K,C,K,K],
+  [_,K,K,_,_,K,K,C,C,C,C,K,K,_,_,K,K,_],  // hips
+  [_,_,_,_,_,K,C,C,K,K,C,C,K,_,_,_,_,_],  // upper legs
+  [_,_,_,_,_,K,C,S,K,K,S,C,K,_,_,_,_,_],  // lower legs
+  [_,_,_,_,K,K,K,K,_,_,K,K,K,K,_,_,_,_],  // planted feet
+]};
+
+// ── ROCK MONSTER ──────────────────────────────────────────────────────────────
+// Front-on. Asymmetric — one shoulder higher than the other, giving it a
+// lurching quality. No neck — head sits directly on body. Wide craggy face
+// with two small recessed eyes. Cracks/fissures drawn as S pixels across body.
+// Huge irregular arms. Stubby thick legs. Feels ancient and heavy.
+// 20 wide × 22 tall
+const ROCK = { name:'ROCK MONSTER', desc:'Ancient. Doesn\'t notice pain. Keeps moving.', cols:20, rows:22, grid:[
+  [_,_,_,K,K,K,K,K,K,K,K,K,K,K,_,_,_,_,_,_],  // head top — irregular
+  [_,_,K,C,C,C,C,C,C,C,C,C,C,C,K,K,_,_,_,_],
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_],  // wide craggy head
+  [_,K,C,S,C,C,S,C,C,C,C,S,C,C,S,C,K,_,_,_],  // surface cracks
+  [_,K,C,C,C,K,C,C,S,S,C,C,K,C,C,C,K,_,_,_],  // small recessed eyes
+  [_,K,C,C,C,C,C,S,C,C,S,C,C,C,C,C,K,_,_,_],
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_],
+  [_,K,C,S,C,C,C,K,K,K,K,C,C,C,S,C,K,_,_,_],  // jagged mouth crack
+  [_,_,K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_,_],
+  // BODY — left shoulder HIGHER than right (asymmetric)
+  [K,K,K,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_,_,_],  // left shoulder raised
+  [C,C,K,C,C,C,C,C,C,C,C,C,C,C,C,K,K,K,_,_],  // right shoulder lower + arms begin
+  [C,C,K,S,C,C,C,C,C,C,C,C,C,S,C,C,C,K,_,_],  // chest top — cracks
+  [C,C,K,C,C,C,S,C,C,C,C,S,C,C,C,C,C,K,_,_],
+  [K,K,K,C,C,C,C,C,C,C,C,C,C,C,C,C,K,K,_,_],  // chest lower
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_],
+  [K,C,K,C,S,C,C,C,C,C,C,C,C,S,C,K,C,K,_,_],  // gut — arms thicken
+  [K,C,K,C,C,C,C,C,C,C,C,C,C,C,C,K,C,K,_,_],
+  [K,K,K,K,C,C,C,C,C,C,C,C,C,C,K,K,K,K,_,_],  // hip — wide
+  [_,_,_,K,C,C,K,K,_,_,K,K,C,C,K,_,_,_,_,_],  // upper legs — thick stumps
+  [_,_,_,K,C,S,K,_,_,_,_,K,S,C,K,_,_,_,_,_],
+  [_,_,_,K,C,C,K,_,_,_,_,K,C,C,K,_,_,_,_,_],
+  [_,_,K,K,K,K,K,_,_,_,_,K,K,K,K,K,_,_,_,_],  // wide flat feet
+]};
+
+// ── SLUG ─────────────────────────────────────────────────────────────────────
+// Side-on (only readable perspective). Long tapered body — fat at head end,
+// narrowing to a tail. Two eyestalks up at the front, one taller than other.
+// Rippled underside / foot. Slightly raised rear. Slimy texture via S pixels.
+// 22 wide × 12 tall
+const SLUG = { name:'SLUG', desc:'Leaves a trail. Everything it touches rots.', cols:22, rows:12, grid:[
+  [_,_,K,K,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],  // eyestalks — tall one left
+  [_,K,C,C,K,K,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],  // eyeball left stalk
+  [_,K,K,C,K,C,K,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],  // eyeball right stalk
+  [_,_,K,C,C,K,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+  [_,K,C,C,C,C,K,K,K,K,K,K,K,K,K,K,K,K,K,_,_,_],  // head + body top
+  [K,C,C,S,C,C,C,C,S,C,C,S,C,C,S,C,C,S,C,C,K,_],  // body — slime texture
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_],  // body mid
+  [K,C,S,C,C,C,C,S,C,C,C,C,S,C,C,C,S,C,C,K,K,_],  // belly — ripple
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_],  // foot / underside
+  [_,K,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_,_,_],  // foot tapers
+  [_,_,K,K,C,C,C,C,C,C,C,C,C,C,K,K,_,_,_,_,_,_],  // tail end
+  [_,_,_,_,K,K,K,K,K,K,K,K,K,K,_,_,_,_,_,_,_,_],  // tail tip
+]};
+
+// ── WRAITH ────────────────────────────────────────────────────────────────────
+// Front-on. Tall peaked hood — void inside where face should be.
+// Tattered robes, wider at mid then dissolving into ragged wisps at base.
+// Arms trail outward and downward, ending in claw suggestions not solid hands.
+// No legs — floats. Face is pure black hollow. This is the emptiness.
+// 16 wide × 24 tall
+const WRAITH = { name:'WRAITH', desc:'What remains when everything else is gone.', cols:16, rows:24, grid:[
+  [_,_,_,_,_,K,K,K,K,_,_,_,_,_,_,_],  // hood peak — off-centre for unease
+  [_,_,_,_,K,C,C,C,C,K,_,_,_,_,_,_],
+  [_,_,_,K,C,C,C,C,C,C,K,_,_,_,_,_],
+  [_,_,K,C,C,C,C,C,C,C,C,K,_,_,_,_],  // hood widens
+  [_,K,C,C,C,C,C,C,C,C,C,C,K,_,_,_],
+  [K,C,C,C,S,C,C,C,C,C,S,C,C,K,_,_],  // hood shadow folds
+  [K,C,C,K,K,K,K,K,K,K,K,K,C,K,_,_],  // void face begins — all black inside
+  [K,C,C,K,_,_,_,_,_,_,_,K,C,K,_,_],  // face void
+  [K,C,C,K,_,_,_,_,_,_,_,K,C,K,_,_],
+  [K,C,C,K,_,_,_,_,_,_,_,K,C,K,_,_],  // pure hollow
+  [K,C,C,C,K,K,K,K,K,K,K,C,C,K,_,_],  // hood base — chin line
+  [_,K,C,C,C,C,C,C,C,C,C,C,K,_,_,_],  // neck / upper robe
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_],  // robe widens
+  [K,C,C,S,C,C,C,C,C,C,S,C,C,K,_,_],  // robe folds
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_],
+  [K,C,C,C,C,C,C,C,C,C,C,C,C,K,_,_],  // widest point
+  [K,C,S,C,C,C,C,C,C,C,C,C,S,K,_,_],  // arms trail out
+  [C,K,_,S,C,C,C,C,C,C,C,S,_,C,K,_],  // arms dissolving
+  [K,_,_,_,K,C,C,C,C,C,K,_,_,_,K,_],  // robe narrows — arms gone
+  [_,_,_,_,K,C,S,C,C,S,K,_,_,_,_,_],  // lower robe
+  [_,_,_,K,C,C,C,C,C,C,C,K,_,_,_,_],
+  [_,_,_,K,S,C,C,C,C,C,S,K,_,_,_,_],  // robe tattered
+  [_,_,K,K,C,S,C,C,C,S,C,K,K,_,_,_],  // wisps
+  [_,K,K,_,K,K,K,K,K,K,K,_,K,K,_,_],  // dissolves
+]};
+
+const SPRITES = [RAT, ORC, ROCK, SLUG, WRAITH];
+
+// ── Draw ──
+function drawSprite(cv, grid, rows, cols, mainCol, shadowCol, bgCol) {
+  cv.width  = cols * PX;
+  cv.height = rows * PX;
+  cv.style.width  = (cols * PX * 2.5) + 'px';
+  cv.style.height = (rows * PX * 2.5) + 'px';
+  cv.style.imageRendering = 'pixelated';
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  // Fill bg first (transparent for light tiers, dark pad for dark tiers)
+  ctx.fillStyle = bgCol || 'transparent';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const v = grid[r]?.[c];
+      if (v === null || v === undefined) continue;
+      if      (v === K)   ctx.fillStyle = '#000000';
+      else if (v === C)   ctx.fillStyle = mainCol;
+      else if (v === S)   ctx.fillStyle = shadowCol;
+      else                ctx.fillStyle = v;
+      ctx.fillRect(c * PX, r * PX, PX, PX);
+    }
+  }
+}
+
+// ── Build tier key ──
+const keyEl = document.getElementById('key');
+TIERS.forEach(t => {
+  const item = document.createElement('div');
+  item.className = 'tier-item';
+  item.style.color = DARK_TIERS.has(t.name) ? '#666666' : t.hex;
+  const dot = document.createElement('div');
+  dot.className = 'tier-dot';
+  dot.style.background = t.hex;
+  if (DARK_TIERS.has(t.name)) dot.style.border = '1px solid #444';
+  item.appendChild(dot);
+  item.appendChild(document.createTextNode(t.name));
+  keyEl.appendChild(item);
+});
+
+// ── Build sheet ──
+const sheet = document.getElementById('sheet');
+
+SPRITES.forEach(sprite => {
+  const block = document.createElement('div');
+  block.className = 'enemy-block';
+
+  const label = document.createElement('div');
+  label.className = 'enemy-label';
+  label.textContent = sprite.name;
+
+  const desc = document.createElement('div');
+  desc.className = 'enemy-desc';
+  desc.textContent = sprite.desc;
+
+  const row = document.createElement('div');
+  row.className = 'tier-row';
+
+  TIERS.forEach(tier => {
+    const col = document.createElement('div');
+    col.className = 'sprite-col';
+
+    const nm = document.createElement('div');
+    nm.className = 'tier-name';
+    nm.style.color = DARK_TIERS.has(tier.name) ? '#666666' : tier.hex;
+    nm.textContent = tier.name;
+
+    const cv = document.createElement('canvas');
+    const bg = DARK_TIERS.has(tier.name) ? '#1e1e1e' : null;
+    drawSprite(cv, sprite.grid, sprite.rows, sprite.cols, tier.hex, tier.shadow, bg);
+
+    col.appendChild(cv);
+    col.appendChild(nm);
+    row.appendChild(col);
+  });
+
+  block.appendChild(label);
+  block.appendChild(desc);
+  block.appendChild(row);
+  sheet.appendChild(block);
+});
+</script>
+</body>
+</html>
