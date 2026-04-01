@@ -83,6 +83,10 @@
         { "itemId": "montors_mums_bread_knife",  "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_mums_rolling_pin",  "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_pot_lid",           "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_walking_stick",     "weight": 3,  "minRarity": "uncommon" },
+        { "itemId": "montors_sabatier",          "weight": 1,  "minRarity": "rare" },
+        { "itemId": "montors_letter_opener",     "weight": 1,  "minRarity": "rare" },
+        { "itemId": "montors_doorstop",          "weight": 1,  "minRarity": "rare" },
         { "itemId": "montors_void_cleaver",      "weight": 1,  "minRarity": "epic" }
       ]
     },

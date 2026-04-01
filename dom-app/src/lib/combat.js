@@ -35,7 +35,8 @@ function createBattleState(players, enemies) {
   players.forEach(function(p) {
     var char = p.character
     var agiMod = getModifier(char.stats.agi)
-    var initRoll = rollWithMod(20, agiMod)
+    var weaponInitBonus = (char.equipped && char.equipped.weapon && char.equipped.weapon.initBonus) || 0
+    var initRoll = rollWithMod(20, agiMod + weaponInitBonus)
 
     playerStates[p.uid] = {
       uid: p.uid,
