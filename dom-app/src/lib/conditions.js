@@ -32,11 +32,18 @@ function applyCondition(statusEffects, conditionId, source) {
           name: 'Bleeding x' + (currentStacks + 1),
         })
       })
-      // Trigger FEAR at stack threshold (e.g. 3+ stacks of BLEED)
+      // Trigger FEAR at stack threshold (e.g. 3+ stacks of BLEED) — only once
       if (def.triggerFear && (currentStacks + 1) >= def.triggerFear) {
         var hasFear = newEffects.some(function(c) { return c.id === 'FEAR' })
-        if (!hasFear) {
+        var hadFearFromBleed = newEffects.some(function(c) { return c.id === 'FEAR' && c.source === 'bleed_panic' }) ||
+          statusEffects.some(function(c) { return c.bleedFearTriggered })
+        if (!hasFear && !hadFearFromBleed) {
           newEffects = applyCondition(newEffects, 'FEAR', 'bleed_panic')
+          // Mark BLEED as having triggered fear so it doesn't re-trigger
+          newEffects = newEffects.map(function(c) {
+            if (c.id === def.id) return Object.assign({}, c, { bleedFearTriggered: true })
+            return c
+          })
         }
       }
       return newEffects

@@ -196,6 +196,15 @@ function applyConsumable(item, playerState) {
   } else if (item.effect === 'flee_guaranteed') {
     result.description = 'Smoke fills the chamber. You vanish.'
     result.stateChanges.guaranteedFlee = true
+  } else if (item.effect === 'cure_body') {
+    result.description = 'Body condition cleared.'
+    result.stateChanges.cureSlot = 'body'
+  } else if (item.effect === 'cure_mind') {
+    result.description = 'Mind condition cleared.'
+    result.stateChanges.cureSlot = 'mind'
+  } else if (item.effect === 'damage_all_enemies') {
+    result.description = item.effectValue + ' damage to all enemies!'
+    result.stateChanges.damageAllEnemies = item.effectValue
   } else {
     result.used = false
   }

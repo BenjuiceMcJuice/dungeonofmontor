@@ -108,6 +108,7 @@ function Game({ character, user, onEndRun }) {
   function checkLevelUp(newXp) {
     if (runLevel >= XP_THRESHOLDS.length) return false
     var threshold = XP_THRESHOLDS[runLevel]
+    if (!threshold) return false
     if (newXp >= threshold.xp) {
       // Apply HP gain immediately
       if (threshold.hpGain > 0) {
@@ -174,17 +175,8 @@ function Game({ character, user, onEndRun }) {
   useEffect(function() {
     window.domDebug = {
       giveItems: function() {
-        var debugItems = [
-          { id: 'health_potion', name: 'Health Potion', type: 'consumable', rarity: 'common', effect: 'heal', effectValue: 15, buyPrice: 10, sellPrice: 4, description: 'Tastes foul. Works fast.' },
-          { id: 'health_potion', name: 'Health Potion', type: 'consumable', rarity: 'common', effect: 'heal', effectValue: 15, buyPrice: 10, sellPrice: 4, description: 'Tastes foul. Works fast.' },
-          { id: 'rage_draught', name: 'Rage Draught', type: 'consumable', rarity: 'uncommon', effect: 'stat_buff', effectStat: 'str', effectValue: 4, effectDuration: 3, buyPrice: 18, sellPrice: 7, description: 'Thick, red, tastes of iron.' },
-          { id: 'smoke_bomb', name: 'Smoke Bomb', type: 'consumable', rarity: 'common', effect: 'flee_guaranteed', effectValue: 1, buyPrice: 12, sellPrice: 5, description: 'Crack it. Run.' },
-          { id: 'dagger_common', name: 'Dagger', type: 'weapon', slot: 'weapon', rarity: 'common', damageDie: 4, attackStat: 'str', buyPrice: 8, sellPrice: 3, description: 'Quick and light.' },
-          { id: 'shortsword_common', name: 'Shortsword', type: 'weapon', slot: 'weapon', rarity: 'common', damageDie: 6, attackStat: 'str', buyPrice: 15, sellPrice: 6, description: 'A reliable blade.' },
-          { id: 'leather_common', name: 'Leather Armour', type: 'armour', slot: 'armour', rarity: 'common', defBonus: 2, agiPenalty: 0, buyPrice: 12, sellPrice: 5, description: 'Supple hide.' },
-          { id: 'ring_of_vitality', name: 'Ring of Vitality', type: 'relic', slot: 'relic', rarity: 'uncommon', passiveEffect: 'hp_bonus', passiveValue: 5, buyPrice: 35, sellPrice: 14, description: 'A warm band of copper.' },
-          { id: 'lucky_coin', name: 'Lucky Coin', type: 'relic', slot: 'relic', rarity: 'uncommon', passiveEffect: 'lck_bonus', passiveValue: 2, buyPrice: 30, sellPrice: 12, description: 'Heads you win.' },
-        ]
+        var ids = ['health_potion', 'health_potion', 'rage_draught', 'smoke_bomb', 'dagger_common', 'shortsword_common', 'leather_common', 'montors_signet_ring', 'montors_lucky_penny', 'montors_pruning_shears', 'antidote', 'montors_bath_bomb']
+        var debugItems = ids.map(function(id) { return getItem(id) }).filter(Boolean)
         setPlayerInventory(function(prev) { return prev.concat(debugItems) })
         setPlayerGold(function(g) { return g + 200 })
         console.log('Added 9 items + 200 gold')
@@ -866,6 +858,23 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
+    // Tick buff durations and revert expired buffs
+    setActiveBuffs(function(prev) {
+      var remaining = []
+      for (var bi = 0; bi < prev.length; bi++) {
+        var b = Object.assign({}, prev[bi], { turnsRemaining: prev[bi].turnsRemaining - 1 })
+        if (b.turnsRemaining > 0) {
+          remaining.push(b)
+        } else {
+          // Revert the buff from combat stats
+          if (updatedBattle && updatedBattle.players[user.uid] && b.stat) {
+            updatedBattle.players[user.uid].combatStats[b.stat] = (updatedBattle.players[user.uid].combatStats[b.stat] || 10) - b.value
+          }
+        }
+      }
+      return remaining
+    })
+
     var nextBattle = advanceTurn(updatedBattle)
     setBattle(nextBattle)
 
@@ -1011,6 +1020,28 @@ function Game({ character, user, onEndRun }) {
     }
     if (updatedBattleForItem !== battle) {
       setBattle(updatedBattleForItem)
+    }
+    // Cure conditions
+    if (result.stateChanges.cureSlot && battle) {
+      var curePlayers = {}
+      Object.keys(updatedBattleForItem.players).forEach(function(uid) {
+        curePlayers[uid] = Object.assign({}, updatedBattleForItem.players[uid], {
+          combatStats: Object.assign({}, updatedBattleForItem.players[uid].combatStats),
+          statusEffects: updatedBattleForItem.players[uid].statusEffects.filter(function(c) { return c.slot !== result.stateChanges.cureSlot }),
+        })
+      })
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, { players: curePlayers })
+    }
+    // Damage all enemies
+    if (result.stateChanges.damageAllEnemies && battle) {
+      var dmgAll = result.stateChanges.damageAllEnemies
+      var damagedEnemies = updatedBattleForItem.enemies.map(function(e) {
+        if (e.isDown) return e
+        var newHp = Math.max(0, e.currentHp - dmgAll)
+        var downed = newHp <= 0
+        return Object.assign({}, e, { currentHp: newHp, isDown: downed })
+      })
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, { enemies: damagedEnemies })
     }
     if (result.stateChanges.guaranteedFlee) {
       // Remove item, then auto-flee successfully
