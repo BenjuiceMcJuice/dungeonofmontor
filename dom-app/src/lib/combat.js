@@ -345,7 +345,15 @@ function resolveEnemyAttack(battleState, enemyId) {
   var forcedTier = getForcedTier(enemy.statusEffects || [])
   var missChance = getMissChance(enemy.statusEffects || [])
 
-  var attackResult = d20Attack(strMod + rollsMod, 20)
+  // Pack tactics — rats and similar swarming enemies buff each other
+  var packBonus = 0
+  if (enemy.archetypeKey === 'rat' || enemy.archetypeKey === 'moth' || enemy.archetypeKey === 'bat') {
+    var packCount = bs.enemies.filter(function(e) { return !e.isDown && e.archetypeKey === enemy.archetypeKey }).length
+    if (packCount >= 3) packBonus = 2
+    else if (packCount >= 2) packBonus = 1
+  }
+
+  var attackResult = d20Attack(strMod + rollsMod + packBonus, 20)
 
   if (forcedTier && attackResult.tier < forcedTier) {
     attackResult = Object.assign({}, attackResult, { tier: forcedTier, tierName: forcedTier === 3 ? 'glancing' : attackResult.tierName })
