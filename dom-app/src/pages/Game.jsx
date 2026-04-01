@@ -1391,11 +1391,12 @@ function Game({ character, user, onEndRun }) {
 
   function handleCloseChest() {
     setLootingChestId(null)
-    // Mark chamber cleared when closing chest
+    // Mark chamber cleared + chest fully looted to prevent re-opening
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
-        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
-        return ch
+        if (ch.id !== zone.playerPosition) return ch
+        var updatedChest = ch.chest ? Object.assign({}, ch.chest, { goldTaken: true }) : ch.chest
+        return Object.assign({}, ch, { cleared: true, chest: updatedChest })
       })
     })
     setZone(newZone)
@@ -2076,7 +2077,7 @@ function Game({ character, user, onEndRun }) {
               : /* Chest in room (loot/hidden chambers) */
               currentChamber.chest && !lootingChestId && !lootingCorpseId ? (function() {
                 var chest = currentChamber.chest
-                var isFullyLooted = chest.goldTaken && chest.items.length === chest.itemsTaken.length
+                var isFullyLooted = chest.goldTaken && (chest.items.length === 0 || chest.items.length === chest.itemsTaken.length)
                 return (
                   <div className="flex flex-col items-center gap-2">
                     <button
