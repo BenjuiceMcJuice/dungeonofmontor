@@ -752,6 +752,7 @@ function Game({ character, user, onEndRun }) {
 
   var playerState = battle ? battle.players[user.uid] : null
   var strMod = playerState ? getModifier(playerState.combatStats.str) : 0
+  var accuracyBonus = (character.equipped && character.equipped.weapon && character.equipped.weapon.accuracyBonus) || 0
   var currentTurnId = battle ? getCurrentTurnId(battle) : null
   var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn'
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
@@ -765,7 +766,7 @@ function Game({ character, user, onEndRun }) {
   function handlePlayerAttackDirect(enemyId) {
     if (pendingAttackResult) return
     setSelectedTarget(enemyId)
-    var rollResult = d20Attack(strMod, critThreshold)
+    var rollResult = d20Attack(strMod + accuracyBonus, critThreshold)
     if (godModeRef.current) {
       rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
     }
@@ -785,7 +786,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handlePlayerAttackRoll() {
-    var rollResult = d20Attack(strMod, critThreshold)
+    var rollResult = d20Attack(strMod + accuracyBonus, critThreshold)
     if (godModeRef.current) {
       rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
     }

@@ -1,17 +1,17 @@
 {
   "dagger_common": {
     "id": "dagger_common", "name": "Some Bloke's Dagger", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.2, "defIgnore": 0,
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
     "rarity": "common", "damageDie": 4, "attackStat": "str",
     "buyPrice": 8, "sellPrice": 3,
     "description": "Left behind by someone who didn't make it. Quick, at least."
   },
   "shortsword_common": {
     "id": "shortsword_common", "name": "Boring Sword", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
     "rarity": "common", "damageDie": 6, "attackStat": "str",
     "buyPrice": 15, "sellPrice": 6,
-    "description": "Reliable. Dull. Like its previous owner."
+    "description": "Reliable. Dull. +1 accuracy. Like its previous owner."
   },
   "longsword_common": {
     "id": "longsword_common", "name": "Slightly Less Boring Sword", "type": "weapon", "slot": "weapon",
@@ -22,15 +22,15 @@
   },
   "mace_common": {
     "id": "mace_common", "name": "Dull Mace", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5,
+    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5, "agiPenalty": -1,
     "rarity": "common", "damageDie": 6, "attackStat": "str",
     "buyPrice": 20, "sellPrice": 8,
-    "description": "Blunt. Graceless. Punches through armour though."
+    "description": "Blunt. Heavy. -1 AGI. Punches through armour though."
   },
 
   "montors_peeling_knife": {
     "id": "montors_peeling_knife", "name": "Montor's Peeling Knife", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0,
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
     "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
     "conditionOnHit": "POISON", "conditionChance": 1.0,
     "giftPower": "bile",
@@ -39,7 +39,7 @@
   },
   "montors_pruning_shears": {
     "id": "montors_pruning_shears", "name": "Montor's Pruning Shears", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.2, "defIgnore": 0,
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
     "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
     "conditionOnHit": "BLEED", "conditionChance": 1.0,
     "giftPower": "petal",
@@ -98,6 +98,34 @@
     "giftPower": ["void", "blood"],
     "buyPrice": 100, "sellPrice": 40,
     "description": "Montor's personal blade. He's noticed it's missing."
+  },
+  "montors_sabatier": {
+    "id": "montors_sabatier", "name": "Montor's Sabatier", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "A chef's knife. d8 sword, +2 accuracy. No effect — but perfect for a Gift."
+  },
+  "montors_letter_opener": {
+    "id": "montors_letter_opener", "name": "Montor's Letter Opener", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.3, "defIgnore": 0, "initBonus": 2,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "Silver. Sharp. 30% double strike, +2 initiative. No effect — a blank canvas."
+  },
+  "montors_doorstop": {
+    "id": "montors_doorstop", "name": "Montor's Doorstop", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.6, "agiPenalty": -1,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "Cast iron. d8 mace, ignores 60% DEF. No effect — waiting for a Gift."
+  },
+  "montors_walking_stick": {
+    "id": "montors_walking_stick", "name": "Montor's Walking Stick", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.2, "accuracyBonus": 1,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Sturdy oak. d6, +1 accuracy, 20% DEF ignore. His mum gave it to him."
   },
 
   "wooden_shield": {
