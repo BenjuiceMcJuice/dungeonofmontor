@@ -1619,10 +1619,22 @@ function Game({ character, user, onEndRun }) {
             { id: 'items',   label: 'Items',   types: ['consumable'] },
           ]
           var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
-          var filteredItems = []
+          var filteredRaw = []
           for (var fi = 0; fi < playerInventory.length; fi++) {
             if (activeTab.types.indexOf(playerInventory[fi].type) !== -1) {
-              filteredItems.push({ item: playerInventory[fi], idx: fi })
+              filteredRaw.push({ item: playerInventory[fi], idx: fi })
+            }
+          }
+          // Stack identical items by ID
+          var filteredItems = []
+          var stackMap = {}
+          for (var si = 0; si < filteredRaw.length; si++) {
+            var itemId = filteredRaw[si].item.id
+            if (stackMap[itemId] !== undefined) {
+              filteredItems[stackMap[itemId]].count++
+            } else {
+              stackMap[itemId] = filteredItems.length
+              filteredItems.push({ item: filteredRaw[si].item, idx: filteredRaw[si].idx, count: 1 })
             }
           }
 
@@ -1829,7 +1841,10 @@ function Game({ character, user, onEndRun }) {
                                item.type}
                             </span>
                           </div>
-                          <span className="text-ink-faint text-[10px]">{'>'}</span>
+                          <div className="flex items-center gap-2">
+                            {entry.count > 1 && <span className="text-gold text-xs font-display">x{entry.count}</span>}
+                            <span className="text-ink-faint text-[10px]">{'>'}</span>
+                          </div>
                         </button>
                       )
                     })}
