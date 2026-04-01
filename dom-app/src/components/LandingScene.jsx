@@ -313,6 +313,8 @@ function LandingScene({ onEnter }) {
   }
 
   var pixelFont = "'Press Start 2P', monospace"
+  var displayFont = "'Sorts Mill Goudy', serif"
+  var uiFont = "system-ui, -apple-system, sans-serif"
 
   return (
     <div className="h-full flex flex-col items-center justify-center overflow-hidden"
@@ -330,8 +332,8 @@ function LandingScene({ onEnter }) {
           {/* Skip hint during typing */}
           {phase === 'typing' && (
             <div className="absolute bottom-2 right-3 pointer-events-none">
-              <span style={{ fontFamily: pixelFont, fontSize: '6px', color: '#4a4a52', letterSpacing: '1px' }}>
-                TAP TO SKIP
+              <span style={{ fontFamily: uiFont, fontSize: '10px', color: '#4a4a52', letterSpacing: '1px' }}>
+                tap to skip
               </span>
             </div>
           )}
@@ -341,7 +343,7 @@ function LandingScene({ onEnter }) {
         <div className="p-5 min-h-[120px] flex flex-col justify-between" style={{ background: '#030408', borderTop: '3px solid #2a1a30' }}>
           {/* Typewriter / narrative text */}
           <div>
-            <p style={{ fontFamily: pixelFont, fontSize: '9px', lineHeight: '2.4', color: '#d4c8a0', minHeight: '50px', letterSpacing: '0.5px' }}>
+            <p style={{ fontFamily: displayFont, fontSize: '15px', lineHeight: '1.8', color: '#d4c8a0', minHeight: '50px', fontStyle: 'italic' }}>
               {displayText}
               {phase === 'typing' && <span className="inline-block w-2 h-3 align-middle ml-0.5 animate-pulse" style={{ background: '#d4c8a0' }} />}
             </p>
@@ -352,11 +354,11 @@ function LandingScene({ onEnter }) {
             <div className="flex justify-center mt-4">
               <button onClick={function(e) { e.stopPropagation(); handleEnter() }}
                 style={{
-                  fontFamily: pixelFont, fontSize: '9px', background: '#0e0818', border: '3px solid #7a3a9a',
-                  color: '#c06ee0', padding: '12px 24px', cursor: 'pointer', letterSpacing: '3px', textTransform: 'uppercase',
-                  boxShadow: '0 0 24px rgba(155,89,182,0.3)',
+                  fontFamily: uiFont, fontSize: '14px', background: '#0e0818', border: '2px solid #7a3a9a',
+                  color: '#c06ee0', padding: '12px 28px', cursor: 'pointer', letterSpacing: '2px', textTransform: 'uppercase',
+                  boxShadow: '0 0 24px rgba(155,89,182,0.3)', borderRadius: '6px', fontWeight: 600,
                 }}>
-                ▶ ENTER DUNGEON
+                Enter Dungeon
               </button>
             </div>
           )}
@@ -364,26 +366,26 @@ function LandingScene({ onEnter }) {
           {/* Name input */}
           {phase === 'name' && (
             <div className="mt-4 flex flex-col gap-3" onClick={function(e) { e.stopPropagation() }}>
-              <p style={{ fontFamily: pixelFont, fontSize: '7px', color: '#8b5e3c', letterSpacing: '2px', textTransform: 'uppercase' }}>
-                WHAT IS YOUR NAME, KNIGHT?
+              <p style={{ fontFamily: displayFont, fontSize: '14px', color: '#8b5e3c', fontStyle: 'italic' }}>
+                What is your name, knight?
               </p>
               <input type="text" placeholder="..." enterKeyHint="go" autoComplete="off" autoFocus
                 value={name} onChange={function(e) { setName(e.target.value) }}
                 onKeyDown={function(e) { if (e.key === 'Enter') handleStart() }}
                 style={{
-                  fontFamily: pixelFont, fontSize: '16px', background: '#060410', border: '2px solid #2a1a30',
-                  color: '#d4c8a0', padding: '10px 14px', outline: 'none', letterSpacing: '2px',
-                  borderBottom: '2px solid #7a3a9a', borderRadius: 0,
+                  fontFamily: uiFont, fontSize: '16px', background: '#060410', border: '2px solid #2a1a30',
+                  color: '#d4c8a0', padding: '12px 14px', outline: 'none', letterSpacing: '1px',
+                  borderBottom: '2px solid #7a3a9a', borderRadius: '4px',
                 }}
               />
               <div className="flex justify-center">
                 <button onClick={handleStart}
                   style={{
-                    fontFamily: pixelFont, fontSize: '9px', background: '#0e0818', border: '3px solid #7a3a9a',
-                    color: '#c06ee0', padding: '12px 24px', cursor: 'pointer', letterSpacing: '3px', textTransform: 'uppercase',
-                    boxShadow: '0 0 24px rgba(155,89,182,0.3)',
+                    fontFamily: uiFont, fontSize: '14px', background: '#0e0818', border: '2px solid #7a3a9a',
+                    color: '#c06ee0', padding: '12px 28px', cursor: 'pointer', letterSpacing: '2px', textTransform: 'uppercase',
+                    boxShadow: '0 0 24px rgba(155,89,182,0.3)', borderRadius: '6px', fontWeight: 600,
                   }}>
-                  ▶ BEGIN
+                  Begin
                 </button>
               </div>
             </div>
