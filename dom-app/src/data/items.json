@@ -300,6 +300,13 @@
     "buyPrice": 12, "sellPrice": 5,
     "description": "Industrial strength. She used them on Montor as a boy."
   },
+  "montors_adrenaline_shot": {
+    "id": "montors_adrenaline_shot", "name": "Montor's Adrenaline Shot", "type": "consumable",
+    "rarity": "rare", "effect": "apply_condition", "effectCondition": "ADRENALINE",
+    "giftPower": "blood",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "Syringe from the medicine cabinet. Guaranteed crit next attack, +3 STR. Then the crash."
+  },
   "fortify_draught": {
     "id": "fortify_draught", "name": "Thick Gloop", "type": "consumable",
     "rarity": "uncommon", "effect": "stat_buff", "effectStat": "def", "effectValue": 4, "effectDuration": 3,
@@ -370,14 +377,13 @@
     "buyPrice": 80, "sellPrice": 32,
     "description": "She never took it off. Heals 10% of damage dealt. The ring remembers."
   },
-  "montors_lottery_ticket": {
-    "id": "montors_lottery_ticket", "name": "Montor's Lottery Ticket", "type": "relic", "slot": "relic",
+  "montors_grans_lottery_ticket": {
+    "id": "montors_grans_lottery_ticket", "name": "Montor's Gran's Lottery Ticket", "type": "relic", "slot": "relic",
     "rarity": "epic",
     "passiveEffect": "lottery", "passiveValue": 0,
-    "lotteryNumbers": null,
     "giftPower": "void",
     "buyPrice": 100, "sellPrice": 1,
-    "description": "Three numbers scratched in ink. If any die matches... \"jackpot.\""
+    "description": "Scratch it off. Two numbers. If any d20 roll matches, you win something rare. Gran always won."
   },
   "montors_monocle": {
     "id": "montors_monocle", "name": "Montor's Monocle", "type": "relic", "slot": "relic",
@@ -402,6 +408,14 @@
     "giftPower": "void",
     "buyPrice": 45, "sellPrice": 18,
     "description": "He checks his hair constantly. 25% chance to reflect conditions back."
+  },
+  "montors_magnifying_glass": {
+    "id": "montors_magnifying_glass", "name": "Montor's Magnifying Glass", "type": "relic", "slot": "relic",
+    "rarity": "rare",
+    "passiveEffect": "double_condition", "passiveValue": 1,
+    "giftPower": "bile",
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Everything looks bigger through it. Weapon conditions apply twice on hit."
   },
   "montors_last_stand_brooch": {
     "id": "montors_last_stand_brooch", "name": "Montor's Last Stand Brooch", "type": "relic", "slot": "relic",

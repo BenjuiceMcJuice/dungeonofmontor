@@ -70,12 +70,19 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-01 | Bug fixes — chamber clearing, chest exploit, buff durations, iOS zoom | ✅ Done |
 | 2026-04-01 | Docs reorganised into dom-app/docs/ with INDEX.md | ✅ Done |
 | 2026-04-01 | Design specs: build identity, gift system v0.2, Montor AI, junk/gifts | ✅ Done |
+| 2026-04-01 | CHA merchant pricing — 5% per mod on buy/sell, all merchant UIs | ✅ Done |
+| 2026-04-01 | New items: Magnifying Glass (double conditions), Gran's Lottery Ticket (d20 match → rare item), Adrenaline Shot | ✅ Done |
+| 2026-04-01 | Condition log grammar — display names (Bleeding, Afraid) instead of raw IDs | ✅ Done |
+| 2026-04-01 | FEAR rework — fight-or-flight (40% skip / 60% adrenaline crit), replaces death spiral | ✅ Done |
+| 2026-04-01 | ADRENALINE + CRASH conditions — forceCrit mechanic, triggersOnExpiry chain | ✅ Done |
+| 2026-04-01 | Turn skip UX — playerSkipped phase with 1.5s delay + red banner | ✅ Done |
+| 2026-04-01 | Design: Gift endgame — Void Chamber restoration, terminals under junk piles | ✅ Done |
 |            | **Next up** | |
-|            | Junk piles — room interaction, search intensity, PER rolls, XP, dodgy consumables | ⬜ |
+|            | Junk piles — room interaction, search intensity, PER rolls, XP, terminals hidden underneath | ⬜ |
+|            | Wire remaining passives — reflect_conditions, last_stand, see_enemy_hp_exact | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
-|            | Montor's Gift system — find treasures in junk, activate at safe rooms | ⬜ |
+|            | Montor's Gift system — find/break/apply at terminals/restore to Void Chamber | ⬜ |
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
-|            | CHA merchant pricing | ⬜ |
 
 ---
 
