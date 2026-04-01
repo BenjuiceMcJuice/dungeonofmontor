@@ -172,6 +172,16 @@ function Game({ character, user, onEndRun }) {
   })
 
   var godModeRef = useRef(false)
+  var transitionGuardRef = useRef(0)
+
+  // Block taps for 400ms after screen transitions to prevent bleed-through
+  function guardedSetPhase(phase) {
+    transitionGuardRef.current = Date.now()
+    setGamePhase(phase)
+  }
+  function isGuarded() {
+    return Date.now() - transitionGuardRef.current < 400
+  }
 
   // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
   useEffect(function() {
@@ -291,6 +301,13 @@ function Game({ character, user, onEndRun }) {
 
     // If already cleared or has corpses (fought), just show doors (backtracking)
     if (chamber.cleared || chamber.corpses) {
+      setGamePhase('doors')
+      return
+    }
+
+    // If chest/npc already visited, show room without regenerating content
+    if ((chamber.chest && chamber.chest.opened) || chamber.npc) {
+      setChamberContent(null)
       setGamePhase('doors')
       return
     }
@@ -457,11 +474,12 @@ function Game({ character, user, onEndRun }) {
 
     // Floor transition → safe room
     setFloorsCompleted(function(prev) { return prev.concat([zone.floorId]) })
-    setGamePhase('floor_transition')
+    guardedSetPhase('floor_transition')
   }
 
   // --- Floor transition: move to next floor or victory ---
   function handleFloorTransitionContinue() {
+    if (isGuarded()) return
     // Determine next floor from data
     var currentFloorDef = FLOORS[floor.floorId]
     var nextFloorId = currentFloorDef ? currentFloorDef.nextFloor : null
@@ -482,11 +500,13 @@ function Game({ character, user, onEndRun }) {
     setLootingCorpseId(null)
     setLootingChestId(null)
     setLootingNpcId(null)
-    setGamePhase('safe_room')
+    guardedSetPhase('safe_room')
   }
 
   // --- Safe room: Montor's audience chamber ---
   function handleSafeRoomContinue() {
+    if (isGuarded()) return
+    transitionGuardRef.current = Date.now()
     setGamePhase('doors')
   }
 
@@ -525,7 +545,7 @@ function Game({ character, user, onEndRun }) {
       setPlayerHp(newHp3)
       setChamberContent(Object.assign({}, chamberContent, { triggered: true }))
       if (newHp3 <= 0) {
-        setTimeout(function() { setGamePhase('defeat') }, 500)
+        setTimeout(function() { guardedSetPhase('defeat') }, 500)
         return
       }
     } else if (action === 'help_npc') {
@@ -601,7 +621,7 @@ function Game({ character, user, onEndRun }) {
         var newXp = totalXp + xpGained
         setTotalXp(newXp)
         checkLevelUp(newXp)
-        setCombatPhase('victory')
+        transitionGuardRef.current = Date.now(); setCombatPhase('victory')
         return
       }
       // Enemy died from conditions — skip their turn
@@ -677,7 +697,7 @@ function Game({ character, user, onEndRun }) {
       setBattle(updatedBattle)
       setEnemyAttackInfo(null)
       setPlayerHp(0)
-      setGamePhase('defeat')
+      guardedSetPhase('defeat')
       return
     }
 
@@ -710,7 +730,7 @@ function Game({ character, user, onEndRun }) {
 
     if (tickResult.died) {
       setPlayerHp(0)
-      setGamePhase('defeat')
+      guardedSetPhase('defeat')
       return
     }
     if (tickResult.skipped) {
@@ -935,7 +955,7 @@ function Game({ character, user, onEndRun }) {
     setPlayerGold(newGold)
 
     if (newHp <= 0) {
-      setGamePhase('defeat')
+      guardedSetPhase('defeat')
       return
     }
 
@@ -950,10 +970,11 @@ function Game({ character, user, onEndRun }) {
       hpLoss: hpLoss,
       goldLoss: goldLoss,
     })
-    setGamePhase('flee_result')
+    guardedSetPhase('flee_result')
   }
 
   function handleFleeResultContinue() {
+    if (isGuarded()) return
     if (!fleeOutcome) return
 
     if (fleeOutcome.fled) {
@@ -1218,6 +1239,8 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handleCombatVictoryToDoors() {
+    if (isGuarded()) return
+    transitionGuardRef.current = Date.now()
     // Generate corpses with loot (gold + items array)
     var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
     var lckStat = (character.stats.lck || 10) + getPassiveTotal(character.equipped, 'lck_bonus')
@@ -1491,7 +1514,7 @@ function Game({ character, user, onEndRun }) {
   // --- Defeat ---
   if (gamePhase === 'defeat') {
     return (
-      <div onClick={function() { writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
+      <div onClick={function() { if (isGuarded()) return; writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
         className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
         <h1 className="font-display text-4xl text-red-400">Defeated</h1>
         <p className="text-ink text-lg italic">Darkness swallows you whole.</p>
