@@ -641,4 +641,166 @@ function drawChamberIcon(canvas, iconKey, theme, scale) {
   }
 }
 
-export { SPRITES, PLAYER_SPRITES, CLASS_COLOURS, TIERS, DARK_TIERS, drawSprite, drawPlayerSprite, DOOR_SPRITE, DOOR_THEMES, drawDoorSprite, CHAMBER_ICONS, drawChamberIcon }
+// --- Condition icons (tiny 6x6 sprites) ---
+var CONDITION_ICONS = {
+  BLEED: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#cc2222',_,_,_],
+      [_,'#cc2222','#ff4444','#cc2222',_,_],
+      [_,'#cc2222','#ff4444','#cc2222',_,_],
+      [_,_,'#cc2222','#ff4444','#cc2222',_],
+      [_,_,_,'#cc2222','#cc2222',_],
+      [_,_,_,_,'#cc2222',_],
+    ],
+  },
+  POISON: {
+    cols: 6, rows: 6, grid: [
+      [_,_,K,K,_,_],
+      [_,K,'#44aa44','#44aa44',K,_],
+      [K,'#44aa44','#66cc66','#44aa44','#44aa44',K],
+      [K,'#44aa44','#44aa44','#66cc66','#44aa44',K],
+      [_,K,'#44aa44','#44aa44',K,_],
+      [_,_,K,K,_,_],
+    ],
+  },
+  BURN: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#ff6600',_,_,_],
+      [_,'#ff6600','#ffaa00','#ff6600',_,_],
+      ['#ff4400','#ffaa00','#ffcc00','#ffaa00','#ff6600',_],
+      [_,'#ff4400','#ffaa00','#ffcc00','#ff6600',_],
+      [_,_,'#ff4400','#ff6600',_,_],
+      [_,_,_,'#cc2200',_,_],
+    ],
+  },
+  FROST: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#88ccff',_,_,_],
+      [_,'#88ccff',_,'#88ccff',_,_],
+      ['#88ccff',_,'#aaddff',_,'#88ccff',_],
+      [_,'#88ccff',_,'#88ccff',_,_],
+      [_,_,'#88ccff',_,_,_],
+      [_,_,_,_,_,_],
+    ],
+  },
+  NAUSEA: {
+    cols: 6, rows: 6, grid: [
+      [_,'#88aa44','#88aa44',_,_,_],
+      ['#88aa44','#aacc66','#88aa44',_,_,_],
+      [_,'#88aa44',_,'#88aa44',_,_],
+      [_,_,'#88aa44','#aacc66','#88aa44',_],
+      [_,_,_,'#88aa44','#aacc66','#88aa44'],
+      [_,_,_,_,'#88aa44','#88aa44'],
+    ],
+  },
+  SLUGGISH: {
+    cols: 6, rows: 6, grid: [
+      [_,_,_,_,_,_],
+      [_,K,K,K,K,_],
+      [K,'#887766','#aa9988',K,_,_],
+      [K,'#aa9988','#887766','#aa9988',K,_],
+      [_,K,'#887766','#aa9988',K,_],
+      [_,_,K,K,K,_],
+    ],
+  },
+  FEAR: {
+    cols: 6, rows: 6, grid: [
+      [_,'#cc44cc',_,_,_,_],
+      ['#cc44cc','#ee66ee','#cc44cc',_,_,_],
+      ['#cc44cc','#ee66ee','#cc44cc',_,_,_],
+      [_,'#cc44cc',_,_,_,_],
+      [_,_,_,_,_,_],
+      [_,'#cc44cc',_,_,_,_],
+    ],
+  },
+  FRENZY: {
+    cols: 6, rows: 6, grid: [
+      [_,'#ff4444',_,'#ff4444',_,_],
+      ['#ff4444','#ff6666','#ff4444','#ff6666','#ff4444',_],
+      [_,'#ff4444','#ff6666','#ff4444',_,_],
+      ['#ff4444','#ff6666','#ff4444','#ff6666','#ff4444',_],
+      [_,'#ff4444',_,'#ff4444',_,_],
+      [_,_,_,_,_,_],
+    ],
+  },
+  CHARM: {
+    cols: 6, rows: 6, grid: [
+      [_,'#ff66aa',_,'#ff66aa',_,_],
+      ['#ff66aa','#ff88cc','#ff88cc','#ff88cc','#ff66aa',_],
+      ['#ff66aa','#ff88cc','#ffaadd','#ff88cc','#ff66aa',_],
+      [_,'#ff66aa','#ff88cc','#ff66aa',_,_],
+      [_,_,'#ff66aa',_,_,_],
+      [_,_,_,_,_,_],
+    ],
+  },
+  DAZE: {
+    cols: 6, rows: 6, grid: [
+      [_,'#ffcc00',_,_,'#ffcc00',_],
+      [_,_,'#ffcc00',_,_,_],
+      ['#ffcc00',_,_,'#ffcc00',_,_],
+      [_,_,'#ffcc00',_,_,'#ffcc00'],
+      [_,'#ffcc00',_,_,'#ffcc00',_],
+      [_,_,_,_,_,_],
+    ],
+  },
+  BORED: {
+    cols: 6, rows: 6, grid: [
+      [_,_,_,_,_,_],
+      [_,K,K,K,K,_],
+      [K,_,_,_,_,K],
+      [K,_,K,K,_,K],
+      [_,K,K,K,K,_],
+      [_,_,_,_,_,_],
+    ],
+  },
+  SAD: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#5588cc',_,_,_],
+      [_,'#5588cc','#77aaee','#5588cc',_,_],
+      [_,_,'#5588cc',_,_,_],
+      [_,'#5588cc',_,'#5588cc',_,_],
+      ['#5588cc',_,_,_,'#5588cc',_],
+      [_,_,_,_,_,_],
+    ],
+  },
+  BLIND: {
+    cols: 6, rows: 6, grid: [
+      [_,K,K,K,K,_],
+      [K,'#444444','#444444','#444444','#444444',K],
+      [K,'#444444','#222222','#222222','#444444',K],
+      [K,'#444444','#222222','#222222','#444444',K],
+      [K,'#444444','#444444','#444444','#444444',K],
+      [_,K,K,K,K,_],
+    ],
+  },
+  BLOODLUST: {
+    cols: 6, rows: 6, grid: [
+      [_,'#cc2222',_,'#cc2222',_,_],
+      ['#cc2222','#ff4444','#ff4444','#ff4444','#cc2222',_],
+      ['#cc2222','#ff4444','#ff6666','#ff4444','#cc2222',_],
+      [_,'#cc2222','#ff4444','#cc2222',_,_],
+      [_,_,'#cc2222',_,_,_],
+      [_,_,'#880000',_,_,_],
+    ],
+  },
+}
+
+function drawConditionIcon(canvas, conditionId, scale) {
+  var sprite = CONDITION_ICONS[conditionId]
+  if (!sprite) return
+  var px = scale || 3
+  canvas.width = sprite.cols * px
+  canvas.height = sprite.rows * px
+  canvas.style.imageRendering = 'pixelated'
+  var ctx = canvas.getContext('2d')
+  for (var r = 0; r < sprite.rows; r++) {
+    for (var c = 0; c < sprite.cols; c++) {
+      var v = sprite.grid[r][c]
+      if (v === null) continue
+      ctx.fillStyle = v
+      ctx.fillRect(c * px, r * px, px, px)
+    }
+  }
+}
+
+export { SPRITES, PLAYER_SPRITES, CLASS_COLOURS, TIERS, DARK_TIERS, drawSprite, drawPlayerSprite, DOOR_SPRITE, DOOR_THEMES, drawDoorSprite, CHAMBER_ICONS, drawChamberIcon, CONDITION_ICONS, drawConditionIcon }
