@@ -1,34 +1,12 @@
-// Stage 1: Knight only. Other classes added in Stage 2.
-var CLASSES = {
-  knight: {
-    name: 'Knight',
-    baseHp: 30,
-    hpPerLevel: 8,
-    autoSkills: { str: 1, def: 1 },
-    freePointsPerLevel: 2,
-    playstyle: 'Tanky frontliner',
-  },
-}
+// Character classes, skills, and generation
+// Data loaded from JSON — see src/data/classes.json for definitions
 
-// 14 skills — all present from day one
-var SKILLS = [
-  { id: 'str', name: 'Strength',   abbrev: 'STR', group: 'combat' },
-  { id: 'agi', name: 'Agility',    abbrev: 'AGI', group: 'combat' },
-  { id: 'def', name: 'Defence',    abbrev: 'DEF', group: 'combat' },
-  { id: 'end', name: 'Endurance',  abbrev: 'END', group: 'combat' },
-  { id: 'int', name: 'Intellect',  abbrev: 'INT', group: 'mental' },
-  { id: 'wis', name: 'Wisdom',     abbrev: 'WIS', group: 'mental' },
-  { id: 'per', name: 'Perception', abbrev: 'PER', group: 'mental' },
-  { id: 'lck', name: 'Luck',       abbrev: 'LCK', group: 'fortune' },
-  { id: 'cha', name: 'Charisma',   abbrev: 'CHA', group: 'fortune' },
-  { id: 'vit', name: 'Vitality',   abbrev: 'VIT', group: 'body' },
-  { id: 'res', name: 'Resilience', abbrev: 'RES', group: 'body' },
-  { id: 'sth', name: 'Stealth',    abbrev: 'STH', group: 'specialist' },
-  { id: 'cun', name: 'Cunning',    abbrev: 'CUN', group: 'specialist' },
-  { id: 'wil', name: 'Willpower',  abbrev: 'WIL', group: 'specialist' },
-]
+import classData from '../data/classes.json'
+import ITEMS from '../data/items.json'
 
-var STAT_POINTS_TOTAL = 70
+var CLASSES = classData.classes
+var SKILLS = classData.skills
+var STAT_POINTS_TOTAL = classData.statPointsTotal
 
 // Modifier formula: floor((skill - 10) / 2)
 function getModifier(value) {
@@ -40,40 +18,30 @@ function getMaxHp(cls, stats) {
   return cls.baseHp + (stats.vit * 5) + (stats.end * 2)
 }
 
-// Generate a Knight with evenly distributed stats for Stage 1
+// Generate a Knight with base stats, no equipment, and starting gold
+// Stats are allocated on the Preparation screen before the run
 function generateKnight(name) {
-  // 70 points across 14 skills = 5 each, then boost Knight-relevant stats
-  // 70 points across 14 skills. Knight favours STR, DEF, VIT, END.
-  // STR 14 (+2 mod) — trained fighter, hits reliably
-  // DEF 10 (+0 mod) — base defence, armour adds the rest
-  // AGI 10 (+0) — average initiative, not slow not fast
-  var stats = {
-    str: 14, def: 10, vit: 10, end: 8,
-    agi: 10, per: 4, wil: 3,
-    int: 2, wis: 1, lck: 2,
-    cha: 1, res: 2, sth: 1, cun: 2,
-  }
-  // Total: 14+10+10+8+10+4+3+2+1+2+1+2+1+2 = 70 ✓
+  var start = classData.startingKnight
+  var stats = Object.assign({}, start.baseStats)
 
-  var cls = CLASSES.knight
   return {
     name: name,
     class: 'knight',
     level: 1,
     xp: 0,
     stats: stats,
-    maxHp: 35, // Stage 1: fixed HP. Slightly lower — rats should feel threatening in groups.
+    maxHp: start.maxHp,
     abilities: [],
     scars: [],
     titles: [],
     equipped: {
-      weapon: { id: 'longsword_common', name: 'Longsword', type: 'weapon', slot: 'weapon', damageDie: 8, attackStat: 'str', rarity: 'common', buyPrice: 25, sellPrice: 10, description: 'A sturdy blade. Gets the job done.' },
+      weapon: null,
       offhand: null,
-      armour: { id: 'chainmail_common', name: 'Chainmail', type: 'armour', slot: 'armour', defBonus: 4, agiPenalty: -1, rarity: 'common', buyPrice: 30, sellPrice: 12, description: 'Heavy but protective.' },
+      armour: null,
       relics: [],
     },
     inventory: [],
-    gold: 0,
+    gold: start.startingGold || 50,
   }
 }
 

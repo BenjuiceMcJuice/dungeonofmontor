@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { getModifier } from '../lib/classes.js'
 import { d20Attack, d20Flee } from '../lib/dice.js'
-import { generateGardenZone, generateChamberContent, getAdjacentChambers, getDoorDirection } from '../lib/dungeon.js'
+import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentChambers, getDoorDirection, ZONES, FLOORS } from '../lib/dungeon.js'
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, applyConsumable } from '../lib/loot.js'
-import { createBattleState, getCurrentTurnId, getActor, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
+import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
+import { isFleeBlocked, areItemsBlocked } from '../lib/conditions.js'
+import dialogueData from '../data/dialogue.json'
+import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
 import CombatRoller from '../components/CombatRoller.jsx'
+import StatPicker from '../components/StatPicker.jsx'
 import ChamberView from '../components/ChamberView.jsx'
 import DoorSprite from '../components/DoorSprite.jsx'
 import ChamberIcon from '../components/ChamberIcon.jsx'
@@ -18,32 +22,30 @@ var MAX_LOG_ENTRIES = 6
 // Direction labels
 var DIR_LABELS = { N: 'North', S: 'South', E: 'East', W: 'West' }
 
-// Montor whispers — random flavour text between rooms
-// Stage 1: scripted pool. Stage 4: AI-generated based on mood/state.
-var MONTOR_WHISPERS = [
-  "You're still here? Interesting.",
-  "The walls remember your footsteps.",
-  "I can smell your fear. It's... adequate.",
-  "Every door you open was already open. I left them that way.",
-  "The garden grows tired of you.",
-  "Take your time. I have forever.",
-  "That last fight was disappointing. I expected more.",
-  "You remind me of someone. They didn't make it either.",
-  "The deeper you go, the more I see.",
-  "Your gold won't help you where you're headed.",
-  "I wonder — do you loot because you need to, or because you can't help yourself?",
-  "The rats speak of you. Not kindly.",
-  "Something watches from the hedgerows. Not me. Something else.",
-  "You're braver than you look. That's not a compliment.",
-  "Keep going. I'm curious how far you'll get.",
-  "The flowers lean toward you. That's not a good sign.",
-  "I could close these doors any time. Remember that.",
-  "Your heartbeat echoes through my garden. It's... rhythmic.",
-  "The last adventurer made it further than this. Just saying.",
-  "Don't trust the merchant. Actually, don't trust anyone.",
-  null, null, null, null, null, null, null, null, null, null,
-  null, null, null, null, null,
-]
+var MONTOR_WHISPERS = dialogueData.montorWhispers
+
+// Helper: get total passive value from equipped relics + armour
+function getPassiveTotal(equipped, effectName) {
+  var total = 0
+  if (equipped && equipped.relics) {
+    for (var i = 0; i < equipped.relics.length; i++) {
+      if (equipped.relics[i].passiveEffect === effectName) total += (equipped.relics[i].passiveValue || 0)
+    }
+  }
+  if (equipped && equipped.armour && equipped.armour.passiveEffect === effectName) {
+    total += (equipped.armour.passiveValue || 0)
+  }
+  return total
+}
+
+// Helper: check if equipped relics grant immunity to a condition
+function hasConditionImmunity(equipped, conditionId) {
+  if (!equipped || !equipped.relics) return false
+  for (var i = 0; i < equipped.relics.length; i++) {
+    if (equipped.relics[i].passiveEffect === 'condition_immunity' && equipped.relics[i].passiveCondition === conditionId) return true
+  }
+  return false
+}
 
 // Map chamber types to centre icon keys (after clearing)
 function getChamberIconKey(type) {
@@ -84,8 +86,9 @@ function formatAttackLog(r, type) {
 
 function Game({ character, user, onEndRun }) {
   // --- Dungeon state ---
+  var [floor, setFloor] = useState(null)
   var [zone, setZone] = useState(null)
-  // Phases: doors | entering | chamber | combat | victory | defeat
+  // Phases: doors | entering | chamber | combat | victory | defeat | safe_room | floor_transition
   var [gamePhase, setGamePhase] = useState('doors')
   var [chamberContent, setChamberContent] = useState(null)
   var [totalXp, setTotalXp] = useState(0)
@@ -95,8 +98,60 @@ function Game({ character, user, onEndRun }) {
   var [previousPosition, setPreviousPosition] = useState(null)
   var [playerInventory, setPlayerInventory] = useState(character.inventory ? character.inventory.slice() : [])
   var [activeBuffs, setActiveBuffs] = useState([])
+  var [hasZoneKey, setHasZoneKey] = useState(false)
+  var [floorsCompleted, setFloorsCompleted] = useState([])
+  var [runLevel, setRunLevel] = useState(0)
+  var [pendingLevelUp, setPendingLevelUp] = useState(null) // { hpGain, statPick } or null
+
+  var XP_THRESHOLDS = progressionData.xpThresholds
+
+  function checkLevelUp(newXp) {
+    if (runLevel >= XP_THRESHOLDS.length) return false
+    var threshold = XP_THRESHOLDS[runLevel]
+    if (newXp >= threshold.xp) {
+      // Apply HP gain immediately
+      if (threshold.hpGain > 0) {
+        character.maxHp += threshold.hpGain
+        setPlayerHp(function(hp) { return Math.min(hp + threshold.hpGain, character.maxHp) })
+      }
+      if (threshold.statPick) {
+        setPendingLevelUp({ hpGain: threshold.hpGain, statPick: true, level: runLevel + 1 })
+      } else {
+        setPendingLevelUp({ hpGain: threshold.hpGain, statPick: false, level: runLevel + 1 })
+      }
+      setRunLevel(runLevel + 1)
+      return true
+    }
+    return false
+  }
+
+  function handleStatPick(stat) {
+    character.stats[stat] = (character.stats[stat] || 10) + 1
+    // Also update battle state if in combat
+    if (battle && battle.players[user.uid]) {
+      var bs = Object.assign({}, battle)
+      var newPlayers = {}
+      Object.keys(bs.players).forEach(function(uid) {
+        newPlayers[uid] = Object.assign({}, bs.players[uid], {
+          combatStats: Object.assign({}, bs.players[uid].combatStats),
+          statusEffects: bs.players[uid].statusEffects.slice(),
+        })
+        if (uid === user.uid) {
+          newPlayers[uid].combatStats[stat] = (newPlayers[uid].combatStats[stat] || 10) + 1
+        }
+      })
+      bs.players = newPlayers
+      setBattle(bs)
+    }
+    setPendingLevelUp(null)
+  }
+
+  function handleLevelUpDismiss() {
+    setPendingLevelUp(null)
+  }
 
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
+  var [inventoryTab, setInventoryTab] = useState('weapons')
 
   // --- Run tracking (for balance logging) ---
   var [runStats, setRunStats] = useState({
@@ -111,6 +166,8 @@ function Game({ character, user, onEndRun }) {
     killedByTier: null,
     killedInChamber: null,
   })
+
+  var godModeRef = useRef(false)
 
   // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
   useEffect(function() {
@@ -131,7 +188,20 @@ function Game({ character, user, onEndRun }) {
         setPlayerGold(function(g) { return g + 200 })
         console.log('Added 9 items + 200 gold')
       },
-      heal: function() { setPlayerHp(character.maxHp); console.log('Healed to full') },
+      heal: function() {
+        setPlayerHp(character.maxHp)
+        if (battle && battle.players[user.uid]) {
+          var bs = Object.assign({}, battle)
+          var np = {}
+          Object.keys(bs.players).forEach(function(uid) {
+            np[uid] = Object.assign({}, bs.players[uid], { combatStats: Object.assign({}, bs.players[uid].combatStats), statusEffects: bs.players[uid].statusEffects.slice() })
+            if (uid === user.uid) np[uid].currentHp = character.maxHp
+          })
+          bs.players = np
+          setBattle(bs)
+        }
+        console.log('Healed to ' + character.maxHp)
+      },
       gold: function(n) { setPlayerGold(function(g) { return g + (n || 100) }); console.log('Added ' + (n || 100) + ' gold') },
       hp: function() { console.log('HP: ' + playerHp + '/' + character.maxHp + ' | Gold: ' + playerGold + ' | Items: ' + playerInventory.length) },
       god: function() { godModeRef.current = !godModeRef.current; console.log('God mode: ' + (godModeRef.current ? 'ON — one-hit kills' : 'OFF')) },
@@ -160,18 +230,19 @@ function Game({ character, user, onEndRun }) {
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null)
   var [enemyRollerKey, setEnemyRollerKey] = useState(0)
   var [lootableCorpses, setLootableCorpses] = useState([])
-  var godModeRef = useRef(false)
   var [lootingCorpseId, setLootingCorpseId] = useState(null)
   var [lootingChestId, setLootingChestId] = useState(null)
   var [lootingNpcId, setLootingNpcId] = useState(null)
   var [montorWhisper, setMontorWhisper] = useState(null)
   var logRef = useRef(null)
 
-  // Init zone — start at entry, show doors
+  // Init floor — start at Garden
   useEffect(function() {
     window.scrollTo(0, 0)
-    var z = generateGardenZone()
-    setZone(z)
+    var f = generateFloor('grounds')
+    setFloor(f)
+    setZone(f.zones[0])
+    setHasZoneKey(false)
     setGamePhase('doors')
   }, [])
 
@@ -208,6 +279,12 @@ function Game({ character, user, onEndRun }) {
     })
     setZone(newZone)
 
+    // Relic passive: regen_per_chamber — heal on entering a new chamber
+    var regenAmount = getPassiveTotal(character.equipped, 'regen_per_chamber')
+    if (regenAmount > 0) {
+      setPlayerHp(function(hp) { return Math.min(hp + regenAmount, character.maxHp) })
+    }
+
     // Montor whisper — random chance on entering a new room
     var whisper = MONTOR_WHISPERS[Math.floor(Math.random() * MONTOR_WHISPERS.length)]
     setMontorWhisper(whisper)
@@ -223,16 +300,51 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
-    var content = generateChamberContent(chamber, 'seasoned')
+    var zoneDef = ZONES[newZone.zoneId] || null
+    var content = generateChamberContent(chamber, 'seasoned', zoneDef)
     setChamberContent(content)
 
+    // --- Combat chambers ---
     if (content && content.enemies) {
       setGamePhase('entering')
       setTimeout(function() {
         startCombat(content.enemies, newZone, targetId)
       }, 800)
-    } else if (content && (chamber.type === 'loot' || chamber.type === 'hidden')) {
-      // Store chest on the chamber — player interacts in doors view
+    }
+    // --- Keystone chamber --- press to unlock stairwell
+    else if (chamber.type === 'keystone') {
+      // Auto-mark as keystone in doors view — player interacts there
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { isKeystone: true })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Zone door --- locked until key obtained
+    else if (chamber.type === 'zone_door') {
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { isZoneDoor: true })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Stairwell descent --- locked until keystone pressed + boss defeated
+    else if (chamber.type === 'stairwell_descent') {
+      // Handled in doors view — shows locked/unlocked state
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Loot / Hidden --- chest entity
+    else if (content && (chamber.type === 'loot' || chamber.type === 'hidden')) {
       var chestItems = []
       if (content.item) chestItems.push(content.item)
       var chest = {
@@ -253,15 +365,16 @@ function Game({ character, user, onEndRun }) {
       setZone(newZone)
       setChamberContent(null)
       setGamePhase('doors')
-    } else if (content && (chamber.type === 'merchant' || chamber.type === 'quest_npc')) {
-      // Store NPC on the chamber — player interacts in doors view
+    }
+    // --- Merchant / Quest NPC --- NPC entity
+    else if (content && (chamber.type === 'merchant' || chamber.type === 'quest_npc')) {
       var npc = {
         id: 'npc_' + targetId,
         type: chamber.type,
         name: chamber.type === 'merchant' ? 'Wandering Vendor' : (content.npcName || 'Stranger'),
         description: content.description,
-        items: content.items || [],       // merchant wares
-        reward: content.reward || null,   // quest reward
+        items: content.items || [],
+        reward: content.reward || null,
         interacted: false,
         showSell: false,
       }
@@ -274,9 +387,113 @@ function Game({ character, user, onEndRun }) {
       setZone(newZone)
       setChamberContent(null)
       setGamePhase('doors')
-    } else {
+    }
+    // --- Rest chamber --- interactable in doors view
+    else if (content && chamber.type === 'rest') {
+      newZone = Object.assign({}, newZone, {
+        chambers: newZone.chambers.map(function(ch) {
+          if (ch.id === targetId) return Object.assign({}, ch, { restAvailable: true, restHealPercent: content.hpRecovery || 0.25, restDescription: content.description })
+          return ch
+        })
+      })
+      setZone(newZone)
+      setChamberContent(null)
+      setGamePhase('doors')
+    }
+    // --- Everything else --- ChamberView (trap, event, etc.)
+    else {
       setGamePhase('chamber')
     }
+  }
+
+  // --- Rest interaction ---
+  function handleRest() {
+    var chamber = zone.chambers[zone.playerPosition]
+    if (!chamber.restAvailable) return
+    var heal = Math.round(character.maxHp * (chamber.restHealPercent || 0.25))
+    var newHp = Math.min(playerHp + heal, character.maxHp)
+    setPlayerHp(newHp)
+    var newZone = Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { restAvailable: false, restUsed: true, restHealed: heal, cleared: true })
+        return ch
+      })
+    })
+    setZone(newZone)
+    setChambersCleared(chambersCleared + 1)
+  }
+
+  // --- Keystone press ---
+  function handlePressKeystone() {
+    var newZone = Object.assign({}, zone, { keystonePressed: true })
+    newZone.chambers = newZone.chambers.map(function(ch) {
+      if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
+      return ch
+    })
+    setZone(newZone)
+    setChambersCleared(chambersCleared + 1)
+  }
+
+  // --- Zone door ---
+  function handleOpenZoneDoor() {
+    if (!hasZoneKey) return
+    if (!floor || !floor.zones) return
+    // Move to next zone
+    var nextZoneIndex = (floor.currentZoneIndex + 1) % floor.zones.length
+    if (nextZoneIndex === floor.currentZoneIndex) return // only one zone
+    var nextZone = floor.zones[nextZoneIndex]
+    setFloor(Object.assign({}, floor, { currentZoneIndex: nextZoneIndex }))
+    setZone(nextZone)
+    setHasZoneKey(false)
+    setPreviousPosition(null)
+    setLootingCorpseId(null)
+    setLootingChestId(null)
+    setLootingNpcId(null)
+  }
+
+  // --- Stairwell descent --- triggers floor transition
+  function handleDescendStairwell() {
+    if (!zone.keystonePressed) return  // locked
+    // Check if boss is cleared (boss chamber must be cleared)
+    var bossCleared = zone.chambers.every(function(ch) {
+      return ch.type !== 'boss' || ch.cleared
+    })
+    if (!bossCleared) return  // boss not defeated
+
+    // Floor transition → safe room
+    setFloorsCompleted(function(prev) { return prev.concat([zone.floorId]) })
+    setGamePhase('floor_transition')
+  }
+
+  // --- Floor transition: move to next floor or victory ---
+  function handleFloorTransitionContinue() {
+    // Determine next floor
+    var floorOrder = ['grounds', 'underground']  // expand as floors are added
+    var currentIdx = floorOrder.indexOf(floor.floorId)
+    var nextFloorId = floorOrder[currentIdx + 1]
+
+    if (!nextFloorId || !FLOORS[nextFloorId]) {
+      // No more floors — victory!
+      writeRunLog('victory')
+      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length, floorsCompleted: floorsCompleted.length + 1 })
+      return
+    }
+
+    // Generate next floor
+    var nextFloor = generateFloor(nextFloorId)
+    setFloor(nextFloor)
+    setZone(nextFloor.zones[0])
+    setHasZoneKey(false)
+    setPreviousPosition(null)
+    setLootingCorpseId(null)
+    setLootingChestId(null)
+    setLootingNpcId(null)
+    setGamePhase('safe_room')
+  }
+
+  // --- Safe room: Montor's audience chamber ---
+  function handleSafeRoomContinue() {
+    setGamePhase('doors')
   }
 
   // --- Chamber interaction actions ---
@@ -323,8 +540,7 @@ function Game({ character, user, onEndRun }) {
       }
       setChamberContent(Object.assign({}, chamberContent, { helped: true }))
     } else if (action === 'descend') {
-      writeRunLog('victory')
-      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length })
+      handleDescendStairwell()
       return
     }
   }
@@ -376,7 +592,41 @@ function Game({ character, user, onEndRun }) {
   useEffect(function() {
     if (combatPhase !== 'enemyWindup' || !battle || gamePhase !== 'combat') return
     var currentId = getCurrentTurnId(battle)
-    var attackOut = resolveEnemyAttack(battle, currentId)
+
+    // Tick conditions on enemy's turn start
+    var tickResult = tickTurnStart(battle, currentId)
+    var tickedBattle = tickResult.newBattle
+    if (tickResult.damage > 0) {
+      addLog({ type: 'condition', text: tickResult.narrative, tier: 'glancing' })
+    }
+    if (tickResult.died) {
+      setBattle(tickedBattle)
+      var endCheck = checkBattleEnd(tickedBattle)
+      if (endCheck === 'victory') {
+        var xpGained = calculateXp(tickedBattle)
+        var newXp = totalXp + xpGained
+        setTotalXp(newXp)
+        checkLevelUp(newXp)
+        setCombatPhase('victory')
+        return
+      }
+      // Enemy died from conditions — skip their turn
+      var nextB = advanceTurn(tickedBattle)
+      setBattle(nextB)
+      var nextA = getActor(nextB, getCurrentTurnId(nextB))
+      setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      return
+    }
+    if (tickResult.skipped) {
+      addLog({ type: 'condition', text: tickResult.narrative, tier: 'miss' })
+      var nextB2 = advanceTurn(tickedBattle)
+      setBattle(nextB2)
+      var nextA2 = getActor(nextB2, getCurrentTurnId(nextB2))
+      setCombatPhase(nextA2 && nextA2.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      return
+    }
+
+    var attackOut = resolveEnemyAttack(tickedBattle, currentId)
     if (attackOut) {
       setEnemyAttackInfo({ attackOut: attackOut })
       setEnemyRollerKey(function(k) { return k + 1 })
@@ -395,7 +645,24 @@ function Game({ character, user, onEndRun }) {
     var attackOut = enemyAttackInfo.attackOut
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'enemy')
-    addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
+    if (r.blocked) {
+      addLog({ type: 'player', text: 'Shield block! Attack negated!', tier: 'crit' })
+    } else if (r.dodged) {
+      addLog({ type: 'player', text: 'Dodged! Attack evaded!', tier: 'crit' })
+    } else {
+      addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
+    }
+    if (r.reflectDamage) {
+      addLog({ type: 'player', text: 'Reflected ' + r.reflectDamage + ' damage back!' + (r.reflectKill ? ' It dies!' : ''), tier: 'hit' })
+    }
+    if (r.conditionBlocked) {
+      addLog({ type: 'player', text: r.conditionBlocked + ' blocked by immunity!', tier: 'hit' })
+    }
+
+    // Log condition applied
+    if (r.conditionApplied) {
+      addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
+    }
 
     var updatedBattle = attackOut.newBattle
     var pState = updatedBattle.players[user.uid]
@@ -429,6 +696,45 @@ function Game({ character, user, onEndRun }) {
   }
 
   // === PLAYER TURN ===
+  // Tick player conditions at turn start
+  var [playerConditionTicked, setPlayerConditionTicked] = useState(false)
+  useEffect(function() {
+    if (combatPhase !== 'playerTurn' || !battle || playerConditionTicked) return
+    var playerUid = user.uid
+    var player = battle.players[playerUid]
+    if (!player || !player.statusEffects || player.statusEffects.length === 0) {
+      setPlayerConditionTicked(true)
+      return
+    }
+
+    var tickResult = tickTurnStart(battle, playerUid)
+    if (tickResult.damage > 0 || tickResult.narrative) {
+      addLog({ type: 'condition', text: tickResult.narrative, tier: 'glancing' })
+    }
+    setBattle(tickResult.newBattle)
+    setPlayerHp(tickResult.newBattle.players[playerUid].currentHp)
+
+    if (tickResult.died) {
+      setPlayerHp(0)
+      setGamePhase('defeat')
+      return
+    }
+    if (tickResult.skipped) {
+      var nextB = advanceTurn(tickResult.newBattle)
+      setBattle(nextB)
+      var nextA = getActor(nextB, getCurrentTurnId(nextB))
+      setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      setPlayerConditionTicked(false)
+      return
+    }
+    setPlayerConditionTicked(true)
+  }, [combatPhase, battle, playerConditionTicked])
+
+  // Reset condition tick flag when combat phase changes away from playerTurn
+  useEffect(function() {
+    if (combatPhase !== 'playerTurn') setPlayerConditionTicked(false)
+  }, [combatPhase])
+
   // Auto-select target: if only one living enemy, select it automatically
   // Also validate existing selection — if selected target died, pick a live one
   useEffect(function() {
@@ -457,8 +763,34 @@ function Game({ character, user, onEndRun }) {
   var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn'
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
+  // Effective crit threshold — lowered by crit_bonus relics (Keen Edge Ring = 19+)
+  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus')
+
+  // Direct attack — click enemy card to attack without going through CombatRoller button
+  function handlePlayerAttackDirect(enemyId) {
+    if (pendingAttackResult) return
+    setSelectedTarget(enemyId)
+    var rollResult = d20Attack(strMod, critThreshold)
+    if (godModeRef.current) {
+      rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
+    }
+    var attackOut = resolvePlayerAttack(battle, user.uid, enemyId, rollResult)
+    if (attackOut && godModeRef.current) {
+      var target = attackOut.newBattle.enemies.find(function(e) { return e.id === enemyId })
+      if (target) {
+        var overkill = target.currentHp + target.maxHp
+        target.currentHp = 0
+        target.isDown = true
+        attackOut.result.damage = overkill
+        attackOut.result.enemyDefeated = true
+        if (attackOut.result.damageBreakdown) attackOut.result.damageBreakdown.final = overkill
+      }
+    }
+    if (attackOut) setPendingAttackResult(attackOut)
+  }
+
   function handlePlayerAttackRoll() {
-    var rollResult = d20Attack(strMod, 20)
+    var rollResult = d20Attack(strMod, critThreshold)
     if (godModeRef.current) {
       rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
     }
@@ -485,6 +817,18 @@ function Game({ character, user, onEndRun }) {
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'player')
     addLog({ type: 'player', text: logEntry.text, tier: logEntry.tier })
+    if (r.doubleStrike) {
+      addLog({ type: 'player', text: 'Double strike! ' + r.doubleStrikeDamage + ' bonus damage!', tier: 'crit' })
+    }
+    if (r.lifestealHeal) {
+      addLog({ type: 'player', text: 'Lifesteal: healed ' + r.lifestealHeal + ' HP.', tier: 'hit' })
+    }
+    if (r.rerolled) {
+      addLog({ type: 'player', text: 'Loaded Dice: rerolled a 1!', tier: 'hit' })
+    }
+    if (r.conditionApplied) {
+      addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
+    }
     setPendingAttackResult(null)
 
     // Track combat stats
@@ -496,7 +840,9 @@ function Game({ character, user, onEndRun }) {
     var endResult = checkBattleEnd(updatedBattle)
     if (endResult === 'victory') {
       var xpGained = calculateXp(updatedBattle)
-      setTotalXp(totalXp + xpGained)
+      var newXp = totalXp + xpGained
+      setTotalXp(newXp)
+      checkLevelUp(newXp)
       setBattle(updatedBattle)
       setCombatPhase('victory')
       var newZone = Object.assign({}, zone, {
@@ -708,6 +1054,9 @@ function Game({ character, user, onEndRun }) {
     if (item.type === 'weapon' && item.slot === 'weapon') {
       returnItem = newEquipped.weapon
       newEquipped.weapon = item
+    } else if (item.type === 'armour' && item.slot === 'offhand') {
+      returnItem = newEquipped.offhand
+      newEquipped.offhand = item
     } else if (item.type === 'armour' && item.slot === 'armour') {
       returnItem = newEquipped.armour
       newEquipped.armour = item
@@ -725,6 +1074,12 @@ function Game({ character, user, onEndRun }) {
     // Update character equipped (mutating the prop — Stage 1 ephemeral character)
     character.equipped = newEquipped
 
+    // Apply hp_bonus from newly equipped relic
+    if (item.passiveEffect === 'hp_bonus' && item.passiveValue) {
+      character.maxHp += item.passiveValue
+      setPlayerHp(function(hp) { return Math.min(hp + item.passiveValue, character.maxHp) })
+    }
+
     // Remove equipped item from inventory, add old item back
     setPlayerInventory(function(prev) {
       var next = prev.slice()
@@ -732,6 +1087,43 @@ function Game({ character, user, onEndRun }) {
       if (returnItem) next.push(returnItem)
       return next
     })
+  }
+
+  // === UNEQUIP ITEM (out of combat) ===
+  function handleUnequipWeapon() {
+    if (!character.equipped || !character.equipped.weapon) return
+    var item = character.equipped.weapon
+    character.equipped = Object.assign({}, character.equipped, { weapon: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipArmour() {
+    if (!character.equipped || !character.equipped.armour) return
+    var item = character.equipped.armour
+    character.equipped = Object.assign({}, character.equipped, { armour: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipOffhand() {
+    if (!character.equipped || !character.equipped.offhand) return
+    var item = character.equipped.offhand
+    character.equipped = Object.assign({}, character.equipped, { offhand: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipRelic(relicIndex) {
+    if (!character.equipped || !character.equipped.relics) return
+    var item = character.equipped.relics[relicIndex]
+    if (!item) return
+    // Remove hp_bonus when unequipping
+    if (item.passiveEffect === 'hp_bonus' && item.passiveValue) {
+      character.maxHp -= item.passiveValue
+      setPlayerHp(function(hp) { return Math.min(hp, character.maxHp) })
+    }
+    var newRelics = character.equipped.relics.slice()
+    newRelics.splice(relicIndex, 1)
+    character.equipped = Object.assign({}, character.equipped, { relics: newRelics })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
   }
 
   // === WRITE RUN LOG TO FIRESTORE ===
@@ -771,26 +1163,44 @@ function Game({ character, user, onEndRun }) {
   function handleCombatVictoryToDoors() {
     // Generate corpses with loot (gold + items array)
     var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
-    var lckStat = character.stats.lck || 10
+    var lckStat = (character.stats.lck || 10) + getPassiveTotal(character.equipped, 'lck_bonus')
     var corpses = battle.enemies.filter(function(e) { return e.isDown }).map(function(e) {
-      var loot = generateCombatLoot(encounterLevel, lckStat)
+      var currentFloorId = zone ? zone.floorId : 'grounds'
+      var loot = generateCombatLoot(encounterLevel, lckStat, currentFloorId)
       // Build items array — stronger enemies can drop multiple items
       var items = []
       if (loot.item) items.push(loot.item)
-      // Elite/boss: extra roll for a second item
+      // Elite: extra roll for a second item
       if (encounterLevel >= 2) {
-        var loot2 = generateCombatLoot(encounterLevel, lckStat)
+        var loot2 = generateCombatLoot(encounterLevel, lckStat, currentFloorId)
         if (loot2.item) items.push(loot2.item)
+      }
+      // Boss: guaranteed item + extra roll from chest table (best loot)
+      if (e.isBoss) {
+        var bossLoot = generateChestLoot(lckStat, currentFloorId)
+        if (bossLoot.item) items.push(bossLoot.item)
+        // If still no items, force one
+        if (items.length === 0) {
+          var forcedLoot = generateChestLoot(lckStat, currentFloorId)
+          if (forcedLoot.item) items.push(forcedLoot.item)
+        }
       }
       return {
         id: e.id, name: e.name, archetypeKey: e.archetypeKey, tierKey: e.tierKey,
-        gold: Math.max(1, loot.gold + Math.round(e.xp * 0.2)),
+        gold: Math.max(1, loot.gold + Math.round(e.xp * (e.isBoss ? 0.5 : 0.2))),
         items: items,
         goldTaken: false,
         itemsTaken: [],    // indices of items already taken
         opened: false,     // has the player looked inside?
       }
     })
+
+    // Mini-boss drops zone key
+    if (chamberContent && (chamberContent.dropsZoneKey || chamberContent.isBoss)) {
+      if (floor && floor.zones && floor.zones.length > 1 && !hasZoneKey) {
+        setHasZoneKey(true)
+      }
+    }
 
     // Store corpses on the chamber in zone state
     var newZone = Object.assign({}, zone, {
@@ -977,20 +1387,55 @@ function Game({ character, user, onEndRun }) {
     )
   }
 
+  // --- Floor transition ---
+  if (gamePhase === 'floor_transition') {
+    return (
+      <div onClick={handleFloorTransitionContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
+        <p className="text-ink text-lg italic max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+          {floor ? floor.transitionText : 'You descend deeper...'}
+        </p>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
+      </div>
+    )
+  }
+
+  // --- Safe room (Montor's audience chamber) ---
+  if (gamePhase === 'safe_room') {
+    return (
+      <div onClick={handleSafeRoomContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-8 bg-raised cursor-pointer">
+        <h2 className="font-display text-2xl text-gold">{floor ? floor.floorName : 'Unknown Depth'}</h2>
+        <div className="max-w-sm">
+          <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
+          </p>
+          <p className="text-ink-faint text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            "{floor ? floor.montorLine : 'I see you.'}"
+          </p>
+        </div>
+        <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs text-sm text-ink-dim">
+          <p>HP: <span className="text-ink">{playerHp}/{character.maxHp}</span></p>
+          <p>Gold: <span className="text-gold">{playerGold}</span></p>
+          <p>Items: <span className="text-emerald-400">{playerInventory.length}</span></p>
+          <p>Chambers cleared: <span className="text-ink">{chambersCleared}</span></p>
+          <p>XP: <span className="text-ink">{totalXp}</span></p>
+        </div>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
+      </div>
+    )
+  }
+
   // --- Defeat ---
   if (gamePhase === 'defeat') {
     return (
-      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+      <div onClick={function() { writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
+        className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
         <h1 className="font-display text-4xl text-red-400">Defeated</h1>
         <p className="text-ink text-lg italic">Darkness swallows you whole.</p>
         <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
           <p className="text-ink text-sm">Chambers cleared: {chambersCleared}</p>
           <p className="text-ink text-sm mt-1">XP earned: <span className="text-gold">{Math.round(totalXp * 0.5)}</span></p>
         </div>
-        <button onClick={function() { writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
-          className="py-3 px-8 rounded-lg bg-surface border border-border text-ink font-sans text-base">
-          Return to Tavern
-        </button>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to return</p>
       </div>
     )
   }
@@ -1038,9 +1483,10 @@ function Game({ character, user, onEndRun }) {
       <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">
-            {currentChamber.label}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
+            <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{currentChamber.label}</span>
+          </div>
           <div className="flex items-center gap-3">
             {playerInventory.length > 0 && (
               <button onClick={function() { setShowInventoryPanel(!showInventoryPanel) }}
@@ -1053,42 +1499,171 @@ function Game({ character, user, onEndRun }) {
           </div>
         </div>
 
-        {/* Inventory panel (out of combat) */}
-        {showInventoryPanel && (
-          <div className="mb-2 p-3 rounded-lg bg-surface border border-border max-h-48 overflow-y-auto">
-            <div className="flex flex-col gap-1">
-              {playerInventory.map(function(item, idx) {
-                var isEquippable = item.type === 'weapon' || item.type === 'armour' || item.type === 'relic'
-                var isConsumable = item.type === 'consumable'
-                return (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans">
+        {/* Inventory panel (out of combat) — tabbed by category */}
+        {showInventoryPanel && (function() {
+          var tabs = [
+            { id: 'weapons', label: 'Weapons', types: ['weapon'] },
+            { id: 'armour',  label: 'Armour',  types: ['armour', 'relic'] },
+            { id: 'items',   label: 'Items',   types: ['consumable'] },
+          ]
+          var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
+          var filteredItems = []
+          for (var fi = 0; fi < playerInventory.length; fi++) {
+            if (activeTab.types.indexOf(playerInventory[fi].type) !== -1) {
+              filteredItems.push({ item: playerInventory[fi], idx: fi })
+            }
+          }
+
+          // Count items per tab for badges
+          var tabCounts = {}
+          for (var ci = 0; ci < tabs.length; ci++) {
+            tabCounts[tabs[ci].id] = 0
+            for (var pi = 0; pi < playerInventory.length; pi++) {
+              if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabs[ci].id]++
+            }
+          }
+
+          return (
+            <div className="mb-2 rounded-lg bg-surface border border-border overflow-hidden">
+              {/* Tab bar */}
+              <div className="flex border-b border-border">
+                {tabs.map(function(tab) {
+                  var isActive = tab.id === activeTab.id
+                  return (
+                    <button key={tab.id}
+                      onClick={function() { setInventoryTab(tab.id) }}
+                      className={'flex-1 py-2 text-xs font-sans transition-colors ' +
+                        (isActive ? 'text-gold border-b-2 border-gold bg-raised' : 'text-ink-dim hover:text-ink')}>
+                      {tab.label}
+                      {tabCounts[tab.id] > 0 && (
+                        <span className="ml-1 text-[10px] opacity-60">({tabCounts[tab.id]})</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Currently equipped (weapons/armour tabs) */}
+              {activeTab.id === 'weapons' && character.equipped && character.equipped.weapon && (
+                <div className="mx-3 mt-2 p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                  <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-ink">{item.name}</span>
-                      <span className="text-ink-faint text-[10px]">
-                        {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                         item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                         item.type === 'relic' ? item.description :
-                         item.description || ''}
-                      </span>
+                      <span className="text-[10px] text-gold uppercase tracking-wide">Equipped</span>
+                      <span className="text-ink">{character.equipped.weapon.name}</span>
+                      <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg</span>
                     </div>
-                    {isEquippable && gamePhase === 'doors' && (
-                      <button onClick={function() { handleEquipItem(idx) }}
-                        className="text-xs text-gold border border-gold/40 px-2 py-1 rounded hover:border-gold transition-colors">
-                        Equip
-                      </button>
-                    )}
-                    {isConsumable && gamePhase === 'doors' && (
-                      <button onClick={function() { handleUseItem(idx) }}
-                        className="text-xs text-emerald-400 border border-emerald-500/40 px-2 py-1 rounded hover:border-emerald-400 transition-colors">
-                        Use
+                    {gamePhase === 'doors' && (
+                      <button onClick={handleUnequipWeapon}
+                        className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                        Unequip
                       </button>
                     )}
                   </div>
-                )
-              })}
+                </div>
+              )}
+              {activeTab.id === 'armour' && (
+                <div className="mx-3 mt-2 flex flex-col gap-1">
+                  {character.equipped && character.equipped.armour && (
+                    <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-gold uppercase tracking-wide">Equipped Armour</span>
+                          <span className="text-ink">{character.equipped.armour.name}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus} DEF</span>
+                        </div>
+                        {gamePhase === 'doors' && (
+                          <button onClick={handleUnequipArmour}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.offhand && (
+                    <div className="p-2 rounded bg-blue-500/10 border border-blue-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-blue-400 uppercase tracking-wide">Offhand</span>
+                          <span className="text-ink">{character.equipped.offhand.name}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.offhand.defBonus} DEF, {Math.round((character.equipped.offhand.passiveValue || 0) * 100)}% block</span>
+                        </div>
+                        {gamePhase === 'doors' && (
+                          <button onClick={handleUnequipOffhand}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.relics && character.equipped.relics.length > 0 && (
+                    <div className="p-2 rounded bg-purple-500/10 border border-purple-500/20 text-sm font-sans">
+                      <span className="text-[10px] text-purple-400 uppercase tracking-wide">Relics ({character.equipped.relics.length}/3)</span>
+                      {character.equipped.relics.map(function(relic, ri) {
+                        return (
+                          <div key={ri} className="flex items-center justify-between mt-1">
+                            <div className="flex flex-col">
+                              <span className="text-ink text-xs">{relic.name}</span>
+                              <span className="text-ink-faint text-[10px]">{relic.description}</span>
+                            </div>
+                            {gamePhase === 'doors' && (
+                              <button onClick={function() { handleUnequipRelic(ri) }}
+                                className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
+                                Unequip
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Bag contents for active tab */}
+              <div className="p-3 max-h-40 overflow-y-auto">
+                {filteredItems.length === 0 && (
+                  <p className="text-ink-faint text-xs text-center py-2">Nothing here.</p>
+                )}
+                <div className="flex flex-col gap-1">
+                  {filteredItems.map(function(entry) {
+                    var item = entry.item
+                    var idx = entry.idx
+                    var isEquippable = item.type === 'weapon' || item.type === 'armour' || item.type === 'relic'
+                    var isConsumable = item.type === 'consumable'
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans">
+                        <div className="flex flex-col">
+                          <span className="text-ink">{item.name}</span>
+                          <span className="text-ink-faint text-[10px]">
+                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' + (item.weaponType ? ' (' + item.weaponType + ')' : '') :
+                             item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
+                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                             item.type === 'relic' ? item.description :
+                             item.description || ''}
+                          </span>
+                        </div>
+                        {isEquippable && gamePhase === 'doors' && (
+                          <button onClick={function() { handleEquipItem(idx) }}
+                            className="text-xs text-gold border border-gold/40 px-2 py-1 rounded hover:border-gold transition-colors">
+                            Equip
+                          </button>
+                        )}
+                        {isConsumable && gamePhase === 'doors' && (
+                          <button onClick={function() { handleUseItem(idx) }}
+                            className="text-xs text-emerald-400 border border-emerald-500/40 px-2 py-1 rounded hover:border-emerald-400 transition-colors">
+                            Use
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Room layout — doors on edges, content in centre */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -1112,6 +1687,90 @@ function Game({ character, user, onEndRun }) {
                   style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
                   "{montorWhisper}"
                 </p>
+              )}
+
+              {/* Keystone pedestal */}
+              {currentChamber.isKeystone && !currentChamber.cleared && (
+                <div className="flex flex-col items-center gap-3">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  {zone.keystonePressed ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-gold text-sm font-sans">The keystone is pressed. Something shifts deep below.</p>
+                      <button onClick={function() { handlePressKeystone() }}
+                        className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm">
+                        Continue
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-ink text-sm italic">A stone pedestal. A carved slot awaits a heavy hand.</p>
+                      <button onClick={function() { handlePressKeystone() }}
+                        className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base animate-pulse">
+                        Press the Keystone
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Zone door (locked/unlocked) */}
+              {currentChamber.isZoneDoor && !currentChamber.cleared && (
+                <div className="flex flex-col items-center gap-3">
+                  <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-ink text-sm italic">A heavy door. {hasZoneKey ? 'Your key fits the lock.' : 'Locked. You need a key.'}</p>
+                  {hasZoneKey ? (
+                    <button onClick={handleOpenZoneDoor}
+                      className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
+                      Open Door
+                    </button>
+                  ) : (
+                    <p className="text-red-400 text-xs font-sans">Find the key to proceed.</p>
+                  )}
+                </div>
+              )}
+
+              {/* Stairwell descent (locked until keystone + boss) */}
+              {currentChamber.type === 'stairwell_descent' && !currentChamber.cleared && (function() {
+                var bossCleared = zone.chambers.every(function(ch) { return ch.type !== 'boss' || ch.cleared })
+                var canDescend = zone.keystonePressed && bossCleared
+                return (
+                  <div className="flex flex-col items-center gap-3">
+                    <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
+                    {canDescend ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-gold text-sm italic">The way down is open.</p>
+                        <button onClick={handleDescendStairwell}
+                          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-lg">
+                          Descend
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-ink text-sm italic">Stone steps spiral downward. The way is sealed.</p>
+                        {!zone.keystonePressed && <p className="text-red-400 text-xs font-sans">The keystone has not been pressed.</p>}
+                        {zone.keystonePressed && !bossCleared && <p className="text-red-400 text-xs font-sans">The guardian still blocks the way.</p>}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
+              {/* Rest point */}
+              {currentChamber.restAvailable && !currentChamber.restUsed && (
+                <div className="flex flex-col items-center gap-3">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-ink-dim text-xs italic text-center">{currentChamber.restDescription || 'A sheltered space. The air is still.'}</p>
+                  <button onClick={handleRest}
+                    className="py-3 px-8 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 font-sans text-base">
+                    Rest (+{Math.round((currentChamber.restHealPercent || 0.25) * 100)}% HP)
+                  </button>
+                </div>
+              )}
+              {currentChamber.restUsed && (
+                <div className="flex flex-col items-center gap-2">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-green-400 text-sm font-sans">Rested. Healed {currentChamber.restHealed} HP.</p>
+                </div>
               )}
 
               {/* NPC in room (merchant/quest) */}
@@ -1502,7 +2161,7 @@ function Game({ character, user, onEndRun }) {
       : 'Blocked!'
 
     return (
-      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-5 bg-raised">
+      <div onClick={handleFleeResultContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-5 bg-raised cursor-pointer">
         <p className={'font-display text-2xl ' + fleeColour}>{fleeTitle}</p>
         <p className="text-ink text-base italic max-w-xs">{fleeOutcome.narrative}</p>
 
@@ -1517,10 +2176,7 @@ function Game({ character, user, onEndRun }) {
           </div>
         )}
 
-        <button onClick={handleFleeResultContinue}
-          className="py-3 px-8 rounded-lg bg-surface border border-border-hl text-ink font-sans text-base">
-          {fleeOutcome.fled ? 'Continue' : 'Back to fight'}
-        </button>
+        <p className="text-ink-faint text-xs font-sans">{fleeOutcome.fled ? 'Tap anywhere to continue' : 'Tap anywhere to return to fight'}</p>
 
         {renderPartyBar()}
       </div>
@@ -1532,17 +2188,36 @@ function Game({ character, user, onEndRun }) {
     // Combat victory — show doors after
     if (combatPhase === 'victory') {
       return (
-        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+        <div onClick={pendingLevelUp ? undefined : handleCombatVictoryToDoors}
+          className={'h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised' + (pendingLevelUp ? '' : ' cursor-pointer')}>
           <h1 className="font-display text-4xl text-gold">Victory</h1>
           <p className="text-ink text-base italic">The chamber falls silent.</p>
           <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
-            <p className="text-ink text-sm">XP earned: <span className="text-gold font-display text-xl">{totalXp}</span></p>
-            <p className="text-ink-dim text-sm mt-1">HP remaining: {playerHp}/{character.maxHp}</p>
+            <p className="text-ink text-sm">XP: <span className="text-gold font-display text-xl">{totalXp}</span></p>
+            <p className="text-ink-dim text-sm mt-1">HP: {playerHp}/{character.maxHp}</p>
           </div>
-          <button onClick={handleCombatVictoryToDoors}
-            className="py-3 px-8 rounded-lg bg-gold text-bg font-sans text-base font-semibold">
-            Continue
-          </button>
+
+          {/* Level up! */}
+          {pendingLevelUp && (
+            <div className="w-full max-w-xs" onClick={function(e) { e.stopPropagation() }}>
+              <p className="text-gold font-display text-xl mb-2 text-center">Level Up!</p>
+              {pendingLevelUp.hpGain > 0 && (
+                <p className="text-green-400 text-sm mb-2 text-center">+{pendingLevelUp.hpGain} max HP</p>
+              )}
+              {pendingLevelUp.statPick ? (
+                <StatPicker stats={character.stats} onPick={handleStatPick} mode="levelup" />
+              ) : (
+                <button onClick={handleLevelUpDismiss}
+                  className="w-full py-2 px-6 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-sm">
+                  Continue
+                </button>
+              )}
+            </div>
+          )}
+
+          {!pendingLevelUp && (
+            <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
+          )}
         </div>
       )
     }
@@ -1554,7 +2229,10 @@ function Game({ character, user, onEndRun }) {
       <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-ink-dim text-xs uppercase tracking-widest">{combatChamber.label} -- Round {battle.round}</span>
+          <div className="flex flex-col items-start">
+            <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
+            <span className="text-ink-dim text-xs uppercase tracking-widest">{combatChamber.label} -- Round {battle.round}</span>
+          </div>
         </div>
 
         {/* Enemies */}
@@ -1565,7 +2243,15 @@ function Game({ character, user, onEndRun }) {
             var isActing = activeEnemyId === enemy.id
             return (
               <button key={enemy.id}
-                onClick={function() { if (!isDead && isPlayerTurn) handleSelectTarget(enemy.id) }}
+                onClick={function() {
+                  if (isDead || !isPlayerTurn || pendingAttackResult) return
+                  if (isTarget) {
+                    // Already selected — clicking again triggers attack roll directly
+                    handlePlayerAttackDirect(enemy.id)
+                  } else {
+                    handleSelectTarget(enemy.id)
+                  }
+                }}
                 disabled={isDead || !isPlayerTurn}
                 className={
                   'flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ' +
@@ -1587,6 +2273,13 @@ function Game({ character, user, onEndRun }) {
                   <span>DEF {enemy.stats.def}</span>
                   <span>AGI {enemy.stats.agi}</span>
                 </div>
+                {enemy.statusEffects && enemy.statusEffects.length > 0 && (
+                  <div className="flex gap-1 flex-wrap mt-0.5">
+                    {enemy.statusEffects.map(function(c, ci) {
+                      return <span key={ci} className="text-[8px] font-sans px-1 rounded bg-red-500/20 text-red-300">{c.name} ({c.turnsRemaining || '~'})</span>
+                    })}
+                  </div>
+                )}
               </button>
             )
           })}
@@ -1681,8 +2374,10 @@ function Game({ character, user, onEndRun }) {
                   damageMod={strMod}
                   colour="gold"
                   buttonLabel={'Attack ' + targetEnemy.name}
-                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage : null}
+                  resolvedDamage={pendingAttackResult ? pendingAttackResult.result.damage - (pendingAttackResult.result.doubleStrikeDamage || 0) : null}
                   damageBreakdown={pendingAttackResult ? pendingAttackResult.result.damageBreakdown : null}
+                  doubleStrike={pendingAttackResult ? pendingAttackResult.result.doubleStrike : false}
+                  doubleStrikeDamage={pendingAttackResult ? pendingAttackResult.result.doubleStrikeDamage : 0}
                   attackerName={character.name}
                   targetName={targetEnemy.name}
                 />
@@ -1691,20 +2386,32 @@ function Game({ character, user, onEndRun }) {
           })()}
 
           {/* Use Item / Flee — always visible on player turn unless mid-roll or inventory open */}
-          {isPlayerTurn && !showInventoryPanel && !pendingAttackResult && (
-            <div className="flex gap-3 mt-1">
-              {playerInventory.some(function(it) { return it.type === 'consumable' }) && (
-                <button onClick={function() { setShowInventoryPanel(true) }}
-                  className="py-2 px-5 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-sm hover:border-emerald-400 transition-colors">
-                  Use Item
-                </button>
-              )}
-              <button onClick={handleFlee}
-                className="py-2 px-5 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
-                Flee
-              </button>
-            </div>
-          )}
+          {isPlayerTurn && !showInventoryPanel && !pendingAttackResult && (function() {
+            var playerEffects = (battle && battle.players[user.uid]) ? battle.players[user.uid].statusEffects : []
+            var fleeBlocked = isFleeBlocked(playerEffects)
+            var itemsBlocked = areItemsBlocked(playerEffects)
+            return (
+              <div className="flex gap-3 mt-1">
+                {playerInventory.some(function(it) { return it.type === 'consumable' }) && !itemsBlocked && (
+                  <button onClick={function() { setShowInventoryPanel(true) }}
+                    className="py-2 px-5 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-sm hover:border-emerald-400 transition-colors">
+                    Use Item
+                  </button>
+                )}
+                {itemsBlocked && (
+                  <span className="py-2 px-5 text-ink-faint font-sans text-sm italic">Items blocked</span>
+                )}
+                {!fleeBlocked ? (
+                  <button onClick={handleFlee}
+                    className="py-2 px-5 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
+                    Flee
+                  </button>
+                ) : (
+                  <span className="py-2 px-5 text-red-400 font-sans text-sm italic">Can't flee</span>
+                )}
+              </div>
+            )
+          })()}
         </div>
 
         {/* Party bar */}
@@ -1730,6 +2437,13 @@ function Game({ character, user, onEndRun }) {
                 <span className="text-[10px] font-sans text-ink-dim">
                   STR {character.stats.str} DEF {character.stats.def} AGI {character.stats.agi}
                 </span>
+                {battle && battle.players[user.uid] && battle.players[user.uid].statusEffects.length > 0 && (
+                  <div className="flex gap-1">
+                    {battle.players[user.uid].statusEffects.map(function(c, ci) {
+                      return <span key={ci} className="text-[8px] font-sans px-1 rounded bg-amber-500/20 text-amber-300">{c.name} ({c.turnsRemaining || '~'})</span>
+                    })}
+                  </div>
+                )}
               </div>
               <span className="text-ink text-xs font-sans shrink-0">{playerHp}/{character.maxHp}</span>
             </div>

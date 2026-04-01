@@ -41,16 +41,17 @@ The atomic unit. 16 per zone always. Types drawn from the zone's template pool, 
 
 > Zone counts marked TBD — to be decided by designer. Examples given as starting point only.
 
-| Floor | Name | Zones (examples) | Notes |
-|---|---|---|---|
-| 0 | **The Grounds** | Montor's Garden | Above ground. One zone. Entry point. |
-| -1 | **The Underground** | The Great Hall, The Kitchen | Two zones. Introductory underground floors. |
-| -2 | **The Underbelly** | The Trash Level, The Sewers (TBD) | Filth and gas. Zone count TBD. |
-| -3 | **The Quarters** | The Boudoir, The Bathing House | Sleep and water mechanics. Zone count TBD. |
-| -4 | **The Works** | The Boiler Room, The Furnace (TBD) | Heat mechanics. Zone count TBD. |
-| -5 | **The Deep** | The Caverns, The Fissures (TBD) | Darkness mechanics. Zone count TBD. |
-| -6 | **The Veins** | The Air Vents | Tight traversal. Die Hard / Alien flavour. |
-| -7 | **Montor's Domain** | Montor's Zone | Mood-dependent. Changes run to run. |
+| Floor | Name | Theme (as home) | Gift | Enemy Tiers | Zones |
+|---|---|---|---|---|---|
+| 0 | **The Grounds** | Front garden | **Petal** (nature/poison) | Dust | Montor's Garden |
+| -1 | **The Underground** | Reception rooms | **Stone** (earth/cold) | Dust + Slate | Great Hall, Kitchen |
+| -2 | **The Underbelly** | Sewers, waste | **Bile** (decay/acid) | Slate + Iron | Trash Level, Sewers |
+| -3 | **The Quarters** | Private rooms | **Blood** (flesh/life) | Iron + Crimson | Boudoir, Bathing House |
+| -4 | **The Works** | Forge, workshop | **Ember** (fire/metal) | Crimson | Boiler Room, Furnace |
+| -5 | **The Deep** | Caves, secrets | **Void Shard** (chaos/shadow) | Crimson + Void | Caverns, Fissures |
+| -6 | **Montor's Domain** | Throne room | None — Montor himself | Void | Montor's Zone |
+
+> Full Gift system detailed in `10_Montors_Gifts.md`
 
 ---
 

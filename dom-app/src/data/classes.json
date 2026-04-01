@@ -1,0 +1,45 @@
+{
+  "classes": {
+    "knight": {
+      "name": "Knight",
+      "baseHp": 30,
+      "hpPerLevel": 8,
+      "autoSkills": { "str": 1, "def": 1 },
+      "freePointsPerLevel": 2,
+      "playstyle": "Tanky frontliner"
+    }
+  },
+  "skills": [
+    { "id": "str", "name": "Strength",   "abbrev": "STR", "group": "combat" },
+    { "id": "agi", "name": "Agility",    "abbrev": "AGI", "group": "combat" },
+    { "id": "def", "name": "Defence",    "abbrev": "DEF", "group": "combat" },
+    { "id": "end", "name": "Endurance",  "abbrev": "END", "group": "combat" },
+    { "id": "int", "name": "Intellect",  "abbrev": "INT", "group": "mental" },
+    { "id": "wis", "name": "Wisdom",     "abbrev": "WIS", "group": "mental" },
+    { "id": "per", "name": "Perception", "abbrev": "PER", "group": "mental" },
+    { "id": "lck", "name": "Luck",       "abbrev": "LCK", "group": "fortune" },
+    { "id": "cha", "name": "Charisma",   "abbrev": "CHA", "group": "fortune" },
+    { "id": "vit", "name": "Vitality",   "abbrev": "VIT", "group": "body" },
+    { "id": "res", "name": "Resilience", "abbrev": "RES", "group": "body" },
+    { "id": "sth", "name": "Stealth",    "abbrev": "STH", "group": "specialist" },
+    { "id": "cun", "name": "Cunning",    "abbrev": "CUN", "group": "specialist" },
+    { "id": "wil", "name": "Willpower",  "abbrev": "WIL", "group": "specialist" }
+  ],
+  "statPointsTotal": 70,
+  "startingKnight": {
+    "baseStats": {
+      "str": 8, "def": 8, "agi": 8, "int": 6, "lck": 6,
+      "per": 6, "end": 6, "wis": 6, "cha": 6,
+      "vit": 4, "res": 4, "sth": 4, "cun": 4, "wil": 4
+    },
+    "freeStatPoints": 10,
+    "allocatableStats": ["str", "def", "agi", "int", "lck", "per", "end", "wis", "cha"],
+    "maxHp": 45,
+    "startingGold": 50,
+    "starterShopItems": [
+      "dagger_common", "shortsword_common", "longsword_common", "mace_common",
+      "leather_common", "chainmail_common", "wooden_shield",
+      "health_potion", "health_potion", "smoke_bomb", "rage_draught"
+    ]
+  }
+}

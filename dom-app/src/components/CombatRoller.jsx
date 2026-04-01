@@ -28,11 +28,15 @@ function getDamageFontSize(dmg) {
   return '1.8rem'
 }
 
-function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage, damageBreakdown, attackerName, targetName }) {
+function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage, damageBreakdown, doubleStrike, doubleStrikeDamage, attackerName, targetName }) {
   var resolvedDamageRef = useRef(resolvedDamage)
   resolvedDamageRef.current = resolvedDamage
   var breakdownRef = useRef(damageBreakdown)
   breakdownRef.current = damageBreakdown
+  var doubleStrikeRef = useRef(doubleStrike)
+  doubleStrikeRef.current = doubleStrike
+  var doubleStrikeDamageRef = useRef(doubleStrikeDamage)
+  doubleStrikeDamageRef.current = doubleStrikeDamage
 
   var accentBorder = colour === 'red' ? 'border-red-400' : 'border-gold'
   var accentBg = colour === 'red' ? 'bg-red-400/10' : 'bg-gold-glow'
@@ -47,6 +51,7 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
   var [narrative, setNarrative] = useState('')
   var [finalDamage, setFinalDamage] = useState(null)
   var [finalTier, setFinalTier] = useState(null)
+  var [showDoubleStrike, setShowDoubleStrike] = useState(false)
 
   var who = attackerName || 'Attacker'
   var target = targetName || 'target'
@@ -133,7 +138,17 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
                 setNarrative(sentence)
                 setFinalDamage(dmg)
                 setFinalTier(result.tierName)
-                setPhase('damageResult')
+                setShowDoubleStrike(false)
+
+                // Show double strike after a beat
+                if (doubleStrikeRef.current && doubleStrikeDamageRef.current > 0) {
+                  setPhase('damageResult')
+                  setTimeout(function() {
+                    setShowDoubleStrike(true)
+                  }, 600)
+                } else {
+                  setPhase('damageResult')
+                }
               }
             }, 60)
           }, 800)
@@ -142,7 +157,8 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
     }, 60)
   }
 
-  var showContinue = (phase === 'attackResult' && !isHit) || phase === 'damageResult'
+  var waitingForDoubleStrike = phase === 'damageResult' && doubleStrikeRef.current && !showDoubleStrike
+  var showContinue = ((phase === 'attackResult' && !isHit) || phase === 'damageResult') && !waitingForDoubleStrike
 
   function getAttackDieClass() {
     if (phase === 'attackRolling') return accentBorder + ' ' + accentBg + ' ' + accentText + ' animate-pulse scale-110'
@@ -154,7 +170,7 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-3" onClick={showContinue ? function() { if (onComplete) onComplete(attackResult, 0) } : undefined} style={showContinue ? { cursor: 'pointer' } : undefined}>
       {/* Dice row */}
       <div className="flex items-center justify-center gap-4">
         <div className="flex flex-col items-center gap-1">
@@ -207,6 +223,16 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
         </div>
       )}
 
+      {/* Double strike flash */}
+      {showDoubleStrike && doubleStrikeDamageRef.current > 0 && (
+        <div className="text-center animate-bounce">
+          <p className="text-emerald-400 font-display text-xs uppercase tracking-widest">Double Strike!</p>
+          <p className="font-display text-emerald-400" style={{ fontSize: getDamageFontSize(doubleStrikeDamageRef.current), lineHeight: 1.1 }}>
+            +{doubleStrikeDamageRef.current}
+          </p>
+        </div>
+      )}
+
       {/* Roll button */}
       {phase === 'idle' && !autoRoll && (
         <button onClick={handleRoll}
@@ -221,10 +247,7 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
       )}
 
       {showContinue && (
-        <button onClick={function() { if (onComplete) onComplete(attackResult, 0) }}
-          className="py-2 px-6 rounded-lg bg-surface border border-border-hl text-ink font-sans text-sm hover:bg-raised transition-colors">
-          Continue
-        </button>
+        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
       )}
     </div>
   )
