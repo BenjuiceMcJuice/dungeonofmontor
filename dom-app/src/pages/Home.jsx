@@ -7,6 +7,8 @@ function Home({ onSignInWithGoogle, onSignInWithEmail, onSignUpWithEmail, error 
 
   function handleSubmit(e) {
     e.preventDefault()
+    if (!email || !email.trim()) return
+    if (!password || password.length < 6) return
     if (isSignUp) {
       onSignUpWithEmail(email, password)
     } else {

@@ -18,7 +18,12 @@ function useAuth() {
   function signInWithGoogle() {
     setError(null)
     return signInWithPopup(auth, googleProvider).catch(function(err) {
-      setError(err.message)
+      var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches
+      if (isStandalone && (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-browser')) {
+        setError('Google sign-in needs Safari. Tap ⋯ → Open in Safari, or use email login.')
+      } else {
+        setError(err.message || 'Sign in failed')
+      }
     })
   }
 
