@@ -336,7 +336,10 @@ for (var si = 0; si < spriteKeys.length; si++) {
     var canvas = document.createElement('canvas')
     drawSprite(canvas, sprite, tierKey, 4)
     card.appendChild(canvas)
-    card.innerHTML += '<div class="name">' + tier.name + '</div>'
+    var label = document.createElement('div')
+    label.className = 'name'
+    label.textContent = tier.name
+    card.appendChild(label)
     row.appendChild(card)
   }
 
