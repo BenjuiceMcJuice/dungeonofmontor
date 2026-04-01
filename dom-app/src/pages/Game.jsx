@@ -287,8 +287,8 @@ function Game({ character, user, onEndRun }) {
 
     var chamber = newZone.chambers[targetId]
 
-    // If already cleared, just show doors again (backtracking)
-    if (chamber.cleared) {
+    // If already cleared or has corpses (fought), just show doors (backtracking)
+    if (chamber.cleared || chamber.corpses) {
       setGamePhase('doors')
       return
     }
@@ -1248,10 +1248,10 @@ function Game({ character, user, onEndRun }) {
       }
     }
 
-    // Store corpses on the chamber in zone state
+    // Store corpses on the chamber in zone state + ensure cleared
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
-        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { corpses: corpses })
+        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { corpses: corpses, cleared: true })
         return ch
       })
     })
