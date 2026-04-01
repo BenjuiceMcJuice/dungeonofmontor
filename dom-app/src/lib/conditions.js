@@ -1,108 +1,11 @@
 // Conditions engine — apply, tick, remove, check
-// Conditions are temporary effects on players and enemies during combat
-// One per slot (body/mind) — new condition in same slot replaces old
-// See docs/specs/09_Firestore_Data_Model.md §14a for full schema
+// Data loaded from JSON — see src/data/conditions.json for definitions
 
 import { roll } from './dice.js'
 import { getModifier } from './classes.js'
+import conditionData from '../data/conditions.json'
 
-// ============================================================
-// CONDITION CATALOGUE
-// ============================================================
-
-var CONDITIONS = {
-  // --- BODY ---
-  BLEED: {
-    id: 'BLEED', slot: 'body', name: 'Bleeding',
-    turns: null, // lasts until cured or combat ends
-    damagePerTurn: 1, // starts at 1, stacks add +1 each
-    stackable: true, maxStacks: 5,
-    description: 'Bleeding. Stacks — each hit adds +1 damage/turn.',
-  },
-  POISON: {
-    id: 'POISON', slot: 'body', name: 'Poisoned',
-    turns: 3, damagePerTurn: 2,
-    statDrain: true, // each tick drains a different stat: STR → AGI → DEF
-    statDrainValue: -1,
-    description: 'Poisoned. 2 damage/turn + drains a stat each turn.',
-  },
-  BURN: {
-    id: 'BURN', slot: 'body', name: 'Burning',
-    turns: 1, damagePerTurn: 0,
-    burstDamage: 5, // one big hit next turn
-    aoe: true, // spreads to adjacent enemies/allies
-    aoeDamage: 3,
-    description: 'On fire. 5 burst damage next turn. Spreads to adjacent.',
-  },
-  FROST: {
-    id: 'FROST', slot: 'body', name: 'Frozen',
-    turns: 2,
-    statModifier: { stat: 'agi', value: -3 },
-    description: 'Sluggish. -3 AGI for 2 turns.',
-  },
-  NAUSEA: {
-    id: 'NAUSEA', slot: 'body', name: 'Nauseous',
-    turns: 2, skipChance: 0.3,
-    description: 'Retching. 30% chance to skip action.',
-  },
-  SLUGGISH: {
-    id: 'SLUGGISH', slot: 'body', name: 'Sluggish',
-    turns: 2,
-    statModifier: { stat: 'agi', value: -5 },
-    skipFleeChance: 0.5,
-    description: 'Heavy. -5 AGI, 50% chance can\'t flee.',
-  },
-
-  // --- MIND ---
-  FEAR: {
-    id: 'FEAR', slot: 'mind', name: 'Afraid',
-    turns: 2,
-    allRollsMod: -2,
-    fleeIfLowHp: true, // flee if HP < 50%
-    description: 'Terrified. -2 all rolls. Flee if HP low.',
-  },
-  FRENZY: {
-    id: 'FRENZY', slot: 'mind', name: 'Frenzied',
-    turns: 3,
-    statModifier: { stat: 'str', value: 3 },
-    defPenalty: -2,
-    attacksRandom: true,
-    description: '+3 STR, -2 DEF. Attacks random target.',
-  },
-  CHARM: {
-    id: 'CHARM', slot: 'mind', name: 'Charmed',
-    turns: 2, skipChance: 0.5,
-    description: 'Enthralled. 50% chance to skip action.',
-  },
-  DAZE: {
-    id: 'DAZE', slot: 'mind', name: 'Dazed',
-    turns: 1, forceTier: 3,
-    description: 'Stunned. Next attack is a glancing blow.',
-  },
-  BORED: {
-    id: 'BORED', slot: 'mind', name: 'Bored',
-    turns: 2, allRollsMod: -2,
-    description: '-2 to all rolls. Montor is unimpressed.',
-  },
-  SAD: {
-    id: 'SAD', slot: 'mind', name: 'Sad',
-    turns: 2, blockItems: true,
-    description: 'Can\'t use items. What\'s the point?',
-  },
-  BLIND: {
-    id: 'BLIND', slot: 'mind', name: 'Blind',
-    turns: 2, missChance: 0.5,
-    description: '50% miss chance.',
-  },
-  BLOODLUST: {
-    id: 'BLOODLUST', slot: 'mind', name: 'Bloodlust',
-    turns: null, // lasts entire combat
-    healPerKill: 3,
-    damagePerNoKill: 3,
-    canFlee: false,
-    description: 'Kill to heal 3. No kill = lose 3. Can\'t flee.',
-  },
-}
+var CONDITIONS = conditionData.conditions
 
 // ============================================================
 // APPLY / REMOVE
@@ -358,14 +261,7 @@ function rollConditionApplication(attackTier, intStat, conditionChance) {
 // ENEMY INNATE CONDITIONS
 // ============================================================
 
-// Which conditions each enemy archetype can apply
-var ENEMY_CONDITIONS = {
-  rat:    { conditionId: 'BLEED',  chance: 1.0 },   // rats cause bleeding
-  slug:   { conditionId: 'NAUSEA', chance: 1.0 },   // slugs cause nausea
-  orc:    { conditionId: 'FEAR',   chance: 0.5 },    // orcs can intimidate (50% base)
-  rock:   { conditionId: 'DAZE',   chance: 1.0 },    // rocks stun you
-  wraith: { conditionId: 'BLIND',  chance: 0.7 },    // wraiths blind you
-}
+var ENEMY_CONDITIONS = conditionData.enemyConditions
 
 function getEnemyCondition(archetypeKey) {
   return ENEMY_CONDITIONS[archetypeKey] || null

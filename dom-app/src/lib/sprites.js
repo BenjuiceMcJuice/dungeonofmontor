@@ -1,20 +1,18 @@
 // Sprite grid system — all enemies as 2D arrays
 // Cell values: null (transparent), K (black outline), C (tier colour), S (shadow)
+// Theme data loaded from JSON — see src/data/themes.json
+import themeData from '../data/themes.json'
+
 var K = '#000000'
 var _ = null
 var C = 'C'
 var S = 'S'
 
-var TIERS = {
-  dust:    { name: 'Dust',    hex: '#d4c8a0', shadow: '#9a8e6a' },  // pale sandy — weak, forgettable
-  slate:   { name: 'Slate',   hex: '#5b8dd9', shadow: '#2e5a9a' },  // blue steel — a step up, noticeable
-  iron:    { name: 'Iron',    hex: '#8b5e3c', shadow: '#5a3420' },   // dark bronze — serious, battle-worn
-  crimson: { name: 'Crimson', hex: '#cc2222', shadow: '#7a0a0a' },   // blood red — danger, unmistakable
-  void:    { name: 'Void',    hex: '#9b59b6', shadow: '#5b2a7a' },   // deep purple — otherworldly, boss
-}
+var TIERS = themeData.tiers
 
 // Dark tiers need a bg pad so sprites read against black background
-var DARK_TIERS = { void: true }
+var DARK_TIERS = {}
+for (var i = 0; i < themeData.darkTiers.length; i++) DARK_TIERS[themeData.darkTiers[i]] = true
 
 var SPRITES = {
   rat: {
@@ -167,15 +165,7 @@ var PLAYER_SPRITES = {
   },
 }
 
-// Class colour schemes — main colour + shadow
-var CLASS_COLOURS = {
-  knight: { hex: '#9ca3af', shadow: '#6b7280' },  // steel grey
-  // Future classes:
-  // ranger:    { hex: '#4ade80', shadow: '#16a34a' },
-  // mage:      { hex: '#818cf8', shadow: '#4f46e5' },
-  // rogue:     { hex: '#a78bfa', shadow: '#7c3aed' },
-  // cleric:    { hex: '#fbbf24', shadow: '#d97706' },
-}
+var CLASS_COLOURS = themeData.classColours
 
 // Draw a player sprite with class colours
 function drawPlayerSprite(canvas, classKey, scale) {
@@ -266,11 +256,7 @@ var DOOR_SPRITE = {
   ],
 }
 
-// Zone-themed door colours
-var DOOR_THEMES = {
-  garden:  { wall: '#5a6e4a', wallHi: '#7a9060', door: '#6b4e2e', doorHi: '#c8a050' },
-  dungeon: { wall: '#4a4a52', wallHi: '#6a6a72', door: '#5a3a1e', doorHi: '#b89040' },
-}
+var DOOR_THEMES = themeData.doorThemes
 
 function drawDoorSprite(canvas, theme, scale) {
   var colours = DOOR_THEMES[theme] || DOOR_THEMES.dungeon

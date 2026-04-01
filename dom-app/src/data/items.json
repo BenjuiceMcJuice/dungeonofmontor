@@ -1,0 +1,324 @@
+{
+  "dagger_common": {
+    "id": "dagger_common", "name": "Some Bloke's Dagger", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.2, "defIgnore": 0,
+    "rarity": "common", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "Left behind by someone who didn't make it. Quick, at least."
+  },
+  "shortsword_common": {
+    "id": "shortsword_common", "name": "Boring Sword", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
+    "rarity": "common", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Reliable. Dull. Like its previous owner."
+  },
+  "longsword_common": {
+    "id": "longsword_common", "name": "Slightly Less Boring Sword", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
+    "rarity": "common", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Longer. Still boring. But it works."
+  },
+  "mace_common": {
+    "id": "mace_common", "name": "Dull Mace", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5,
+    "rarity": "common", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Blunt. Graceless. Punches through armour though."
+  },
+
+  "montors_peeling_knife": {
+    "id": "montors_peeling_knife", "name": "Montor's Peeling Knife", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0,
+    "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "POISON", "conditionChance": 1.0,
+    "giftPower": "bile",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Still has potato on it. Also venom."
+  },
+  "montors_pruning_shears": {
+    "id": "montors_pruning_shears", "name": "Montor's Pruning Shears", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.2, "defIgnore": 0,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 1.0,
+    "giftPower": "petal",
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "For the garden. Grows back sharper each time."
+  },
+  "montors_ice_pick": {
+    "id": "montors_ice_pick", "name": "Montor's Ice Pick", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "FROST", "conditionChance": 1.0,
+    "giftPower": "stone",
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Keeps the drinks cold. And the enemies."
+  },
+  "montors_fireplace_poker": {
+    "id": "montors_fireplace_poker", "name": "Montor's Fireplace Poker", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 1.0,
+    "giftPower": "ember",
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Still hot. Always hot. Melts through armour."
+  },
+  "montors_mums_bread_knife": {
+    "id": "montors_mums_bread_knife", "name": "Montor's Mum's Bread Knife", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 0.7,
+    "giftPower": "blood",
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "She could silence a room. So can this."
+  },
+  "montors_tenderiser": {
+    "id": "montors_tenderiser", "name": "Montor's Tenderiser", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.5,
+    "rarity": "uncommon", "damageDie": 8, "attackStat": "str", "agiPenalty": -1,
+    "conditionOnHit": "DAZE", "conditionChance": 1.0,
+    "giftPower": "stone",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "For meat. You're meat."
+  },
+  "montors_mums_rolling_pin": {
+    "id": "montors_mums_rolling_pin", "name": "Montor's Mum's Rolling Pin", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.5,
+    "rarity": "uncommon", "damageDie": 10, "attackStat": "str", "agiPenalty": -2,
+    "giftPower": "stone",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "She didn't need magic. Neither does this."
+  },
+  "montors_void_cleaver": {
+    "id": "montors_void_cleaver", "name": "Montor's Void Cleaver", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.3,
+    "rarity": "epic", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 0.5,
+    "giftPower": ["void", "blood"],
+    "buyPrice": 100, "sellPrice": 40,
+    "description": "Montor's personal blade. He's noticed it's missing."
+  },
+
+  "wooden_shield": {
+    "id": "wooden_shield", "name": "Bit of Wood", "type": "armour", "slot": "offhand",
+    "rarity": "common", "defBonus": 2, "agiPenalty": 0,
+    "passiveEffect": "block_chance", "passiveValue": 0.15,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "It's a plank. With a handle. 15% block."
+  },
+  "montors_pot_lid": {
+    "id": "montors_pot_lid", "name": "Montor's Pot Lid", "type": "armour", "slot": "offhand",
+    "rarity": "uncommon", "defBonus": 3, "agiPenalty": -1,
+    "passiveEffect": "block_chance", "passiveValue": 0.2,
+    "giftPower": "stone",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Dented. Scorched. Blocks surprisingly well."
+  },
+  "montors_dinner_tray": {
+    "id": "montors_dinner_tray", "name": "Montor's Dinner Tray", "type": "armour", "slot": "offhand",
+    "rarity": "rare", "defBonus": 4, "agiPenalty": -1,
+    "passiveEffect": "block_chance", "passiveValue": 0.25,
+    "giftPower": ["stone", "ember"],
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Silver. Monogrammed 'M'. Reflects fire. 25% block."
+  },
+
+  "leather_common": {
+    "id": "leather_common", "name": "Tatty Leather", "type": "armour", "slot": "armour",
+    "rarity": "common", "defBonus": 2, "agiPenalty": 0,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "Smells. Barely holds together. Better than nothing."
+  },
+  "chainmail_common": {
+    "id": "chainmail_common", "name": "Clanky Armour", "type": "armour", "slot": "armour",
+    "rarity": "common", "defBonus": 4, "agiPenalty": -1,
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "Loud. Heavy. Announces you to everything."
+  },
+  "montors_welcome_mat": {
+    "id": "montors_welcome_mat", "name": "Montor's Welcome Mat", "type": "armour", "slot": "armour",
+    "rarity": "rare", "defBonus": 5, "agiPenalty": -2,
+    "passiveEffect": "damage_reflect", "passiveValue": 2,
+    "giftPower": "ember",
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Wipe your feet. Or bleed on them."
+  },
+  "montors_dressing_gown": {
+    "id": "montors_dressing_gown", "name": "Montor's Dressing Gown", "type": "armour", "slot": "armour",
+    "rarity": "rare", "defBonus": 1, "agiPenalty": 0,
+    "passiveEffect": "dodge_chance", "passiveValue": 0.15,
+    "giftPower": "void",
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Threadbare. Smells of pipe smoke. Somehow invisible."
+  },
+
+  "health_potion": {
+    "id": "health_potion", "name": "Dodgy Red Liquid", "type": "consumable",
+    "rarity": "common", "effect": "heal", "effectValue": 15,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "Found in a cupboard. Unlabelled. Heals 15 HP somehow."
+  },
+  "greater_health_potion": {
+    "id": "greater_health_potion", "name": "Suspiciously Good Red Liquid", "type": "consumable",
+    "rarity": "uncommon", "effect": "heal", "effectValue": 30,
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Thicker. Warmer. Heals 30 HP. Don't think about it."
+  },
+  "montors_homebrew": {
+    "id": "montors_homebrew", "name": "Montor's Homebrew", "type": "consumable",
+    "rarity": "rare", "effect": "heal", "effectValue": 45,
+    "giftPower": "bile",
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Brewed in the cellar. Don't ask what's in it. Heals everything."
+  },
+  "rage_draught": {
+    "id": "rage_draught", "name": "Angry Juice", "type": "consumable",
+    "rarity": "uncommon", "effect": "stat_buff", "effectStat": "str", "effectValue": 4, "effectDuration": 3,
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "Thick. Red. Tastes of iron. +4 STR for 3 turns."
+  },
+  "smoke_bomb": {
+    "id": "smoke_bomb", "name": "Stink Pellet", "type": "consumable",
+    "rarity": "common", "effect": "flee_guaranteed", "effectValue": 1,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "Smells like the Cook's socks. Guaranteed escape."
+  },
+  "antidote": {
+    "id": "antidote", "name": "Chalky Tablet", "type": "consumable",
+    "rarity": "common", "effect": "cure_body", "effectValue": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "Found in the bathroom cabinet. Cures body conditions."
+  },
+  "smelling_salts": {
+    "id": "smelling_salts", "name": "Nasty Sniff", "type": "consumable",
+    "rarity": "common", "effect": "cure_mind", "effectValue": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "One whiff and your head clears. Violently. Cures mind conditions."
+  },
+  "montors_bath_bomb": {
+    "id": "montors_bath_bomb", "name": "Montor's Bath Bomb", "type": "consumable",
+    "rarity": "uncommon", "effect": "damage_all_enemies", "effectValue": 8,
+    "giftPower": "ember",
+    "buyPrice": 24, "sellPrice": 10,
+    "description": "Fizzy. Floral. Explosive. Not for baths."
+  },
+  "montors_mums_smelling_salts": {
+    "id": "montors_mums_smelling_salts", "name": "Montor's Mum's Smelling Salts", "type": "consumable",
+    "rarity": "uncommon", "effect": "cure_mind", "effectValue": 1,
+    "giftPower": "petal",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "Industrial strength. She used them on Montor as a boy."
+  },
+  "fortify_draught": {
+    "id": "fortify_draught", "name": "Thick Gloop", "type": "consumable",
+    "rarity": "uncommon", "effect": "stat_buff", "effectStat": "def", "effectValue": 4, "effectDuration": 3,
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "Drink it. Skin hardens. +4 DEF for 3 turns. Try not to think about the texture."
+  },
+
+  "montors_signet_ring": {
+    "id": "montors_signet_ring", "name": "Montor's Signet Ring", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "hp_bonus", "passiveValue": 5,
+    "giftPower": "stone",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "His seal. Worn smooth. Makes you feel... sturdier."
+  },
+  "montors_garden_charm": {
+    "id": "montors_garden_charm", "name": "Montor's Garden Charm", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "regen_per_chamber", "passiveValue": 2,
+    "giftPower": "petal",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "A pressed flower in resin. Heals 2 HP per chamber."
+  },
+  "montors_greenhouse_key": {
+    "id": "montors_greenhouse_key", "name": "Montor's Greenhouse Key", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "regen_per_chamber", "passiveValue": 4,
+    "giftPower": ["petal", "stone"],
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Opens nothing now. But the vines still grow around it. Heals 4 HP per chamber."
+  },
+  "montors_lucky_penny": {
+    "id": "montors_lucky_penny", "name": "Montor's Lucky Penny", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "lck_bonus", "passiveValue": 2,
+    "giftPower": "petal",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "Found in the fountain. Montor threw it in and wished for peace. Didn't work."
+  },
+  "montors_mums_bandage": {
+    "id": "montors_mums_bandage", "name": "Montor's Mum's Bandage", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_immunity", "passiveCondition": "BLEED",
+    "giftPower": "blood",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "She always had one ready. Stops the bleeding before it starts."
+  },
+  "montors_herb_pouch": {
+    "id": "montors_herb_pouch", "name": "Montor's Herb Pouch", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_immunity", "passiveCondition": "POISON",
+    "giftPower": "bile",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Dried garden herbs. Smell awful. Poison can't touch you."
+  },
+  "montors_nightlight": {
+    "id": "montors_nightlight", "name": "Montor's Nightlight", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_immunity", "passiveCondition": "FEAR",
+    "giftPower": "void",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "He's had it since he was small. The dark can't find you."
+  },
+  "montors_thimble": {
+    "id": "montors_thimble", "name": "Montor's Thimble", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "crit_bonus", "passiveValue": 1,
+    "giftPower": "blood",
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Tiny. Sharp. Crits on 19+. His mum used it for sewing. And threats."
+  },
+  "montors_mums_wedding_ring": {
+    "id": "montors_mums_wedding_ring", "name": "Montor's Mum's Wedding Ring", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "lifesteal", "passiveValue": 0.1,
+    "giftPower": ["blood", "void"],
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "She never took it off. Heals 10% of damage dealt. The ring remembers."
+  },
+  "montors_lottery_ticket": {
+    "id": "montors_lottery_ticket", "name": "Montor's Lottery Ticket", "type": "relic", "slot": "relic",
+    "rarity": "epic",
+    "passiveEffect": "lottery", "passiveValue": 0,
+    "lotteryNumbers": null,
+    "giftPower": "void",
+    "buyPrice": 100, "sellPrice": 1,
+    "description": "Three numbers scratched in ink. If any die matches... \"jackpot.\""
+  },
+  "montors_monocle": {
+    "id": "montors_monocle", "name": "Montor's Monocle", "type": "relic", "slot": "relic",
+    "rarity": "epic",
+    "passiveEffect": "see_enemy_hp_exact", "passiveValue": 1,
+    "giftPower": "void",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "See their exact HP. Knowledge is half the battle. Montor wants it back."
+  },
+  "montors_loaded_dice": {
+    "id": "montors_loaded_dice", "name": "Montor's Loaded Dice", "type": "relic", "slot": "relic",
+    "rarity": "rare",
+    "passiveEffect": "reroll_ones", "passiveValue": 1,
+    "giftPower": "void",
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Ones become twos. He cheats at everything."
+  },
+  "montors_hand_mirror": {
+    "id": "montors_hand_mirror", "name": "Montor's Hand Mirror", "type": "relic", "slot": "relic",
+    "rarity": "rare",
+    "passiveEffect": "reflect_conditions", "passiveValue": 0.25,
+    "giftPower": "void",
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "He checks his hair constantly. 25% chance to reflect conditions back."
+  },
+  "montors_last_stand_brooch": {
+    "id": "montors_last_stand_brooch", "name": "Montor's Last Stand Brooch", "type": "relic", "slot": "relic",
+    "rarity": "rare",
+    "passiveEffect": "last_stand", "passiveValue": 1,
+    "giftPower": ["blood", "stone"],
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Pinned to his coat the day he built the dungeon. +1 DEF per 20% HP missing."
+  }
+}

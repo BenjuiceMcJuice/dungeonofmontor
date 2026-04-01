@@ -1,0 +1,40 @@
+{
+  "classes": {
+    "knight": {
+      "name": "Knight",
+      "baseHp": 30,
+      "hpPerLevel": 8,
+      "autoSkills": { "str": 1, "def": 1 },
+      "freePointsPerLevel": 2,
+      "playstyle": "Tanky frontliner"
+    }
+  },
+  "skills": [
+    { "id": "str", "name": "Strength",   "abbrev": "STR", "group": "combat" },
+    { "id": "agi", "name": "Agility",    "abbrev": "AGI", "group": "combat" },
+    { "id": "def", "name": "Defence",    "abbrev": "DEF", "group": "combat" },
+    { "id": "end", "name": "Endurance",  "abbrev": "END", "group": "combat" },
+    { "id": "int", "name": "Intellect",  "abbrev": "INT", "group": "mental" },
+    { "id": "wis", "name": "Wisdom",     "abbrev": "WIS", "group": "mental" },
+    { "id": "per", "name": "Perception", "abbrev": "PER", "group": "mental" },
+    { "id": "lck", "name": "Luck",       "abbrev": "LCK", "group": "fortune" },
+    { "id": "cha", "name": "Charisma",   "abbrev": "CHA", "group": "fortune" },
+    { "id": "vit", "name": "Vitality",   "abbrev": "VIT", "group": "body" },
+    { "id": "res", "name": "Resilience", "abbrev": "RES", "group": "body" },
+    { "id": "sth", "name": "Stealth",    "abbrev": "STH", "group": "specialist" },
+    { "id": "cun", "name": "Cunning",    "abbrev": "CUN", "group": "specialist" },
+    { "id": "wil", "name": "Willpower",  "abbrev": "WIL", "group": "specialist" }
+  ],
+  "statPointsTotal": 70,
+  "startingKnight": {
+    "stats": {
+      "str": 14, "def": 10, "vit": 10, "end": 8,
+      "agi": 10, "per": 4, "wil": 3,
+      "int": 2, "wis": 1, "lck": 2,
+      "cha": 1, "res": 2, "sth": 1, "cun": 2
+    },
+    "maxHp": 45,
+    "weaponId": "longsword_common",
+    "armourId": "chainmail_common"
+  }
+}

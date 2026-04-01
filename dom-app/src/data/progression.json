@@ -1,0 +1,8 @@
+{
+  "xpThresholds": [
+    { "xp": 50,  "hpGain": 5, "statPick": false },
+    { "xp": 120, "hpGain": 0, "statPick": true },
+    { "xp": 250, "hpGain": 5, "statPick": true },
+    { "xp": 400, "hpGain": 0, "statPick": true }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "archetypes": {
+    "rat":    { "hp": 10, "str": 8,  "agi": 14, "def": 6,  "int": 6,  "weaponDie": 4,  "xp": 10 },
+    "orc":    { "hp": 35, "str": 16, "agi": 8,  "def": 14, "int": 8,  "weaponDie": 8,  "xp": 30 },
+    "rock":   { "hp": 50, "str": 14, "agi": 6,  "def": 18, "int": 6,  "weaponDie": 10, "xp": 40 },
+    "slug":   { "hp": 16, "str": 8,  "agi": 6,  "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 15 },
+    "wraith": { "hp": 22, "str": 12, "agi": 12, "def": 8,  "int": 16, "weaponDie": 6,  "xp": 35 }
+  },
+  "tierMultipliers": {
+    "dust":    0.8,
+    "slate":   0.9,
+    "iron":    1.0,
+    "crimson": 1.15,
+    "void":    1.3
+  },
+  "difficultyMultipliers": {
+    "novice":    0.9,
+    "seasoned":  1.0,
+    "veteran":   1.1,
+    "legendary": 1.2
+  },
+  "namePools": {
+    "rat":    { "dust": ["Dungeon Rat"], "slate": ["Sewer Rat"], "iron": ["Plague Rat"], "crimson": ["Blood Rat"], "void": ["Void Rat"] },
+    "orc":    { "dust": ["Orc Grunt"], "slate": ["Orc Brute"], "iron": ["Orc Warlord"], "crimson": ["Orc Berserker"], "void": ["Orc Champion"] },
+    "rock":   { "dust": ["Rock Golem"], "slate": ["Stone Golem"], "iron": ["Steel Golem"], "crimson": ["Magma Golem"], "void": ["Void Golem"] },
+    "slug":   { "dust": ["Ashslug"], "slate": ["Venomslug"], "iron": ["Bile Slug"], "crimson": ["Blood Slug"], "void": ["Void Slug"] },
+    "wraith": { "dust": ["Wisp"], "slate": ["Shade"], "iron": ["Wraith"], "crimson": ["Banshee"], "void": ["Void Wraith"] }
+  },
+  "encounterPools": {
+    "1": { "types": ["rat", "slug"], "tiers": ["dust"], "count": [1, 2] },
+    "2": { "types": ["rat", "slug", "rat"], "tiers": ["dust"], "count": [2, 3] },
+    "3": { "types": ["rat", "slug"], "tiers": ["slate"], "count": [1, 1] },
+    "4": { "types": ["orc", "rock", "wraith"], "tiers": ["slate", "iron"], "count": [1, 2] }
+  }
+}

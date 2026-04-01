@@ -7,6 +7,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, applyConsumable } from '../lib/loot.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { isFleeBlocked, areItemsBlocked } from '../lib/conditions.js'
+import dialogueData from '../data/dialogue.json'
+import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
 import CombatRoller from '../components/CombatRoller.jsx'
@@ -19,32 +21,30 @@ var MAX_LOG_ENTRIES = 6
 // Direction labels
 var DIR_LABELS = { N: 'North', S: 'South', E: 'East', W: 'West' }
 
-// Montor whispers — random flavour text between rooms
-// Stage 1: scripted pool. Stage 4: AI-generated based on mood/state.
-var MONTOR_WHISPERS = [
-  "You're still here? Interesting.",
-  "The walls remember your footsteps.",
-  "I can smell your fear. It's... adequate.",
-  "Every door you open was already open. I left them that way.",
-  "The garden grows tired of you.",
-  "Take your time. I have forever.",
-  "That last fight was disappointing. I expected more.",
-  "You remind me of someone. They didn't make it either.",
-  "The deeper you go, the more I see.",
-  "Your gold won't help you where you're headed.",
-  "I wonder — do you loot because you need to, or because you can't help yourself?",
-  "The rats speak of you. Not kindly.",
-  "Something watches from the hedgerows. Not me. Something else.",
-  "You're braver than you look. That's not a compliment.",
-  "Keep going. I'm curious how far you'll get.",
-  "The flowers lean toward you. That's not a good sign.",
-  "I could close these doors any time. Remember that.",
-  "Your heartbeat echoes through my garden. It's... rhythmic.",
-  "The last adventurer made it further than this. Just saying.",
-  "Don't trust the merchant. Actually, don't trust anyone.",
-  null, null, null, null, null, null, null, null, null, null,
-  null, null, null, null, null,
-]
+var MONTOR_WHISPERS = dialogueData.montorWhispers
+
+// Helper: get total passive value from equipped relics + armour
+function getPassiveTotal(equipped, effectName) {
+  var total = 0
+  if (equipped && equipped.relics) {
+    for (var i = 0; i < equipped.relics.length; i++) {
+      if (equipped.relics[i].passiveEffect === effectName) total += (equipped.relics[i].passiveValue || 0)
+    }
+  }
+  if (equipped && equipped.armour && equipped.armour.passiveEffect === effectName) {
+    total += (equipped.armour.passiveValue || 0)
+  }
+  return total
+}
+
+// Helper: check if equipped relics grant immunity to a condition
+function hasConditionImmunity(equipped, conditionId) {
+  if (!equipped || !equipped.relics) return false
+  for (var i = 0; i < equipped.relics.length; i++) {
+    if (equipped.relics[i].passiveEffect === 'condition_immunity' && equipped.relics[i].passiveCondition === conditionId) return true
+  }
+  return false
+}
 
 // Map chamber types to centre icon keys (after clearing)
 function getChamberIconKey(type) {
@@ -102,13 +102,7 @@ function Game({ character, user, onEndRun }) {
   var [runLevel, setRunLevel] = useState(0)
   var [pendingLevelUp, setPendingLevelUp] = useState(null) // { hpGain, statPick } or null
 
-  // XP thresholds for in-run levelling
-  var XP_THRESHOLDS = [
-    { xp: 50,  hpGain: 5, statPick: false },
-    { xp: 120, hpGain: 0, statPick: true },
-    { xp: 250, hpGain: 5, statPick: true },
-    { xp: 400, hpGain: 0, statPick: true },
-  ]
+  var XP_THRESHOLDS = progressionData.xpThresholds
 
   function checkLevelUp(newXp) {
     if (runLevel >= XP_THRESHOLDS.length) return false
@@ -156,6 +150,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
+  var [inventoryTab, setInventoryTab] = useState('weapons')
 
   // --- Run tracking (for balance logging) ---
   var [runStats, setRunStats] = useState({
@@ -281,6 +276,12 @@ function Game({ character, user, onEndRun }) {
       })
     })
     setZone(newZone)
+
+    // Relic passive: regen_per_chamber — heal on entering a new chamber
+    var regenAmount = getPassiveTotal(character.equipped, 'regen_per_chamber')
+    if (regenAmount > 0) {
+      setPlayerHp(function(hp) { return Math.min(hp + regenAmount, character.maxHp) })
+    }
 
     // Montor whisper — random chance on entering a new room
     var whisper = MONTOR_WHISPERS[Math.floor(Math.random() * MONTOR_WHISPERS.length)]
@@ -748,11 +749,14 @@ function Game({ character, user, onEndRun }) {
   var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn'
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
+  // Effective crit threshold — lowered by crit_bonus relics (Keen Edge Ring = 19+)
+  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus')
+
   // Direct attack — click enemy card to attack without going through CombatRoller button
   function handlePlayerAttackDirect(enemyId) {
     if (pendingAttackResult) return
     setSelectedTarget(enemyId)
-    var rollResult = d20Attack(strMod, 20)
+    var rollResult = d20Attack(strMod, critThreshold)
     if (godModeRef.current) {
       rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
     }
@@ -772,7 +776,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handlePlayerAttackRoll() {
-    var rollResult = d20Attack(strMod, 20)
+    var rollResult = d20Attack(strMod, critThreshold)
     if (godModeRef.current) {
       rollResult = { roll: 20, modifier: strMod, total: 20 + strMod, tier: 1, tierName: 'crit' }
     }
@@ -1027,6 +1031,9 @@ function Game({ character, user, onEndRun }) {
     if (item.type === 'weapon' && item.slot === 'weapon') {
       returnItem = newEquipped.weapon
       newEquipped.weapon = item
+    } else if (item.type === 'armour' && item.slot === 'offhand') {
+      returnItem = newEquipped.offhand
+      newEquipped.offhand = item
     } else if (item.type === 'armour' && item.slot === 'armour') {
       returnItem = newEquipped.armour
       newEquipped.armour = item
@@ -1044,6 +1051,12 @@ function Game({ character, user, onEndRun }) {
     // Update character equipped (mutating the prop — Stage 1 ephemeral character)
     character.equipped = newEquipped
 
+    // Apply hp_bonus from newly equipped relic
+    if (item.passiveEffect === 'hp_bonus' && item.passiveValue) {
+      character.maxHp += item.passiveValue
+      setPlayerHp(function(hp) { return Math.min(hp + item.passiveValue, character.maxHp) })
+    }
+
     // Remove equipped item from inventory, add old item back
     setPlayerInventory(function(prev) {
       var next = prev.slice()
@@ -1051,6 +1064,43 @@ function Game({ character, user, onEndRun }) {
       if (returnItem) next.push(returnItem)
       return next
     })
+  }
+
+  // === UNEQUIP ITEM (out of combat) ===
+  function handleUnequipWeapon() {
+    if (!character.equipped || !character.equipped.weapon) return
+    var item = character.equipped.weapon
+    character.equipped = Object.assign({}, character.equipped, { weapon: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipArmour() {
+    if (!character.equipped || !character.equipped.armour) return
+    var item = character.equipped.armour
+    character.equipped = Object.assign({}, character.equipped, { armour: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipOffhand() {
+    if (!character.equipped || !character.equipped.offhand) return
+    var item = character.equipped.offhand
+    character.equipped = Object.assign({}, character.equipped, { offhand: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipRelic(relicIndex) {
+    if (!character.equipped || !character.equipped.relics) return
+    var item = character.equipped.relics[relicIndex]
+    if (!item) return
+    // Remove hp_bonus when unequipping
+    if (item.passiveEffect === 'hp_bonus' && item.passiveValue) {
+      character.maxHp -= item.passiveValue
+      setPlayerHp(function(hp) { return Math.min(hp, character.maxHp) })
+    }
+    var newRelics = character.equipped.relics.slice()
+    newRelics.splice(relicIndex, 1)
+    character.equipped = Object.assign({}, character.equipped, { relics: newRelics })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
   }
 
   // === WRITE RUN LOG TO FIRESTORE ===
@@ -1090,7 +1140,7 @@ function Game({ character, user, onEndRun }) {
   function handleCombatVictoryToDoors() {
     // Generate corpses with loot (gold + items array)
     var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
-    var lckStat = character.stats.lck || 10
+    var lckStat = (character.stats.lck || 10) + getPassiveTotal(character.equipped, 'lck_bonus')
     var corpses = battle.enemies.filter(function(e) { return e.isDown }).map(function(e) {
       var currentFloorId = zone ? zone.floorId : 'grounds'
       var loot = generateCombatLoot(encounterLevel, lckStat, currentFloorId)
@@ -1434,42 +1484,171 @@ function Game({ character, user, onEndRun }) {
           </div>
         </div>
 
-        {/* Inventory panel (out of combat) */}
-        {showInventoryPanel && (
-          <div className="mb-2 p-3 rounded-lg bg-surface border border-border max-h-48 overflow-y-auto">
-            <div className="flex flex-col gap-1">
-              {playerInventory.map(function(item, idx) {
-                var isEquippable = item.type === 'weapon' || item.type === 'armour' || item.type === 'relic'
-                var isConsumable = item.type === 'consumable'
-                return (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans">
+        {/* Inventory panel (out of combat) — tabbed by category */}
+        {showInventoryPanel && (function() {
+          var tabs = [
+            { id: 'weapons', label: 'Weapons', types: ['weapon'] },
+            { id: 'armour',  label: 'Armour',  types: ['armour', 'relic'] },
+            { id: 'items',   label: 'Items',   types: ['consumable'] },
+          ]
+          var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
+          var filteredItems = []
+          for (var fi = 0; fi < playerInventory.length; fi++) {
+            if (activeTab.types.indexOf(playerInventory[fi].type) !== -1) {
+              filteredItems.push({ item: playerInventory[fi], idx: fi })
+            }
+          }
+
+          // Count items per tab for badges
+          var tabCounts = {}
+          for (var ci = 0; ci < tabs.length; ci++) {
+            tabCounts[tabs[ci].id] = 0
+            for (var pi = 0; pi < playerInventory.length; pi++) {
+              if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabs[ci].id]++
+            }
+          }
+
+          return (
+            <div className="mb-2 rounded-lg bg-surface border border-border overflow-hidden">
+              {/* Tab bar */}
+              <div className="flex border-b border-border">
+                {tabs.map(function(tab) {
+                  var isActive = tab.id === activeTab.id
+                  return (
+                    <button key={tab.id}
+                      onClick={function() { setInventoryTab(tab.id) }}
+                      className={'flex-1 py-2 text-xs font-sans transition-colors ' +
+                        (isActive ? 'text-gold border-b-2 border-gold bg-raised' : 'text-ink-dim hover:text-ink')}>
+                      {tab.label}
+                      {tabCounts[tab.id] > 0 && (
+                        <span className="ml-1 text-[10px] opacity-60">({tabCounts[tab.id]})</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Currently equipped (weapons/armour tabs) */}
+              {activeTab.id === 'weapons' && character.equipped && character.equipped.weapon && (
+                <div className="mx-3 mt-2 p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                  <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-ink">{item.name}</span>
-                      <span className="text-ink-faint text-[10px]">
-                        {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                         item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                         item.type === 'relic' ? item.description :
-                         item.description || ''}
-                      </span>
+                      <span className="text-[10px] text-gold uppercase tracking-wide">Equipped</span>
+                      <span className="text-ink">{character.equipped.weapon.name}</span>
+                      <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg</span>
                     </div>
-                    {isEquippable && gamePhase === 'doors' && (
-                      <button onClick={function() { handleEquipItem(idx) }}
-                        className="text-xs text-gold border border-gold/40 px-2 py-1 rounded hover:border-gold transition-colors">
-                        Equip
-                      </button>
-                    )}
-                    {isConsumable && gamePhase === 'doors' && (
-                      <button onClick={function() { handleUseItem(idx) }}
-                        className="text-xs text-emerald-400 border border-emerald-500/40 px-2 py-1 rounded hover:border-emerald-400 transition-colors">
-                        Use
+                    {gamePhase === 'doors' && (
+                      <button onClick={handleUnequipWeapon}
+                        className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                        Unequip
                       </button>
                     )}
                   </div>
-                )
-              })}
+                </div>
+              )}
+              {activeTab.id === 'armour' && (
+                <div className="mx-3 mt-2 flex flex-col gap-1">
+                  {character.equipped && character.equipped.armour && (
+                    <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-gold uppercase tracking-wide">Equipped Armour</span>
+                          <span className="text-ink">{character.equipped.armour.name}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus} DEF</span>
+                        </div>
+                        {gamePhase === 'doors' && (
+                          <button onClick={handleUnequipArmour}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.offhand && (
+                    <div className="p-2 rounded bg-blue-500/10 border border-blue-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-blue-400 uppercase tracking-wide">Offhand</span>
+                          <span className="text-ink">{character.equipped.offhand.name}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.offhand.defBonus} DEF, {Math.round((character.equipped.offhand.passiveValue || 0) * 100)}% block</span>
+                        </div>
+                        {gamePhase === 'doors' && (
+                          <button onClick={handleUnequipOffhand}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.relics && character.equipped.relics.length > 0 && (
+                    <div className="p-2 rounded bg-purple-500/10 border border-purple-500/20 text-sm font-sans">
+                      <span className="text-[10px] text-purple-400 uppercase tracking-wide">Relics ({character.equipped.relics.length}/3)</span>
+                      {character.equipped.relics.map(function(relic, ri) {
+                        return (
+                          <div key={ri} className="flex items-center justify-between mt-1">
+                            <div className="flex flex-col">
+                              <span className="text-ink text-xs">{relic.name}</span>
+                              <span className="text-ink-faint text-[10px]">{relic.description}</span>
+                            </div>
+                            {gamePhase === 'doors' && (
+                              <button onClick={function() { handleUnequipRelic(ri) }}
+                                className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
+                                Unequip
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Bag contents for active tab */}
+              <div className="p-3 max-h-40 overflow-y-auto">
+                {filteredItems.length === 0 && (
+                  <p className="text-ink-faint text-xs text-center py-2">Nothing here.</p>
+                )}
+                <div className="flex flex-col gap-1">
+                  {filteredItems.map(function(entry) {
+                    var item = entry.item
+                    var idx = entry.idx
+                    var isEquippable = item.type === 'weapon' || item.type === 'armour' || item.type === 'relic'
+                    var isConsumable = item.type === 'consumable'
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded bg-raised text-sm font-sans">
+                        <div className="flex flex-col">
+                          <span className="text-ink">{item.name}</span>
+                          <span className="text-ink-faint text-[10px]">
+                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' + (item.weaponType ? ' (' + item.weaponType + ')' : '') :
+                             item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
+                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                             item.type === 'relic' ? item.description :
+                             item.description || ''}
+                          </span>
+                        </div>
+                        {isEquippable && gamePhase === 'doors' && (
+                          <button onClick={function() { handleEquipItem(idx) }}
+                            className="text-xs text-gold border border-gold/40 px-2 py-1 rounded hover:border-gold transition-colors">
+                            Equip
+                          </button>
+                        )}
+                        {isConsumable && gamePhase === 'doors' && (
+                          <button onClick={function() { handleUseItem(idx) }}
+                            className="text-xs text-emerald-400 border border-emerald-500/40 px-2 py-1 rounded hover:border-emerald-400 transition-colors">
+                            Use
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Room layout — doors on edges, content in centre */}
         <div className="flex-1 flex flex-col min-h-0">

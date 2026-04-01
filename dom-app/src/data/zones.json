@@ -1,0 +1,111 @@
+{
+  "floors": {
+    "grounds": {
+      "id": "grounds", "name": "The Grounds", "order": 0,
+      "zones": ["montors_garden"],
+      "transitionText": "You step through the gates. They close behind you.",
+      "montorLine": "Welcome to my garden. Mind the flowers — they bite."
+    },
+    "underground": {
+      "id": "underground", "name": "The Underground", "order": -1,
+      "zones": ["great_hall", "kitchen"],
+      "transitionText": "The stone steps wind downward. The air grows cold and damp.",
+      "montorLine": "You made it past the garden. How... persistent. Down here, things are less polite."
+    }
+  },
+  "zones": {
+    "montors_garden": {
+      "id": "montors_garden", "name": "Montor's Garden", "floorId": "grounds",
+      "doorTheme": "garden",
+      "enemyTypes": ["rat", "slug"], "enemyTiers": ["dust"],
+      "bossType": "slug", "bossTier": "slate", "bossName": "The Overgrowth",
+      "merchantName": "The Gardener", "merchantRole": "Montor's groundskeeper",
+      "merchantGreeting": "Psst. Over here. Don't tell him I sold the shears.",
+      "encounterPools": {
+        "1": { "types": ["rat", "slug"], "tiers": ["dust"], "count": [1, 1] },
+        "2": { "types": ["rat", "slug", "rat"], "tiers": ["dust"], "count": [1, 2] },
+        "3": { "types": ["rat", "slug"], "tiers": ["slate"], "count": [1, 1] }
+      },
+      "templates": [
+        { "type": "stairwell_entry", "label": "Entrance",           "safe": true,  "icon": "▽" },
+        { "type": "rest",            "label": "Ruined Gazebo",       "safe": true,  "icon": "△" },
+        { "type": "combat_standard", "label": "Overgrown Path",      "safe": false, "icon": "⚔" },
+        { "type": "combat_standard", "label": "Tangled Clearing",    "safe": false, "icon": "⚔" },
+        { "type": "combat_standard", "label": "Broken Fountain",     "safe": false, "icon": "⚔" },
+        { "type": "combat_standard", "label": "Hedge Corridor",      "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",    "label": "Thorn Thicket",       "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",       "label": "Topiary Guardian",    "safe": false, "icon": "☠" },
+        { "type": "keystone",        "label": "Stone Pedestal",      "safe": true,  "icon": "⚷" },
+        { "type": "merchant",        "label": "Wandering Vendor",    "safe": true,  "icon": "⚒" },
+        { "type": "quest_npc",       "label": "Wounded Traveller",   "safe": true,  "icon": "?" },
+        { "type": "trap",            "label": "Overgrown Tripwires", "safe": false, "icon": "!" },
+        { "type": "loot",            "label": "Hidden Cache",        "safe": true,  "icon": "◆" },
+        { "type": "hidden",          "label": "Behind the Foliage",  "safe": true,  "icon": "◇" },
+        { "type": "boss",            "label": "Stairwell Guardian",  "safe": false, "icon": "☠" },
+        { "type": "stairwell_descent", "label": "Stairwell Down",    "safe": true,  "icon": "▼" }
+      ]
+    },
+    "great_hall": {
+      "id": "great_hall", "name": "The Great Hall", "floorId": "underground",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["rat", "orc"], "enemyTiers": ["dust", "slate"],
+      "bossType": "orc", "bossTier": "slate", "bossName": "Ironjaw",
+      "merchantName": "The Butler", "merchantRole": "Montor's head of household",
+      "merchantGreeting": "Master Montor won't notice one less goblet. Probably.",
+      "encounterPools": {
+        "1": { "types": ["rat", "orc"], "tiers": ["dust"], "count": [1, 2] },
+        "2": { "types": ["rat", "orc"], "tiers": ["dust", "slate"], "count": [2, 3] },
+        "3": { "types": ["orc"], "tiers": ["slate"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Landing",             "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Alcove",               "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Long Table",           "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Collapsed Pillar",     "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Armoury Ruin",         "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Shattered Throne",     "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Guard Post",           "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Warden Chamber",       "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Ancient Lever",        "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Scavenger",            "safe": true,  "icon": "⚒" },
+        { "type": "quest_npc",        "label": "Imprisoned Scholar",   "safe": true,  "icon": "?" },
+        { "type": "trap",             "label": "Pressure Plate",       "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Weapon Rack",          "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Tapestry",  "safe": true,  "icon": "◇" },
+        { "type": "zone_door",        "label": "Iron Door",            "safe": true,  "icon": "▣" },
+        { "type": "combat_standard",  "label": "Servants Passage",     "safe": false, "icon": "⚔" }
+      ]
+    },
+    "kitchen": {
+      "id": "kitchen", "name": "The Kitchen", "floorId": "underground",
+      "doorTheme": "dungeon",
+      "enemyTypes": ["rat", "orc", "slug"], "enemyTiers": ["dust", "slate"],
+      "bossType": "orc", "bossTier": "iron", "bossName": "The Kitchen Brute",
+      "merchantName": "The Cook", "merchantRole": "Montor's kitchen staff",
+      "merchantGreeting": "Take it. Less washing up for me.",
+      "encounterPools": {
+        "1": { "types": ["rat", "slug"], "tiers": ["dust", "slate"], "count": [1, 2] },
+        "2": { "types": ["rat", "orc", "slug"], "tiers": ["slate"], "count": [2, 3] },
+        "3": { "types": ["orc"], "tiers": ["slate", "iron"], "count": [1, 2] }
+      },
+      "templates": [
+        { "type": "stairwell_entry",  "label": "Side Entrance",        "safe": true,  "icon": "▽" },
+        { "type": "rest",             "label": "Cold Pantry",           "safe": true,  "icon": "△" },
+        { "type": "combat_standard",  "label": "Cauldron Room",         "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Meat Locker",           "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Scullery",              "safe": false, "icon": "⚔" },
+        { "type": "combat_standard",  "label": "Hearth",                "safe": false, "icon": "⚔" },
+        { "type": "combat_elite",     "label": "Head Chef Station",     "safe": false, "icon": "⚔" },
+        { "type": "mini_boss",        "label": "Larder Keeper",         "safe": false, "icon": "☠" },
+        { "type": "keystone",         "label": "Rusty Winch",           "safe": true,  "icon": "⚷" },
+        { "type": "merchant",         "label": "Rat Trader",            "safe": true,  "icon": "⚒" },
+        { "type": "trap",             "label": "Grease Trap",           "safe": false, "icon": "!" },
+        { "type": "trap",             "label": "Scalding Vent",         "safe": false, "icon": "!" },
+        { "type": "loot",             "label": "Provisions Crate",      "safe": true,  "icon": "◆" },
+        { "type": "hidden",           "label": "Behind the Furnace",    "safe": true,  "icon": "◇" },
+        { "type": "zone_door",        "label": "Service Hatch",         "safe": true,  "icon": "▣" },
+        { "type": "combat_standard",  "label": "Drain Grate",           "safe": false, "icon": "⚔" }
+      ]
+    }
+  }
+}

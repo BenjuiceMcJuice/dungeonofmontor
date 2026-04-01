@@ -37,6 +37,22 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-03-31 | In-run levelling — XP thresholds, HP boost, stat pick UI | ✅ Done |
 | 2026-03-31 | Balance pass — DEF/3, min damage 2, enemy stat reductions, boss 3x HP | ✅ Done |
 | 2026-03-31 | Montor's Gifts spec — 6 gifts, treasures, sacrifices, boons, fusions (design only) | ✅ Done |
+|            | **Architecture — Data-driven engine** | |
+| 2026-04-01 | Phase 1-3: All game data extracted to 10 JSON files, engine files pure logic | ✅ Done |
+|            | **Stage 1 — The Crawl (continued)** | |
+| 2026-04-01 | Tabbed inventory UI (Weapons/Armour/Items) + unequip system | ✅ Done |
+| 2026-04-01 | 9 relic passives wired (regen, hp_bonus, lck, crit, immunity, lifesteal, reflect, dodge, reroll) | ✅ Done |
+| 2026-04-01 | Weapon type overhaul — daggers (double strike/AGI), maces (DEF ignore), shields (block/DEF) | ✅ Done |
+| 2026-04-01 | Montor-themed item naming — personal collection + disdainful generic names | ✅ Done |
+| 2026-04-01 | Trader variety — zone-appropriate random stock, merchants named as Montor's staff | ✅ Done |
+| 2026-04-01 | New items: Dull Mace, shields (Bit of Wood, Pot Lid, Dinner Tray), Void Cleaver, Last Stand Brooch, Homebrew, Bath Bomb | ✅ Done |
+| 2026-04-01 | Sprint backlog spec (docs/specs/11) | ✅ Done |
+| 2026-04-01 | Junk & Gifts system spec (docs/specs/12) — junk piles, weight, PER/END/WIS/LCK/CHA activation | ✅ Done |
+| 2026-04-01 | Montor AI conversations & mood system spec (docs/specs/13) | ✅ Done |
+|            | **Next up** | |
+|            | Starting screen — stat allocation + pre-run merchant | ⬜ |
+|            | Junk piles — room interaction, PER rolls, XP for searching | ⬜ |
+|            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Sprint 6 — Polish + feel (narration strings, HP bars, damage) | ⬜ |
 
 ---

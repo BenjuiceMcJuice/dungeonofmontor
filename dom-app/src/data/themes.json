@@ -1,0 +1,17 @@
+{
+  "tiers": {
+    "dust":    { "name": "Dust",    "hex": "#d4c8a0", "shadow": "#9a8e6a" },
+    "slate":   { "name": "Slate",   "hex": "#5b8dd9", "shadow": "#2e5a9a" },
+    "iron":    { "name": "Iron",    "hex": "#8b5e3c", "shadow": "#5a3420" },
+    "crimson": { "name": "Crimson", "hex": "#cc2222", "shadow": "#7a0a0a" },
+    "void":    { "name": "Void",    "hex": "#9b59b6", "shadow": "#5b2a7a" }
+  },
+  "darkTiers": ["void"],
+  "classColours": {
+    "knight": { "hex": "#9ca3af", "shadow": "#6b7280" }
+  },
+  "doorThemes": {
+    "garden":  { "wall": "#5a6e4a", "wallHi": "#7a9060", "door": "#6b4e2e", "doorHi": "#c8a050" },
+    "dungeon": { "wall": "#4a4a52", "wallHi": "#6a6a72", "door": "#5a3a1e", "doorHi": "#b89040" }
+  }
+}
