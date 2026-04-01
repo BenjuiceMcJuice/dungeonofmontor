@@ -5,7 +5,7 @@
     "orc":      { "hp": 35, "str": 16, "agi": 8,  "def": 14, "int": 8,  "weaponDie": 8,  "xp": 30 },
     "rock":     { "hp": 50, "str": 14, "agi": 6,  "def": 18, "int": 6,  "weaponDie": 10, "xp": 40 },
     "wraith":   { "hp": 22, "str": 12, "agi": 12, "def": 8,  "int": 16, "weaponDie": 6,  "xp": 35 },
-    "spider":   { "hp": 14, "str": 10, "agi": 16, "def": 4,  "int": 10, "weaponDie": 4,  "xp": 20 },
+    "spider":   { "hp": 12, "str": 6,  "agi": 16, "def": 3,  "int": 14, "weaponDie": 4,  "xp": 20 },
     "mimic":    { "hp": 40, "str": 14, "agi": 4,  "def": 16, "int": 12, "weaponDie": 8,  "xp": 45 },
     "bat":      { "hp": 8,  "str": 6,  "agi": 18, "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 12 },
     "hound":    { "hp": 28, "str": 14, "agi": 14, "def": 10, "int": 8,  "weaponDie": 6,  "xp": 30 },
