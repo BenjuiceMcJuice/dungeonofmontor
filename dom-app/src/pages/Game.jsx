@@ -1235,6 +1235,8 @@ function Game({ character, user, onEndRun }) {
   // Open a corpse to see what's inside
   function handleOpenCorpse(corpseId) {
     setLootingCorpseId(corpseId)
+    setShowInventoryPanel(false)
+    setShowCharPanel(false)
     // Mark as opened
     updateCorpse(corpseId, function(c) { return Object.assign({}, c, { opened: true }) })
   }
@@ -1270,6 +1272,8 @@ function Game({ character, user, onEndRun }) {
     var chamber = zone.chambers[zone.playerPosition]
     if (!chamber.npc) return
     setLootingNpcId(chamber.npc.id)
+    setShowInventoryPanel(false)
+    setShowCharPanel(false)
   }
 
   function handleNpcBuy(item) {
@@ -1332,6 +1336,8 @@ function Game({ character, user, onEndRun }) {
     var chamber = zone.chambers[zone.playerPosition]
     if (!chamber.chest) return
     setLootingChestId(chamber.chest.id)
+    setShowInventoryPanel(false)
+    setShowCharPanel(false)
     updateChest(function(c) { return Object.assign({}, c, { opened: true }) })
   }
 
