@@ -41,9 +41,10 @@
       "id": "SLUGGISH", "slot": "body", "name": "Sluggish",
       "turns": 2,
       "statModifier": { "stat": "agi", "value": -5 },
+      "strPenalty": -2,
       "skipFleeChance": 0.5,
       "blockItems": true,
-      "description": "Heavy. -5 AGI, 50% can't flee, can't use items — too weighed down to rummage."
+      "description": "Heavy. -5 AGI, -2 STR, 50% can't flee, can't use items — too weighed down."
     },
     "FEAR": {
       "id": "FEAR", "slot": "mind", "name": "Afraid",
@@ -81,8 +82,9 @@
     "SAD": {
       "id": "SAD", "slot": "mind", "name": "Sad",
       "turns": 2, "blockItems": true,
+      "strPenalty": -2,
       "regenPenalty": -1,
-      "description": "Can't use items. -1 regen — body gives up healing. What's the point?"
+      "description": "Can't use items. -2 STR, -1 regen — too sad to fight properly. What's the point?"
     },
     "BLIND": {
       "id": "BLIND", "slot": "mind", "name": "Blind",
@@ -109,8 +111,8 @@
     "mimic":     { "conditionId": "FEAR",     "chance": 0.6 },
     "bat":       { "conditionId": "BLIND",    "chance": 0.5 },
     "hound":     { "conditionId": "BLEED",    "chance": 0.8 },
-    "automaton": { "conditionId": "DAZE",     "chance": 0.9 },
-    "shade":     { "conditionId": "SAD",      "chance": 0.7 },
+    "automaton": { "conditionId": "SLUGGISH", "chance": 0.7 },
+    "shade":     { "conditionId": "CHARM",    "chance": 0.6 },
     "moth":      { "conditionId": "POISON",  "chance": 0.5 }
   }
 }
