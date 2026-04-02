@@ -1090,5 +1090,276 @@
     "rarity": "legendary", "passiveEffect": "condition_resist_all", "passiveValue": 0.35,
     "buyPrice": 150, "sellPrice": 60,
     "description": "35% resist to ALL conditions. Sealed. Uncomfortable. Extremely effective."
+  },
+
+  "___COMMENT_HELMETS": "=== HELMETS ===",
+
+  "montors_colander": {
+    "id": "montors_colander", "name": "Montor's Colander", "type": "armour", "slot": "helmet",
+    "rarity": "common", "defBonus": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "+1 DEF. Strains pasta. Strains blows. Looks ridiculous."
+  },
+  "montors_saucepan": {
+    "id": "montors_saucepan", "name": "Montor's Saucepan", "type": "armour", "slot": "helmet",
+    "rarity": "common", "defBonus": 2, "agiPenalty": -1,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "+2 DEF, -1 AGI. Heavy. Loud. Handle sticks out. Nobody takes you seriously."
+  },
+  "montors_bowler_hat": {
+    "id": "montors_bowler_hat", "name": "Montor's Bowler Hat", "type": "armour", "slot": "helmet",
+    "rarity": "uncommon", "defBonus": 1,
+    "passiveEffect": "condition_resist", "passiveCondition": "DAZE", "passiveValue": 0.25,
+    "setId": "sunday_best",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "+1 DEF, 25% DAZE resist. Formal. Sturdy. A gentleman's defence."
+  },
+  "montors_cricket_helmet": {
+    "id": "montors_cricket_helmet", "name": "Montor's Cricket Helmet", "type": "armour", "slot": "helmet",
+    "rarity": "uncommon", "defBonus": 2,
+    "passiveEffect": "condition_resist", "passiveCondition": "DAZE", "passiveValue": 0.25,
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "+2 DEF, 25% DAZE resist. From the garden shed. Visor down. Howzat."
+  },
+  "montors_hair_dryer_hood": {
+    "id": "montors_hair_dryer_hood", "name": "Montor's Mum's Hair Dryer Hood", "type": "armour", "slot": "helmet",
+    "rarity": "rare", "defBonus": 2,
+    "passiveEffect": "condition_resist_multi", "passiveConditions": ["DAZE", "FEAR"], "passiveValue": 0.40,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "+2 DEF, 40% DAZE + FEAR resist. Sits over the whole head. Warm. Muffles screaming."
+  },
+  "montors_knight_helm": {
+    "id": "montors_knight_helm", "name": "Montor's Knight Helm", "type": "armour", "slot": "helmet",
+    "rarity": "epic", "defBonus": 3,
+    "passiveEffect": "condition_immunity", "passiveCondition": "DAZE",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "+3 DEF, DAZE immunity. The real thing. He kept it in the attic. Visor squeaks."
+  },
+
+  "___COMMENT_BOOTS": "=== BOOTS ===",
+
+  "montors_wellies": {
+    "id": "montors_wellies", "name": "Montor's Wellies", "type": "armour", "slot": "boots",
+    "rarity": "common", "agiBonus": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "+1 AGI. Green. Muddy. Garden standard issue."
+  },
+  "montors_slippers": {
+    "id": "montors_slippers", "name": "Montor's Slippers", "type": "armour", "slot": "boots",
+    "rarity": "common", "initBonus": 1,
+    "setId": "sunday_best",
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "+1 init. Quiet. Surprisingly fast. Tartan."
+  },
+  "montors_mums_heels": {
+    "id": "montors_mums_heels", "name": "Montor's Mum's Heels", "type": "armour", "slot": "boots",
+    "rarity": "uncommon", "agiBonus": 1,
+    "passiveEffect": "dodge_chance", "passiveValue": 0.05,
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "+1 AGI, 5% dodge. Click click click. She was quick in these."
+  },
+  "montors_hiking_boots": {
+    "id": "montors_hiking_boots", "name": "Montor's Hiking Boots", "type": "armour", "slot": "boots",
+    "rarity": "uncommon", "agiBonus": 1, "defBonus": 1,
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "+1 AGI, +1 DEF. Sturdy. Waterproof. For the fells."
+  },
+  "montors_dancing_shoes": {
+    "id": "montors_dancing_shoes", "name": "Montor's Dancing Shoes", "type": "armour", "slot": "boots",
+    "rarity": "rare", "agiBonus": 2,
+    "passiveEffect": "dodge_chance", "passiveValue": 0.10,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "+2 AGI, 10% dodge. Patent leather. He took lessons. Secretly."
+  },
+  "montors_iron_boots": {
+    "id": "montors_iron_boots", "name": "Montor's Iron Boots", "type": "armour", "slot": "boots",
+    "rarity": "epic", "defBonus": 3, "agiPenalty": -1,
+    "passiveEffect": "damage_reflect", "passiveValue": 2,
+    "buyPrice": 65, "sellPrice": 26,
+    "description": "+3 DEF, -1 AGI, reflect 2 damage. Magnetic. Heavy. Kick like a mule."
+  },
+
+  "___COMMENT_BODY_ARMOUR_NEW": "=== BODY ARMOUR (new) ===",
+
+  "montors_apron_armour": {
+    "id": "montors_apron_armour", "name": "Montor's Apron", "type": "armour", "slot": "armour",
+    "rarity": "common", "defBonus": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "+1 DEF. Stained. Stiff. Smells of Sunday roast."
+  },
+  "montors_duffel_coat": {
+    "id": "montors_duffel_coat", "name": "Montor's Duffel Coat", "type": "armour", "slot": "armour",
+    "rarity": "uncommon", "defBonus": 3, "agiPenalty": -1,
+    "passiveEffect": "condition_resist", "passiveCondition": "FROST", "passiveValue": 0.25,
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "+3 DEF, -1 AGI, 25% FROST resist. Toggle buttons. Warm. Smells of mothballs."
+  },
+  "montors_mums_fur_coat": {
+    "id": "montors_mums_fur_coat", "name": "Montor's Mum's Fur Coat", "type": "armour", "slot": "armour",
+    "rarity": "rare", "defBonus": 3,
+    "passiveEffect": "dodge_chance", "passiveValue": 0.10,
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "+3 DEF, 10% dodge. Fake fur. Real protection. She wore it to bingo."
+  },
+  "montors_suit_of_armour": {
+    "id": "montors_suit_of_armour", "name": "Montor's Suit of Armour", "type": "armour", "slot": "armour",
+    "rarity": "epic", "defBonus": 6, "agiPenalty": -2,
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "+6 DEF, -2 AGI. From the hallway. Missing a gauntlet. Clanks when you breathe."
+  },
+
+  "___COMMENT_RINGS": "=== RINGS ===",
+
+  "montors_curtain_ring": {
+    "id": "montors_curtain_ring", "name": "Montor's Curtain Ring", "type": "ring", "slot": "ring",
+    "rarity": "common", "passiveEffect": "init_bonus", "passiveValue": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "+1 initiative. Brass. Slides off the curtain rail. Fits a finger perfectly."
+  },
+  "montors_washer_ring": {
+    "id": "montors_washer_ring", "name": "Montor's Washer", "type": "ring", "slot": "ring",
+    "rarity": "common", "passiveEffect": "def_bonus", "passiveValue": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "+1 DEF. A plumbing washer. Steel. Surprisingly tough on the knuckle."
+  },
+  "montors_mums_thimble_ring": {
+    "id": "montors_mums_thimble_ring", "name": "Montor's Mum's Thimble Ring", "type": "ring", "slot": "ring",
+    "rarity": "common", "passiveEffect": "hp_bonus", "passiveValue": 5,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "+5 max HP. She wore it like a ring. Pockmarked from a thousand needles."
+  },
+  "montors_rubber_band_ring": {
+    "id": "montors_rubber_band_ring", "name": "Montor's Rubber Band", "type": "ring", "slot": "ring",
+    "rarity": "uncommon", "passiveEffect": "dodge_chance", "passiveValue": 0.05,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "5% dodge. Stretched around his finger. Twangs when danger's near."
+  },
+  "montors_key_ring": {
+    "id": "montors_key_ring", "name": "Montor's Key Ring", "type": "ring", "slot": "ring",
+    "rarity": "uncommon", "passiveEffect": "lck_bonus", "passiveValue": 1,
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "+1 LCK. Full of keys. None of them fit anything. Jingles constantly."
+  },
+  "montors_pipe_ring": {
+    "id": "montors_pipe_ring", "name": "Montor's Pipe Ring", "type": "ring", "slot": "ring",
+    "rarity": "rare", "passiveEffect": "regen_per_chamber", "passiveValue": 2,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Heal 2 HP/chamber. The silver band from his pipe. Still warm. Smells of cherry tobacco."
+  },
+  "montors_grans_ring": {
+    "id": "montors_grans_ring", "name": "Montor's Gran's Ring", "type": "ring", "slot": "ring",
+    "rarity": "rare", "passiveEffect": "crit_bonus", "passiveValue": 1,
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Crits on 19+. She had a sharp tongue. This has a sharp edge. Don't shake hands."
+  },
+  "montors_engagement_ring": {
+    "id": "montors_engagement_ring", "name": "Montor's Engagement Ring", "type": "ring", "slot": "ring",
+    "rarity": "epic", "passiveEffect": "lifesteal", "passiveValue": 0.05,
+    "buyPrice": 75, "sellPrice": 30,
+    "description": "5% lifesteal. He never gave it to anyone. The diamond still sparkles."
+  },
+
+  "___COMMENT_AMULETS": "=== AMULETS ===",
+
+  "montors_dog_tag": {
+    "id": "montors_dog_tag", "name": "Montor's Dog Tag", "type": "amulet", "slot": "amulet",
+    "rarity": "common", "passiveEffect": "str_bonus", "passiveValue": 1,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "+1 STR. Engraved with GOOD BOY. The dog's name was also Montor."
+  },
+  "montors_mums_locket": {
+    "id": "montors_mums_locket", "name": "Montor's Mum's Locket", "type": "amulet", "slot": "amulet",
+    "rarity": "uncommon", "twinFangsGrant": true,
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "Grants Twin Fangs: dual-wield bleed on double-connect. She kept a photo inside. Of the dog."
+  },
+  "montors_bifocals": {
+    "id": "montors_bifocals", "name": "Montor's Bifocals", "type": "amulet", "slot": "amulet",
+    "rarity": "uncommon", "passiveEffect": "see_enemy_hp_exact", "passiveValue": 1,
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "See exact enemy HP. Thick lenses. Everything's clearer. Hung on a chain."
+  },
+  "montors_rabbits_foot": {
+    "id": "montors_rabbits_foot", "name": "Montor's Rabbit's Foot", "type": "amulet", "slot": "amulet",
+    "rarity": "rare", "passiveEffect": "reroll_ones", "passiveValue": 1,
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Reroll 1s on damage. From the garden. The rabbit survived. Probably."
+  },
+  "montors_mums_crucifix": {
+    "id": "montors_mums_crucifix", "name": "Montor's Mum's Crucifix", "type": "amulet", "slot": "amulet",
+    "rarity": "rare", "passiveEffect": "condition_resist_all", "passiveValue": 0.15,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "15% resist ALL conditions. She wore it every Sunday. The chain never broke."
+  },
+  "montors_lodestone": {
+    "id": "montors_lodestone", "name": "Montor's Lodestone", "type": "amulet", "slot": "amulet",
+    "rarity": "epic", "passiveEffect": "d20_nudge", "passiveValue": 2,
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "+2 to all d20 rolls. Heavy. Pulls north. And pulls luck toward you."
+  },
+
+  "___COMMENT_SET_SUNDAY": "=== SET: Montor's Sunday Best ===",
+
+  "montors_sunday_shirt": {
+    "id": "montors_sunday_shirt", "name": "Montor's Sunday Shirt", "type": "armour", "slot": "armour",
+    "rarity": "uncommon", "defBonus": 2,
+    "setId": "sunday_best",
+    "setBonuses": {
+      "2": { "passiveEffect": "dodge_chance", "passiveValue": 0.05, "label": "+5% dodge" },
+      "3": { "passiveEffect": "dodge_chance", "passiveValue": 0.15, "secondEffect": "enemy_skip_chance", "secondValue": 0.10, "label": "+15% dodge, 10% enemy skip" }
+    },
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "+2 DEF. Pressed. Starched. She ironed it the night before."
+  },
+
+  "___COMMENT_SET_PEAKY": "=== SET: Montor's Peaky Set ===",
+
+  "montors_newsboy_cap": {
+    "id": "montors_newsboy_cap", "name": "Montor's Newsboy Cap", "type": "armour", "slot": "helmet",
+    "rarity": "rare", "defBonus": 2, "initBonus": 1,
+    "setId": "peaky",
+    "setBonuses": {
+      "2": { "passiveEffect": "str_bonus", "passiveValue": 1, "secondEffect": "crit_bonus", "secondValue": 1, "label": "+1 STR, crit 19+ (Intimidation)" },
+      "3": { "passiveEffect": "dodge_chance", "passiveValue": 0.10, "secondEffect": "enemy_accuracy_penalty", "secondValue": 1, "label": "+10% dodge, -1 enemy acc (Reputation)" },
+      "4": { "passiveEffect": "first_hit_crit", "passiveValue": 1, "label": "First hit = guaranteed crit (By Order)" }
+    },
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "+2 DEF, +1 init. Eight-panel. Stitched razor in the peak. By order."
+  },
+  "montors_tweed_overcoat": {
+    "id": "montors_tweed_overcoat", "name": "Montor's Tweed Overcoat", "type": "armour", "slot": "armour",
+    "rarity": "rare", "defBonus": 3,
+    "setId": "peaky",
+    "setBonuses": {
+      "2": { "passiveEffect": "str_bonus", "passiveValue": 1, "secondEffect": "crit_bonus", "secondValue": 1, "label": "+1 STR, crit 19+ (Intimidation)" },
+      "3": { "passiveEffect": "dodge_chance", "passiveValue": 0.10, "secondEffect": "enemy_accuracy_penalty", "secondValue": 1, "label": "+10% dodge, -1 enemy acc (Reputation)" },
+      "4": { "passiveEffect": "first_hit_crit", "passiveValue": 1, "label": "First hit = guaranteed crit (By Order)" }
+    },
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "+3 DEF. Heavy tweed. Lined pockets. Hides a multitude of sins."
+  },
+  "montors_hobnail_boots": {
+    "id": "montors_hobnail_boots", "name": "Montor's Hobnail Boots", "type": "armour", "slot": "boots",
+    "rarity": "rare", "agiBonus": 1, "defBonus": 1, "initBonus": 1,
+    "setId": "peaky",
+    "setBonuses": {
+      "2": { "passiveEffect": "str_bonus", "passiveValue": 1, "secondEffect": "crit_bonus", "secondValue": 1, "label": "+1 STR, crit 19+ (Intimidation)" },
+      "3": { "passiveEffect": "dodge_chance", "passiveValue": 0.10, "secondEffect": "enemy_accuracy_penalty", "secondValue": 1, "label": "+10% dodge, -1 enemy acc (Reputation)" },
+      "4": { "passiveEffect": "first_hit_crit", "passiveValue": 1, "label": "First hit = guaranteed crit (By Order)" }
+    },
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "+1 AGI, +1 DEF, +1 init. Steel-capped. Cobbled together. Kick first."
+  },
+  "montors_sovereign_ring": {
+    "id": "montors_sovereign_ring", "name": "Montor's Sovereign Ring", "type": "ring", "slot": "ring",
+    "rarity": "rare", "passiveEffect": "str_bonus", "passiveValue": 1,
+    "setId": "peaky",
+    "setBonuses": {
+      "2": { "passiveEffect": "str_bonus", "passiveValue": 1, "secondEffect": "crit_bonus", "secondValue": 1, "label": "+1 STR, crit 19+ (Intimidation)" },
+      "3": { "passiveEffect": "dodge_chance", "passiveValue": 0.10, "secondEffect": "enemy_accuracy_penalty", "secondValue": 1, "label": "+10% dodge, -1 enemy acc (Reputation)" },
+      "4": { "passiveEffect": "first_hit_crit", "passiveValue": 1, "label": "First hit = guaranteed crit (By Order)" }
+    },
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "+1 STR, +1 LCK. Gold. Thick. Leaves a mark. By order."
   }
 }

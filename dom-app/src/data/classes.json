@@ -37,7 +37,7 @@
     "startingGold": 50,
     "starterShopItems": [
       "dagger_base", "sword_base", "spear_base", "mace_base", "axe_base",
-      "shield_base", "leather_common",
+      "shield_base", "leather_common", "montors_colander", "montors_wellies",
       "health_potion", "health_potion", "smoke_bomb", "rage_draught", "montors_marvelous_medicine", "montors_marvelous_medicine"
     ]
   }
