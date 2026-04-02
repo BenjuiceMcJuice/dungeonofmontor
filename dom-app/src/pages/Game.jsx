@@ -7,6 +7,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
 import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspectJunkItem, consumeJunk, CLEAN_CONFIG } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
+import { generateCombatEnemies } from '../lib/enemies.js'
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
@@ -669,12 +670,30 @@ function Game({ character, user, onEndRun }) {
   function handleDismissSearch() {
     if (searchDiceRef.current) clearInterval(searchDiceRef.current)
     if (searchTimeoutRef.current) { clearTimeout(searchTimeoutRef.current); searchTimeoutRef.current = null }
+
+    // Check if an enemy encounter should trigger combat
+    var pendingEnemy = searchResult && searchResult.enemy && searchResult.enemy !== 'spotted' ? searchResult.enemy : null
+
     searchLockedRef.current = false
     setSearchResult(null)
     setSearchingPileId(null)
     setSearchPhase(null)
     setSearchDiceDisplay(null)
     setSearchSaveDiceDisplay(null)
+
+    if (pendingEnemy) {
+      // Generate low-level enemies from zone pool (always encounter level 1)
+      var zoneDef = ZONES[zone.zoneId] || null
+      var pool = zoneDef ? zoneDef.encounterPools : null
+      var enemies = generateCombatEnemies('seasoned', 1, pool)
+      // Cap at 1-2 enemies for junk encounters
+      if (enemies.length > 2) enemies = enemies.slice(0, 2)
+      startCombat(enemies, zone, zone.playerPosition)
+      // Ambush: enemy gets first strike
+      if (pendingEnemy === 'ambush') {
+        guardedSetCombatPhase('enemyWindup')
+      }
+    }
   }
 
   function handleCancelSearch() {
@@ -3263,18 +3282,30 @@ function Game({ character, user, onEndRun }) {
                     var saved = searchResult.dangerType === 'enemy' ? searchResult.perSaved : searchResult.agiSaved
                     var sc = saved ? 'text-green-400 border-green-400 bg-green-400/10' : 'text-red-400 border-red-400 bg-red-400/10'
                     var saveRoll = searchResult.dangerType === 'enemy' ? searchResult.perSaveRoll : searchResult.agiSaveRoll
+                    var saveLabel = searchResult.dangerType === 'enemy' ? 'PER save' : 'AGI save'
                     return (
                       <div className="flex flex-col items-center gap-3 mt-4">
                         <p className="text-red-400 text-lg font-display">
                           {searchResult.dangerType === 'enemy' ? 'Something stirs!' : 'TRAP!'}
                         </p>
+                        <p className="text-ink-faint text-xs font-sans">{saveLabel}</p>
                         <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + sc}
                           style={{ width: '4.5rem', height: '4.5rem' }}>
                           {saveRoll}
                         </div>
                         <p className={'text-xl font-display ' + sc.split(' ')[0]}>
-                          {saved ? (searchResult.dangerType === 'enemy' ? 'Spotted!' : 'Dodged!') :
-                           (searchResult.dangerType === 'enemy' ? 'AMBUSH!' : 'Hit!')}
+                          {saved
+                            ? (searchResult.dangerType === 'enemy' ? 'Spotted! It retreats.' : 'Dodged!')
+                            : (searchResult.dangerType === 'enemy'
+                              ? (searchResult.enemy === 'ambush' ? 'AMBUSH!' : 'Fight!')
+                              : searchResult.condition + '!')}
+                        </p>
+                        <p className="text-ink-dim text-xs font-sans italic text-center">
+                          {saved
+                            ? (searchResult.dangerType === 'enemy' ? 'Your perception scared it off.' : 'Quick reflexes save you.')
+                            : (searchResult.dangerType === 'enemy'
+                              ? (searchResult.enemy === 'ambush' ? 'They strike first!' : 'Prepare yourself.')
+                              : '')}
                         </p>
                       </div>
                     )
@@ -3339,8 +3370,12 @@ function Game({ character, user, onEndRun }) {
                     {searchResult.enemy && (
                       <div className="p-3 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-center">
                         <p className="text-red-400 font-display text-xl">
-                          {searchResult.perSaved ? 'Spotted — it retreats.' :
-                           searchResult.enemy === 'ambush' ? 'AMBUSHED!' : 'Something emerges!'}
+                          {searchResult.perSaved ? 'Spotted — it slinks away.' :
+                           searchResult.enemy === 'ambush' ? 'AMBUSH!' : 'Something emerges!'}
+                        </p>
+                        <p className="text-red-300 text-xs font-sans mt-1">
+                          {searchResult.perSaved ? 'Your sharp eyes scared it off.' :
+                           searchResult.enemy === 'ambush' ? 'Enemies attack! They strike first.' : 'Prepare to fight!'}
                         </p>
                       </div>
                     )}
