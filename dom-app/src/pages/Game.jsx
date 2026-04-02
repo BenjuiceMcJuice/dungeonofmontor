@@ -3061,39 +3061,7 @@ function Game({ character, user, onEndRun }) {
                 )
               })()}
 
-              {/* Search: Choose clean level */}
-              {searchPhase === 'choose' && (function() {
-                var ch2 = zone.chambers[zone.playerPosition]
-                var pile = ch2.junkPiles && ch2.junkPiles.find(function(p) { return p.id === searchingPileId })
-                if (!pile) return null
-                var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
-                var levels = getAvailableCleanLevels(pile)
-                return (
-                  <div className="flex flex-col items-center gap-3 p-3 max-w-xs">
-                    <p className="text-ink text-sm font-display">{sizeLabel}</p>
-                    <p className="text-ink-dim text-xs italic text-center">{pile.inspectHint || pile.description}</p>
-                    <p className="text-ink-faint text-[10px]">{pile.layersRemaining} {pile.layersRemaining === 1 ? 'layer' : 'layers'} remaining</p>
-                    <div className="flex flex-col gap-2 w-full">
-                      {levels.map(function(lvl) {
-                        var c = CLEAN_CONFIG[lvl]
-                        var lvlColour = lvl === 3 ? 'border-red-400/50 hover:border-red-400 text-red-400' :
-                          lvl === 2 ? 'border-amber-400/50 hover:border-amber-400 text-amber-400' :
-                          'border-green-400/50 hover:border-green-400 text-green-400'
-                        return (
-                          <button key={lvl}
-                            onClick={function() { handleChooseCleanLevel(lvl) }}
-                            className={'p-2.5 rounded-lg border-2 bg-surface transition-all cursor-pointer text-left ' + lvlColour}
-                          >
-                            <span className="font-display text-sm">{c.label}</span>
-                            <span className="text-ink-dim text-xs font-sans ml-2">{c.description}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                    <button onClick={handleCancelSearch} className="text-ink-faint text-[10px] hover:text-ink transition-colors">Leave it</button>
-                  </div>
-                )
-              })()}
+              {/* Search choose rendered as overlay below */}
 
               {/* Search overlay rendered below as fixed overlay */}
             </div>
@@ -3109,6 +3077,57 @@ function Game({ character, user, onEndRun }) {
             {doorMap.S ? renderDoor('S') : <div className="h-12" />}
           </div>
         </div>
+
+        {/* Search: Choose clean level — full screen overlay */}
+        {searchPhase === 'choose' && (function() {
+          var ch2 = zone.chambers[zone.playerPosition]
+          var pile = ch2.junkPiles && ch2.junkPiles.find(function(p) { return p.id === searchingPileId })
+          if (!pile) return null
+          var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
+          var levels = getAvailableCleanLevels(pile)
+          var riskLabels = { 1: 'Low risk', 2: 'Medium risk', 3: 'High risk' }
+          var riskDetail = {
+            1: 'Removes 1 layer. Quiet — low chance of trouble. Modest finds.',
+            2: 'Removes 2 layers. Noisier — enemies may notice. Better loot.',
+            3: 'Removes all layers. Loud and reckless — high danger, best rewards. Can reveal terminals.',
+          }
+          return (
+            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="font-display text-lg text-gold">{sizeLabel}</span>
+                <button onClick={handleCancelSearch}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Leave it
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
+                <p className="text-ink-dim text-sm italic text-center mb-1">{pile.inspectHint || pile.description}</p>
+                <p className="text-ink-faint text-xs mb-6">{pile.layersRemaining} {pile.layersRemaining === 1 ? 'layer' : 'layers'} remaining</p>
+                <div className="flex flex-col gap-3 w-full max-w-sm">
+                  {levels.map(function(lvl) {
+                    var c = CLEAN_CONFIG[lvl]
+                    var borderColour = lvl === 3 ? 'border-red-400' : lvl === 2 ? 'border-amber-400' : 'border-green-400'
+                    var textColour = lvl === 3 ? 'text-red-400' : lvl === 2 ? 'text-amber-400' : 'text-green-400'
+                    var bgColour = lvl === 3 ? 'bg-red-400/5' : lvl === 2 ? 'bg-amber-400/5' : 'bg-green-400/5'
+                    return (
+                      <button key={lvl}
+                        onClick={function() { handleChooseCleanLevel(lvl) }}
+                        className={'p-4 rounded-lg border-2 transition-all cursor-pointer text-left ' + borderColour + '/50 hover:' + borderColour + ' ' + bgColour}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={'font-display text-lg ' + textColour}>{c.label}</span>
+                          <span className={'text-sm font-sans font-bold ' + textColour}>{riskLabels[lvl]}</span>
+                        </div>
+                        <p className="text-ink-dim text-sm font-sans">{riskDetail[lvl]}</p>
+                        <p className="text-ink-faint text-xs font-sans mt-1">Uses {c.layersCost} {c.layersCost === 1 ? 'layer' : 'layers'}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Search overlay — covers everything during search phases */}
         {(searchPhase === 'rolling' || searchPhase === 'landed' || searchPhase === 'save_rolling' || searchPhase === 'save_landed' || searchPhase === 'reveal') && (function() {
