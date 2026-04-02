@@ -2919,11 +2919,6 @@ function Game({ character, user, onEndRun }) {
                     {searchResult.narrative[0]}
                   </p>
 
-                  {/* Roll summary */}
-                  <p className="text-ink-dim text-sm font-sans italic text-center">
-                    {character.name} rolled a {searchResult.natRoll}
-                  </p>
-
                   {/* Loot cards */}
                   <div className="flex flex-col gap-3 w-full">
                     {(searchResult.gold > 0 || searchResult.xp > 0) && (

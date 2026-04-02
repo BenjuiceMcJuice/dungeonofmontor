@@ -79,8 +79,8 @@ var CLEAN_CONFIG = {
     goldMul: 0.4,
     itemChance: 0.15,
     lootTable: 'standard',
-    enemyMul: 0.1,
-    conditionMul: 0.1,
+    enemyMul: 0.2,
+    conditionMul: 0.3,
     xpMul: 0.4,
     terminalReveal: false,
   },
@@ -127,11 +127,11 @@ function getBaseGold(riskLevel) {
 }
 
 function getBaseEnemyChance(riskLevel) {
-  return [0.0, 0.05, 0.15, 0.30, 0.50][Math.min(riskLevel - 1, 4)]
+  return [0.05, 0.15, 0.25, 0.40, 0.60][Math.min(riskLevel - 1, 4)]
 }
 
 function getBaseConditionChance(riskLevel) {
-  return [0.0, 0.05, 0.10, 0.20, 0.35][Math.min(riskLevel - 1, 4)]
+  return [0.05, 0.15, 0.25, 0.35, 0.50][Math.min(riskLevel - 1, 4)]
 }
 
 function getBaseXp(riskLevel) {
