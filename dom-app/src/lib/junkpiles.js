@@ -480,7 +480,6 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   if (pile.hasTreasure && pile.treasureData) {
     result.treasure = Object.assign({}, pile.treasureData)
     pile.hasTreasure = false // consumed — won't appear again
-    result.narrative.push(pile.treasureData.montorReaction)
   }
 
   // === XP ===
