@@ -1136,13 +1136,15 @@ function Game({ character, user, onEndRun }) {
       if (rareItems.length > 0) {
         var prize = Object.assign({}, rareItems[Math.floor(Math.random() * rareItems.length)])
         setPlayerInventory(function(prev) { return prev.concat([prize]) })
-        addLog({ type: 'player', text: 'JACKPOT! Rolled a ' + r.lotteryNumber + '! Won: ' + prize.name + '!', tier: 'crit' })
+        var dieText = r.lotteryDie === 'BOTH!' ? 'DOUBLE JACKPOT! Both dice match' : 'JACKPOT! ' + r.lotteryDie + ' rolled ' + r.lotteryNumber
+        addLog({ type: 'player', text: dieText + '! Won: ' + prize.name + '!', tier: 'crit' })
         // Remove the matched number so each number only wins once
         if (character.equipped && character.equipped.relics) {
           for (var lri = 0; lri < character.equipped.relics.length; lri++) {
             var lr = character.equipped.relics[lri]
-            if (lr.passiveEffect === 'lottery' && lr.lotteryNumbers) {
-              lr.lotteryNumbers = lr.lotteryNumbers.filter(function(n) { return n !== r.lotteryNumber })
+            if (lr.passiveEffect === 'lottery') {
+              if (r.lotteryDie === 'd20' || r.lotteryDie === 'BOTH!') lr.lotteryD20 = null
+              if (r.lotteryDie === 'weapon' || r.lotteryDie === 'BOTH!') lr.lotteryWeapon = null
             }
           }
         }
@@ -1294,6 +1296,25 @@ function Game({ character, user, onEndRun }) {
   function handleUseItem(itemIndex) {
     var item = playerInventory[itemIndex]
     if (!item || item.type !== 'consumable') return
+
+    // Permanent stat boosts — handle directly, not through applyConsumable
+    if (item.effect === 'permanent_stat') {
+      character.stats[item.effectStat] = (character.stats[item.effectStat] || 10) + (item.effectValue || 1)
+      if (item.effectStat === 'vit') { character.maxHp = 20 + ((character.stats.vit || 8) * 5); setPlayerHp(function(hp) { return Math.min(hp + 5, character.maxHp) }) }
+      addLog({ type: 'player', text: item.name + ': permanently +' + item.effectValue + ' ' + item.effectStat.toUpperCase() + '!', tier: 'crit' })
+      setPlayerInventory(function(prev) { var n = prev.slice(); n.splice(itemIndex, 1); return n })
+      return
+    }
+    if (item.effect === 'permanent_stat_multi') {
+      var stats = item.effectStats || []
+      for (var psi = 0; psi < stats.length; psi++) {
+        character.stats[stats[psi]] = (character.stats[stats[psi]] || 10) + (item.effectValue || 1)
+      }
+      if (stats.indexOf('vit') !== -1) { character.maxHp = 20 + ((character.stats.vit || 8) * 5); setPlayerHp(function(hp) { return Math.min(hp + 5, character.maxHp) }) }
+      addLog({ type: 'player', text: item.name + ': permanently +' + item.effectValue + ' ' + stats.map(function(s) { return s.toUpperCase() }).join(', ') + '!', tier: 'crit' })
+      setPlayerInventory(function(prev) { var n = prev.slice(); n.splice(itemIndex, 1); return n })
+      return
+    }
 
     var result = applyConsumable(item, { currentHp: playerHp, maxHp: character.maxHp })
     if (!result || !result.used) return
@@ -1451,11 +1472,15 @@ function Game({ character, user, onEndRun }) {
       newEquipped.armour = item
     } else if (item.type === 'relic' && item.slot === 'relic') {
       if (!newEquipped.relics) newEquipped.relics = []
-      if (newEquipped.relics.length < 3) {
-        newEquipped.relics = newEquipped.relics.concat([item])
-      } else {
-        return // relics full
+      // Only condition resist/immunity relics count toward 3-slot cap
+      var isResistRelic = item.passiveEffect === 'condition_resist' || item.passiveEffect === 'condition_immunity' || item.passiveEffect === 'condition_resist_multi' || item.passiveEffect === 'condition_resist_all'
+      if (isResistRelic) {
+        var resistCount = newEquipped.relics.filter(function(r) {
+          return r.passiveEffect === 'condition_resist' || r.passiveEffect === 'condition_immunity' || r.passiveEffect === 'condition_resist_multi' || r.passiveEffect === 'condition_resist_all'
+        }).length
+        if (resistCount >= 3) return // resist relic slots full
       }
+      newEquipped.relics = newEquipped.relics.concat([item])
     } else {
       return
     }
@@ -1469,13 +1494,13 @@ function Game({ character, user, onEndRun }) {
       setPlayerHp(function(hp) { return Math.min(hp + item.passiveValue, character.maxHp) })
     }
 
-    // Lottery ticket — scratch off and generate 2 winning numbers (2-20)
-    if (item.passiveEffect === 'lottery' && !item.lotteryNumbers) {
-      var n1 = 2 + Math.floor(Math.random() * 19) // 2-20
-      var n2 = n1
-      while (n2 === n1) n2 = 2 + Math.floor(Math.random() * 19)
-      item.lotteryNumbers = [n1, n2].sort(function(a, b) { return a - b })
-      addLog({ type: 'player', text: 'Scratched off Gran\'s ticket... lucky numbers: ' + item.lotteryNumbers[0] + ' and ' + item.lotteryNumbers[1] + '!', tier: 'crit' })
+    // Lottery ticket — scratch off: one d20 number and one weapon die number
+    if (item.passiveEffect === 'lottery' && !item.lotteryD20) {
+      item.lotteryD20 = 2 + Math.floor(Math.random() * 19) // 2-20
+      item.lotteryWeapon = 1 + Math.floor(Math.random() * 10) // 1-10 (covers d4 through d10)
+      // Keep legacy lotteryNumbers for combat check (d20 number)
+      item.lotteryNumbers = [item.lotteryD20]
+      addLog({ type: 'player', text: 'Scratched off Gran\'s ticket... d20: ' + item.lotteryD20 + ', weapon die: ' + item.lotteryWeapon + '!', tier: 'crit' })
     }
 
     // Remove equipped item from inventory, add old item back
@@ -2132,7 +2157,7 @@ function Game({ character, user, onEndRun }) {
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.relics && character.equipped.relics.length > 0 && (
                     <div className="p-2 rounded bg-purple-500/10 border border-purple-500/20 text-sm font-sans">
-                      <span className="text-[10px] text-purple-400 uppercase tracking-wide">Relics ({character.equipped.relics.length}/3)</span>
+                      <span className="text-[10px] text-purple-400 uppercase tracking-wide">Relics ({character.equipped.relics.filter(function(r) { return r.passiveEffect === 'condition_resist' || r.passiveEffect === 'condition_immunity' || r.passiveEffect === 'condition_resist_multi' || r.passiveEffect === 'condition_resist_all' }).length}/3 resist slots)</span>
                       {character.equipped.relics.map(function(relic, ri) {
                         return (
                           <div key={ri} className="flex items-center justify-between mt-1">

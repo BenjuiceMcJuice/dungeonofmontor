@@ -345,15 +345,23 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       result.enemyDefeated = true
     }
 
-    // Lottery ticket — check if natural d20 matches a winning number
+    // Lottery ticket — check d20 AND weapon die against winning numbers
     if (player.equipped && player.equipped.relics) {
       for (var lti = 0; lti < player.equipped.relics.length; lti++) {
         var lotteryRelic = player.equipped.relics[lti]
-        if (lotteryRelic.passiveEffect === 'lottery' && lotteryRelic.lotteryNumbers) {
+        if (lotteryRelic.passiveEffect === 'lottery') {
           var natRoll = attackResult.roll
-          if (lotteryRelic.lotteryNumbers.indexOf(natRoll) !== -1) {
+          // d20 match
+          if (lotteryRelic.lotteryD20 && natRoll === lotteryRelic.lotteryD20) {
             result.lotteryWin = true
             result.lotteryNumber = natRoll
+            result.lotteryDie = 'd20'
+          }
+          // Weapon die match
+          if (lotteryRelic.lotteryWeapon && dmgResult && dmgResult.roll === lotteryRelic.lotteryWeapon) {
+            result.lotteryWin = true
+            result.lotteryNumber = dmgResult.roll
+            result.lotteryDie = result.lotteryDie ? 'BOTH!' : 'weapon'
           }
         }
       }
