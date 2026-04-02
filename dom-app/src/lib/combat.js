@@ -427,6 +427,12 @@ function resolveEnemyAttack(battleState, enemyId) {
 
   var attackResult = d20Attack(strMod + rollsMod + packBonus, 20)
 
+  // Adrenaline — enemies can crit too (triggered by FEAR fight-or-flight)
+  var enemyForceCrit = hasForceCrit(enemy.statusEffects || [])
+  if (enemyForceCrit && attackResult.tier > 1) {
+    attackResult = Object.assign({}, attackResult, { tier: 1, tierName: 'crit' })
+  }
+
   if (forcedTier && attackResult.tier < forcedTier) {
     attackResult = Object.assign({}, attackResult, { tier: forcedTier, tierName: forcedTier === 3 ? 'glancing' : attackResult.tierName })
   }

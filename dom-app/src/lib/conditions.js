@@ -174,7 +174,7 @@ function tickConditions(statusEffects, currentHp, maxHp) {
 
     // FEAR: fight-or-flight if HP < 50%
     if (c.fleeIfLowHp && currentHp < maxHp * 0.5 && !skipped) {
-      if (Math.random() < 0.4) {
+      if (Math.random() < 0.5) {
         // Flight — paralysed
         narratives.push('Paralysed with fear — turn lost!')
         skipped = true
