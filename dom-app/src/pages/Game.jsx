@@ -556,12 +556,38 @@ function Game({ character, user, onEndRun }) {
     if (result.item) {
       setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
     }
-    // Apply condition hazard as HP damage (outside combat, conditions = direct damage)
+    // Apply condition hazard — check immunity relics first, then DEF reduces physical damage
     if (result.condition && !result.agiSaved) {
-      var trapDamage = { POISON: 5, NAUSEA: 3, BLIND: 2, DAZE: 2, SLUGGISH: 4, FEAR: 3, CHARM: 2, BURN: 8, FROST: 4, BLEED: 4, FRENZY: 3, BORED: 1, SAD: 2 }
-      var dmg = trapDamage[result.condition] || 3
-      setPlayerHp(function(hp) { return Math.max(1, hp - dmg) })
-      result.trapDamage = dmg
+      // Check condition immunity from relics
+      var isImmune = false
+      if (character.equipped && character.equipped.relics) {
+        for (var ri = 0; ri < character.equipped.relics.length; ri++) {
+          if (character.equipped.relics[ri].passiveEffect === 'condition_immunity' &&
+              character.equipped.relics[ri].passiveCondition === result.condition) {
+            isImmune = true
+            break
+          }
+        }
+      }
+      if (isImmune) {
+        result.trapImmune = true
+        result.condition = null // negated
+      } else {
+        var trapBaseDamage = { POISON: 6, NAUSEA: 3, BLIND: 2, DAZE: 2, SLUGGISH: 4, FEAR: 3, CHARM: 2, BURN: 10, FROST: 5, BLEED: 5, FRENZY: 4, BORED: 1, SAD: 2 }
+        var baseDmg = trapBaseDamage[result.condition] || 3
+        // DEF reduces physical trap damage (BLEED, BURN, FROST, POISON = physical; FEAR, CHARM, DAZE = mental, no DEF)
+        var physicalTraps = ['POISON', 'BLEED', 'BURN', 'FROST', 'SLUGGISH', 'NAUSEA']
+        var defReduction = 0
+        if (physicalTraps.indexOf(result.condition) !== -1) {
+          var totalDef = (character.stats.def || 10)
+          if (character.equipped && character.equipped.armour) totalDef += character.equipped.armour.defBonus || 0
+          if (character.equipped && character.equipped.offhand) totalDef += character.equipped.offhand.defBonus || 0
+          defReduction = Math.floor(getModifier(totalDef))
+        }
+        var finalDmg = Math.max(1, baseDmg - defReduction)
+        setPlayerHp(function(hp) { return Math.max(1, hp - finalDmg) })
+        result.trapDamage = finalDmg
+      }
     }
     setZone(Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
@@ -2821,11 +2847,16 @@ function Game({ character, user, onEndRun }) {
                         <p className="text-ink-dim text-[10px]">{searchResult.item.description || ''}</p>
                       </div>
                     )}
+                    {searchResult.trapImmune && (
+                      <div className="p-2 rounded border border-green-400/40 bg-green-400/5">
+                        <p className="text-green-400">Trap triggered — but you're immune!</p>
+                      </div>
+                    )}
                     {searchResult.condition && (
                       <div className="p-2 rounded border border-red-400/40 bg-red-400/5">
                         <p className="text-red-400">
                           {searchResult.agiSaved ? 'Trap dodged!' :
-                           'TRAP: ' + searchResult.condition + '!' + (searchResult.trapDamage ? ' -' + searchResult.trapDamage + ' HP' : '')}
+                           searchResult.condition + '! -' + (searchResult.trapDamage || 0) + ' HP'}
                         </p>
                       </div>
                     )}
