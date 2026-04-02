@@ -625,12 +625,20 @@ function Game({ character, user, onEndRun }) {
         result.trapDamage = finalDmg
       }
     }
-    setZone(Object.assign({}, zone, {
-      chambers: zone.chambers.map(function(ch) {
-        if (ch.id !== zone.playerPosition) return ch
-        return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
+    // Check if terminal was just revealed — set zone-level flag
+    var foundTerminal = result.terminal
+    setZone(function(prevZone) {
+      return Object.assign({}, prevZone, {
+        terminalFound: prevZone.terminalFound || foundTerminal,
+        chambers: prevZone.chambers.map(function(ch) {
+          if (ch.id !== prevZone.playerPosition) return ch
+          return Object.assign({}, ch, {
+            junkPiles: ch.junkPiles.slice(),
+            terminalRevealed: ch.terminalRevealed || foundTerminal,
+          })
+        })
       })
-    }))
+    })
   }
 
   var searchTapGuardRef = useRef(0)
@@ -689,9 +697,9 @@ function Game({ character, user, onEndRun }) {
 
   // --- Stairwell descent --- triggers floor transition
   function handleDescendStairwell() {
-    // Terminal must be activated (any terminal in the zone revealed)
-    var terminalActivated = zone.chambers.some(function(ch) {
-      return ch.junkPiles && ch.junkPiles.some(function(p) { return p.terminalRevealed })
+    // Terminal must be activated
+    var terminalActivated = zone.terminalFound || zone.chambers.some(function(ch) {
+      return ch.terminalRevealed || (ch.junkPiles && ch.junkPiles.some(function(p) { return p.terminalRevealed }))
     })
     if (!terminalActivated) return  // terminal not found
 
@@ -2470,8 +2478,8 @@ function Game({ character, user, onEndRun }) {
               {/* Stairwell descent (locked until terminal activated + boss defeated) */}
               {currentChamber.type === 'stairwell_descent' && !currentChamber.cleared && (function() {
                 var bossCleared = zone.chambers.every(function(ch) { return ch.type !== 'boss' || ch.cleared })
-                var terminalActivated = zone.chambers.some(function(ch) {
-                  return ch.junkPiles && ch.junkPiles.some(function(p) { return p.terminalRevealed })
+                var terminalActivated = zone.terminalFound || zone.chambers.some(function(ch) {
+                  return ch.terminalRevealed || (ch.junkPiles && ch.junkPiles.some(function(p) { return p.terminalRevealed }))
                 })
                 var canDescend = terminalActivated && bossCleared
                 return (
