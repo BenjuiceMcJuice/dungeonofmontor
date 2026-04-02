@@ -327,6 +327,7 @@ function Game({ character, user, onEndRun }) {
     setShowCharPanel(false)
     // Reset any open search state
     if (searchDiceRef.current) clearInterval(searchDiceRef.current)
+    if (searchTimeoutRef.current) { clearTimeout(searchTimeoutRef.current); searchTimeoutRef.current = null }
     setSearchPhase(null)
     setSearchResult(null)
     setSearchingPileId(null)
@@ -499,6 +500,7 @@ function Game({ character, user, onEndRun }) {
   var [searchDiceDisplay, setSearchDiceDisplay] = useState(null)
   var [searchSaveDiceDisplay, setSearchSaveDiceDisplay] = useState(null)
   var searchDiceRef = useRef(null)
+  var searchTimeoutRef = useRef(null)
 
   // Step 1: Tap pile → inspect + show clean level choices
   function handleInspectPile(pileId) {
@@ -544,11 +546,10 @@ function Game({ character, user, onEndRun }) {
         setSearchDiceDisplay(result.natRoll)
         setSearchPhase('landed')
 
-        // Dice has landed — go straight to landed phase (tap to continue)
         // If danger: brief pause then auto-run save roll
         if (result.dangerTriggered) {
-          setSearchPhase('landed')
-          setTimeout(function() {
+          searchTimeoutRef.current = setTimeout(function() {
+            searchTimeoutRef.current = null
             setSearchPhase('save_rolling')
             var saveCount = 0
             searchDiceRef.current = setInterval(function() {
@@ -564,7 +565,6 @@ function Game({ character, user, onEndRun }) {
             }, 80)
           }, 1500)
         } else {
-          setSearchPhase('landed')
           // Wait for tap — handled by handleSearchTapContinue
         }
       }
@@ -658,6 +658,8 @@ function Game({ character, user, onEndRun }) {
 
   function handleSearchTapContinue() {
     if (searchPhase === 'landed' || searchPhase === 'save_landed') {
+      // Kill any pending save-roll timeout so it doesn't fire after we move on
+      if (searchTimeoutRef.current) { clearTimeout(searchTimeoutRef.current); searchTimeoutRef.current = null }
       searchTapGuardRef.current = Date.now()
       applySearchRewards(searchResult)
       setSearchPhase('reveal')
@@ -666,6 +668,7 @@ function Game({ character, user, onEndRun }) {
 
   function handleDismissSearch() {
     if (searchDiceRef.current) clearInterval(searchDiceRef.current)
+    if (searchTimeoutRef.current) { clearTimeout(searchTimeoutRef.current); searchTimeoutRef.current = null }
     searchLockedRef.current = false
     setSearchResult(null)
     setSearchingPileId(null)
@@ -2051,18 +2054,16 @@ function Game({ character, user, onEndRun }) {
                 (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
               Stats
             </button>
-            {playerInventory.length > 0 && (
-              <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) setShowCharPanel(false) }}
-                className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
-                  (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
-                Bag ({playerInventory.length})
-              </button>
-            )}
+            <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) setShowCharPanel(false) }}
+              className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
+              Bag
+            </button>
             <span className="text-gold text-xs font-sans">{playerGold}g</span>
           </div>
         </div>
 
-        {/* Character stats panel */}
+        {/* Character stats panel — full screen overlay */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
           var statRows = [
@@ -2081,14 +2082,35 @@ function Game({ character, user, onEndRun }) {
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
           var totalDef = (character.stats.def || 10) + (a ? a.defBonus || 0 : 0) + (o ? o.defBonus || 0 : 0)
+
+          // Compute effective stats from equipment
+          var equipBonuses = {}
+          if (a && a.defBonus) equipBonuses.def = (equipBonuses.def || 0) + a.defBonus
+          if (o && o.defBonus) equipBonuses.def = (equipBonuses.def || 0) + o.defBonus
+          if (w && w.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + w.agiPenalty
+          if (a && a.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + a.agiPenalty
+          if (o && o.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + o.agiPenalty
+
+          // Active buff bonuses
+          for (var bi = 0; bi < activeBuffs.length; bi++) {
+            var b = activeBuffs[bi]
+            if (b.stat && b.value) equipBonuses[b.stat] = (equipBonuses[b.stat] || 0) + b.value
+          }
+
           return (
-            <div className="mb-2 rounded-lg bg-surface border border-border overflow-hidden">
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-display text-base text-gold">{character.name}</span>
+            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="font-display text-lg text-gold">{character.name}</span>
+                <button onClick={function() { setShowCharPanel(false) }}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Close
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-ink-dim text-xs font-sans">Level {character.level || 1} Knight</span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mb-3">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
                   <div className="text-xs font-sans"><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
@@ -2098,18 +2120,41 @@ function Game({ character, user, onEndRun }) {
                   <div className="text-xs font-sans"><span className="text-ink-dim">Crit:</span> <span className="text-ink">{critThreshold}+ (nat d20)</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Dodge:</span> <span className="text-ink">{Math.round(Math.max(0, getModifier(character.stats.agi || 10) * 0.02 + getPassiveTotal(character.equipped, 'dodge_chance')) * 100)}%</span></div>
                 </div>
-                <div className="grid grid-cols-5 gap-1">
+                <div className="grid grid-cols-5 gap-1.5">
                   {statRows.map(function(s) {
-                    var val = character.stats[s.id] || 0
+                    var base = character.stats[s.id] || 0
+                    var bonus = equipBonuses[s.id] || 0
+                    var effective = base + bonus
+                    var color = bonus > 0 ? 'text-green-400' : bonus < 0 ? 'text-red-400' : 'text-ink'
                     return (
-                      <div key={s.id} className="flex flex-col items-center p-1.5 rounded bg-raised border border-border">
+                      <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
-                        <span className="text-ink font-display text-sm">{val}</span>
-                        <span className="text-ink-dim text-[9px]">{mod(val)}</span>
+                        <span className={color + ' font-display text-base'}>{effective}</span>
+                        <span className="text-ink-dim text-[9px]">{mod(effective)}</span>
+                        {bonus !== 0 && <span className="text-ink-faint text-[8px]">base {base}</span>}
                       </div>
                     )
                   })}
                 </div>
+                <p className="text-ink-faint text-[9px] text-center mt-2 font-sans">
+                  {statRows.map(function(s) { return s.label + ': ' + s.hint }).join(' · ')}
+                </p>
+
+                {/* Active buffs */}
+                {activeBuffs.length > 0 && (
+                  <div className="mt-4 border-t border-border pt-3">
+                    <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Active Effects</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {activeBuffs.map(function(b, i) {
+                        return (
+                          <span key={i} className="text-green-400 text-[10px] font-sans bg-green-400/10 border border-green-400/20 rounded px-1.5 py-0.5">
+                            +{b.value} {(b.stat || '').toUpperCase()} ({b.turnsRemaining}t)
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )
@@ -3260,8 +3305,86 @@ function Game({ character, user, onEndRun }) {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{chamberNow.label}</span>
-          <span className="text-gold text-xs font-sans">{playerGold}g</span>
+          <div className="flex items-center gap-2">
+            <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) setShowInventoryPanel(false) }}
+              className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
+              Stats
+            </button>
+            <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) setShowCharPanel(false) }}
+              className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
+              Bag
+            </button>
+            <span className="text-gold text-xs font-sans">{playerGold}g</span>
+          </div>
         </div>
+
+        {/* Character stats panel — full screen overlay (chamber) */}
+        {showCharPanel && (function() {
+          var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
+          var statRows = [
+            { id: 'str', label: 'STR', hint: 'Attack + damage' },
+            { id: 'def', label: 'DEF', hint: 'Damage reduction' },
+            { id: 'agi', label: 'AGI', hint: 'Initiative + dodge' },
+            { id: 'vit', label: 'VIT', hint: 'Max HP' },
+            { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
+            { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
+            { id: 'per', label: 'PER', hint: 'Searching' },
+            { id: 'end', label: 'END', hint: 'Carry capacity' },
+            { id: 'wis', label: 'WIS', hint: 'Gift power' },
+            { id: 'cha', label: 'CHA', hint: 'Prices' },
+          ]
+          var w = character.equipped && character.equipped.weapon
+          var a = character.equipped && character.equipped.armour
+          var o = character.equipped && character.equipped.offhand
+          var equipBonuses = {}
+          if (a && a.defBonus) equipBonuses.def = (equipBonuses.def || 0) + a.defBonus
+          if (o && o.defBonus) equipBonuses.def = (equipBonuses.def || 0) + o.defBonus
+          if (w && w.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + w.agiPenalty
+          if (a && a.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + a.agiPenalty
+          if (o && o.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + o.agiPenalty
+          for (var bi = 0; bi < activeBuffs.length; bi++) {
+            var b = activeBuffs[bi]
+            if (b.stat && b.value) equipBonuses[b.stat] = (equipBonuses[b.stat] || 0) + b.value
+          }
+          var totalDef = (character.stats.def || 10) + (a ? a.defBonus || 0 : 0) + (o ? o.defBonus || 0 : 0)
+          return (
+            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="font-display text-lg text-gold">{character.name}</span>
+                <button onClick={function() { setShowCharPanel(false) }}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Close
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4 text-xs font-sans">
+                  <div><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
+                  <div><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
+                  <div><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
+                  <div><span className="text-ink-dim">DEF total:</span> <span className="text-ink">{totalDef} (reduces {Math.floor(totalDef / 2)})</span></div>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {statRows.map(function(s) {
+                    var base = character.stats[s.id] || 0
+                    var bonus = equipBonuses[s.id] || 0
+                    var effective = base + bonus
+                    var color = bonus > 0 ? 'text-green-400' : bonus < 0 ? 'text-red-400' : 'text-ink'
+                    return (
+                      <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
+                        <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
+                        <span className={color + ' font-display text-base'}>{effective}</span>
+                        <span className="text-ink-dim text-[9px]">{mod(effective)}</span>
+                        {bonus !== 0 && <span className="text-ink-faint text-[8px]">base {base}</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Chamber content */}
         <div className="flex-1 flex items-center justify-center min-h-0">
@@ -3367,30 +3490,66 @@ function Game({ character, user, onEndRun }) {
             { id: 'vit', label: 'VIT' }, { id: 'int', label: 'INT' }, { id: 'lck', label: 'LCK' },
             { id: 'per', label: 'PER' }, { id: 'end', label: 'END' }, { id: 'wis', label: 'WIS' }, { id: 'cha', label: 'CHA' },
           ]
+          var w = character.equipped && character.equipped.weapon
+          var a = character.equipped && character.equipped.armour
+          var o = character.equipped && character.equipped.offhand
+
+          var equipBonuses = {}
+          if (a && a.defBonus) equipBonuses.def = (equipBonuses.def || 0) + a.defBonus
+          if (o && o.defBonus) equipBonuses.def = (equipBonuses.def || 0) + o.defBonus
+          if (w && w.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + w.agiPenalty
+          if (a && a.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + a.agiPenalty
+          if (o && o.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + o.agiPenalty
+          for (var bi = 0; bi < activeBuffs.length; bi++) {
+            var b = activeBuffs[bi]
+            if (b.stat && b.value) equipBonuses[b.stat] = (equipBonuses[b.stat] || 0) + b.value
+          }
+
           return (
-            <div className="fixed inset-0 z-50 bg-bg/90 flex flex-col items-center justify-center p-4" onClick={function() { setShowCharPanel(false) }}>
-              <div className="bg-surface border border-border rounded-lg p-4 max-w-xs w-full" onClick={function(e) { e.stopPropagation() }}>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-display text-base text-gold">{character.name}</span>
-                  <button onClick={function() { setShowCharPanel(false) }} className="text-ink-dim text-xs border border-border px-2 py-1 rounded">Close</button>
-                </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mb-3 text-xs font-sans">
+            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="font-display text-lg text-gold">{character.name}</span>
+                <button onClick={function() { setShowCharPanel(false) }}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Close
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4 text-xs font-sans">
                   <div><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
                   <div><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
                   <div><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
                 </div>
-                <div className="grid grid-cols-5 gap-1">
+                <div className="grid grid-cols-5 gap-1.5">
                   {statRows.map(function(s) {
-                    var val = character.stats[s.id] || 0
+                    var base = character.stats[s.id] || 0
+                    var bonus = equipBonuses[s.id] || 0
+                    var effective = base + bonus
+                    var color = bonus > 0 ? 'text-green-400' : bonus < 0 ? 'text-red-400' : 'text-ink'
                     return (
-                      <div key={s.id} className="flex flex-col items-center p-1.5 rounded bg-raised border border-border">
+                      <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
-                        <span className="text-ink font-display text-sm">{val}</span>
-                        <span className="text-ink-dim text-[9px]">{mod(val)}</span>
+                        <span className={color + ' font-display text-base'}>{effective}</span>
+                        <span className="text-ink-dim text-[9px]">{mod(effective)}</span>
+                        {bonus !== 0 && <span className="text-ink-faint text-[8px]">base {base}</span>}
                       </div>
                     )
                   })}
                 </div>
+                {activeBuffs.length > 0 && (
+                  <div className="mt-4 border-t border-border pt-3">
+                    <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Active Effects</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {activeBuffs.map(function(b, i) {
+                        return (
+                          <span key={i} className="text-green-400 text-[10px] font-sans bg-green-400/10 border border-green-400/20 rounded px-1.5 py-0.5">
+                            +{b.value} {(b.stat || '').toUpperCase()} ({b.turnsRemaining}t)
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )
@@ -3401,6 +3560,18 @@ function Game({ character, user, onEndRun }) {
           <div className="flex flex-col items-start">
             <span className="text-gold text-xs font-display">{zone.floorName}</span><span className="text-ink-dim text-[10px] font-sans ml-1">— {zone.zoneName}</span>
             <span className="text-ink-dim text-xs uppercase tracking-widest">{combatChamber.label} -- Round {battle.round}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) { setShowInventoryPanel(false); setCombatItemPhase(null) } }}
+              className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
+              Stats
+            </button>
+            <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) { setShowCharPanel(false); setCombatItemPhase(null) } }}
+              className={'text-xs font-sans px-2 py-1 rounded border transition-colors ' +
+                (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
+              Bag
+            </button>
           </div>
         </div>
 
@@ -3743,18 +3914,7 @@ function Game({ character, user, onEndRun }) {
                   <span>{character.equipped.offhand.type === 'weapon' ? 'Dual' : 'Shield'}</span>
                 )}
               </div>
-              <div className="flex items-center gap-1">
-                <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) { setShowInventoryPanel(false); setCombatItemPhase(null) } }}
-                  className={'text-[9px] font-sans px-1.5 py-0.5 rounded border transition-colors ' +
-                    (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
-                  Stats
-                </button>
-                <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) { setShowCharPanel(false); setCombatItemPhase(null) } }}
-                  className={'text-[9px] font-sans px-1.5 py-0.5 rounded border transition-colors ' +
-                    (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
-                  Bag
-                </button>
-              </div>
+              <span className="text-gold text-[10px] font-sans">{playerGold}g</span>
             </div>
           </div>
         </div>
