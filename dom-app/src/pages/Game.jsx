@@ -601,14 +601,17 @@ function Game({ character, user, onEndRun }) {
     if (result.item) {
       setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
     }
-    // Treasure — Montor's gift artefact
+    // Treasure — Montor's gift artefact (goes in junk bag as a special item)
     if (result.treasure) {
       setCollectedTreasures(function(prev) { return prev.concat([result.treasure.id]) })
-      setPlayerInventory(function(inv) { return inv.concat([{
-        id: result.treasure.id, name: result.treasure.name, type: 'treasure',
-        description: result.treasure.description, gift: result.treasure.gift,
-        sellPrice: 0,
-      }]) })
+      setPlayerJunkBag(function(bag) {
+        return bag.concat([{
+          id: result.treasure.id, name: result.treasure.name,
+          sellPrice: 0, count: 1, consumable: false,
+          isTreasure: true, gift: result.treasure.gift,
+          description: result.treasure.description,
+        }])
+      })
     }
     // Apply condition hazard — check immunity relics first, then DEF reduces physical damage
     if (result.condition && !result.agiSaved) {
@@ -2418,11 +2421,16 @@ function Game({ character, user, onEndRun }) {
                     )}
                     {playerJunkBag.filter(function(j) { return !j.consumable }).map(function(junk) {
                       return (
-                        <div key={junk.id} className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans border border-border">
-                          <span className="text-ink">{junk.name}</span>
+                        <div key={junk.id} className={'flex items-center justify-between p-3 rounded-lg text-sm font-sans border ' +
+                          (junk.isTreasure ? 'bg-gold/10 border-gold/40' : 'bg-raised border-border')}>
+                          <div className="flex flex-col">
+                            <span className={junk.isTreasure ? 'text-gold font-display' : 'text-ink'}>{junk.name}</span>
+                            {junk.isTreasure && <span className="text-purple-400 text-[9px]">Montor's Treasure — Gift: {junk.gift}</span>}
+                            {junk.description && junk.isTreasure && <span className="text-ink-dim text-[9px] italic">{junk.description}</span>}
+                          </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-gold text-xs font-display">x{junk.count}</span>
-                            <span className="text-ink-faint text-[10px]">{junk.sellPrice}g ea</span>
+                            {!junk.isTreasure && <span className="text-gold text-xs font-display">x{junk.count}</span>}
+                            {!junk.isTreasure && <span className="text-ink-faint text-[10px]">{junk.sellPrice}g ea</span>}
                           </div>
                         </div>
                       )
