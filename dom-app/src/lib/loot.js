@@ -250,4 +250,5 @@ export {
   getItemsByType,
   getMerchantItems,
   applyConsumable,
+  getFloorLootPrefix,
 }

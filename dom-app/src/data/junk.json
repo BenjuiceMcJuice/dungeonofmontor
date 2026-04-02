@@ -1,0 +1,106 @@
+{
+  "junkPools": {
+    "grounds": [
+      { "id": "broken_gnome",      "name": "Broken Gnome",        "sellPrice": 1 },
+      { "id": "rusty_trowel",      "name": "Rusty Trowel",        "sellPrice": 1 },
+      { "id": "dried_flowers",     "name": "Dried Flowers",       "sellPrice": 1 },
+      { "id": "empty_seed_packet", "name": "Empty Seed Packet",   "sellPrice": 1 },
+      { "id": "cracked_pot",       "name": "Cracked Pot",         "sellPrice": 2 },
+      { "id": "tangled_hose",      "name": "Tangled Hose",        "sellPrice": 1 },
+      { "id": "faded_label",       "name": "Faded Plant Label",   "sellPrice": 1 },
+      { "id": "snapped_rake",      "name": "Snapped Rake Handle", "sellPrice": 1 },
+      { "id": "worm",              "name": "Worm",                "sellPrice": 1 },
+      { "id": "bird_bath_chunk",   "name": "Bird Bath Fragment",  "sellPrice": 2 }
+    ],
+    "underground": [
+      { "id": "loose_brick",       "name": "Loose Brick",         "sellPrice": 1 },
+      { "id": "rusty_chain",       "name": "Rusty Chain",         "sellPrice": 2 },
+      { "id": "rat_droppings",     "name": "Rat Droppings",       "sellPrice": 1 },
+      { "id": "damp_rag",          "name": "Damp Rag",            "sellPrice": 1 },
+      { "id": "bent_nail",         "name": "Bent Nail",           "sellPrice": 1 },
+      { "id": "mouldy_sock",       "name": "Mouldy Sock",         "sellPrice": 1 },
+      { "id": "cracked_bottle",    "name": "Cracked Bottle",      "sellPrice": 1 },
+      { "id": "cobweb_ball",       "name": "Ball of Cobwebs",     "sellPrice": 1 },
+      { "id": "broken_lantern",    "name": "Broken Lantern",      "sellPrice": 2 },
+      { "id": "single_boot",       "name": "Single Boot",         "sellPrice": 1 }
+    ],
+    "underbelly": [
+      { "id": "cracked_pipe",      "name": "Cracked Pipe",        "sellPrice": 1 },
+      { "id": "slime_clump",       "name": "Clump of Slime",      "sellPrice": 1 },
+      { "id": "rusty_valve",       "name": "Rusty Valve",         "sellPrice": 2 },
+      { "id": "rotting_plank",     "name": "Rotting Plank",       "sellPrice": 1 },
+      { "id": "broken_grate",      "name": "Broken Grate",        "sellPrice": 2 },
+      { "id": "mould_scraping",    "name": "Mould Scraping",      "sellPrice": 1 },
+      { "id": "dead_rat",          "name": "Dead Rat",            "sellPrice": 1 },
+      { "id": "soggy_paper",       "name": "Soggy Paper",         "sellPrice": 1 },
+      { "id": "drain_cover",       "name": "Drain Cover",         "sellPrice": 2 },
+      { "id": "fungal_growth",     "name": "Fungal Growth",       "sellPrice": 1 }
+    ],
+    "quarters": [
+      { "id": "torn_curtain",      "name": "Torn Curtain",        "sellPrice": 1 },
+      { "id": "broken_mirror",     "name": "Broken Mirror Shard", "sellPrice": 2 },
+      { "id": "moth_eaten_sock",   "name": "Moth-Eaten Sock",     "sellPrice": 1 },
+      { "id": "dusty_book",        "name": "Dusty Book",          "sellPrice": 2 },
+      { "id": "snapped_quill",     "name": "Snapped Quill",       "sellPrice": 1 },
+      { "id": "candle_stub",       "name": "Candle Stub",         "sellPrice": 1 },
+      { "id": "tarnished_button",  "name": "Tarnished Button",    "sellPrice": 1 },
+      { "id": "cracked_inkwell",   "name": "Cracked Inkwell",     "sellPrice": 2 },
+      { "id": "hair_ribbon",       "name": "Hair Ribbon",         "sellPrice": 1 },
+      { "id": "chipped_teacup",    "name": "Chipped Teacup",      "sellPrice": 2 }
+    ],
+    "works": [
+      { "id": "bent_gear",         "name": "Bent Gear",           "sellPrice": 2 },
+      { "id": "slag_lump",         "name": "Lump of Slag",        "sellPrice": 1 },
+      { "id": "broken_bellows",    "name": "Broken Bellows",      "sellPrice": 2 },
+      { "id": "twisted_wire",      "name": "Twisted Wire",        "sellPrice": 1 },
+      { "id": "cracked_crucible",  "name": "Cracked Crucible",    "sellPrice": 2 },
+      { "id": "coal_dust",         "name": "Handful of Coal Dust","sellPrice": 1 },
+      { "id": "snapped_tong",      "name": "Snapped Tong",        "sellPrice": 1 },
+      { "id": "melted_screw",      "name": "Melted Screw",        "sellPrice": 1 },
+      { "id": "burnt_leather",     "name": "Burnt Leather Strip",  "sellPrice": 1 },
+      { "id": "iron_filing",       "name": "Iron Filings",        "sellPrice": 2 }
+    ],
+    "deep": [
+      { "id": "cave_crystal",      "name": "Cave Crystal",        "sellPrice": 3 },
+      { "id": "bone_fragment",     "name": "Bone Fragment",        "sellPrice": 1 },
+      { "id": "petrified_wood",    "name": "Petrified Wood",       "sellPrice": 2 },
+      { "id": "strange_fossil",    "name": "Strange Fossil",       "sellPrice": 3 },
+      { "id": "shadow_dust",       "name": "Shadow Dust",          "sellPrice": 2 },
+      { "id": "void_pebble",       "name": "Void Pebble",          "sellPrice": 2 },
+      { "id": "dried_stalactite",  "name": "Dried Stalactite",     "sellPrice": 2 },
+      { "id": "glowing_lichen",    "name": "Glowing Lichen",       "sellPrice": 2 },
+      { "id": "ancient_coin",      "name": "Ancient Coin",         "sellPrice": 3 },
+      { "id": "cracked_geode",     "name": "Cracked Geode",        "sellPrice": 3 }
+    ],
+    "domain": [
+      { "id": "throne_splinter",   "name": "Throne Splinter",      "sellPrice": 3 },
+      { "id": "montor_hair",       "name": "Montor's Hair",        "sellPrice": 1 },
+      { "id": "ripped_tapestry",   "name": "Ripped Tapestry",      "sellPrice": 2 },
+      { "id": "crown_fragment",    "name": "Crown Fragment",        "sellPrice": 3 },
+      { "id": "empty_vial",        "name": "Empty Vial",            "sellPrice": 2 },
+      { "id": "broken_sceptre",    "name": "Broken Sceptre Tip",    "sellPrice": 3 },
+      { "id": "scorch_mark",       "name": "Scorched Fabric",       "sellPrice": 1 },
+      { "id": "dust_of_ages",      "name": "Dust of Ages",          "sellPrice": 2 },
+      { "id": "void_shard_sliver", "name": "Void Shard Sliver",     "sellPrice": 3 },
+      { "id": "montors_note",      "name": "Montor's Crumpled Note","sellPrice": 2 }
+    ]
+  },
+  "conditionHazards": {
+    "grounds":     ["POISON", "NAUSEA"],
+    "underground": ["BLIND", "DAZE"],
+    "underbelly":  ["POISON", "SLUGGISH"],
+    "quarters":    ["FEAR", "CHARM"],
+    "works":       ["BURN", "DAZE"],
+    "deep":        ["FROST", "BLIND"],
+    "domain":      ["FEAR", "BURN"]
+  },
+  "pileDescriptions": {
+    "grounds":     { "small": "A scattering of garden debris", "medium": "A heap of dead leaves and broken tools", "large": "A towering mound of compost and junk" },
+    "underground": { "small": "A few loose stones and rags", "medium": "A pile of rubble and old belongings", "large": "A collapsed section full of buried objects" },
+    "underbelly":  { "small": "A slick cluster of refuse", "medium": "A stinking heap of waste", "large": "A mountain of sewage-soaked debris" },
+    "quarters":    { "small": "A scatter of personal effects", "medium": "A heap of broken furniture", "large": "A collapsed wardrobe spilling its contents" },
+    "works":       { "small": "Some scattered metal scraps", "medium": "A pile of forge waste and broken parts", "large": "A massive slag heap with things buried inside" },
+    "deep":        { "small": "A cluster of strange rocks", "medium": "A cairn of fallen stone and bones", "large": "A vast rockfall hiding who knows what" },
+    "domain":      { "small": "Scraps of Montor's possessions", "medium": "A heap of ruined finery", "large": "A throne room's worth of debris" }
+  }
+}

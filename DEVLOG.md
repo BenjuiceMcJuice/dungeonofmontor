@@ -77,8 +77,17 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-01 | ADRENALINE + CRASH conditions — forceCrit mechanic, triggersOnExpiry chain | ✅ Done |
 | 2026-04-01 | Turn skip UX — playerSkipped phase with 1.5s delay + red banner | ✅ Done |
 | 2026-04-01 | Design: Gift endgame — Void Chamber restoration, terminals under junk piles | ✅ Done |
+| 2026-04-02 | Weapon system overhaul — 5 classes, 4 tiers, ~60 weapons, stagger mechanic | ✅ Done |
+| 2026-04-02 | Frost buff (brittle +50% dmg taken), Daze buff (guaranteed stun) | ✅ Done |
+| 2026-04-02 | HP balance — VIT×5, HP per level 5-10, rest 35%, baseline 1HP regen | ✅ Done |
+| 2026-04-02 | Unarmed combat — d4, 2x STR, -1 acc, +1 init | ✅ Done |
+| 2026-04-02 | Combat UI timing — tap bleed-through fix, condition display pacing | ✅ Done |
+| 2026-04-02 | Enemy adrenaline crits, 50/50 fight-or-flight | ✅ Done |
+| 2026-04-02 | Loot table rebalance + weapon compendium doc | ✅ Done |
+| 2026-04-02 | Junk piles — PER-based search, 3 pile sizes, XP, junk bag, terminal placement | ✅ Done |
+| 2026-04-02 | Removed chest/trap/hidden room types — replaced with junk pile rooms | ✅ Done |
 |            | **Next up** | |
-|            | Junk piles — room interaction, search intensity, PER rolls, XP, terminals hidden underneath | ⬜ |
+|            | Junk pile polish — enemy ambushes from piles, condition hazards applied | ⬜ |
 |            | Wire remaining passives — reflect_conditions, last_stand, see_enemy_hp_exact | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Montor's Gift system — find/break/apply at terminals/restore to Void Chamber | ⬜ |
