@@ -2829,7 +2829,7 @@ function Game({ character, user, onEndRun }) {
               <p className="text-ink-dim text-xs italic text-center max-w-xs">
                 {currentChamber.id === 0
                   ? 'The entrance to the garden. Overgrown walls rise on all sides.'
-                  : 'The chamber is still. ' + doors.length + (doors.length === 1 ? ' door leads onward.' : ' doors lead onward.')}
+                  : (currentChamber.hasTerminal ? 'Something hums faintly beneath the debris. ' : 'The chamber is still. ') + doors.length + (doors.length === 1 ? ' door leads onward.' : ' doors lead onward.')}
               </p>
 
               {/* Junk piles — shown when not mid-search */}
