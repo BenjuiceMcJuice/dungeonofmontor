@@ -1,13 +1,13 @@
 {
   "xpThresholds": [
-    { "xp": 50,   "hpGain": 3, "statPick": true },
-    { "xp": 120,  "hpGain": 3, "statPick": true },
-    { "xp": 220,  "hpGain": 3, "statPick": true },
-    { "xp": 350,  "hpGain": 5, "statPick": true },
-    { "xp": 550,  "hpGain": 3, "statPick": true },
-    { "xp": 800,  "hpGain": 5, "statPick": true },
-    { "xp": 1200, "hpGain": 3, "statPick": true },
-    { "xp": 1700, "hpGain": 5, "statPick": true },
-    { "xp": 2400, "hpGain": 5, "statPick": true }
+    { "xp": 50,   "hpGain": 5,  "statPick": true },
+    { "xp": 120,  "hpGain": 5,  "statPick": true },
+    { "xp": 220,  "hpGain": 5,  "statPick": true },
+    { "xp": 350,  "hpGain": 8,  "statPick": true },
+    { "xp": 550,  "hpGain": 5,  "statPick": true },
+    { "xp": 800,  "hpGain": 8,  "statPick": true },
+    { "xp": 1200, "hpGain": 5,  "statPick": true },
+    { "xp": 1700, "hpGain": 8,  "statPick": true },
+    { "xp": 2400, "hpGain": 10, "statPick": true }
   ]
 }

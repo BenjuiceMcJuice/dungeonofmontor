@@ -36,8 +36,8 @@
     "allocatableStats": ["str", "def", "agi", "int", "lck", "per", "end", "wis", "cha", "vit"],
     "startingGold": 50,
     "starterShopItems": [
-      "dagger_common", "shortsword_common", "longsword_common", "mace_common",
-      "leather_common", "chainmail_common", "wooden_shield",
+      "dagger_base", "sword_base", "spear_base", "mace_base", "axe_base",
+      "shield_base", "leather_common",
       "health_potion", "health_potion", "smoke_bomb", "rage_draught", "montors_marvelous_medicine", "montors_marvelous_medicine"
     ]
   }

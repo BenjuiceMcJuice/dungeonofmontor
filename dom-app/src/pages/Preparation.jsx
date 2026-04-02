@@ -51,7 +51,15 @@ function Preparation({ character, onReady }) {
     if (item.type === 'weapon' && item.slot === 'weapon') {
       returnItem = newEquipped.weapon
       newEquipped.weapon = item
+      // Heavy weapons can't use shields — unequip offhand
+      if (item.hand === 'heavy' && newEquipped.offhand && newEquipped.offhand.slot === 'offhand') {
+        var shieldReturn = newEquipped.offhand
+        newEquipped.offhand = null
+        setInventory(function(prev) { return prev.concat([shieldReturn]) })
+      }
     } else if (item.type === 'armour' && item.slot === 'offhand') {
+      // Can't equip shield with heavy weapon
+      if (newEquipped.weapon && newEquipped.weapon.hand === 'heavy') return
       returnItem = newEquipped.offhand
       newEquipped.offhand = item
     } else if (item.type === 'armour' && item.slot === 'armour') {

@@ -13,9 +13,9 @@ function getModifier(value) {
   return Math.floor((value - 10) / 2)
 }
 
-// Max HP: 25 + (VIT * 3)
+// Max HP: 20 + (VIT * 5)
 function getMaxHp(stats) {
-  return 25 + ((stats.vit || 8) * 3)
+  return 20 + ((stats.vit || 8) * 5)
 }
 
 // Generate a Knight with base stats, no equipment, and starting gold

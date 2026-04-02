@@ -84,6 +84,7 @@ function applyCondition(statusEffects, conditionId, source) {
     intPenalty: def.intPenalty || 0,
     regenPenalty: def.regenPenalty || 0,
     triggerFear: def.triggerFear || 0,
+    damageTakenMultiplier: def.damageTakenMultiplier || 1,
   }
 
   // Non-stackable: remove existing condition in same slot, add new one
@@ -161,6 +162,7 @@ function tickConditions(statusEffects, currentHp, maxHp) {
         skipped = true
         var skipReasons = {
           'Burning': 'Flailing in panic — turn lost!',
+          'Dazed': 'Stunned — seeing stars — turn lost!',
           'Nauseous': 'Retching — turn lost!',
           'Charmed': 'Staring dreamily into nothing — turn lost!',
           'Bored': 'Yawning mid-fight — turn lost!',
@@ -287,6 +289,17 @@ function mustAttackRandom(statusEffects) {
   return statusEffects.some(function(c) { return c.attacksRandom })
 }
 
+// Get damage taken multiplier (FROST brittle effect)
+function getDamageTakenMultiplier(statusEffects) {
+  var mul = 1
+  for (var i = 0; i < statusEffects.length; i++) {
+    if (statusEffects[i].damageTakenMultiplier && statusEffects[i].damageTakenMultiplier > 1) {
+      mul = Math.max(mul, statusEffects[i].damageTakenMultiplier)
+    }
+  }
+  return mul
+}
+
 // BLOODLUST: heal on kill, damage on no-kill
 function getBloodlustEffect(statusEffects) {
   var c = statusEffects.find(function(c) { return c.id === 'BLOODLUST' })
@@ -348,6 +361,7 @@ export {
   areItemsBlocked,
   isFleeBlocked,
   mustAttackRandom,
+  getDamageTakenMultiplier,
   getBloodlustEffect,
   rollConditionApplication,
   getEnemyCondition,

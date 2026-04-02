@@ -29,7 +29,8 @@
       "statModifier": { "stat": "agi", "value": -3 },
       "defPenalty": -3,
       "intPenalty": -2,
-      "description": "Frozen. -3 AGI, -3 DEF, -2 INT — numb, brittle, foggy."
+      "damageTakenMultiplier": 1.5,
+      "description": "Frozen. -3 AGI, -3 DEF, -2 INT, take 50% more damage — numb, brittle, shatterable."
     },
     "NAUSEA": {
       "id": "NAUSEA", "slot": "body", "name": "Nauseous",
@@ -69,9 +70,9 @@
     },
     "DAZE": {
       "id": "DAZE", "slot": "mind", "name": "Dazed",
-      "turns": 1, "forceTier": 3,
+      "turns": 1, "skipChance": 1.0,
       "statModifier": { "stat": "agi", "value": -2 },
-      "description": "Stunned. Glancing blows only. -2 AGI — staggering."
+      "description": "Stunned. Skip next turn. -2 AGI — seeing stars."
     },
     "BORED": {
       "id": "BORED", "slot": "mind", "name": "Bored",

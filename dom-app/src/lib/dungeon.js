@@ -266,7 +266,7 @@ function generateChamberContent(chamber, difficulty, zoneDef) {
   } else if (chamber.type === 'zone_door') {
     content.description = 'A heavy door, locked and cold. Something lies beyond.'
   } else if (chamber.type === 'rest') {
-    content.hpRecovery = 0.25
+    content.hpRecovery = 0.35
     content.description = 'A sheltered space. The air is still.'
   } else if (chamber.type === 'merchant') {
     content.items = getMerchantItems(zd.floorId)
