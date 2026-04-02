@@ -72,7 +72,7 @@
         { "type": "combat_standard", "label": "Hedge Corridor",      "safe": false, "icon": "⚔" },
         { "type": "combat_elite",    "label": "Thorn Thicket",       "safe": false, "icon": "⚔" },
         { "type": "mini_boss",       "label": "Topiary Guardian",    "safe": false, "icon": "☠" },
-        { "type": "keystone",        "label": "Stone Pedestal",      "safe": true,  "icon": "⚷" },
+        { "type": "empty",           "label": "Stone Pedestal",      "safe": true,  "icon": "◇" },
         { "type": "merchant",        "label": "Wandering Vendor",    "safe": true,  "icon": "⚒" },
         { "type": "quest_npc",       "label": "Wounded Traveller",   "safe": true,  "icon": "?" },
         { "type": "empty",            "label": "Overgrown Tripwires", "safe": false, "icon": "!" },
@@ -103,14 +103,14 @@
         { "type": "combat_standard",  "label": "Shattered Throne",     "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Guard Post",           "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Warden Chamber",       "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Ancient Lever",        "safe": true,  "icon": "⚷" },
+        { "type": "boss",             "label": "The Warden",           "safe": false, "icon": "☠" },
         { "type": "merchant",         "label": "Scavenger",            "safe": true,  "icon": "⚒" },
         { "type": "quest_npc",        "label": "Imprisoned Scholar",   "safe": true,  "icon": "?" },
         { "type": "empty",             "label": "Pressure Plate",       "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Weapon Rack",          "safe": true,  "icon": "◆" },
         { "type": "empty",           "label": "Behind the Tapestry",  "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Iron Door",            "safe": true,  "icon": "▣" },
-        { "type": "combat_standard",  "label": "Servants Passage",     "safe": false, "icon": "⚔" }
+        { "type": "stairwell_descent","label": "Servants Passage",     "safe": true,  "icon": "▼" }
       ]
     },
     "kitchen": {
@@ -134,14 +134,14 @@
         { "type": "combat_standard",  "label": "Hearth",                "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Head Chef Station",     "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Larder Keeper",         "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Rusty Winch",           "safe": true,  "icon": "⚷" },
+        { "type": "boss",             "label": "The Head Chef",         "safe": false, "icon": "☠" },
         { "type": "merchant",         "label": "Rat Trader",            "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Grease Trap",           "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Scalding Vent",         "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Provisions Crate",      "safe": true,  "icon": "◆" },
         { "type": "empty",           "label": "Behind the Furnace",    "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Service Hatch",         "safe": true,  "icon": "▣" },
-        { "type": "combat_standard",  "label": "Drain Grate",           "safe": false, "icon": "⚔" }
+        { "type": "stairwell_descent","label": "Drain Grate",           "safe": true,  "icon": "▼" }
       ]
     },
     "sewers": {
@@ -165,14 +165,14 @@
         { "type": "combat_standard",  "label": "Collapsed Pipe",        "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Web Gallery",           "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Egg Chamber",           "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Valve Wheel",           "safe": true,  "icon": "⚷" },
+        { "type": "boss",             "label": "The Brood Queen",       "safe": false, "icon": "☠" },
         { "type": "merchant",         "label": "Ratcatcher's Nook",     "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Slime Pool",            "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Weakened Floor",         "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Washed-Up Crate",       "safe": true,  "icon": "◆" },
         { "type": "empty",           "label": "Behind the Grate",      "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Sluice Gate",           "safe": true,  "icon": "▣" },
-        { "type": "combat_standard",  "label": "Overflow Channel",      "safe": false, "icon": "⚔" }
+        { "type": "stairwell_descent","label": "Overflow Channel",      "safe": true,  "icon": "▼" }
       ]
     },
     "cistern": {
@@ -196,7 +196,7 @@
         { "type": "combat_standard",  "label": "Drowned Steps",         "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Bile Pit",              "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Nesting Chamber",       "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Control Valve",         "safe": true,  "icon": "⚷" },
+        { "type": "empty",            "label": "Control Valve",         "safe": true,  "icon": "◇" },
         { "type": "merchant",         "label": "Plumber's Corner",      "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Acid Drip",             "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Sunken Chest",          "safe": true,  "icon": "◆" },
@@ -227,14 +227,14 @@
         { "type": "combat_standard",  "label": "Under the Bed",         "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Mirror Room",           "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Hound's Den",           "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Music Box",             "safe": true,  "icon": "⚷" },
+        { "type": "boss",             "label": "The Night Terror",      "safe": false, "icon": "☠" },
         { "type": "merchant",         "label": "Maid's Cupboard",       "safe": true,  "icon": "⚒" },
         { "type": "quest_npc",        "label": "Portrait Gallery",      "safe": true,  "icon": "?" },
         { "type": "empty",             "label": "Loose Floorboard",      "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Jewellery Box",         "safe": true,  "icon": "◆" },
         { "type": "empty",           "label": "Behind the Headboard",  "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Study Door",            "safe": true,  "icon": "▣" },
-        { "type": "combat_standard",  "label": "Dressing Room",         "safe": false, "icon": "⚔" }
+        { "type": "stairwell_descent","label": "Dressing Room",         "safe": true,  "icon": "▼" }
       ]
     },
     "study": {
@@ -258,7 +258,7 @@
         { "type": "combat_standard",  "label": "Writing Desk",          "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Forbidden Section",     "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Locked Cabinet",        "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Hidden Lever",          "safe": true,  "icon": "⚷" },
+        { "type": "empty",            "label": "Hidden Lever",          "safe": true,  "icon": "◇" },
         { "type": "merchant",         "label": "Tutor's Desk",          "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Ink Trap",              "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Book Avalanche",        "safe": false, "icon": "!" },
@@ -289,14 +289,14 @@
         { "type": "combat_standard",  "label": "Slag Heap",             "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Crucible Room",         "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Assembly Floor",        "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Master Switch",         "safe": true,  "icon": "⚷" },
+        { "type": "boss",             "label": "The Furnace Keeper",    "safe": false, "icon": "☠" },
         { "type": "merchant",         "label": "Smith's Counter",       "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Steam Burst",           "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Falling Ingots",        "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Finished Goods Rack",   "safe": true,  "icon": "◆" },
         { "type": "empty",           "label": "Behind the Furnace",    "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Workshop Door",         "safe": true,  "icon": "▣" },
-        { "type": "combat_standard",  "label": "Coal Chute",            "safe": false, "icon": "⚔" }
+        { "type": "stairwell_descent","label": "Coal Chute",            "safe": true,  "icon": "▼" }
       ]
     },
     "workshop": {
@@ -320,7 +320,7 @@
         { "type": "combat_standard",  "label": "Gear Room",             "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Prototype Bay",         "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Failed Experiments",    "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Power Lever",           "safe": true,  "icon": "⚷" },
+        { "type": "empty",            "label": "Power Lever",           "safe": true,  "icon": "◇" },
         { "type": "merchant",         "label": "Apprentice's Bench",    "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Spring Trap",           "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Reject Bin",            "safe": true,  "icon": "◆" },
@@ -351,14 +351,14 @@
         { "type": "combat_standard",  "label": "Narrow Squeeze",        "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Nest of Shadows",       "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "The Hollow",            "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Ancient Rune",          "safe": true,  "icon": "⚷" },
+        { "type": "boss",             "label": "The Stone Sentinel",    "safe": false, "icon": "☠" },
         { "type": "merchant",         "label": "Hermit's Alcove",       "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Loose Rockfall",        "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Gas Pocket",            "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Fossil Bed",            "safe": true,  "icon": "◆" },
         { "type": "empty",           "label": "Behind the Waterfall",  "safe": true,  "icon": "◇" },
         { "type": "zone_door",        "label": "Chasm Bridge",          "safe": true,  "icon": "▣" },
-        { "type": "combat_standard",  "label": "Echo Chamber",          "safe": false, "icon": "⚔" }
+        { "type": "stairwell_descent","label": "Echo Chamber",          "safe": true,  "icon": "▼" }
       ]
     },
     "chasm": {
@@ -382,7 +382,7 @@
         { "type": "combat_standard",  "label": "The Overhang",          "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Void Rift",             "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "The Whispering Dark",   "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Void Crystal",          "safe": true,  "icon": "⚷" },
+        { "type": "empty",            "label": "Void Crystal",          "safe": true,  "icon": "◇" },
         { "type": "merchant",         "label": "Prospector's Camp",     "safe": true,  "icon": "⚒" },
         { "type": "empty",             "label": "Crumbling Edge",        "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Abandoned Pack",        "safe": true,  "icon": "◆" },
@@ -413,7 +413,7 @@
         { "type": "combat_standard",  "label": "Guard Station",         "safe": false, "icon": "⚔" },
         { "type": "combat_elite",     "label": "Vault Door",            "safe": false, "icon": "⚔" },
         { "type": "mini_boss",        "label": "Montor's Champion",     "safe": false, "icon": "☠" },
-        { "type": "keystone",         "label": "Montor's Lock",         "safe": true,  "icon": "⚷" },
+        { "type": "empty",            "label": "Montor's Lock",         "safe": true,  "icon": "◇" },
         { "type": "quest_npc",        "label": "A Familiar Face",       "safe": true,  "icon": "?" },
         { "type": "empty",             "label": "Final Test",            "safe": false, "icon": "!" },
         { "type": "empty",             "label": "Void Snare",            "safe": false, "icon": "!" },

@@ -677,7 +677,12 @@ function Game({ character, user, onEndRun }) {
 
   // --- Stairwell descent --- triggers floor transition
   function handleDescendStairwell() {
-    if (!zone.keystonePressed) return  // locked
+    // Terminal must be activated (any terminal in the zone revealed)
+    var terminalActivated = zone.chambers.some(function(ch) {
+      return ch.junkPiles && ch.junkPiles.some(function(p) { return p.terminalRevealed })
+    })
+    if (!terminalActivated) return  // terminal not found
+
     // Check if boss is cleared (boss chamber must be cleared)
     var bossCleared = zone.chambers.every(function(ch) {
       return ch.type !== 'boss' || ch.cleared
@@ -692,7 +697,24 @@ function Game({ character, user, onEndRun }) {
   // --- Floor transition: move to next floor or victory ---
   function handleFloorTransitionContinue() {
     if (isGuarded()) return
-    // Determine next floor from data
+
+    // Check if there's another zone on the same floor (via zone door, optional)
+    var nextZoneIdx = (floor.currentZoneIndex || 0) + 1
+    if (nextZoneIdx < floor.zones.length) {
+      // More zones on this floor — advance to next zone
+      var nextZone = floor.zones[nextZoneIdx]
+      setFloor(Object.assign({}, floor, { currentZoneIndex: nextZoneIdx }))
+      setZone(nextZone)
+      setHasZoneKey(false)
+      setPreviousPosition(null)
+      setLootingCorpseId(null)
+      setLootingChestId(null)
+      setLootingNpcId(null)
+      guardedSetPhase('safe_room')
+      return
+    }
+
+    // All zones on this floor done — move to next floor
     var currentFloorDef = FLOORS[floor.floorId]
     var nextFloorId = currentFloorDef ? currentFloorDef.nextFloor : null
 
@@ -704,6 +726,7 @@ function Game({ character, user, onEndRun }) {
     }
 
     // Generate next floor
+    setFloorsCompleted(function(prev) { return prev.concat([floor.floorId]) })
     var nextFloor = generateFloor(nextFloorId)
     setFloor(nextFloor)
     setZone(nextFloor.zones[0])
@@ -2414,29 +2437,7 @@ function Game({ character, user, onEndRun }) {
                 </p>
               )}
 
-              {/* Keystone pedestal */}
-              {currentChamber.isKeystone && !currentChamber.cleared && (
-                <div className="flex flex-col items-center gap-3">
-                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
-                  {zone.keystonePressed ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-gold text-sm font-sans">The keystone is pressed. Something shifts deep below.</p>
-                      <button onClick={function() { handlePressKeystone() }}
-                        className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm">
-                        Continue
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-ink text-sm italic">A stone pedestal. A carved slot awaits a heavy hand.</p>
-                      <button onClick={function() { handlePressKeystone() }}
-                        className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base animate-pulse">
-                        Press the Keystone
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Old keystone rooms now just empty */}
 
               {/* Zone door (locked/unlocked) */}
               {currentChamber.isZoneDoor && !currentChamber.cleared && (
@@ -2454,16 +2455,19 @@ function Game({ character, user, onEndRun }) {
                 </div>
               )}
 
-              {/* Stairwell descent (locked until keystone + boss) */}
+              {/* Stairwell descent (locked until terminal activated + boss defeated) */}
               {currentChamber.type === 'stairwell_descent' && !currentChamber.cleared && (function() {
                 var bossCleared = zone.chambers.every(function(ch) { return ch.type !== 'boss' || ch.cleared })
-                var canDescend = zone.keystonePressed && bossCleared
+                var terminalActivated = zone.chambers.some(function(ch) {
+                  return ch.junkPiles && ch.junkPiles.some(function(p) { return p.terminalRevealed })
+                })
+                var canDescend = terminalActivated && bossCleared
                 return (
                   <div className="flex flex-col items-center gap-3">
                     <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
                     {canDescend ? (
                       <div className="flex flex-col items-center gap-2">
-                        <p className="text-gold text-sm italic">The way down is open.</p>
+                        <p className="text-gold text-sm italic">The terminal hums. The way down is open.</p>
                         <button onClick={handleDescendStairwell}
                           className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-lg">
                           Descend
@@ -2472,8 +2476,8 @@ function Game({ character, user, onEndRun }) {
                     ) : (
                       <div className="flex flex-col items-center gap-2">
                         <p className="text-ink text-sm italic">Stone steps spiral downward. The way is sealed.</p>
-                        {!zone.keystonePressed && <p className="text-red-400 text-xs font-sans">The keystone has not been pressed.</p>}
-                        {zone.keystonePressed && !bossCleared && <p className="text-red-400 text-xs font-sans">The guardian still blocks the way.</p>}
+                        {!terminalActivated && <p className="text-red-400 text-xs font-sans">A terminal must be activated. Search the junk piles.</p>}
+                        {terminalActivated && !bossCleared && <p className="text-red-400 text-xs font-sans">The guardian still blocks the way.</p>}
                       </div>
                     )}
                   </div>
