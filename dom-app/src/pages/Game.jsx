@@ -188,6 +188,7 @@ function Game({ character, user, onEndRun }) {
 
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
   var [showCharPanel, setShowCharPanel] = useState(false)
+  var [combatItemPhase, setCombatItemPhase] = useState(null) // null | 'use' | 'throw'
   var [inventoryTab, setInventoryTab] = useState('weapons')
   var [selectedItemIdx, setSelectedItemIdx] = useState(null)
 
@@ -1542,6 +1543,7 @@ function Game({ character, user, onEndRun }) {
   function handleCombatVictoryToDoors() {
     if (isGuarded()) return
     transitionGuardRef.current = Date.now()
+    setCombatItemPhase(null)
     // Generate corpses with loot (gold + items array)
     var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
     var lckStat = (character.stats.lck || 10) + getPassiveTotal(character.equipped, 'lck_bonus')
@@ -3221,11 +3223,12 @@ function Game({ character, user, onEndRun }) {
             </div>
           )}
 
-          {isPlayerTurn && showInventoryPanel && (
+          {/* Use Item picker — consumables (heals, cures, tonics) */}
+          {isPlayerTurn && combatItemPhase === 'use' && (
             <div className="flex flex-col items-center gap-2 w-full max-w-xs">
               <div className="flex items-center justify-between w-full">
-                <p className="text-ink text-sm font-sans">Choose an item to use:</p>
-                <button onClick={function() { setShowInventoryPanel(false) }}
+                <p className="text-ink text-sm font-sans">Use an item:</p>
+                <button onClick={function() { setCombatItemPhase(null) }}
                   className="text-ink-dim text-xs border border-border px-2 py-1 rounded hover:text-ink transition-colors">
                   Cancel
                 </button>
@@ -3233,10 +3236,43 @@ function Game({ character, user, onEndRun }) {
               <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
+                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all'
+                  if (isThrowable) return null // throwables go in the other list
                   return (
                     <button key={idx}
-                      onClick={function() { handleUseItem(idx) }}
+                      onClick={function() { setCombatItemPhase(null); handleUseItem(idx) }}
                       className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans text-ink hover:border-emerald-400 cursor-pointer transition-colors"
+                    >
+                      <div className="flex flex-col items-start">
+                        <span>{item.name}</span>
+                        <span className="text-ink-faint text-xs">{item.description || ''}</span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Throw picker — AoE damage/conditions */}
+          {isPlayerTurn && combatItemPhase === 'throw' && (
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <div className="flex items-center justify-between w-full">
+                <p className="text-ink text-sm font-sans">Throw something:</p>
+                <button onClick={function() { setCombatItemPhase(null) }}
+                  className="text-ink-dim text-xs border border-border px-2 py-1 rounded hover:text-ink transition-colors">
+                  Cancel
+                </button>
+              </div>
+              <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
+                {playerInventory.map(function(item, idx) {
+                  if (item.type !== 'consumable') return null
+                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all'
+                  if (!isThrowable) return null
+                  return (
+                    <button key={idx}
+                      onClick={function() { setCombatItemPhase(null); handleUseItem(idx) }}
+                      className="flex items-center justify-between p-3 rounded-lg border border-red-500/30 bg-surface text-sm font-sans text-ink hover:border-red-400 cursor-pointer transition-colors"
                     >
                       <div className="flex flex-col items-start">
                         <span>{item.name}</span>
@@ -3260,14 +3296,14 @@ function Game({ character, user, onEndRun }) {
             </div>
           )}
 
-          {isPlayerTurn && !showInventoryPanel && !selectedTarget && (
+          {isPlayerTurn && !combatItemPhase && !selectedTarget && (
             <div className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center">
               <p className="text-gold text-lg font-display">Your Turn</p>
               <p className="text-ink text-sm">Choose an enemy above to attack</p>
             </div>
           )}
 
-          {isPlayerTurn && !showInventoryPanel && selectedTarget && (function() {
+          {isPlayerTurn && !combatItemPhase && selectedTarget && (function() {
             var targetEnemy = battle.enemies.find(function(e) { return e.id === selectedTarget })
             var weaponDie = (character.equipped && character.equipped.weapon) ? (character.equipped.weapon.damageDie || character.equipped.weapon.die || 8) : 8
             return (
@@ -3294,29 +3330,44 @@ function Game({ character, user, onEndRun }) {
             )
           })()}
 
-          {/* Use Item / Flee — always visible on player turn unless mid-roll or inventory open */}
-          {isPlayerTurn && !showInventoryPanel && !pendingAttackResult && (function() {
+          {/* Use Item / Throw / Flee — visible on player turn unless mid-roll or picking item */}
+          {isPlayerTurn && !combatItemPhase && !pendingAttackResult && (function() {
             var playerEffects = (battle && battle.players[user.uid]) ? battle.players[user.uid].statusEffects : []
             var fleeBlocked = isFleeBlocked(playerEffects)
             var itemsBlocked = areItemsBlocked(playerEffects)
+            var hasUsables = playerInventory.some(function(it) {
+              if (it.type !== 'consumable') return false
+              var isThrow = it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all'
+              return !isThrow
+            })
+            var hasThrowables = playerInventory.some(function(it) {
+              if (it.type !== 'consumable') return false
+              return it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all'
+            })
             return (
-              <div className="flex gap-3 mt-1">
-                {playerInventory.some(function(it) { return it.type === 'consumable' }) && !itemsBlocked && (
-                  <button onClick={function() { setShowInventoryPanel(true) }}
-                    className="py-2 px-5 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-sm hover:border-emerald-400 transition-colors">
+              <div className="flex gap-2 mt-1 flex-wrap justify-center">
+                {hasUsables && !itemsBlocked && (
+                  <button onClick={function() { setCombatItemPhase('use') }}
+                    className="py-1.5 px-4 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 font-sans text-xs hover:border-emerald-400 transition-colors">
                     Use Item
                   </button>
                 )}
+                {hasThrowables && !itemsBlocked && (
+                  <button onClick={function() { setCombatItemPhase('throw') }}
+                    className="py-1.5 px-4 rounded-lg bg-surface border border-red-500/40 text-red-400 font-sans text-xs hover:border-red-400 transition-colors">
+                    Throw
+                  </button>
+                )}
                 {itemsBlocked && (
-                  <span className="py-2 px-5 text-ink-faint font-sans text-sm italic">Items blocked</span>
+                  <span className="py-1.5 px-4 text-ink-faint font-sans text-xs italic">Items blocked</span>
                 )}
                 {!fleeBlocked ? (
                   <button onClick={handleFlee}
-                    className="py-2 px-5 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-sm hover:text-ink hover:border-ink-faint transition-colors">
+                    className="py-1.5 px-4 rounded-lg bg-surface border border-border-hl text-ink-dim font-sans text-xs hover:text-ink hover:border-ink-faint transition-colors">
                     Flee
                   </button>
                 ) : (
-                  <span className="py-2 px-5 text-red-400 font-sans text-sm italic">Can't flee</span>
+                  <span className="py-1.5 px-4 text-red-400 font-sans text-xs italic">Can't flee</span>
                 )}
               </div>
             )
@@ -3380,12 +3431,12 @@ function Game({ character, user, onEndRun }) {
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) setShowInventoryPanel(false) }}
+                <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) { setShowInventoryPanel(false); setCombatItemPhase(null) } }}
                   className={'text-[9px] font-sans px-1.5 py-0.5 rounded border transition-colors ' +
                     (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
                   Stats
                 </button>
-                <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) setShowCharPanel(false) }}
+                <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) { setShowCharPanel(false); setCombatItemPhase(null) } }}
                   className={'text-[9px] font-sans px-1.5 py-0.5 rounded border transition-colors ' +
                     (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
                   Bag
