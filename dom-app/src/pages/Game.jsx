@@ -533,10 +533,11 @@ function Game({ character, user, onEndRun }) {
         setSearchDiceDisplay(result.natRoll)
         setSearchPhase('landed')
 
-        // After landing: show quality + narrative. Wait for tap to continue.
-        // If danger: auto-run save roll, then wait for tap.
-        setTimeout(function() {
-          if (result.dangerTriggered) {
+        // Dice has landed — go straight to landed phase (tap to continue)
+        // If danger: brief pause then auto-run save roll
+        if (result.dangerTriggered) {
+          setSearchPhase('landed')
+          setTimeout(function() {
             setSearchPhase('save_rolling')
             var saveCount = 0
             searchDiceRef.current = setInterval(function() {
@@ -550,11 +551,11 @@ function Game({ character, user, onEndRun }) {
                 // Wait for tap — handled by handleSearchTapContinue
               }
             }, 80)
-          } else {
-            setSearchPhase('landed')
-            // Wait for tap — handled by handleSearchTapContinue
-          }
-        }, 1500)
+          }, 1500)
+        } else {
+          setSearchPhase('landed')
+          // Wait for tap — handled by handleSearchTapContinue
+        }
       }
     }, 80)
   }
@@ -2863,8 +2864,7 @@ function Game({ character, user, onEndRun }) {
           var ql = { excellent: 'EXCELLENT!', good: 'Good find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
 
           return (
-            <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6"
-              onClick={(searchPhase === 'landed' || searchPhase === 'save_landed') ? handleSearchTapContinue : searchPhase === 'reveal' ? handleDismissSearch : undefined}>
+            <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6">
 
               {/* Screen 1: Rolling + Landed + Save — all on one screen */}
               {searchPhase !== 'reveal' && (
@@ -2935,9 +2935,12 @@ function Game({ character, user, onEndRun }) {
                     )
                   })()}
 
-                  {/* Tap to continue — only on landed/save_landed */}
+                  {/* Continue button — only on landed/save_landed */}
                   {(searchPhase === 'landed' || searchPhase === 'save_landed') && (
-                    <p className="text-ink-faint text-xs font-sans mt-6">Tap to continue</p>
+                    <button onClick={handleSearchTapContinue}
+                      className="mt-6 py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
+                      Continue
+                    </button>
                   )}
                 </div>
               )}
@@ -3009,7 +3012,10 @@ function Game({ character, user, onEndRun }) {
                     })}
                   </div>
 
-                  <p className="text-ink-faint text-xs font-sans mt-4">Tap to continue</p>
+                  <button onClick={handleDismissSearch}
+                    className="mt-4 py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
+                    Continue
+                  </button>
                 </div>
               )}
             </div>
