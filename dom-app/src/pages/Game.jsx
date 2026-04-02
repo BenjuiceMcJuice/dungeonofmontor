@@ -910,6 +910,10 @@ function Game({ character, user, onEndRun }) {
 
     var updatedBattle = attackOut.newBattle
     var pState = updatedBattle.players[user.uid]
+    // God mode: invincible — HP never below 1
+    if (pState && character.godInvincible && pState.currentHp <= 0) {
+      pState.currentHp = 1
+    }
     if (pState) setPlayerHp(pState.currentHp)
 
     // Track damage taken
@@ -1158,6 +1162,15 @@ function Game({ character, user, onEndRun }) {
     if (r.enemyDefeated) trackStat('enemiesDefeated', 1)
 
     var updatedBattle = attackOut.newBattle
+
+    // God mode: one-shot — kill all enemies on any hit
+    if (character.godOneShot && r.damage > 0) {
+      updatedBattle = Object.assign({}, updatedBattle, {
+        enemies: updatedBattle.enemies.map(function(e) {
+          return Object.assign({}, e, { currentHp: 0, isDown: true })
+        })
+      })
+    }
     var endResult = checkBattleEnd(updatedBattle)
     if (endResult === 'victory') {
       var xpGained = calculateXp(updatedBattle)

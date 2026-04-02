@@ -9,6 +9,8 @@ var startConfig = classData.startingKnight
 
 function Preparation({ character, onReady }) {
   var [phase, setPhase] = useState('stats') // stats | shop | ready
+  var [godInvincible, setGodInvincible] = useState(false)
+  var [godOneShot, setGodOneShot] = useState(false)
   var [freePoints, setFreePoints] = useState(startConfig.freeStatPoints || 10)
   var [gold, setGold] = useState(character.gold)
   var [inventory, setInventory] = useState(character.inventory.slice())
@@ -118,6 +120,8 @@ function Preparation({ character, onReady }) {
     character.equipped = equipped
     character.inventory = inventory
     character.gold = gold
+    character.godInvincible = godInvincible
+    character.godOneShot = godOneShot
     onReady(character)
   }
 
@@ -142,6 +146,23 @@ function Preparation({ character, onReady }) {
             Skip — keep remaining points
           </button>
         )}
+
+        {/* God mode toggles — testing */}
+        <div className="mt-6 flex flex-col gap-2 items-center">
+          <p className="text-ink-faint text-[9px] uppercase tracking-wide">Testing</p>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" checked={godInvincible} onChange={function() { setGodInvincible(!godInvincible) }}
+                className="w-4 h-4 accent-green-400" />
+              <span className={'text-xs font-sans ' + (godInvincible ? 'text-green-400' : 'text-ink-faint')}>Invincible</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" checked={godOneShot} onChange={function() { setGodOneShot(!godOneShot) }}
+                className="w-4 h-4 accent-red-400" />
+              <span className={'text-xs font-sans ' + (godOneShot ? 'text-red-400' : 'text-ink-faint')}>One-Shot</span>
+            </label>
+          </div>
+        </div>
       </div>
     )
   }
