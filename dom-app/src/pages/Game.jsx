@@ -5,7 +5,7 @@ import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentC
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
-import { resolveSearch, applySearch } from '../lib/junkpiles.js'
+import { resolveSearch, applySearch, inspectPile, DEPTH_CONFIG } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
@@ -456,38 +456,57 @@ function Game({ character, user, onEndRun }) {
   }
 
   // --- Junk pile search ---
-  var [searchPhase, setSearchPhase] = useState(null) // null | 'rolling' | 'landed' | 'reveal'
+  var [searchPhase, setSearchPhase] = useState(null) // null | 'inspect' | 'choose' | 'rolling' | 'landed' | 'reveal'
   var [searchDiceDisplay, setSearchDiceDisplay] = useState(null)
   var searchDiceRef = useRef(null)
 
-  function handleSearchPile(pileId) {
-    if (searchPhase) return // already searching
+  // Step 1: Tap pile → inspect (show risk hint)
+  function handleInspectPile(pileId) {
+    if (searchPhase) return
     var chamber = zone.chambers[zone.playerPosition]
     var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === pileId })
     if (!pile || pile.depleted) return
 
-    // Resolve immediately but don't show yet
     var perStat = character.stats.per || 6
-    var result = resolveSearch(pile, perStat)
+    inspectPile(pile, perStat)
+
+    // Update zone so inspectHint persists
+    setZone(Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id !== zone.playerPosition) return ch
+        return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
+      })
+    }))
+
+    setSearchingPileId(pileId)
+    setSearchPhase('choose')
+  }
+
+  // Step 2: Choose depth → dice roll → reveal
+  function handleChooseDepth(depthKey) {
+    if (searchPhase !== 'choose') return
+    var chamber = zone.chambers[zone.playerPosition]
+    var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === searchingPileId })
+    if (!pile || pile.depleted) return
+
+    var perStat = character.stats.per || 6
+    var result = resolveSearch(pile, perStat, depthKey)
     if (!result) return
 
     applySearch(pile)
     setSearchResult(result)
-    setSearchingPileId(pileId)
     setSearchPhase('rolling')
 
-    // Phase 1: Dice rolling animation (1200ms) — random numbers cycling
+    // Dice rolling animation
     var rollCount = 0
     searchDiceRef.current = setInterval(function() {
       setSearchDiceDisplay(Math.floor(Math.random() * 20) + 1)
       rollCount++
       if (rollCount > 12) {
         clearInterval(searchDiceRef.current)
-        // Land on real roll
         setSearchDiceDisplay(result.natRoll)
         setSearchPhase('landed')
 
-        // Phase 2: Show landed result + quality (1200ms)
         setTimeout(function() {
           // Award gold
           if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold })
@@ -538,6 +557,11 @@ function Game({ character, user, onEndRun }) {
     setSearchingPileId(null)
     setSearchPhase(null)
     setSearchDiceDisplay(null)
+  }
+
+  function handleCancelSearch() {
+    setSearchingPileId(null)
+    setSearchPhase(null)
   }
 
   // --- Keystone press ---
@@ -2579,40 +2603,75 @@ function Game({ character, user, onEndRun }) {
                 var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
                 if (activePiles.length === 0) return null
                 return (
-                  <div className="flex flex-col items-center gap-2 mt-2">
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {activePiles.map(function(pile) {
-                        var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
-                        var sizeColour = pile.size === 'large' ? 'border-gold/50 bg-gold/10' : pile.size === 'medium' ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
-                        var searchesLeft = pile.maxSearches - pile.searched
-                        return (
-                          <button key={pile.id}
-                            onClick={function() { handleSearchPile(pile.id) }}
-                            className={'flex flex-col items-center gap-0.5 p-2.5 rounded-lg border-2 transition-all cursor-pointer hover:border-gold hover:scale-105 ' + sizeColour}
-                          >
-                            <span className="text-ink text-sm font-display">{sizeLabel}</span>
-                            <span className="text-ink-faint text-[9px] font-sans">{searchesLeft} {searchesLeft === 1 ? 'layer' : 'layers'}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                    <p className="text-ink-faint text-[9px] italic">Tap a pile to search (PER: {character.stats.per || 6})</p>
+                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    {activePiles.map(function(pile) {
+                      var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
+                      var sizeColour = pile.size === 'large' ? 'border-gold/50 bg-gold/10' : pile.size === 'medium' ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
+                      var layersLeft = pile.maxLayers - pile.currentLayer
+                      return (
+                        <button key={pile.id}
+                          onClick={function() { handleInspectPile(pile.id) }}
+                          className={'flex flex-col items-center gap-0.5 p-2.5 rounded-lg border-2 transition-all cursor-pointer hover:border-gold hover:scale-105 ' + sizeColour}
+                        >
+                          <span className="text-ink text-sm font-display">{sizeLabel}</span>
+                          <span className="text-ink-faint text-[9px] font-sans">{layersLeft} {layersLeft === 1 ? 'layer' : 'layers'}</span>
+                          {pile.inspected && <span className="text-ink-dim text-[8px] italic">{pile.inspectHint}</span>}
+                        </button>
+                      )
+                    })}
                   </div>
                 )
               })()}
 
-              {/* Search Phase 1: Dice rolling */}
+              {/* Search: Choose depth */}
+              {searchPhase === 'choose' && (function() {
+                var chamber2 = zone.chambers[zone.playerPosition]
+                var pile = chamber2.junkPiles && chamber2.junkPiles.find(function(p) { return p.id === searchingPileId })
+                if (!pile) return null
+                var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
+                return (
+                  <div className="flex flex-col items-center gap-3 p-3 max-w-xs">
+                    <p className="text-ink text-sm font-display">{sizeLabel}</p>
+                    <p className="text-ink-dim text-xs italic text-center">{pile.inspectHint || pile.description}</p>
+                    <p className="text-ink-faint text-[10px]">Layer {pile.currentLayer + 1} of {pile.maxLayers} — how do you search?</p>
+                    <div className="flex flex-col gap-2 w-full">
+                      {['sift', 'rummage', 'deep_clean'].map(function(key) {
+                        var d = DEPTH_CONFIG[key]
+                        var depthColour = key === 'deep_clean' ? 'border-red-400/50 hover:border-red-400 text-red-400' :
+                          key === 'rummage' ? 'border-amber-400/50 hover:border-amber-400 text-amber-400' :
+                          'border-green-400/50 hover:border-green-400 text-green-400'
+                        return (
+                          <button key={key}
+                            onClick={function() { handleChooseDepth(key) }}
+                            className={'p-2.5 rounded-lg border-2 bg-surface transition-all cursor-pointer text-left ' + depthColour}
+                          >
+                            <span className="font-display text-sm">{d.label}</span>
+                            <span className="text-ink-dim text-xs font-sans ml-2">{d.description}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <button onClick={handleCancelSearch} className="text-ink-faint text-[10px] hover:text-ink transition-colors">Leave it</button>
+                  </div>
+                )
+              })()}
+
+              {/* Search: Dice rolling */}
               {searchPhase === 'rolling' && (
                 <div className="flex flex-col items-center gap-3 p-4">
-                  <div className="w-18 h-18 rounded-xl flex items-center justify-center font-display text-3xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
+                  <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
                     style={{ width: '4.5rem', height: '4.5rem' }}>
                     {searchDiceDisplay || '?'}
                   </div>
-                  <p className="text-ink-faint text-xs italic animate-pulse">Searching...</p>
+                  <p className="text-ink-faint text-xs italic animate-pulse">
+                    {searchResult && searchResult.depthKey === 'deep_clean' ? 'Tearing through it...' :
+                     searchResult && searchResult.depthKey === 'rummage' ? 'Rummaging...' :
+                     'Sifting carefully...'}
+                  </p>
                 </div>
               )}
 
-              {/* Search Phase 2: Dice landed + quality */}
+              {/* Search: Dice landed */}
               {searchPhase === 'landed' && searchResult && (function() {
                 var qualColour = searchResult.quality === 'excellent' ? 'text-gold border-gold bg-gold/10' :
                   searchResult.quality === 'good' ? 'text-green-400 border-green-400 bg-green-400/10' :
@@ -2635,7 +2694,7 @@ function Game({ character, user, onEndRun }) {
                 )
               })()}
 
-              {/* Search Phase 3: The Reveal */}
+              {/* Search: Reveal loot */}
               {searchPhase === 'reveal' && searchResult && (
                 <div onClick={handleDismissSearch} className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gold/30 bg-surface cursor-pointer max-w-xs">
                   <p className={'text-base font-display ' + (
@@ -2645,11 +2704,7 @@ function Game({ character, user, onEndRun }) {
                     searchResult.quality === 'poor' ? 'text-ink-dim' :
                     'text-red-400'
                   )}>
-                    {searchResult.quality === 'excellent' ? 'Jackpot!' :
-                     searchResult.quality === 'good' ? 'Nice haul.' :
-                     searchResult.quality === 'decent' ? 'Found something.' :
-                     searchResult.quality === 'poor' ? 'Slim pickings.' :
-                     'Disaster.'}
+                    {searchResult.depthLabel}
                   </p>
                   <div className="flex flex-col gap-1.5 text-sm font-sans text-center w-full">
                     {searchResult.gold > 0 && <p className="text-gold font-display">+{searchResult.gold}g</p>}
