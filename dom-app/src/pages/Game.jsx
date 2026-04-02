@@ -518,8 +518,10 @@ function Game({ character, user, onEndRun }) {
   }
 
   // Step 2: Choose clean level → resolve → dice animation
+  var searchLockedRef = useRef(false)
   function handleChooseCleanLevel(level) {
-    if (searchPhase !== 'choose') return
+    if (searchPhase !== 'choose' || searchLockedRef.current) return
+    searchLockedRef.current = true
     var chamber = zone.chambers[zone.playerPosition]
     var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === searchingPileId })
     if (!pile || pile.depleted) return
@@ -643,6 +645,7 @@ function Game({ character, user, onEndRun }) {
 
   function handleDismissSearch() {
     if (searchDiceRef.current) clearInterval(searchDiceRef.current)
+    searchLockedRef.current = false
     setSearchResult(null)
     setSearchingPileId(null)
     setSearchPhase(null)
@@ -651,6 +654,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handleCancelSearch() {
+    searchLockedRef.current = false
     setSearchingPileId(null)
     setSearchPhase(null)
   }
