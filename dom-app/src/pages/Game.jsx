@@ -576,7 +576,14 @@ function Game({ character, user, onEndRun }) {
             return j
           })
         }
-        return bag.concat([{ id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }])
+        var newJunk = { id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }
+        if (result.junk.consumable) {
+          newJunk.consumable = true
+          newJunk.consumeRisk = result.junk.consumeRisk
+          newJunk.good = result.junk.good
+          newJunk.bad = result.junk.bad
+        }
+        return bag.concat([newJunk])
       })
     }
     if (result.item) {
@@ -1406,14 +1413,13 @@ function Game({ character, user, onEndRun }) {
       } else {
         returnItem = newEquipped.weapon
         newEquipped.weapon = item
-        // Heavy weapons can't use shields — unequip offhand shield
+        // Heavy weapons can't use shields — unequip offhand shield back to inventory
         if (item.hand === 'heavy' && newEquipped.offhand && newEquipped.offhand.slot === 'offhand') {
           var shieldReturn = newEquipped.offhand
           newEquipped.offhand = null
-          // Return shield to inventory
-          var newInv2 = character.inventory.slice()
-          if (shieldReturn) newInv2.push(shieldReturn)
-          character.inventory = newInv2
+          if (shieldReturn) {
+            setPlayerInventory(function(inv) { return inv.concat([shieldReturn]) })
+          }
         }
       }
     } else if (item.type === 'armour' && item.slot === 'offhand') {
@@ -2064,7 +2070,7 @@ function Game({ character, user, onEndRun }) {
                   )}
                 </div>
               )}
-              {activeTab.id === 'wearables' || activeTab.id === 'relics' && (
+              {(activeTab.id === 'wearables' || activeTab.id === 'relics') && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.armour && (
                     <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
