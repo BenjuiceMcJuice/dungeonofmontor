@@ -2488,6 +2488,24 @@ function Game({ character, user, onEndRun }) {
                                   if (result.success && result.effect) {
                                     if (result.effect.effect === 'heal') {
                                       setPlayerHp(function(hp) { return Math.min(hp + result.effect.value, character.maxHp) })
+                                    } else if (result.effect.effect === 'stat_buff') {
+                                      setActiveBuffs(function(prev) { return prev.concat([{ stat: result.effect.stat, value: result.effect.value, turnsRemaining: result.effect.turns || 3 }]) })
+                                    }
+                                  } else if (!result.success && result.effect && result.effect.effect === 'condition') {
+                                    // Bad outcome — apply condition (poison, daze, etc.)
+                                    if (battle) {
+                                      var condId = result.effect.condition
+                                      setBattle(function(prev) {
+                                        if (!prev) return prev
+                                        var newPlayers = {}
+                                        Object.keys(prev.players).forEach(function(uid) {
+                                          var p = prev.players[uid]
+                                          newPlayers[uid] = Object.assign({}, p, {
+                                            statusEffects: p.statusEffects.concat([{ id: condId, turnsRemaining: 3 }])
+                                          })
+                                        })
+                                        return Object.assign({}, prev, { players: newPlayers })
+                                      })
                                     }
                                   }
                                   setConsumeResult({ success: result.success, narrative: result.narrative, junkName: junk.name })
