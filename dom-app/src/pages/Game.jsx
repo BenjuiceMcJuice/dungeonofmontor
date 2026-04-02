@@ -556,6 +556,13 @@ function Game({ character, user, onEndRun }) {
     if (result.item) {
       setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
     }
+    // Apply condition hazard as HP damage (outside combat, conditions = direct damage)
+    if (result.condition && !result.agiSaved) {
+      var trapDamage = { POISON: 5, NAUSEA: 3, BLIND: 2, DAZE: 2, SLUGGISH: 4, FEAR: 3, CHARM: 2, BURN: 8, FROST: 4, BLEED: 4, FRENZY: 3, BORED: 1, SAD: 2 }
+      var dmg = trapDamage[result.condition] || 3
+      setPlayerHp(function(hp) { return Math.max(1, hp - dmg) })
+      result.trapDamage = dmg
+    }
     setZone(Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
         if (ch.id !== zone.playerPosition) return ch
@@ -2816,7 +2823,10 @@ function Game({ character, user, onEndRun }) {
                     )}
                     {searchResult.condition && (
                       <div className="p-2 rounded border border-red-400/40 bg-red-400/5">
-                        <p className="text-red-400">{searchResult.agiSaved ? 'Trap dodged!' : 'TRAP: ' + searchResult.condition + '!'}</p>
+                        <p className="text-red-400">
+                          {searchResult.agiSaved ? 'Trap dodged!' :
+                           'TRAP: ' + searchResult.condition + '!' + (searchResult.trapDamage ? ' -' + searchResult.trapDamage + ' HP' : '')}
+                        </p>
                       </div>
                     )}
                     {searchResult.enemy && (
@@ -2977,6 +2987,43 @@ function Game({ character, user, onEndRun }) {
 
     return (
       <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
+        {/* Stats overlay (read-only during combat) */}
+        {showCharPanel && (function() {
+          var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
+          var statRows = [
+            { id: 'str', label: 'STR' }, { id: 'def', label: 'DEF' }, { id: 'agi', label: 'AGI' },
+            { id: 'vit', label: 'VIT' }, { id: 'int', label: 'INT' }, { id: 'lck', label: 'LCK' },
+            { id: 'per', label: 'PER' }, { id: 'end', label: 'END' }, { id: 'wis', label: 'WIS' }, { id: 'cha', label: 'CHA' },
+          ]
+          return (
+            <div className="fixed inset-0 z-50 bg-bg/90 flex flex-col items-center justify-center p-4" onClick={function() { setShowCharPanel(false) }}>
+              <div className="bg-surface border border-border rounded-lg p-4 max-w-xs w-full" onClick={function(e) { e.stopPropagation() }}>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-display text-base text-gold">{character.name}</span>
+                  <button onClick={function() { setShowCharPanel(false) }} className="text-ink-dim text-xs border border-border px-2 py-1 rounded">Close</button>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mb-3 text-xs font-sans">
+                  <div><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
+                  <div><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
+                  <div><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
+                </div>
+                <div className="grid grid-cols-5 gap-1">
+                  {statRows.map(function(s) {
+                    var val = character.stats[s.id] || 0
+                    return (
+                      <div key={s.id} className="flex flex-col items-center p-1.5 rounded bg-raised border border-border">
+                        <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
+                        <span className="text-ink font-display text-sm">{val}</span>
+                        <span className="text-ink-dim text-[9px]">{mod(val)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col items-start">
@@ -3275,12 +3322,18 @@ function Game({ character, user, onEndRun }) {
                   <span>{character.equipped.offhand.type === 'weapon' ? 'Dual' : 'Shield'}</span>
                 )}
               </div>
-              {battle && allStunned && gamePhase === 'combat' && isPlayerTurn && (
-                <button onClick={function() { setShowInventoryPanel(!showInventoryPanel) }}
-                  className="text-[9px] font-sans text-gold border border-gold/40 px-1.5 py-0.5 rounded hover:border-gold transition-colors">
-                  Swap Gear
+              <div className="flex items-center gap-1">
+                <button onClick={function() { setShowCharPanel(!showCharPanel); if (!showCharPanel) setShowInventoryPanel(false) }}
+                  className={'text-[9px] font-sans px-1.5 py-0.5 rounded border transition-colors ' +
+                    (showCharPanel ? 'border-blue text-blue' : 'border-border text-ink-dim hover:text-ink')}>
+                  Stats
                 </button>
-              )}
+                <button onClick={function() { setShowInventoryPanel(!showInventoryPanel); if (!showInventoryPanel) setShowCharPanel(false) }}
+                  className={'text-[9px] font-sans px-1.5 py-0.5 rounded border transition-colors ' +
+                    (showInventoryPanel ? 'border-emerald-400 text-emerald-400' : 'border-border text-ink-dim hover:text-ink')}>
+                  Bag
+                </button>
+              </div>
             </div>
           </div>
         </div>
