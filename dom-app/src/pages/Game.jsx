@@ -357,6 +357,9 @@ function Game({ character, user, onEndRun }) {
     // Passive regen on entering NEW chambers — baseline 1 HP + relic bonuses
     if (!chamber.cleared && !chamber.corpses) {
       var regenAmount = 1 + getPassiveTotal(character.equipped, 'regen_per_chamber')
+      // Bloom gift: extra HP per chamber
+      var bodyGift = giftSlots.body
+      if (bodyGift && bodyGift.effect === 'chamber_heal') regenAmount += bodyGift.value
       setPlayerHp(function(hp) { return Math.min(hp + regenAmount, character.maxHp) })
     }
 
@@ -582,7 +585,10 @@ function Game({ character, user, onEndRun }) {
 
   // Apply gold, xp, junk, items to player state
   function applySearchRewards(result) {
-    if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold })
+    // Overgrowth (mind gift): bonus gold from junk searches
+    var goldBonus = 0
+    if (giftSlots.mind && giftSlots.mind.effect === 'junk_gold_bonus') goldBonus = Math.round(result.gold * giftSlots.mind.value)
+    if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold + goldBonus })
     if (result.xp > 0) {
       var newXp = totalXp + result.xp
       setTotalXp(newXp)
@@ -987,6 +993,8 @@ function Game({ character, user, onEndRun }) {
     setCombatLog([])
     setPendingAttackResult(null)
     setEnemyAttackInfo(null)
+    // Reset per-combat gift flags
+    setSporeCloudUsed(false)
     setGamePhase('combat')
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
@@ -1087,6 +1095,78 @@ function Game({ character, user, onEndRun }) {
 
     var updatedBattle = attackOut.newBattle
     var pState = updatedBattle.players[user.uid]
+
+    // === GIFT EFFECTS ON TAKING DAMAGE ===
+    if (pState && r.damage > 0) {
+      var bodyG = giftSlots.body
+      var mindG = giftSlots.mind
+      var shieldG = giftSlots.shield
+      var attackerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
+
+      // Root Guard (shield): chance to fully block
+      if (shieldG && shieldG.effect === 'block_chance' && rollGiftChance(shieldG.chance)) {
+        pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp) // undo damage
+        addLog({ type: 'player', text: 'Root Guard blocks the attack completely!', tier: 'hit' })
+      }
+
+      // Thornhide (shield): reflect damage to attacker
+      if (shieldG && shieldG.effect === 'reflect_damage' && attackerEnemy && !attackerEnemy.isDown) {
+        attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - shieldG.value)
+        addLog({ type: 'player', text: 'Thornhide reflects ' + shieldG.value + ' damage!', tier: 'hit' })
+        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled by thorns!', tier: 'crit' }) }
+      }
+
+      // Roothold (body): can't be reduced below minHpAfterHit by a single hit
+      if (bodyG && bodyG.effect === 'damage_floor' && pState.currentHp < bodyG.minHpAfterHit && pState.currentHp > 0) {
+        pState.currentHp = bodyG.minHpAfterHit
+        addLog({ type: 'player', text: 'Roothold holds! HP can\'t drop below ' + bodyG.minHpAfterHit + '.', tier: 'hit' })
+      }
+
+      // Spore Cloud (body): when hit below threshold, DAZE all enemies (once per combat)
+      if (bodyG && bodyG.effect === 'threshold_aoe_condition' && !sporeCloudUsed) {
+        var hpPercent = pState.currentHp / pState.maxHp
+        if (hpPercent < bodyG.hpThreshold) {
+          setSporeCloudUsed(true)
+          updatedBattle.enemies.forEach(function(e) {
+            if (!e.isDown) {
+              e.statusEffects = (e.statusEffects || []).concat([{ id: bodyG.condition, name: bodyG.condition, slot: 'mind', turnsRemaining: bodyG.conditionTurns }])
+            }
+          })
+          addLog({ type: 'condition', text: 'Spore Cloud! All enemies DAZED!', tier: 'crit' })
+        }
+      }
+
+      // Toxic Spores (body): chance to poison attacker
+      if (bodyG && bodyG.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(bodyG.chance)) {
+        attackerEnemy.statusEffects = (attackerEnemy.statusEffects || []).concat([{ id: bodyG.condition, name: bodyG.condition, slot: 'body', turnsRemaining: bodyG.conditionTurns }])
+        addLog({ type: 'condition', text: 'Toxic Spores! ' + attackerEnemy.name + ' poisoned!', tier: 'hit' })
+      }
+
+      // Vine Parry (sword weapon gift): chance to SLUGGISH attacker when hit
+      var weaponGDef = giftSlots.weapon
+      if (weaponGDef && weaponGDef.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(weaponGDef.chance)) {
+        attackerEnemy.statusEffects = (attackerEnemy.statusEffects || []).concat([{ id: weaponGDef.condition, name: weaponGDef.condition, slot: 'body', turnsRemaining: weaponGDef.conditionTurns }])
+        addLog({ type: 'condition', text: 'Vine Parry! ' + attackerEnemy.name + ' SLUGGISH!', tier: 'hit' })
+      }
+
+      // Fungal Confusion (mind): chance to CHARM attacker
+      if (mindG && mindG.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(mindG.chance)) {
+        attackerEnemy.statusEffects = (attackerEnemy.statusEffects || []).concat([{ id: mindG.condition, name: mindG.condition, slot: 'mind', turnsRemaining: mindG.conditionTurns }])
+        addLog({ type: 'condition', text: 'Fungal Confusion! ' + attackerEnemy.name + ' turns on allies!', tier: 'crit' })
+      }
+
+      // Deep Roots (mind): reduce body condition durations on player by 1
+      if (mindG && mindG.effect === 'condition_shorten' && r.conditionApplied && pState) {
+        var playerEffects = pState.statusEffects || []
+        for (var dri = 0; dri < playerEffects.length; dri++) {
+          if (playerEffects[dri].slot === mindG.slot && playerEffects[dri].turnsRemaining > 1) {
+            playerEffects[dri].turnsRemaining = Math.max(1, playerEffects[dri].turnsRemaining - mindG.reduction)
+          }
+        }
+        if (r.conditionApplied) addLog({ type: 'player', text: 'Deep Roots: condition duration shortened!', tier: 'hit' })
+      }
+    }
+
     // God mode: invincible — HP never below 1
     if (pState && character.godInvincible && pState.currentHp <= 0) {
       pState.currentHp = 1
@@ -1331,6 +1411,67 @@ function Game({ character, user, onEndRun }) {
         }
       }
     }
+    // === GIFT EFFECTS ON PLAYER ATTACK ===
+    var giftBattle = attackOut.newBattle
+    var weaponG = giftSlots.weapon
+    var mindG2 = giftSlots.mind
+    var hitTarget = giftBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
+
+    if (r.damage > 0 && hitTarget && !hitTarget.isDown) {
+      var wt3 = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+
+      // Weapon gifts per class
+      if (weaponG && weaponG.appliedWeaponType === wt3) {
+        // Briar Flurry (dagger): double strikes apply stacking bleed
+        if (weaponG.effect === 'double_strike_bleed' && r.doubleStrike) {
+          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
+            { id: 'BLEED', name: 'Bleed', slot: 'body', turnsRemaining: weaponG.bleedTurns, damagePerTurn: weaponG.bleedDamage, stacks: true }
+          ])
+          addLog({ type: 'condition', text: 'Briar Flurry! Stacking bleed on ' + hitTarget.name + '!', tier: 'crit' })
+        }
+        // Thorn Reach (spear): +1 damage + first hit condition (tracked per combat)
+        if (weaponG.effect === 'bonus_damage_and_first_hit_condition' && !weaponG._firstHitUsed) {
+          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
+            { id: weaponG.condition, name: weaponG.condition, slot: 'body', turnsRemaining: weaponG.conditionTurns }
+          ])
+          weaponG._firstHitUsed = true
+          addLog({ type: 'condition', text: 'Thorn Reach! ' + hitTarget.name + ' SLUGGISH!', tier: 'hit' })
+        }
+        // Root Shatter (mace): DEF-ignoring hits apply condition
+        if (weaponG.effect === 'def_ignore_condition' && r.damageBreakdown && r.damageBreakdown.defIgnored) {
+          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
+            { id: weaponG.condition, name: weaponG.condition, slot: 'mind', turnsRemaining: weaponG.conditionTurns }
+          ])
+          addLog({ type: 'condition', text: 'Root Shatter! ' + hitTarget.name + ' DAZED!', tier: 'hit' })
+        }
+        // Spore Fist (fists): chance per hit
+        if (weaponG.effect === 'hit_condition' && rollGiftChance(weaponG.chance)) {
+          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
+            { id: weaponG.condition, name: weaponG.condition, slot: 'mind', turnsRemaining: weaponG.conditionTurns }
+          ])
+          addLog({ type: 'condition', text: 'Spore Fist! ' + hitTarget.name + ' BLIND!', tier: 'hit' })
+        }
+        // Vine Parry (sword): reflect on being hit — already handled in damage-taken section
+        // Wild Growth (axe): heal on kill
+        if (weaponG.effect === 'kill_heal' && r.enemyDefeated) {
+          setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
+          addLog({ type: 'player', text: 'Wild Growth! Heal ' + weaponG.value + ' HP from the kill.', tier: 'hit' })
+        }
+      }
+
+      // Pollen Cloud (mind): on crit, all enemies BLIND
+      if (mindG2 && mindG2.effect === 'crit_aoe_condition' && r.attackRoll && r.attackRoll.tierName === 'crit') {
+        giftBattle.enemies.forEach(function(e) {
+          if (!e.isDown) {
+            e.statusEffects = (e.statusEffects || []).concat([
+              { id: mindG2.condition, name: mindG2.condition, slot: 'mind', turnsRemaining: mindG2.conditionTurns }
+            ])
+          }
+        })
+        addLog({ type: 'condition', text: 'Pollen Cloud! All enemies BLIND!', tier: 'crit' })
+      }
+    }
+
     setPendingAttackResult(null)
 
     // Track combat stats
@@ -1338,7 +1479,7 @@ function Game({ character, user, onEndRun }) {
     if (r.attackRoll && r.attackRoll.tierName === 'crit') trackStat('critsLanded', 1)
     if (r.enemyDefeated) trackStat('enemiesDefeated', 1)
 
-    var updatedBattle = attackOut.newBattle
+    var updatedBattle = giftBattle
 
     // God mode: one-shot — kill all enemies on any hit
     if (character.godOneShot && r.damage > 0) {
@@ -1777,6 +1918,21 @@ function Game({ character, user, onEndRun }) {
     if (isGuarded()) return
     transitionGuardRef.current = Date.now()
     setCombatItemPhase(null)
+
+    // Regrowth gift: heal at end of combat
+    var bodyGiftV = giftSlots.body
+    if (bodyGiftV && bodyGiftV.effect === 'post_combat_heal') {
+      setPlayerHp(function(hp) { return Math.min(hp + bodyGiftV.value, character.maxHp) })
+    }
+
+    // Reset weapon per-combat flags
+    if (giftSlots.weapon && giftSlots.weapon._firstHitUsed) {
+      setGiftSlots(function(prev) {
+        var w = Object.assign({}, prev.weapon, { _firstHitUsed: false })
+        return Object.assign({}, prev, { weapon: w })
+      })
+    }
+
     // Generate corpses with loot (gold + items array)
     var encounterLevel = chamberContent ? (chamberContent.type === 'combat_elite' ? 2 : chamberContent.type === 'mini_boss' ? 3 : 1) : 1
     var lckStat = (character.stats.lck || 10) + getPassiveTotal(character.equipped, 'lck_bonus')
@@ -2773,7 +2929,12 @@ function Game({ character, user, onEndRun }) {
                               <p className="text-ink-faint text-[10px]">Sell: {junk.sellPrice}g</p>
                               {canEquipNow && (
                                 <button onClick={function() {
-                                  var result = consumeJunk(junk, character.stats.lck || 10)
+                                  var consumeTarget = junk
+                                  // Green Patience (mind gift): reduce consume risk
+                                  if (giftSlots.mind && giftSlots.mind.effect === 'junk_risk_reduction') {
+                                    consumeTarget = Object.assign({}, junk, { consumeRisk: Math.max(1, (junk.consumeRisk || 3) - giftSlots.mind.value) })
+                                  }
+                                  var result = consumeJunk(consumeTarget, character.stats.lck || 10)
                                   if (!result) return
                                   setPlayerJunkBag(function(bag) {
                                     return bag.map(function(j) {
