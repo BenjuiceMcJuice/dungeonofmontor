@@ -622,14 +622,18 @@ function Game({ character, user, onEndRun }) {
     }))
   }
 
+  var searchTapGuardRef = useRef(0)
+
   function handleSearchTapContinue() {
     if (searchPhase === 'landed' || searchPhase === 'save_landed') {
+      searchTapGuardRef.current = Date.now()
       applySearchRewards(searchResult)
       setSearchPhase('reveal')
     }
   }
 
   function handleDismissSearch() {
+    if (Date.now() - searchTapGuardRef.current < 400) return
     if (searchDiceRef.current) clearInterval(searchDiceRef.current)
     setSearchResult(null)
     setSearchingPileId(null)
