@@ -1753,9 +1753,13 @@ function Game({ character, user, onEndRun }) {
     }
 
     // Store corpses on the chamber in zone state + ensure cleared
+    // Append to existing corpses (junk search combat can happen in rooms with prior corpses)
     var newZone = Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
-        if (ch.id === zone.playerPosition) return Object.assign({}, ch, { corpses: corpses, cleared: true })
+        if (ch.id === zone.playerPosition) {
+          var existingCorpses = ch.corpses || []
+          return Object.assign({}, ch, { corpses: existingCorpses.concat(corpses), cleared: true })
+        }
         return ch
       })
     })
