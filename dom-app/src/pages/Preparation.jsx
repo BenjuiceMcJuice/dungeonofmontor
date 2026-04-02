@@ -33,13 +33,48 @@ function Preparation({ character, onReady }) {
     var price = item.buyPrice || 0
     if (gold < price) return
     setGold(gold - price)
-    setInventory(function(prev) { return prev.concat([Object.assign({}, item)]) })
-    // Remove from shop (one-time purchase per slot)
+
+    // Remove from shop
     setShopItems(function(prev) {
       var next = prev.slice()
       next.splice(shopIndex, 1)
       return next
     })
+
+    // Auto-equip weapons, armour, shields. Non-equippable goes to bag.
+    var boughtItem = Object.assign({}, item)
+    if (boughtItem.type === 'weapon' && boughtItem.slot === 'weapon') {
+      setEquipped(function(prev) {
+        var returnItem = prev.weapon
+        var newEq = Object.assign({}, prev, { weapon: boughtItem })
+        // Heavy weapons unequip shield
+        if (boughtItem.hand === 'heavy' && prev.offhand && prev.offhand.slot === 'offhand') {
+          setInventory(function(inv) { return inv.concat(prev.offhand ? [prev.offhand] : []) })
+          newEq.offhand = null
+        }
+        if (returnItem) setInventory(function(inv) { return inv.concat([returnItem]) })
+        return newEq
+      })
+    } else if (boughtItem.type === 'armour' && boughtItem.slot === 'offhand') {
+      // Can't equip shield with heavy weapon
+      if (equipped.weapon && equipped.weapon.hand === 'heavy') {
+        setInventory(function(prev) { return prev.concat([boughtItem]) })
+      } else {
+        setEquipped(function(prev) {
+          var returnItem = prev.offhand
+          if (returnItem) setInventory(function(inv) { return inv.concat([returnItem]) })
+          return Object.assign({}, prev, { offhand: boughtItem })
+        })
+      }
+    } else if (boughtItem.type === 'armour' && boughtItem.slot === 'armour') {
+      setEquipped(function(prev) {
+        var returnItem = prev.armour
+        if (returnItem) setInventory(function(inv) { return inv.concat([returnItem]) })
+        return Object.assign({}, prev, { armour: boughtItem })
+      })
+    } else {
+      setInventory(function(prev) { return prev.concat([boughtItem]) })
+    }
   }
 
   function handleEquip(invIndex) {
@@ -129,16 +164,43 @@ function Preparation({ character, onReady }) {
 
         {/* Currently equipped */}
         <div className="bg-surface border border-border rounded-lg p-3 mb-3">
-          <p className="text-[10px] text-gold uppercase tracking-wide mb-1">Equipped</p>
-          <div className="flex gap-4 text-xs text-ink-dim font-sans">
-            <span>Weapon: <span className="text-ink">{equippedWeaponName}</span></span>
-            <span>Armour: <span className="text-ink">{equippedArmourName}</span></span>
-          </div>
-          {equippedOffhandName !== 'None' && (
-            <div className="text-xs text-ink-dim font-sans mt-1">
-              <span>Offhand: <span className="text-ink">{equippedOffhandName}</span></span>
+          <p className="text-[10px] text-gold uppercase tracking-wide mb-2">Equipped</p>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-[9px] text-ink-faint uppercase">Weapon</span>
+                <span className="text-ink text-sm font-sans">{equipped.weapon ? equipped.weapon.name : 'Fists'}</span>
+                {equipped.weapon && <span className="text-ink-dim text-[10px]">d{equipped.weapon.damageDie} {equipped.weapon.weaponType} ({equipped.weapon.hand})</span>}
+                {!equipped.weapon && <span className="text-ink-dim text-[10px]">d4, -1 acc, 2× STR</span>}
+              </div>
+              {equipped.weapon && (
+                <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.weapon]) }); setEquipped(function(e) { return Object.assign({}, e, { weapon: null }) }) }}
+                  className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+              )}
             </div>
-          )}
+            {equipped.armour && (
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-ink-faint uppercase">Armour</span>
+                  <span className="text-ink text-sm font-sans">{equipped.armour.name}</span>
+                  <span className="text-ink-dim text-[10px]">+{equipped.armour.defBonus} DEF</span>
+                </div>
+                <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.armour]) }); setEquipped(function(e) { return Object.assign({}, e, { armour: null }) }) }}
+                  className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+              </div>
+            )}
+            {equipped.offhand && (
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-ink-faint uppercase">Offhand</span>
+                  <span className="text-ink text-sm font-sans">{equipped.offhand.name}</span>
+                  <span className="text-ink-dim text-[10px]">+{equipped.offhand.defBonus} DEF, {Math.round((equipped.offhand.passiveValue || 0) * 100)}% block</span>
+                </div>
+                <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.offhand]) }); setEquipped(function(e) { return Object.assign({}, e, { offhand: null }) }) }}
+                  className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Shop items */}
