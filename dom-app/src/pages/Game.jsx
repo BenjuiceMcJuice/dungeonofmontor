@@ -1210,7 +1210,7 @@ function Game({ character, user, onEndRun }) {
     var logEntry = formatAttackLog(r, 'player')
     addLog({ type: 'player', text: logEntry.text, tier: logEntry.tier })
     if (r.adrenalineCrit) {
-      addLog({ type: 'condition', text: 'ADRENALINE! Guaranteed crit!', tier: 'crit' })
+      addLog({ type: 'condition', text: 'ADRENALINE surge! +6 STR!', tier: 'crit' })
     }
     if (r.doubleStrike) {
       addLog({ type: 'player', text: 'Double strike! ' + r.doubleStrikeDamage + ' bonus damage!', tier: 'crit' })
