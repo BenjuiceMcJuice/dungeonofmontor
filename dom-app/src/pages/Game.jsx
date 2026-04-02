@@ -1974,7 +1974,7 @@ function Game({ character, user, onEndRun }) {
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
-            <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
+            <span className="text-gold text-xs font-display">{zone.floorName}</span><span className="text-ink-dim text-[10px] font-sans ml-1">— {zone.zoneName}</span>
             <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{currentChamber.label}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -3293,7 +3293,7 @@ function Game({ character, user, onEndRun }) {
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col items-start">
-            <span className="text-ink-faint text-[9px] font-sans">{zone.floorName} — {zone.zoneName}</span>
+            <span className="text-gold text-xs font-display">{zone.floorName}</span><span className="text-ink-dim text-[10px] font-sans ml-1">— {zone.zoneName}</span>
             <span className="text-ink-dim text-xs uppercase tracking-widest">{combatChamber.label} -- Round {battle.round}</span>
           </div>
         </div>
