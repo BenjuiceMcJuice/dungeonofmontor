@@ -2732,120 +2732,14 @@ function Game({ character, user, onEndRun }) {
                     <p className="text-ink-dim text-xs italic text-center max-w-xs">{npc.description}</p>
                   </div>
                 )
-              })() : lootingNpcId && currentChamber.npc ? (function() {
-                var npc = currentChamber.npc
+              })() : lootingNpcId && currentChamber.npc ? (
+                <div className="flex flex-col items-center gap-2">
+                  <ChamberIcon iconKey="npc" theme="garden" scale={4} />
+                  <span className="text-ink-faint text-[10px] font-sans">{currentChamber.npc.name}</span>
+                </div>
+              )
 
-                // Merchant NPC
-                if (npc.type === 'merchant') {
-                  return (
-                    <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-                      <p className="text-ink text-sm font-sans">{npc.name}</p>
-                      <p className="text-gold text-xs font-sans">Your gold: {playerGold}</p>
-                      <div className="flex gap-2">
-                        <button onClick={function() { updateNpc(function(n) { return Object.assign({}, n, { showSell: false }) }) }}
-                          className={'px-4 py-1 rounded text-xs font-sans border transition-colors ' +
-                            (!npc.showSell ? 'border-gold text-gold' : 'border-border text-ink-dim hover:text-ink')}>
-                          Buy
-                        </button>
-                        {playerInventory.length > 0 && (
-                          <button onClick={handleNpcSellToggle}
-                            className={'px-4 py-1 rounded text-xs font-sans border transition-colors ' +
-                              (npc.showSell ? 'border-gold text-gold' : 'border-border text-ink-dim hover:text-ink')}>
-                            Sell
-                          </button>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-2 w-full max-h-40 overflow-y-auto">
-                        {!npc.showSell && npc.items.map(function(item, i) {
-                          var npcBasePr = item.buyPrice || item.cost || 0
-                          var npcChaMod = getModifier(character.stats.cha || 10)
-                          var price = Math.max(1, npcBasePr - Math.max(0, Math.round(npcBasePr * npcChaMod * 0.05)))
-                          var canAfford = playerGold >= price
-                          return (
-                            <div key={'buy-' + i} className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans">
-                              <div className="flex flex-col items-start">
-                                <span className="text-ink">{item.name}</span>
-                                <span className="text-ink-faint text-[10px]">
-                                  {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                                   item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                                   item.description || item.type}
-                                </span>
-                              </div>
-                              <button onClick={function() { if (canAfford) handleNpcBuy(item) }}
-                                disabled={!canAfford}
-                                className={'text-xs px-3 py-1 rounded border transition-colors ' +
-                                  (canAfford ? 'text-gold border-gold/40 hover:border-gold cursor-pointer' : 'text-ink-faint border-border opacity-50')}>
-                                {price}g
-                              </button>
-                            </div>
-                          )
-                        })}
-                        {!npc.showSell && npc.items.length === 0 && (
-                          <p className="text-ink-faint text-xs italic text-center">Sold out.</p>
-                        )}
-                        {npc.showSell && playerInventory.map(function(item, i) {
-                          var baseSellNpc = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
-                          var sellChaMod = getModifier(character.stats.cha || 10)
-                          var sellPrice = Math.max(1, baseSellNpc + Math.max(0, Math.round(baseSellNpc * sellChaMod * 0.05)))
-                          return (
-                            <div key={'sell-' + i} className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans">
-                              <div className="flex flex-col items-start">
-                                <span className="text-ink">{item.name}</span>
-                                <span className="text-ink-faint text-[10px]">
-                                  {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                                   item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                                   item.description || item.type}
-                                </span>
-                              </div>
-                              <button onClick={function() { handleNpcSell(i, sellPrice) }}
-                                className="text-xs text-gold px-3 py-1 rounded border border-gold/40 hover:border-gold cursor-pointer transition-colors">
-                                Sell {sellPrice}g
-                              </button>
-                            </div>
-                          )
-                        })}
-                      </div>
-                      <button onClick={handleCloseNpc}
-                        className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
-                        Leave
-                      </button>
-                    </div>
-                  )
-                }
-
-                // Quest NPC
-                return (
-                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-                    <p className="text-ink text-sm font-sans">{npc.name}</p>
-                    <p className="text-ink-dim text-xs italic text-center">{npc.description}</p>
-                    {!npc.interacted ? (
-                      <div className="flex flex-col gap-2 w-full">
-                        <button onClick={handleNpcHelp}
-                          className="w-full p-3 rounded-lg border border-blue/40 bg-surface text-sm font-sans text-blue hover:border-blue transition-colors">
-                          Help them {npc.reward && npc.reward.gold ? '(reward: ' + npc.reward.gold + 'g)' : ''}
-                        </button>
-                        <button onClick={handleCloseNpc}
-                          className="w-full p-3 rounded-lg border border-border bg-surface text-sm font-sans text-ink-dim hover:text-ink transition-colors">
-                          Ignore and leave
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <p className="text-blue text-sm">They thank you.</p>
-                        {npc.reward && npc.reward.gold && (
-                          <p className="text-gold text-sm">+{npc.reward.gold} gold</p>
-                        )}
-                        <button onClick={handleCloseNpc}
-                          className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
-                          Continue
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })()
-
-              : /* Chest in room (loot/hidden chambers) */
+              : /* Chest in room (loot/hidden chambers) — trigger button */
               currentChamber.chest && !lootingChestId && !lootingCorpseId ? (function() {
                 var chest = currentChamber.chest
                 var isFullyLooted = chest.goldTaken && (chest.items.length === 0 || chest.items.length === chest.itemsTaken.length)
@@ -2874,59 +2768,12 @@ function Game({ character, user, onEndRun }) {
                     </button>
                   </div>
                 )
-              })() : lootingChestId && currentChamber.chest ? (function() {
-                var chest = currentChamber.chest
-                return (
-                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-                    <p className="text-ink text-sm font-sans">{chest.label}</p>
-                    <div className="flex flex-col gap-2 w-full">
-                      {chest.gold > 0 && (
-                        <div className="flex items-center justify-between p-3 rounded-lg border border-gold/30 bg-surface text-sm font-sans">
-                          <span className="text-gold">{chest.gold} gold</span>
-                          {chest.goldTaken ? (
-                            <span className="text-ink-faint text-xs">taken</span>
-                          ) : (
-                            <button onClick={handleTakeChestGold}
-                              className="text-xs text-gold border border-gold/40 px-3 py-1 rounded hover:border-gold transition-colors">
-                              Take
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      {chest.items.map(function(item, idx) {
-                        var taken = chest.itemsTaken.indexOf(idx) !== -1
-                        return (
-                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
-                            <div className="flex flex-col">
-                              <span className="text-ink">{item.name}</span>
-                              <span className="text-ink-faint text-[10px]">
-                                {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                                 item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                                 item.description || item.type}
-                              </span>
-                            </div>
-                            {taken ? (
-                              <span className="text-ink-faint text-xs">taken</span>
-                            ) : (
-                              <button onClick={function() { handleTakeChestItem(idx) }}
-                                className="text-xs text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded hover:border-emerald-400 transition-colors">
-                                Take
-                              </button>
-                            )}
-                          </div>
-                        )
-                      })}
-                      {chest.items.length === 0 && chest.gold === 0 && (
-                        <p className="text-ink-faint text-xs italic">Empty.</p>
-                      )}
-                    </div>
-                    <button onClick={handleCloseChest}
-                      className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
-                      {chest.goldTaken || chest.itemsTaken.length > 0 ? 'Done' : 'Leave it'}
-                    </button>
-                  </div>
-                )
-              })()
+              })() : lootingChestId && currentChamber.chest ? (
+                <div className="flex flex-col items-center gap-2">
+                  <ChamberIcon iconKey="chest" theme="garden" scale={4} />
+                  <span className="text-ink-faint text-[10px] font-sans">Searching...</span>
+                </div>
+              )
 
               : /* Lootable corpses from combat */
               currentChamber.corpses && currentChamber.corpses.length > 0 && !lootingCorpseId ? (
@@ -2961,63 +2808,12 @@ function Game({ character, user, onEndRun }) {
                     })}
                   </div>
                 </div>
-              ) : lootingCorpseId && currentChamber.corpses ? (function() {
-                var corpse = currentChamber.corpses.find(function(c) { return c.id === lootingCorpseId })
-                if (!corpse) return null
-                var allItemsTaken = corpse.items.length === corpse.itemsTaken.length
-                return (
-                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-                    <p className="text-ink text-sm font-sans">{corpse.name}</p>
-                    <div className="flex flex-col gap-2 w-full">
-                      {/* Gold */}
-                      {corpse.gold > 0 && (
-                        <div className="flex items-center justify-between p-3 rounded-lg border border-gold/30 bg-surface text-sm font-sans">
-                          <span className="text-gold">{corpse.gold} gold</span>
-                          {corpse.goldTaken ? (
-                            <span className="text-ink-faint text-xs">taken</span>
-                          ) : (
-                            <button onClick={function() { handleTakeGold(corpse.id) }}
-                              className="text-xs text-gold border border-gold/40 px-3 py-1 rounded hover:border-gold transition-colors">
-                              Take
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      {/* Items */}
-                      {corpse.items.map(function(item, idx) {
-                        var taken = corpse.itemsTaken.indexOf(idx) !== -1
-                        return (
-                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
-                            <div className="flex flex-col">
-                              <span className="text-ink">{item.name}</span>
-                              <span className="text-ink-faint text-[10px]">
-                                {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                                 item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                                 item.description || item.type}
-                              </span>
-                            </div>
-                            {taken ? (
-                              <span className="text-ink-faint text-xs">taken</span>
-                            ) : (
-                              <button onClick={function() { handleTakeItem(corpse.id, idx) }}
-                                className="text-xs text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded hover:border-emerald-400 transition-colors">
-                                Take
-                              </button>
-                            )}
-                          </div>
-                        )
-                      })}
-                      {corpse.items.length === 0 && !corpse.gold && (
-                        <p className="text-ink-faint text-xs italic text-center">Nothing here.</p>
-                      )}
-                    </div>
-                    <button onClick={handleCloseLoot}
-                      className="py-2 px-6 rounded-lg bg-surface border border-border text-ink-dim font-sans text-sm hover:text-ink transition-colors">
-                      {corpse.goldTaken || corpse.itemsTaken.length > 0 ? 'Done' : 'Leave it'}
-                    </button>
-                  </div>
-                )
-              })() : showCentre ? (
+              ) : lootingCorpseId && currentChamber.corpses ? (
+                <div className="flex flex-col items-center gap-2">
+                  <ChamberIcon iconKey="corpse_orc" theme="garden" scale={4} />
+                  <span className="text-ink-faint text-[10px] font-sans">Looting...</span>
+                </div>
+              ) : showCentre ? (
                 <div className="flex flex-col items-center gap-2">
                   <ChamberIcon iconKey={centreIconKey} theme="garden" scale={4} />
                   <span className="text-ink-faint text-[10px] font-sans uppercase">
@@ -3078,6 +2874,261 @@ function Game({ character, user, onEndRun }) {
           </div>
         </div>
 
+        {/* Interaction overlays — merchant, quest NPC, chest, corpse */}
+        {lootingNpcId && currentChamber.npc && (function() {
+          var npc = currentChamber.npc
+          var interactionBg = {
+            backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
+            backgroundSize: '8px 8px',
+          }
+          if (npc.type === 'merchant') {
+            return (
+              <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
+                <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+                  <div className="flex flex-col">
+                    <span className="font-display text-lg text-gold">{npc.name}</span>
+                    <span className="text-gold text-xs font-sans">{playerGold} gold</span>
+                  </div>
+                  <button onClick={handleCloseNpc}
+                    className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                    Leave
+                  </button>
+                </div>
+                <div className="flex gap-2 px-4 pt-3">
+                  <button onClick={function() { updateNpc(function(n) { return Object.assign({}, n, { showSell: false }) }) }}
+                    className={'px-4 py-1.5 rounded text-sm font-sans border transition-colors ' +
+                      (!npc.showSell ? 'border-gold text-gold bg-gold/10' : 'border-border text-ink-dim hover:text-ink')}>
+                    Buy
+                  </button>
+                  {playerInventory.length > 0 && (
+                    <button onClick={handleNpcSellToggle}
+                      className={'px-4 py-1.5 rounded text-sm font-sans border transition-colors ' +
+                        (npc.showSell ? 'border-gold text-gold bg-gold/10' : 'border-border text-ink-dim hover:text-ink')}>
+                      Sell
+                    </button>
+                  )}
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+                  {!npc.showSell && npc.items.map(function(item, i) {
+                    var npcBasePr = item.buyPrice || item.cost || 0
+                    var npcChaMod = getModifier(character.stats.cha || 10)
+                    var price = Math.max(1, npcBasePr - Math.max(0, Math.round(npcBasePr * npcChaMod * 0.05)))
+                    var canAfford = playerGold >= price
+                    return (
+                      <div key={'buy-' + i} className="flex items-center justify-between p-4 rounded-lg border border-border-hl bg-surface text-sm font-sans">
+                        <div className="flex flex-col items-start">
+                          <span className="text-ink text-base">{item.name}</span>
+                          <span className="text-ink-faint text-xs">
+                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg (' + (item.weaponType || 'weapon') + ')' :
+                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                             item.description || item.type}
+                          </span>
+                        </div>
+                        <button onClick={function() { if (canAfford) handleNpcBuy(item) }}
+                          disabled={!canAfford}
+                          className={'text-sm px-4 py-1.5 rounded border transition-colors ' +
+                            (canAfford ? 'text-gold border-gold/40 hover:border-gold cursor-pointer' : 'text-ink-faint border-border opacity-50')}>
+                          {price}g
+                        </button>
+                      </div>
+                    )
+                  })}
+                  {!npc.showSell && npc.items.length === 0 && (
+                    <p className="text-ink-faint text-sm italic text-center py-4">Sold out.</p>
+                  )}
+                  {npc.showSell && playerInventory.map(function(item, i) {
+                    var baseSellNpc = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+                    var sellChaMod = getModifier(character.stats.cha || 10)
+                    var sellPrice = Math.max(1, baseSellNpc + Math.max(0, Math.round(baseSellNpc * sellChaMod * 0.05)))
+                    return (
+                      <div key={'sell-' + i} className="flex items-center justify-between p-4 rounded-lg border border-border-hl bg-surface text-sm font-sans">
+                        <div className="flex flex-col items-start">
+                          <span className="text-ink text-base">{item.name}</span>
+                          <span className="text-ink-faint text-xs">
+                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                             item.description || item.type}
+                          </span>
+                        </div>
+                        <button onClick={function() { handleNpcSell(i, sellPrice) }}
+                          className="text-sm text-gold px-4 py-1.5 rounded border border-gold/40 hover:border-gold cursor-pointer transition-colors">
+                          Sell {sellPrice}g
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          }
+          // Quest NPC
+          return (
+            <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
+              <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+                <span className="font-display text-lg text-blue">{npc.name}</span>
+                <button onClick={handleCloseNpc}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Leave
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center gap-4">
+                <ChamberIcon iconKey="npc" theme="garden" scale={5} />
+                <p className="text-ink text-base italic text-center max-w-sm">{npc.description}</p>
+                {!npc.interacted ? (
+                  <div className="flex flex-col gap-3 w-full max-w-sm">
+                    <button onClick={handleNpcHelp}
+                      className="w-full p-4 rounded-lg border-2 border-blue/40 bg-surface text-base font-sans text-blue hover:border-blue transition-colors">
+                      Help them {npc.reward && npc.reward.gold ? '(reward: ' + npc.reward.gold + 'g)' : ''}
+                    </button>
+                    <button onClick={handleCloseNpc}
+                      className="w-full p-4 rounded-lg border border-border bg-surface text-base font-sans text-ink-dim hover:text-ink transition-colors">
+                      Ignore and leave
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="text-blue text-lg">They thank you.</p>
+                    {npc.reward && npc.reward.gold && (
+                      <p className="text-gold text-lg font-display">+{npc.reward.gold} gold</p>
+                    )}
+                    <button onClick={handleCloseNpc}
+                      className="py-3 px-8 rounded-lg bg-surface border border-border text-ink-dim font-sans text-base hover:text-ink transition-colors">
+                      Continue
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Chest looting overlay */}
+        {lootingChestId && currentChamber.chest && (function() {
+          var chest = currentChamber.chest
+          var interactionBg = {
+            backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
+            backgroundSize: '8px 8px',
+          }
+          return (
+            <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
+              <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+                <span className="font-display text-lg text-gold">{chest.label || 'Chest'}</span>
+                <button onClick={handleCloseChest}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  {chest.goldTaken || chest.itemsTaken.length > 0 ? 'Done' : 'Leave it'}
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                {chest.gold > 0 && (
+                  <div className="flex items-center justify-between p-4 rounded-lg border border-gold/30 bg-surface text-base font-sans">
+                    <span className="text-gold text-lg font-display">{chest.gold} gold</span>
+                    {chest.goldTaken ? (
+                      <span className="text-ink-faint text-sm">taken</span>
+                    ) : (
+                      <button onClick={handleTakeChestGold}
+                        className="text-sm text-gold border border-gold/40 px-4 py-1.5 rounded hover:border-gold transition-colors">
+                        Take
+                      </button>
+                    )}
+                  </div>
+                )}
+                {chest.items.map(function(item, idx) {
+                  var taken = chest.itemsTaken.indexOf(idx) !== -1
+                  return (
+                    <div key={idx} className="flex items-center justify-between p-4 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
+                      <div className="flex flex-col">
+                        <span className="text-ink text-base">{item.name}</span>
+                        <span className="text-ink-faint text-xs">
+                          {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                           item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                           item.description || item.type}
+                        </span>
+                      </div>
+                      {taken ? (
+                        <span className="text-ink-faint text-sm">taken</span>
+                      ) : (
+                        <button onClick={function() { handleTakeChestItem(idx) }}
+                          className="text-sm text-emerald-400 border border-emerald-500/40 px-4 py-1.5 rounded hover:border-emerald-400 transition-colors">
+                          Take
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+                {chest.items.length === 0 && chest.gold === 0 && (
+                  <p className="text-ink-faint text-sm italic text-center py-4">Empty.</p>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Corpse looting overlay */}
+        {lootingCorpseId && currentChamber.corpses && (function() {
+          var corpse = currentChamber.corpses.find(function(c) { return c.id === lootingCorpseId })
+          if (!corpse) return null
+          var interactionBg = {
+            backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
+            backgroundSize: '8px 8px',
+          }
+          return (
+            <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
+              <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+                <span className="font-display text-lg text-ink">{corpse.name}</span>
+                <button onClick={handleCloseLoot}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  {corpse.goldTaken || corpse.itemsTaken.length > 0 ? 'Done' : 'Leave it'}
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                {corpse.gold > 0 && (
+                  <div className="flex items-center justify-between p-4 rounded-lg border border-gold/30 bg-surface text-base font-sans">
+                    <span className="text-gold text-lg font-display">{corpse.gold} gold</span>
+                    {corpse.goldTaken ? (
+                      <span className="text-ink-faint text-sm">taken</span>
+                    ) : (
+                      <button onClick={function() { handleTakeGold(corpse.id) }}
+                        className="text-sm text-gold border border-gold/40 px-4 py-1.5 rounded hover:border-gold transition-colors">
+                        Take
+                      </button>
+                    )}
+                  </div>
+                )}
+                {corpse.items.map(function(item, idx) {
+                  var taken = corpse.itemsTaken.indexOf(idx) !== -1
+                  return (
+                    <div key={idx} className="flex items-center justify-between p-4 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
+                      <div className="flex flex-col">
+                        <span className="text-ink text-base">{item.name}</span>
+                        <span className="text-ink-faint text-xs">
+                          {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                           item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                           item.description || item.type}
+                        </span>
+                      </div>
+                      {taken ? (
+                        <span className="text-ink-faint text-sm">taken</span>
+                      ) : (
+                        <button onClick={function() { handleTakeItem(corpse.id, idx) }}
+                          className="text-sm text-emerald-400 border border-emerald-500/40 px-4 py-1.5 rounded hover:border-emerald-400 transition-colors">
+                          Take
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+                {corpse.items.length === 0 && !corpse.gold && (
+                  <p className="text-ink-faint text-sm italic text-center py-4">Nothing here.</p>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Search: Choose clean level — full screen overlay */}
         {searchPhase === 'choose' && (function() {
           var ch2 = zone.chambers[zone.playerPosition]
@@ -3091,9 +3142,14 @@ function Game({ character, user, onEndRun }) {
             2: 'Removes 2 layers. Noisier — enemies may notice. Better loot.',
             3: 'Removes all layers. Loud and reckless — high danger, best rewards. Can reveal terminals.',
           }
+          var interactionBg = {
+            backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
+            backgroundSize: '8px 8px',
+          }
           return (
-            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
+              <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
                 <span className="font-display text-lg text-gold">{sizeLabel}</span>
                 <button onClick={handleCancelSearch}
                   className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
