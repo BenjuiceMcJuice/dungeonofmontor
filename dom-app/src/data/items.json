@@ -720,6 +720,63 @@
     "description": "Splash. Cures ALL your conditions. Cold. Refreshing. Undignified."
   },
 
+  "___COMMENT_STAT_BOOSTS": "=== CONSUMABLES — Permanent Stat Boosts ===",
+
+  "montors_protein_shake": {
+    "id": "montors_protein_shake", "name": "Montor's Protein Shake", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "str", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 STR. Thick. Gritty. You feel stronger immediately."
+  },
+  "montors_yoga_mat": {
+    "id": "montors_yoga_mat", "name": "Montor's Yoga Mat", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "agi", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 AGI. A quick stretch. Surprisingly effective."
+  },
+  "montors_multivitamin": {
+    "id": "montors_multivitamin", "name": "Montor's Multivitamin", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "vit", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 VIT (+5 max HP). Chalky. His mum made him take one every morning."
+  },
+  "montors_reading_glasses": {
+    "id": "montors_reading_glasses", "name": "Montor's Reading Glasses", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "per", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 PER. Everything's sharper. He left them on the nightstand."
+  },
+  "montors_sudoku_book": {
+    "id": "montors_sudoku_book", "name": "Montor's Sudoku Book", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "int", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 INT. Half-finished. You complete a few puzzles."
+  },
+  "montors_lucky_horseshoe": {
+    "id": "montors_lucky_horseshoe", "name": "Montor's Lucky Horseshoe", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "lck", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 LCK. Hung above his door. Upside down, which explains a lot."
+  },
+  "montors_shield_polish": {
+    "id": "montors_shield_polish", "name": "Montor's Shield Polish", "type": "consumable",
+    "rarity": "rare", "effect": "permanent_stat", "effectStat": "def", "effectValue": 1,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Permanently +1 DEF. Rub it in. Skin toughens. Smells of beeswax."
+  },
+  "montors_mums_recipe_book": {
+    "id": "montors_mums_recipe_book", "name": "Montor's Mum's Recipe Book", "type": "consumable",
+    "rarity": "epic", "effect": "permanent_stat_multi", "effectStats": ["str", "vit", "def"], "effectValue": 1,
+    "buyPrice": 120, "sellPrice": 48,
+    "description": "Permanently +1 STR, VIT, DEF. Her cooking made you stronger. Literally."
+  },
+  "montors_grans_wisdom": {
+    "id": "montors_grans_wisdom", "name": "Montor's Gran's Wisdom", "type": "consumable",
+    "rarity": "epic", "effect": "permanent_stat_multi", "effectStats": ["int", "per", "lck"], "effectValue": 1,
+    "buyPrice": 120, "sellPrice": 48,
+    "description": "Permanently +1 INT, PER, LCK. She knew things. Now you know them too."
+  },
+
   "___COMMENT_RELICS": "=== RELICS ===",
 
   "___COMMENT_RELICS_UTILITY": "=== RELICS — Utility ===",

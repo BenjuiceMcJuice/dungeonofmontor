@@ -1797,6 +1797,31 @@
           "itemId": "montors_nudge",
           "weight": 2,
           "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_protein_shake",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_yoga_mat",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_sudoku_book",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_lucky_horseshoe",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_shield_polish",
+          "weight": 1,
+          "minRarity": "rare"
         }
       ]
     },
@@ -1945,6 +1970,31 @@
           "itemId": "tonic_all",
           "weight": 1,
           "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_protein_shake",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_multivitamin",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_reading_glasses",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_lucky_horseshoe",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_shield_polish",
+          "weight": 1,
+          "minRarity": "rare"
         }
       ]
     },
@@ -2073,6 +2123,26 @@
           "itemId": "tonic_all",
           "weight": 2,
           "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_protein_shake",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_yoga_mat",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_sudoku_book",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_lucky_horseshoe",
+          "weight": 1,
+          "minRarity": "rare"
         }
       ]
     },
@@ -2180,6 +2250,26 @@
         {
           "itemId": "montors_nudge",
           "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_yoga_mat",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_multivitamin",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_reading_glasses",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_shield_polish",
+          "weight": 1,
           "minRarity": "rare"
         }
       ]
@@ -2457,6 +2547,16 @@
           "itemId": "montors_chaos_marble",
           "weight": 2,
           "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_mums_recipe_book",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_grans_wisdom",
+          "weight": 1,
+          "minRarity": "epic"
         }
       ]
     },
@@ -2618,6 +2718,16 @@
           "itemId": "montors_chaos_marble",
           "weight": 2,
           "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_mums_recipe_book",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_grans_wisdom",
+          "weight": 1,
+          "minRarity": "epic"
         }
       ]
     },
@@ -2770,6 +2880,16 @@
         {
           "itemId": "montors_chaos_marble",
           "weight": 2,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_mums_recipe_book",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_grans_wisdom",
+          "weight": 1,
           "minRarity": "epic"
         }
       ]
