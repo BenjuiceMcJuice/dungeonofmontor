@@ -69,43 +69,43 @@ var RISK_HINTS = {
 
 // Clean level 1/2/3 — must have enough layers remaining
 // Reward design: 3× Careful must give LESS total than 1× Deep.
-// Per-layer value: Careful=0.3, Thorough=0.85/layer, Deep=1.5/layer
-// So 3× Careful = 0.9 total, 1× Deep = 4.5 total. Deep is 5× better but 10× riskier.
+// Per-layer: Careful=0.4, Thorough=1.0/layer, Deep=1.8/layer
+// 3× Careful = 1.2 total. 1× Deep = 5.5 total. Deep is ~4.5× better but much riskier.
 var CLEAN_CONFIG = {
   1: {
     label: 'Careful Clean',
     description: 'One layer. Slow and steady.',
     layersCost: 1,
-    goldMul: 0.3,
-    itemChance: 0.05,
+    goldMul: 0.4,
+    itemChance: 0.15,
     lootTable: 'standard',
     enemyMul: 0.1,
     conditionMul: 0.1,
-    xpMul: 0.3,
+    xpMul: 0.4,
     terminalReveal: false,
   },
   2: {
     label: 'Thorough Search',
     description: 'Two layers at once. Some noise.',
     layersCost: 2,
-    goldMul: 1.7,
-    itemChance: 0.25,
+    goldMul: 2.0,
+    itemChance: 0.40,
     lootTable: 'elite',
     enemyMul: 1.0,
     conditionMul: 1.0,
-    xpMul: 1.7,
+    xpMul: 2.0,
     terminalReveal: false,
   },
   3: {
     label: 'Deep Clean',
     description: 'Everything. All at once.',
     layersCost: 3,
-    goldMul: 4.5,
-    itemChance: 0.50,
+    goldMul: 5.5,
+    itemChance: 0.60,
     lootTable: 'chest',
     enemyMul: 2.5,
     conditionMul: 2.0,
-    xpMul: 4.5,
+    xpMul: 5.5,
     terminalReveal: true,
   },
 }
@@ -325,21 +325,22 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   // === GOLD ===
   var baseGold = getBaseGold(risk)
   result.gold = Math.max(1, Math.round(baseGold * config.goldMul))
-  if (quality === 'fumble' || quality === 'poor') result.gold = Math.max(1, Math.floor(result.gold * 0.5))
-  if (quality === 'excellent') result.gold = Math.round(result.gold * 1.5)
+  if (quality === 'fumble') { result.gold = Math.max(1, Math.floor(result.gold * 0.3)) }
+  else if (quality === 'poor') { result.gold = Math.max(1, Math.floor(result.gold * 0.6)) }
+  else if (quality === 'good') { result.gold = Math.round(result.gold * 1.3) }
+  else if (quality === 'excellent') { result.gold = Math.round(result.gold * 2.0) }
 
   // === JUNK ITEM ===
-  // LCK affects whether you find consumable vs useless junk
-  // Higher LCK = more likely to find consumable (useful) junk
+  // LCK affects: consumable vs useless junk (higher LCK = better junk)
   var floorPool = JUNK_POOLS[floorId] || JUNK_POOLS['grounds']
   var useless = floorPool.useless || []
   var consumable = floorPool.consumable || []
   var lckMod = lckStat ? getModifier(lckStat) : 0
-  // Base 30% chance of consumable, +5% per LCK mod
   var consumableChance = Math.min(0.7, Math.max(0.1, 0.30 + lckMod * 0.05))
   if (consumable.length > 0 && Math.random() < consumableChance) {
     var picked = consumable[Math.floor(Math.random() * consumable.length)]
     result.junk = Object.assign({}, picked, { consumable: true })
+    if (lckMod >= 2) result.narrative.push('Lucky find!')
   } else if (useless.length > 0) {
     result.junk = Object.assign({}, useless[Math.floor(Math.random() * useless.length)], { consumable: false })
   } else {
@@ -347,16 +348,30 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   }
 
   // === REAL ITEM ===
+  // LCK boosts item find chance: +3% per LCK mod
   var prefix = getFloorLootPrefix(floorId)
   var tableId = prefix + '_' + config.lootTable
-  if (Math.random() < config.itemChance) {
-    if (quality === 'fumble' || quality === 'poor') {
-      result.narrative.push('You missed something buried deeper...')
+  var adjustedItemChance = Math.min(0.85, config.itemChance + lckMod * 0.03)
+  if (Math.random() < adjustedItemChance) {
+    if (quality === 'fumble') {
+      result.narrative.push('Something was here... but you fumbled past it.')
+    } else if (quality === 'poor') {
+      if (Math.random() < 0.3) {
+        result.item = rollDrop(tableId, lckStat || 10)
+        result.narrative.push('Almost missed it — something useful!')
+      } else {
+        result.narrative.push('You sense something buried deeper... but can\'t reach it.')
+      }
     } else if (quality === 'decent') {
-      if (Math.random() < 0.5) result.item = rollDrop(tableId, 10)
-      else result.narrative.push('Something glints but slips away...')
+      if (Math.random() < 0.7) {
+        result.item = rollDrop(tableId, lckStat || 10)
+      } else {
+        result.narrative.push('Something glints but slips away...')
+      }
     } else {
-      result.item = rollDrop(tableId, 10)
+      // Good or excellent — always find it
+      result.item = rollDrop(tableId, lckStat || 10)
+      if (quality === 'excellent') result.narrative.push('Your keen eye spots something others would miss.')
     }
   }
 
@@ -427,15 +442,36 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   var xpQualMul = { fumble: 0.25, poor: 0.5, decent: 1, good: 1.5, excellent: 2 }
   result.xp = Math.max(1, Math.round(baseXp * config.xpMul * (xpQualMul[quality] || 1)))
 
-  // === QUALITY NARRATIVE ===
-  var qualityText = {
-    fumble: 'Fumble!',
-    poor: 'Slim pickings.',
-    decent: 'Found something.',
-    good: 'Nice haul!',
-    excellent: 'Jackpot!',
+  // === QUALITY NARRATIVE — with PER/LCK flavour ===
+  var qualNarrative = {
+    fumble: [
+      'Fumble! You knock the pile over.',
+      'Fumble! Everything scatters.',
+      'Fumble! Your hands find nothing but splinters.',
+    ],
+    poor: [
+      'A clumsy search. Not much here.',
+      'You dig blindly. Slim pickings.',
+      'Half-hearted effort. Half-hearted results.',
+    ],
+    decent: [
+      'A solid rummage. Something turns up.',
+      'Patient work pays off.',
+      'Not bad. There\'s more if you look harder.',
+    ],
+    good: [
+      'Sharp eyes! You spot what others would miss.',
+      'Thorough and quick. Nice haul.',
+      'Your experience shows. Good find.',
+    ],
+    excellent: [
+      'Incredible! Everything falls into place.',
+      'Masterful search. The pile gives up its secrets.',
+      'Jackpot! You were born to scavenge.',
+    ],
   }
-  result.narrative.unshift(qualityText[quality] || '')
+  var narrs = qualNarrative[quality] || ['You search the pile.']
+  result.narrative.unshift(narrs[Math.floor(Math.random() * narrs.length)])
 
   return result
 }
