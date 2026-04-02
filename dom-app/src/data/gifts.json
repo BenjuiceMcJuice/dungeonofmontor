@@ -1,0 +1,188 @@
+{
+  "petal": {
+    "id": "petal",
+    "name": "Petal",
+    "theme": "Garden, growth, nature",
+    "smashText": "You snap Gerald in half. Petals spill from the crack. They dissolve into your skin.",
+    "montorSmash": "You BROKE Gerald?! ...he would have wanted it this way.",
+    "body": [
+      {
+        "id": "bark_skin",
+        "name": "Bark Skin",
+        "type": "defence",
+        "description": "+2 DEF, +1 END.",
+        "effect": "stat_boost",
+        "stats": { "def": 2, "end": 1 }
+      },
+      {
+        "id": "roothold",
+        "name": "Roothold",
+        "type": "defence",
+        "description": "Single hits can't reduce you below 3 HP.",
+        "effect": "damage_floor",
+        "minHpAfterHit": 3
+      },
+      {
+        "id": "spore_cloud",
+        "name": "Spore Cloud",
+        "type": "defence",
+        "description": "When hit below 50% HP, all enemies DAZED 1 turn. Once per combat.",
+        "effect": "threshold_aoe_condition",
+        "hpThreshold": 0.5,
+        "condition": "DAZE",
+        "conditionTurns": 1,
+        "oncePerCombat": true
+      },
+      {
+        "id": "toxic_spores",
+        "name": "Toxic Spores",
+        "type": "attack",
+        "description": "15% chance when hit: attacker gets POISON 2 turns.",
+        "effect": "reflect_condition",
+        "chance": 0.15,
+        "condition": "POISON",
+        "conditionTurns": 2
+      },
+      {
+        "id": "regrowth",
+        "name": "Regrowth",
+        "type": "other",
+        "description": "Heal 3 HP at the end of each combat.",
+        "effect": "post_combat_heal",
+        "value": 3
+      },
+      {
+        "id": "bloom",
+        "name": "Bloom",
+        "type": "other",
+        "description": "Heal 2 HP per chamber entered.",
+        "effect": "chamber_heal",
+        "value": 2
+      }
+    ],
+    "mind": [
+      {
+        "id": "deep_roots",
+        "name": "Deep Roots",
+        "type": "defence",
+        "description": "+2 WIS. Body condition durations reduced by 1 turn.",
+        "effect": "condition_shorten",
+        "stats": { "wis": 2 },
+        "slot": "body",
+        "reduction": 1
+      },
+      {
+        "id": "fungal_confusion",
+        "name": "Fungal Confusion",
+        "type": "attack",
+        "description": "15% chance when hit: attacker CHARMed 1 turn (attacks ally).",
+        "effect": "reflect_condition",
+        "chance": 0.15,
+        "condition": "CHARM",
+        "conditionTurns": 1
+      },
+      {
+        "id": "pollen_cloud",
+        "name": "Pollen Cloud",
+        "type": "attack",
+        "description": "On crit, all enemies BLIND 1 turn.",
+        "effect": "crit_aoe_condition",
+        "condition": "BLIND",
+        "conditionTurns": 1
+      },
+      {
+        "id": "pollensense",
+        "name": "Pollensense",
+        "type": "other",
+        "description": "+3 PER permanently.",
+        "effect": "stat_boost",
+        "stats": { "per": 3 }
+      },
+      {
+        "id": "green_patience",
+        "name": "Green Patience",
+        "type": "other",
+        "description": "Consumable junk risk reduced by 2.",
+        "effect": "junk_risk_reduction",
+        "value": 2
+      },
+      {
+        "id": "overgrowth",
+        "name": "Overgrowth",
+        "type": "other",
+        "description": "Junk piles yield +50% gold.",
+        "effect": "junk_gold_bonus",
+        "value": 0.5
+      }
+    ],
+    "weapon": {
+      "dagger": {
+        "id": "briar_flurry",
+        "name": "Briar Flurry",
+        "description": "Double-strikes apply stacking Briar Bleed (2 dmg/tick, stacks).",
+        "effect": "double_strike_bleed",
+        "bleedDamage": 2,
+        "bleedTurns": 3,
+        "stacks": true
+      },
+      "sword": {
+        "id": "vine_parry",
+        "name": "Vine Parry",
+        "description": "15% chance when hit: attacker SLUGGISH 1 turn.",
+        "effect": "reflect_condition",
+        "chance": 0.15,
+        "condition": "SLUGGISH",
+        "conditionTurns": 1
+      },
+      "spear": {
+        "id": "thorn_reach",
+        "name": "Thorn Reach",
+        "description": "+1 damage. First hit each combat applies SLUGGISH 2 turns.",
+        "effect": "bonus_damage_and_first_hit_condition",
+        "bonusDamage": 1,
+        "condition": "SLUGGISH",
+        "conditionTurns": 2
+      },
+      "mace": {
+        "id": "root_shatter",
+        "name": "Root Shatter",
+        "description": "DEF-ignoring hits also apply DAZE 1 turn.",
+        "effect": "def_ignore_condition",
+        "condition": "DAZE",
+        "conditionTurns": 1
+      },
+      "axe": {
+        "id": "wild_growth",
+        "name": "Wild Growth",
+        "description": "On kill, heal 3 HP.",
+        "effect": "kill_heal",
+        "value": 3
+      },
+      "fists": {
+        "id": "spore_fist",
+        "name": "Spore Fist",
+        "description": "25% chance per hit: BLIND 1 turn.",
+        "effect": "hit_condition",
+        "chance": 0.25,
+        "condition": "BLIND",
+        "conditionTurns": 1
+      }
+    },
+    "shield": [
+      {
+        "id": "thornhide",
+        "name": "Thornhide",
+        "description": "Attackers take 3 reflected damage when they hit you.",
+        "effect": "reflect_damage",
+        "value": 3
+      },
+      {
+        "id": "root_guard",
+        "name": "Root Guard",
+        "description": "20% chance to fully block an attack (0 damage).",
+        "effect": "block_chance",
+        "chance": 0.2
+      }
+    ]
+  }
+}

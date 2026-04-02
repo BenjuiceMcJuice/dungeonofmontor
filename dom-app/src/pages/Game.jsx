@@ -8,6 +8,7 @@ import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getIt
 import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspectJunkItem, consumeJunk, CLEAN_CONFIG } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { generateCombatEnemies } from '../lib/enemies.js'
+import { getGiftDef, getGiftEffect, getWeaponGiftEffect, rollGiftChance } from '../lib/gifts.js'
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
@@ -139,6 +140,13 @@ function Game({ character, user, onEndRun }) {
   var [collectedTreasures, setCollectedTreasures] = useState([])
   var [runLevel, setRunLevel] = useState(0)
   var [pendingLevelUp, setPendingLevelUp] = useState(null) // { hpGain, statPick } or null
+
+  // Gift system — Montor's sacrificed treasures, one per slot
+  var [giftSlots, setGiftSlots] = useState({ body: null, mind: null, weapon: null, shield: null })
+  var [safeRoomStep, setSafeRoomStep] = useState('arrival') // arrival | offering | pick_slot | pick_option | smashed | done
+  var [safeRoomGift, setSafeRoomGift] = useState(null) // the treasure being offered
+  var [safeRoomSlotChoice, setSafeRoomSlotChoice] = useState(null) // body | mind | weapon | shield
+  var [sporeCloudUsed, setSporeCloudUsed] = useState(false) // per-combat flag for Spore Cloud
 
   var XP_THRESHOLDS = progressionData.xpThresholds
 
@@ -799,6 +807,7 @@ function Game({ character, user, onEndRun }) {
       setLootingCorpseId(null)
       setLootingChestId(null)
       setLootingNpcId(null)
+      initSafeRoom()
       guardedSetPhase('safe_room')
       return
     }
@@ -824,14 +833,71 @@ function Game({ character, user, onEndRun }) {
     setLootingCorpseId(null)
     setLootingChestId(null)
     setLootingNpcId(null)
+    initSafeRoom()
     guardedSetPhase('safe_room')
   }
 
   // --- Safe room: Montor's audience chamber ---
+  function initSafeRoom() {
+    // Check if player has any unsmashed treasures in junk bag
+    var treasure = playerJunkBag.find(function(j) { return j.isTreasure })
+    setSafeRoomGift(treasure || null)
+    setSafeRoomStep('arrival')
+    setSafeRoomSlotChoice(null)
+  }
+
   function handleSafeRoomContinue() {
     if (isGuarded()) return
     transitionGuardRef.current = Date.now()
+    setSafeRoomStep('arrival')
+    setSafeRoomGift(null)
+    setSafeRoomSlotChoice(null)
     setGamePhase('doors')
+  }
+
+  function handleSmashGift() {
+    if (!safeRoomGift) return
+    setSafeRoomStep('pick_slot')
+  }
+
+  function handlePickGiftSlot(slotName) {
+    setSafeRoomSlotChoice(slotName)
+    setSafeRoomStep('pick_option')
+  }
+
+  function handleApplyGiftOption(option) {
+    if (!safeRoomGift || !safeRoomSlotChoice) return
+    var giftId = safeRoomGift.gift
+
+    // Build the slot data
+    var slotData = Object.assign({}, option, { giftId: giftId, giftName: safeRoomGift.name })
+
+    // For weapon, tag with the current weapon type
+    if (safeRoomSlotChoice === 'weapon') {
+      var wt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+      slotData.appliedWeaponType = wt
+    }
+
+    // Apply stat boosts immediately (permanent for the run)
+    if (option.stats) {
+      Object.keys(option.stats).forEach(function(stat) {
+        character.stats[stat] = (character.stats[stat] || 10) + option.stats[stat]
+      })
+    }
+
+    // Set the slot
+    setGiftSlots(function(prev) {
+      var updated = Object.assign({}, prev)
+      updated[safeRoomSlotChoice] = slotData
+      return updated
+    })
+
+    // Remove treasure from junk bag
+    setPlayerJunkBag(function(bag) {
+      return bag.filter(function(j) { return j.id !== safeRoomGift.id })
+    })
+
+    setSafeRoomStep('smashed')
   }
 
   // --- Chamber interaction actions ---
@@ -1985,25 +2051,207 @@ function Game({ character, user, onEndRun }) {
 
   // --- Safe room (Montor's audience chamber) ---
   if (gamePhase === 'safe_room') {
+    var safeInteractionBg = {
+      backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
+      backgroundSize: '8px 8px',
+    }
+
+    // Arrival — base screen with stats and Montor quote
+    if (safeRoomStep === 'arrival') {
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+          <h2 className="font-display text-2xl text-gold">{floor ? floor.floorName : 'Unknown Depth'}</h2>
+          <div className="max-w-sm">
+            <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+              You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
+            </p>
+            <p className="text-ink-faint text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+              "{floor ? floor.montorLine : 'I see you.'}"
+            </p>
+          </div>
+          <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs text-sm text-ink-dim">
+            <p>HP: <span className="text-ink">{playerHp}/{character.maxHp}</span></p>
+            <p>Gold: <span className="text-gold">{playerGold}</span></p>
+            <p>Items: <span className="text-emerald-400">{playerInventory.length}</span></p>
+            <p>Chambers cleared: <span className="text-ink">{chambersCleared}</span></p>
+            <p>XP: <span className="text-ink">{totalXp}</span></p>
+          </div>
+          {safeRoomGift ? (
+            <button onClick={function() { setSafeRoomStep('offering') }}
+              className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
+              Montor eyes your bag...
+            </button>
+          ) : (
+            <button onClick={handleSafeRoomContinue}
+              className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
+              Continue
+            </button>
+          )}
+        </div>
+      )
+    }
+
+    // Offering — Montor reacts to the treasure, offer smash or keep
+    if (safeRoomStep === 'offering' && safeRoomGift) {
+      var giftDef = getGiftDef(safeRoomGift.gift)
+      return (
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={safeInteractionBg}>
+          <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center gap-6">
+            <h2 className="font-display text-2xl text-gold">{safeRoomGift.name}</h2>
+            <p className="text-ink text-base italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+              {safeRoomGift.description}
+            </p>
+            <p className="text-gold/80 text-sm italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+              "{giftDef ? giftDef.montorSmash.split('.')[0] + '...' : '...'}"
+            </p>
+            <p className="text-ink-dim text-xs text-center max-w-sm">
+              Sacrifice this treasure to Montor? Its power will be bound to one of your slots — body, mind, weapon, or shield.
+            </p>
+            <div className="flex gap-4 mt-2">
+              <button onClick={handleSmashGift}
+                className="py-3 px-8 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-red-400 font-display text-lg hover:border-red-400 transition-colors">
+                Smash it
+              </button>
+              <button onClick={handleSafeRoomContinue}
+                className="py-3 px-8 rounded-lg border border-border bg-surface text-ink-dim font-sans text-base hover:text-ink transition-colors">
+                Keep it
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Pick slot — body, mind, weapon, or shield
+    if (safeRoomStep === 'pick_slot' && safeRoomGift) {
+      var giftDef2 = getGiftDef(safeRoomGift.gift)
+      var hasShield = character.equipped && character.equipped.offhand && character.equipped.offhand.slot === 'offhand'
+      var weaponType = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+      var slots = [
+        { id: 'body', label: 'Body', desc: giftDef2 ? giftDef2.body.length + ' options' : '', taken: !!giftSlots.body },
+        { id: 'mind', label: 'Mind', desc: giftDef2 ? giftDef2.mind.length + ' options' : '', taken: !!giftSlots.mind },
+        { id: 'weapon', label: 'Weapon (' + weaponType + ')', desc: giftDef2 && giftDef2.weapon[weaponType] ? giftDef2.weapon[weaponType].name : 'No effect for this weapon', taken: !!giftSlots.weapon },
+      ]
+      if (hasShield) {
+        slots.push({ id: 'shield', label: 'Shield', desc: giftDef2 ? giftDef2.shield.length + ' options' : '', taken: !!giftSlots.shield })
+      }
+      return (
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={safeInteractionBg}>
+          <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+            <span className="font-display text-lg text-gold">Choose a slot</span>
+            <button onClick={function() { setSafeRoomStep('offering') }}
+              className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+              Back
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            <p className="text-ink-dim text-sm italic text-center mb-2">Where will you bind {safeRoomGift.name}'s power?</p>
+            {slots.map(function(s) {
+              var isWeaponNoEffect = s.id === 'weapon' && giftDef2 && !giftDef2.weapon[weaponType]
+              return (
+                <button key={s.id}
+                  onClick={function() { if (!s.taken && !isWeaponNoEffect) handlePickGiftSlot(s.id) }}
+                  disabled={s.taken || isWeaponNoEffect}
+                  className={'p-4 rounded-lg border-2 text-left transition-all ' +
+                    (s.taken ? 'border-border opacity-40' :
+                     isWeaponNoEffect ? 'border-border opacity-40' :
+                     'border-gold/40 bg-gold/5 hover:border-gold cursor-pointer')}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-display text-lg text-gold">{s.label}</span>
+                    {s.taken && <span className="text-ink-faint text-xs">Occupied</span>}
+                  </div>
+                  <p className="text-ink-dim text-sm font-sans mt-1">{s.desc}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+
+    // Pick option — show options for the chosen slot
+    if (safeRoomStep === 'pick_option' && safeRoomGift && safeRoomSlotChoice) {
+      var giftDef3 = getGiftDef(safeRoomGift.gift)
+      var options = []
+      if (safeRoomSlotChoice === 'body' && giftDef3) options = giftDef3.body
+      else if (safeRoomSlotChoice === 'mind' && giftDef3) options = giftDef3.mind
+      else if (safeRoomSlotChoice === 'shield' && giftDef3) options = giftDef3.shield
+      else if (safeRoomSlotChoice === 'weapon' && giftDef3) {
+        var wt2 = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+        var wEffect = giftDef3.weapon[wt2]
+        if (wEffect) options = [wEffect]
+      }
+      var typeColors = { defence: 'border-blue/50 bg-blue/5', attack: 'border-red-400/50 bg-red-400/5', other: 'border-amber-400/50 bg-amber-400/5' }
+      var typeLabels = { defence: 'Defence', attack: 'Attack', other: 'Utility' }
+      return (
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={safeInteractionBg}>
+          <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+            <span className="font-display text-lg text-gold">{safeRoomSlotChoice.charAt(0).toUpperCase() + safeRoomSlotChoice.slice(1)} — Pick a power</span>
+            <button onClick={function() { setSafeRoomStep('pick_slot') }}
+              className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+              Back
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            {options.map(function(opt) {
+              var tc = typeColors[opt.type] || typeColors.other
+              return (
+                <button key={opt.id}
+                  onClick={function() { handleApplyGiftOption(opt) }}
+                  className={'p-4 rounded-lg border-2 text-left transition-all cursor-pointer hover:border-gold ' + tc}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-display text-lg text-ink">{opt.name}</span>
+                    {opt.type && <span className={'text-xs font-sans ' + (opt.type === 'defence' ? 'text-blue' : opt.type === 'attack' ? 'text-red-400' : 'text-amber-400')}>{typeLabels[opt.type] || ''}</span>}
+                  </div>
+                  <p className="text-ink-dim text-sm font-sans">{opt.description}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+
+    // Smashed — show the result
+    if (safeRoomStep === 'smashed') {
+      var giftDef4 = getGiftDef(safeRoomGift ? safeRoomGift.gift : null)
+      var appliedSlot = giftSlots[safeRoomSlotChoice]
+      return (
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={safeInteractionBg}>
+          <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center gap-6">
+            <p className="text-ink text-base italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+              {giftDef4 ? giftDef4.smashText : 'The treasure shatters.'}
+            </p>
+            <p className="text-gold/80 text-sm italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+              "{giftDef4 ? giftDef4.montorSmash : '...'}"
+            </p>
+            {appliedSlot && (
+              <div className="p-4 rounded-lg border-2 border-gold/60 bg-gold/10 text-center max-w-sm w-full">
+                <p className="text-gold font-display text-xl">{appliedSlot.name}</p>
+                <p className="text-ink-dim text-sm font-sans mt-1">{appliedSlot.description}</p>
+                <p className="text-ink-faint text-xs font-sans mt-2">Bound to {safeRoomSlotChoice}</p>
+              </div>
+            )}
+            <button onClick={handleSafeRoomContinue}
+              className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors mt-4">
+              Continue
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    // Fallback
     return (
-      <div onClick={handleSafeRoomContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-8 bg-raised cursor-pointer">
-        <h2 className="font-display text-2xl text-gold">{floor ? floor.floorName : 'Unknown Depth'}</h2>
-        <div className="max-w-sm">
-          <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
-            You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
-          </p>
-          <p className="text-ink-faint text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
-            "{floor ? floor.montorLine : 'I see you.'}"
-          </p>
-        </div>
-        <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs text-sm text-ink-dim">
-          <p>HP: <span className="text-ink">{playerHp}/{character.maxHp}</span></p>
-          <p>Gold: <span className="text-gold">{playerGold}</span></p>
-          <p>Items: <span className="text-emerald-400">{playerInventory.length}</span></p>
-          <p>Chambers cleared: <span className="text-ink">{chambersCleared}</span></p>
-          <p>XP: <span className="text-ink">{totalXp}</span></p>
-        </div>
-        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
+      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+        <button onClick={handleSafeRoomContinue}
+          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base">
+          Continue
+        </button>
       </div>
     )
   }
@@ -2178,6 +2426,31 @@ function Game({ character, user, onEndRun }) {
                     </div>
                   </div>
                 )}
+
+                {/* Gift slots */}
+                <div className="mt-4 border-t border-border pt-3">
+                  <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Montor's Gifts</span>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {['body', 'mind', 'weapon', 'shield'].map(function(slot) {
+                      var g = giftSlots[slot]
+                      var slotColors = { body: 'border-red-400/30 bg-red-400/5', mind: 'border-blue/30 bg-blue/5', weapon: 'border-amber-400/30 bg-amber-400/5', shield: 'border-emerald-400/30 bg-emerald-400/5' }
+                      var slotTextColors = { body: 'text-red-400', mind: 'text-blue', weapon: 'text-amber-400', shield: 'text-emerald-400' }
+                      return (
+                        <div key={slot} className={'p-2 rounded-lg border ' + (g ? slotColors[slot] : 'border-border bg-raised')}>
+                          <span className={(g ? slotTextColors[slot] : 'text-ink-faint') + ' text-[9px] uppercase tracking-wide font-sans'}>{slot}</span>
+                          {g ? (
+                            <div className="mt-0.5">
+                              <span className="text-ink text-xs font-display block">{g.name}</span>
+                              <span className="text-ink-dim text-[9px] font-sans">{g.description}</span>
+                            </div>
+                          ) : (
+                            <span className="text-ink-faint text-[9px] block mt-0.5">Empty</span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           )
