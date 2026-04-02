@@ -48,6 +48,7 @@
 | [Sprint Backlog](implementation/sprint_backlog.md) | Prioritised todo list: fixes, features, design work |
 | [Stat Reference](implementation/stat_reference.md) | What each stat does in code RIGHT NOW, with code locations |
 | [Balance Analysis](implementation/balance_analysis.md) | Damage calculations, XP progression, build comparisons, proposed fixes |
+| [Weapon Compendium](reference/weapon_compendium.md) | All 47 weapons + 8 shields — classes, tiers, stats, conditions, gifts |
 
 ---
 
