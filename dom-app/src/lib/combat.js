@@ -200,7 +200,21 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   // If no pre-rolled result provided, roll now (includes weapon accuracy bonus)
   if (!attackResult) {
     var accBonus = (player.equipped && player.equipped.weapon) ? (player.equipped.weapon.accuracyBonus || 0) : -1 // unarmed: -1 accuracy
-    attackResult = d20Attack(strMod + rollsMod + accBonus, 20)
+    // Nudge — +1 to d20 rolls
+    var nudgeBonus = 0
+    var chaosShift = 0
+    if (player.equipped && player.equipped.relics) {
+      for (var ni = 0; ni < player.equipped.relics.length; ni++) {
+        if (player.equipped.relics[ni].passiveEffect === 'd20_nudge') nudgeBonus += (player.equipped.relics[ni].passiveValue || 1)
+        if (player.equipped.relics[ni].passiveEffect === 'chaos_shift') {
+          var range = player.equipped.relics[ni].passiveValue || 2
+          chaosShift = Math.floor(Math.random() * (range * 2 + 1)) - range
+        }
+      }
+    }
+    attackResult = d20Attack(strMod + rollsMod + accBonus + nudgeBonus + chaosShift, 20)
+    if (nudgeBonus > 0) attackResult.nudge = nudgeBonus
+    if (chaosShift !== 0) attackResult.chaosShift = chaosShift
   }
 
   // Apply forced tier
@@ -243,6 +257,11 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     }
 
     var dmgResult = rollDamage(weaponDie, strMod + unarmedStrBonus)
+
+    // Chaos Marble — shift damage die too
+    if (attackResult.chaosShift) {
+      dmgResult = Object.assign({}, dmgResult, { roll: Math.max(1, dmgResult.roll + attackResult.chaosShift) })
+    }
 
     // Reroll ones — Loaded Dice
     if (dmgResult.roll === 1 && player.equipped && player.equipped.relics) {

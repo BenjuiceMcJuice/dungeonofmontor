@@ -49,6 +49,7 @@
 | [Stat Reference](implementation/stat_reference.md) | What each stat does in code RIGHT NOW, with code locations |
 | [Balance Analysis](implementation/balance_analysis.md) | Damage calculations, XP progression, build comparisons, proposed fixes |
 | [Weapon Compendium](reference/weapon_compendium.md) | All 47 weapons + 8 shields — classes, tiers, stats, conditions, gifts |
+| [Item Compendium](reference/item_compendium.md) | All 149 non-weapon items — consumables, relics, armour, junk by floor |
 
 ---
 
