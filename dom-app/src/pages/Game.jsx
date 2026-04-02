@@ -2781,19 +2781,25 @@ function Game({ character, user, onEndRun }) {
               })()}
 
               {/* Search: Dice rolling (main search) */}
-              {searchPhase === 'rolling' && (
-                <div className="flex flex-col items-center gap-3 p-4">
-                  <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
-                    style={{ width: '4.5rem', height: '4.5rem' }}>
-                    {searchDiceDisplay || '?'}
+              {searchPhase === 'rolling' && (function() {
+                var actionText = searchResult && searchResult.cleanLevel === 3
+                  ? 'tears through' : searchResult && searchResult.cleanLevel === 2
+                  ? 'rummages through' : 'carefully sifts through'
+                var ch3 = zone.chambers[zone.playerPosition]
+                var pile3 = ch3.junkPiles && ch3.junkPiles.find(function(p) { return p.id === searchingPileId })
+                var pileDesc = pile3 ? pile3.description.toLowerCase() : 'the pile'
+                return (
+                  <div className="flex flex-col items-center gap-3 p-4">
+                    <p className="text-ink text-sm italic text-center max-w-xs">
+                      {character.name} {actionText} {pileDesc}...
+                    </p>
+                    <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
+                      style={{ width: '4.5rem', height: '4.5rem' }}>
+                      {searchDiceDisplay || '?'}
+                    </div>
                   </div>
-                  <p className="text-ink-faint text-xs italic animate-pulse">
-                    {searchResult && searchResult.cleanLevel === 3 ? 'Tearing through everything...' :
-                     searchResult && searchResult.cleanLevel === 2 ? 'Searching thoroughly...' :
-                     'Sifting carefully...'}
-                  </p>
-                </div>
-              )}
+                )
+              })()}
 
               {/* Search: Dice landed (main search) */}
               {searchPhase === 'landed' && searchResult && (function() {
@@ -2805,13 +2811,14 @@ function Game({ character, user, onEndRun }) {
                 var ql = { excellent: 'EXCELLENT!', good: 'Good find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
                 return (
                   <div className="flex flex-col items-center gap-3 p-4">
+                    <p className="text-ink-dim text-xs italic">{character.name} rolls...</p>
                     <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + qc}
                       style={{ width: '4.5rem', height: '4.5rem' }}>
                       {searchResult.natRoll}
                     </div>
                     <p className={'text-xl font-display ' + qc.split(' ')[0]}>{ql[searchResult.quality]}</p>
                     {searchResult.dangerTriggered && (
-                      <p className="text-red-400 text-xs animate-pulse">Danger...</p>
+                      <p className="text-red-400 text-xs animate-pulse">Wait... something's wrong...</p>
                     )}
                   </div>
                 )
@@ -2821,15 +2828,17 @@ function Game({ character, user, onEndRun }) {
               {searchPhase === 'save_rolling' && searchResult && (
                 <div className="flex flex-col items-center gap-3 p-4">
                   <p className="text-red-400 text-sm font-display">
-                    {searchResult.dangerType === 'enemy' ? 'Something stirs!' : 'TRAP!'}
+                    {searchResult.dangerType === 'enemy' ? 'Something stirs in the pile!' : 'A trap triggers!'}
+                  </p>
+                  <p className="text-ink-dim text-xs italic">
+                    {searchResult.dangerType === 'enemy'
+                      ? character.name + ' tries to spot it...'
+                      : character.name + ' tries to dodge...'}
                   </p>
                   <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-red-400/50 bg-red-400/10 text-red-400 animate-pulse"
                     style={{ width: '4.5rem', height: '4.5rem' }}>
                     {searchSaveDiceDisplay || '?'}
                   </div>
-                  <p className="text-ink-faint text-xs italic animate-pulse">
-                    {searchResult.dangerType === 'enemy' ? 'PER save...' : 'AGI save...'}
-                  </p>
                 </div>
               )}
 
@@ -2840,6 +2849,11 @@ function Game({ character, user, onEndRun }) {
                 var saveRoll = searchResult.dangerType === 'enemy' ? searchResult.perSaveRoll : searchResult.agiSaveRoll
                 return (
                   <div className="flex flex-col items-center gap-3 p-4">
+                    <p className="text-ink-dim text-xs italic">
+                      {searchResult.dangerType === 'enemy'
+                        ? (saved ? character.name + ' spots it in time!' : character.name + ' doesn\'t see it coming!')
+                        : (saved ? character.name + ' leaps aside!' : character.name + ' is too slow!')}
+                    </p>
                     <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + saveColour}
                       style={{ width: '4.5rem', height: '4.5rem' }}>
                       {saveRoll}
