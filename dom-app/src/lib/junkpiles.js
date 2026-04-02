@@ -1,4 +1,4 @@
-// Junk Pile generation, inspect, and depth-based search resolution
+// Junk Pile generation, inspect, clean-level search, PER/AGI saves
 // Data loaded from JSON — see src/data/junk.json
 
 import { roll, rollWithMod } from './dice.js'
@@ -18,7 +18,7 @@ var PILE_COUNTS = {
   combat_standard: { min: 1, max: 3 },
   combat_elite:    { min: 1, max: 3 },
   mini_boss:       { min: 1, max: 2 },
-  boss:            { min: 1, max: 1, forceSize: 'large' },
+  boss:            { min: 1, max: 1, forceSize: 3 },
   merchant:        { min: 1, max: 2 },
   quest_npc:       { min: 1, max: 2 },
   rest:            { min: 1, max: 2 },
@@ -34,13 +34,12 @@ var PILE_COUNTS = {
 // RISK LEVELS — hidden until inspected
 // ============================================================
 
-// Risk 1-5, determines base danger of the pile regardless of search depth
 var RISK_WEIGHTS = [
-  { risk: 1, weight: 25 },  // calm
-  { risk: 2, weight: 30 },  // mild
-  { risk: 3, weight: 25 },  // moderate
-  { risk: 4, weight: 15 },  // dangerous
-  { risk: 5, weight: 5 },   // deadly
+  { risk: 1, weight: 25 },
+  { risk: 2, weight: 30 },
+  { risk: 3, weight: 25 },
+  { risk: 4, weight: 15 },
+  { risk: 5, weight: 5 },
 ]
 
 function rollRiskLevel() {
@@ -55,8 +54,7 @@ function rollRiskLevel() {
   return 3
 }
 
-// Inspect hints based on PER accuracy
-// Higher PER = more accurate. Low PER might lie.
+// Inspect hints — accuracy depends on PER roll
 var RISK_HINTS = {
   1: { accurate: 'Seems quiet',           vague: 'Hard to tell' },
   2: { accurate: 'Probably fine',          vague: 'Maybe fine?' },
@@ -66,46 +64,46 @@ var RISK_HINTS = {
 }
 
 // ============================================================
-// SEARCH DEPTH — player chooses per layer
+// CLEAN LEVELS — player chooses how many layers to clean at once
 // ============================================================
 
-// Depth modifiers applied on top of base risk
-// Sift: careful, low reward, low danger
-// Rummage: balanced
-// Deep clean: aggressive, best loot, most danger
-var DEPTH_CONFIG = {
-  sift: {
-    label: 'Sift',
-    description: 'Careful. Quiet.',
+// Clean level 1/2/3 — must have enough layers remaining
+var CLEAN_CONFIG = {
+  1: {
+    label: 'Careful Clean',
+    description: 'One layer. Slow and steady.',
+    layersCost: 1,
     goldMul: 0.5,
-    itemChance: 0.05,
-    enemyMul: 0.0,     // sifting never triggers enemies
-    conditionMul: 0.2,  // very low condition chance
+    itemChance: 0.10,
+    lootTable: 'standard',
+    enemyMul: 0.2,
+    conditionMul: 0.2,
     xpMul: 0.5,
     terminalReveal: false,
-    lootTable: 'standard',
   },
-  rummage: {
-    label: 'Rummage',
-    description: 'Thorough. Some noise.',
-    goldMul: 1.0,
-    itemChance: 0.2,
-    enemyMul: 0.5,     // half of base enemy chance
-    conditionMul: 0.7,
-    xpMul: 1.0,
-    terminalReveal: false,
-    lootTable: 'elite',
-  },
-  deep_clean: {
-    label: 'Deep Clean',
-    description: 'All in. Everything comes out.',
+  2: {
+    label: 'Thorough Search',
+    description: 'Two layers at once. Some noise.',
+    layersCost: 2,
     goldMul: 1.5,
-    itemChance: 0.4,
-    enemyMul: 1.5,     // amplified enemy chance
-    conditionMul: 1.5,
-    xpMul: 2.0,
-    terminalReveal: true,  // only deep clean reveals terminals
+    itemChance: 0.30,
+    lootTable: 'elite',
+    enemyMul: 1.0,
+    conditionMul: 1.0,
+    xpMul: 1.5,
+    terminalReveal: false,
+  },
+  3: {
+    label: 'Deep Clean',
+    description: 'Everything. All at once.',
+    layersCost: 3,
+    goldMul: 3.0,
+    itemChance: 0.50,
     lootTable: 'chest',
+    enemyMul: 2.0,
+    conditionMul: 1.5,
+    xpMul: 3.0,
+    terminalReveal: true,
   },
 }
 
@@ -113,35 +111,28 @@ var DEPTH_CONFIG = {
 // BASE TABLES — scale with risk level
 // ============================================================
 
-// Base gold per layer (scales with risk — risky piles have more)
 function getBaseGold(riskLevel) {
   var ranges = [
-    { min: 1, max: 3 },   // risk 1
-    { min: 2, max: 5 },   // risk 2
-    { min: 3, max: 8 },   // risk 3
-    { min: 5, max: 12 },  // risk 4
-    { min: 8, max: 18 },  // risk 5
+    { min: 1, max: 3 },
+    { min: 2, max: 5 },
+    { min: 3, max: 8 },
+    { min: 5, max: 12 },
+    { min: 8, max: 18 },
   ]
   var r = ranges[Math.min(riskLevel - 1, ranges.length - 1)]
   return r.min + Math.floor(Math.random() * (r.max - r.min + 1))
 }
 
-// Base enemy chance per risk level
 function getBaseEnemyChance(riskLevel) {
-  var chances = [0.0, 0.05, 0.15, 0.30, 0.50]
-  return chances[Math.min(riskLevel - 1, chances.length - 1)]
+  return [0.0, 0.05, 0.15, 0.30, 0.50][Math.min(riskLevel - 1, 4)]
 }
 
-// Base condition chance per risk level
 function getBaseConditionChance(riskLevel) {
-  var chances = [0.0, 0.05, 0.10, 0.20, 0.35]
-  return chances[Math.min(riskLevel - 1, chances.length - 1)]
+  return [0.0, 0.05, 0.10, 0.20, 0.35][Math.min(riskLevel - 1, 4)]
 }
 
-// XP base per risk level
 function getBaseXp(riskLevel) {
-  var xps = [3, 5, 8, 12, 18]
-  return xps[Math.min(riskLevel - 1, xps.length - 1)]
+  return [3, 5, 8, 12, 18][Math.min(riskLevel - 1, 4)]
 }
 
 // ============================================================
@@ -159,7 +150,7 @@ function generateJunkPiles(chamber, floorId) {
       size = config.forceSize
     } else {
       var sizeRoll = Math.random()
-      size = sizeRoll < 0.6 ? 'small' : sizeRoll < 0.9 ? 'medium' : 'large'
+      size = sizeRoll < 0.6 ? 1 : sizeRoll < 0.9 ? 2 : 3
     }
     piles.push(createPile('pile_' + i, size, floorId))
   }
@@ -167,23 +158,22 @@ function generateJunkPiles(chamber, floorId) {
 }
 
 function createPile(id, size, floorId) {
-  var maxLayers = size === 'small' ? 1 : size === 'medium' ? 2 : 3
   var riskLevel = rollRiskLevel()
   var desc = PILE_DESCRIPTIONS[floorId] || PILE_DESCRIPTIONS['grounds']
+  var sizeKey = size === 3 ? 'large' : size === 2 ? 'medium' : 'small'
 
   return {
     id: id,
-    size: size,
-    maxLayers: maxLayers,
-    currentLayer: 0,        // 0 = top, increments as layers are searched
+    size: size,             // 1, 2, or 3 layers
+    layersRemaining: size,  // decremented as layers are cleaned
     depleted: false,
     floorId: floorId,
-    riskLevel: riskLevel,   // hidden 1-5
-    inspected: false,       // true after player inspects
-    inspectHint: null,      // set on inspect
-    hasTerminal: false,     // set by placeTerminal()
-    terminalLayer: -1,      // which layer the terminal is on (-1 = none)
-    description: desc[size] || 'A pile of junk',
+    riskLevel: riskLevel,
+    inspected: false,
+    inspectHint: null,
+    hasTerminal: false,
+    terminalRevealed: false,
+    description: desc[sizeKey] || 'A pile of junk',
   }
 }
 
@@ -191,8 +181,6 @@ function createPile(id, size, floorId) {
 // TERMINAL PLACEMENT
 // ============================================================
 
-// Place exactly one terminal in a zone's chambers
-// Terminal goes on the deepest layer of a medium/large pile
 function placeTerminal(chambers) {
   var candidates = []
   for (var ci = 0; ci < chambers.length; ci++) {
@@ -200,14 +188,13 @@ function placeTerminal(chambers) {
     if (!ch.junkPiles) continue
     for (var pi = 0; pi < ch.junkPiles.length; pi++) {
       var pile = ch.junkPiles[pi]
-      if (pile.maxLayers >= 2) {
+      if (pile.size >= 2) {
         candidates.push({ chamberIdx: ci, pileIdx: pi })
       }
     }
   }
 
   if (candidates.length === 0) {
-    // Fallback: any pile
     for (var fi = 0; fi < chambers.length; fi++) {
       if (chambers[fi].junkPiles && chambers[fi].junkPiles.length > 0) {
         candidates.push({ chamberIdx: fi, pileIdx: 0 })
@@ -221,7 +208,6 @@ function placeTerminal(chambers) {
   var pick = candidates[Math.floor(Math.random() * candidates.length)]
   var pile = chambers[pick.chamberIdx].junkPiles[pick.pileIdx]
   pile.hasTerminal = true
-  pile.terminalLayer = pile.maxLayers - 1  // deepest layer
   chambers[pick.chamberIdx].hasTerminal = true
 }
 
@@ -233,7 +219,6 @@ function inspectPile(pile, perStat) {
   if (pile.inspected) return pile.inspectHint
 
   var perMod = perStat ? getModifier(perStat) : 0
-  // Silent roll: d20 + PER. High = accurate hint, low = vague
   var inspectRoll = roll(20) + perMod
   var accurate = inspectRoll >= 12
 
@@ -246,27 +231,40 @@ function inspectPile(pile, perStat) {
 }
 
 // ============================================================
-// SEARCH — player chooses depth (sift/rummage/deep_clean)
+// GET AVAILABLE CLEAN LEVELS for a pile
 // ============================================================
 
-// Resolve a search at the current layer with chosen depth
-// Returns { quality, roll, natRoll, gold, junk, item, enemy, condition, terminal, xp, narrative }
-function resolveSearch(pile, perStat, depthKey) {
-  if (pile.depleted) return null
-  if (pile.currentLayer >= pile.maxLayers) return null
+function getAvailableCleanLevels(pile) {
+  var levels = []
+  if (pile.layersRemaining >= 1) levels.push(1)
+  if (pile.layersRemaining >= 2) levels.push(2)
+  if (pile.layersRemaining >= 3) levels.push(3)
+  return levels
+}
 
-  var depth = DEPTH_CONFIG[depthKey] || DEPTH_CONFIG['sift']
+// ============================================================
+// SEARCH RESOLUTION
+// ============================================================
+
+// Resolve a search at given clean level
+// Returns { quality, roll, natRoll, cleanLevel, gold, junk, item,
+//           dangerTriggered, dangerType, dangerDetail, perSaveRoll, agiSaveRoll,
+//           perSaved, agiSaved, enemy, condition, terminal, xp, narrative }
+function resolveSearch(pile, perStat, agiStat, cleanLevel) {
+  if (pile.depleted || pile.layersRemaining <= 0) return null
+
+  var config = CLEAN_CONFIG[cleanLevel] || CLEAN_CONFIG[1]
+  if (pile.layersRemaining < config.layersCost) return null
+
   var risk = pile.riskLevel
-  var layerIdx = pile.currentLayer
   var floorId = pile.floorId
 
-  // PER roll
+  // === MAIN SEARCH ROLL ===
   var perMod = perStat ? getModifier(perStat) : 0
   var searchRoll = rollWithMod(20, perMod)
   var natRoll = searchRoll.roll
   var total = searchRoll.total
 
-  // Determine quality
   var quality
   if (natRoll === 1) quality = 'fumble'
   else if (total <= 7) quality = 'poor'
@@ -278,34 +276,42 @@ function resolveSearch(pile, perStat, depthKey) {
     quality: quality,
     roll: total,
     natRoll: natRoll,
-    depthKey: depthKey,
-    depthLabel: depth.label,
+    cleanLevel: cleanLevel,
+    cleanLabel: config.label,
     gold: 0,
     junk: null,
     item: null,
-    enemy: null,
-    condition: null,
+    // Danger
+    dangerTriggered: false,
+    dangerType: null,     // 'enemy' | 'condition'
+    dangerDetail: null,   // enemy type or condition ID
+    perSaveRoll: null,
+    agiSaveRoll: null,
+    perSaved: false,
+    agiSaved: false,
+    enemy: null,          // null | 'ambush' | 'normal' | 'spotted'
+    condition: null,      // condition ID or null
+    // Other
     terminal: false,
     xp: 0,
     narrative: [],
     pileId: pile.id,
-    layerIdx: layerIdx,
   }
 
-  // --- Gold ---
+  // === GOLD ===
   var baseGold = getBaseGold(risk)
-  result.gold = Math.max(1, Math.round(baseGold * depth.goldMul))
+  result.gold = Math.max(1, Math.round(baseGold * config.goldMul))
   if (quality === 'fumble' || quality === 'poor') result.gold = Math.max(1, Math.floor(result.gold * 0.5))
   if (quality === 'excellent') result.gold = Math.round(result.gold * 1.5)
 
-  // --- Junk item ---
+  // === JUNK ITEM ===
   var pool = JUNK_POOLS[floorId] || JUNK_POOLS['grounds']
   result.junk = pool[Math.floor(Math.random() * pool.length)]
 
-  // --- Real item (from loot table) ---
+  // === REAL ITEM ===
   var prefix = getFloorLootPrefix(floorId)
-  var tableId = prefix + '_' + depth.lootTable
-  if (Math.random() < depth.itemChance) {
+  var tableId = prefix + '_' + config.lootTable
+  if (Math.random() < config.itemChance) {
     if (quality === 'fumble' || quality === 'poor') {
       result.narrative.push('You missed something buried deeper...')
     } else if (quality === 'decent') {
@@ -316,53 +322,74 @@ function resolveSearch(pile, perStat, depthKey) {
     }
   }
 
-  // --- Enemy ---
-  var enemyChance = getBaseEnemyChance(risk) * depth.enemyMul
+  // === DANGER: ENEMY ===
+  var enemyChance = getBaseEnemyChance(risk) * config.enemyMul
   if (enemyChance > 0 && Math.random() < enemyChance) {
-    if (quality === 'excellent') {
-      result.narrative.push('You spot something hiding — it scurries away.')
-    } else if (quality === 'good') {
+    result.dangerTriggered = true
+    result.dangerType = 'enemy'
+
+    // PER save — can you spot it before it gets you?
+    var perSave = rollWithMod(20, perMod)
+    result.perSaveRoll = perSave.total
+
+    if (perSave.total >= 15) {
+      // Spotted it — player chooses fight or flee
+      result.perSaved = true
       result.enemy = 'spotted'
-      result.narrative.push('You spot something lurking!')
-    } else if (quality === 'decent') {
+      result.narrative.push('You spot something lurking — back away or fight?')
+    } else if (perSave.total >= 10) {
+      // Heard it — normal combat (no ambush)
       result.enemy = 'normal'
       result.narrative.push('Something bursts from the pile!')
     } else {
+      // Ambush — enemy gets free first strike
       result.enemy = 'ambush'
       result.narrative.push('AMBUSH! Something lunges from the junk!')
     }
   }
 
-  // --- Condition hazard ---
-  var condChance = getBaseConditionChance(risk) * depth.conditionMul
-  if (condChance > 0 && Math.random() < condChance) {
+  // === DANGER: CONDITION/TRAP ===
+  var condChance = getBaseConditionChance(risk) * config.conditionMul
+  if (!result.dangerTriggered && condChance > 0 && Math.random() < condChance) {
     var condPool = CONDITION_HAZARDS[floorId] || ['NAUSEA']
     var condId = condPool[Math.floor(Math.random() * condPool.length)]
-    if (quality === 'good' || quality === 'excellent') {
-      result.narrative.push('You carefully avoid a hazard.')
-    } else if (quality === 'decent') {
-      if (Math.random() < 0.5) {
-        result.condition = condId
-        result.narrative.push('Hazard — ' + condId + '!')
-      }
+    result.dangerTriggered = true
+    result.dangerType = 'condition'
+    result.dangerDetail = condId
+
+    // AGI save — can you dodge the hazard?
+    var agiMod = agiStat ? getModifier(agiStat) : 0
+    var agiSave = rollWithMod(20, agiMod)
+    result.agiSaveRoll = agiSave.total
+
+    if (agiSave.total >= 13) {
+      // Dodged it
+      result.agiSaved = true
+      result.narrative.push('Trap! But you dodge it — ' + condId + ' avoided!')
     } else {
+      // Hit by it
       result.condition = condId
-      result.narrative.push('Hazard — ' + condId + '!')
+      result.narrative.push('TRAP! ' + condId + '!')
     }
   }
 
-  // --- Terminal ---
-  if (pile.hasTerminal && layerIdx === pile.terminalLayer && depth.terminalReveal) {
-    result.terminal = true
-    result.narrative.push('You uncover something beneath the junk... a strange terminal hums faintly.')
+  // === TERMINAL ===
+  // Only revealed by clean level 3 (deep clean) that fully depletes the pile
+  if (pile.hasTerminal && !pile.terminalRevealed && config.terminalReveal) {
+    // Check this clean would deplete the pile
+    if (pile.layersRemaining - config.layersCost <= 0) {
+      result.terminal = true
+      pile.terminalRevealed = true
+      result.narrative.push('Beneath everything... a terminal hums faintly.')
+    }
   }
 
-  // --- XP ---
+  // === XP ===
   var baseXp = getBaseXp(risk)
-  var xpMul = { fumble: 0.25, poor: 0.5, decent: 1, good: 1.5, excellent: 2 }
-  result.xp = Math.max(1, Math.round(baseXp * depth.xpMul * (xpMul[quality] || 1)))
+  var xpQualMul = { fumble: 0.25, poor: 0.5, decent: 1, good: 1.5, excellent: 2 }
+  result.xp = Math.max(1, Math.round(baseXp * config.xpMul * (xpQualMul[quality] || 1)))
 
-  // --- Quality narrative ---
+  // === QUALITY NARRATIVE ===
   var qualityText = {
     fumble: 'Fumble!',
     poor: 'Slim pickings.',
@@ -375,10 +402,11 @@ function resolveSearch(pile, perStat, depthKey) {
   return result
 }
 
-// Apply search — advance layer, mark depleted if done
-function applySearch(pile) {
-  pile.currentLayer++
-  if (pile.currentLayer >= pile.maxLayers) {
+// Apply search — consume layers, mark depleted
+function applySearch(pile, cleanLevel) {
+  var config = CLEAN_CONFIG[cleanLevel] || CLEAN_CONFIG[1]
+  pile.layersRemaining = Math.max(0, pile.layersRemaining - config.layersCost)
+  if (pile.layersRemaining <= 0) {
     pile.depleted = true
   }
 }
@@ -391,9 +419,10 @@ export {
   generateJunkPiles,
   placeTerminal,
   inspectPile,
+  getAvailableCleanLevels,
   resolveSearch,
   applySearch,
-  DEPTH_CONFIG,
+  CLEAN_CONFIG,
   PILE_COUNTS,
   PILE_DESCRIPTIONS,
 }
