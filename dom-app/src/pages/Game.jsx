@@ -691,16 +691,50 @@ function Game({ character, user, onEndRun }) {
     setChambersCleared(chambersCleared + 1)
   }
 
-  // --- Zone door ---
+  // --- Zone door --- bidirectional passage between zones
   function handleOpenZoneDoor() {
-    if (!hasZoneKey) return
-    if (!floor || !floor.zones) return
-    // Move to next zone
-    var nextZoneIndex = (floor.currentZoneIndex + 1) % floor.zones.length
-    if (nextZoneIndex === floor.currentZoneIndex) return // only one zone
-    var nextZone = floor.zones[nextZoneIndex]
-    setFloor(Object.assign({}, floor, { currentZoneIndex: nextZoneIndex }))
-    setZone(nextZone)
+    if (!floor || !floor.zones || floor.zones.length < 2) return
+    var currentIdx = floor.currentZoneIndex
+
+    // First time through requires a key; after that door stays unlocked
+    var currentZoneUnlocked = zone.zoneDoorUnlocked
+    if (!currentZoneUnlocked && !hasZoneKey) return
+
+    // Figure out destination: if we came from a zone, go back; otherwise go to next
+    var destIdx
+    if (zone.cameFromZoneIndex != null && zone.cameFromZoneIndex !== currentIdx) {
+      destIdx = zone.cameFromZoneIndex
+    } else {
+      destIdx = (currentIdx + 1) % floor.zones.length
+      if (destIdx === currentIdx) return
+    }
+
+    // Mark both zones' doors as unlocked
+    var updatedZones = floor.zones.map(function(z, i) {
+      if (i === currentIdx) {
+        return Object.assign({}, z, { zoneDoorUnlocked: true })
+      }
+      if (i === destIdx) {
+        return Object.assign({}, z, { zoneDoorUnlocked: true, cameFromZoneIndex: currentIdx })
+      }
+      return z
+    })
+
+    // Place player at the zone_door chamber in the destination zone
+    var destZone = updatedZones[destIdx]
+    var doorChamberIdx = destZone.chambers.findIndex(function(ch) { return ch.type === 'zone_door' })
+    if (doorChamberIdx === -1) doorChamberIdx = 0
+    destZone = Object.assign({}, destZone, {
+      playerPosition: doorChamberIdx,
+      chambers: destZone.chambers.map(function(ch, idx) {
+        if (idx === doorChamberIdx) return Object.assign({}, ch, { visited: true, cleared: true, isZoneDoor: true })
+        return ch
+      })
+    })
+    updatedZones[destIdx] = destZone
+
+    setFloor(Object.assign({}, floor, { zones: updatedZones, currentZoneIndex: destIdx }))
+    setZone(destZone)
     setHasZoneKey(false)
     setPreviousPosition(null)
     setLootingCorpseId(null)
@@ -1882,6 +1916,27 @@ function Game({ character, user, onEndRun }) {
   // RENDER
   // ============================================================
 
+  // Floor-themed pixelated border
+  var FLOOR_BORDER_COLORS = {
+    grounds:     '#4a7c59', // mossy green
+    underground: '#7c6b4a', // earthy brown
+    underbelly:  '#4a6a7c', // sewer teal
+    quarters:    '#7c4a6b', // faded plum
+    works:       '#b85c2f', // forge orange
+    deep:        '#3d3d5c', // void indigo
+  }
+  var floorBorderColor = zone ? (FLOOR_BORDER_COLORS[zone.floorId] || FLOOR_BORDER_COLORS.grounds) : FLOOR_BORDER_COLORS.grounds
+  var pixelBorderStyle = {
+    boxShadow:
+      'inset 0 0 0 2px ' + floorBorderColor +
+      ', inset 0 0 0 4px ' + floorBorderColor + '40' +
+      ', inset 4px 4px 0 0px ' + floorBorderColor + '20' +
+      ', inset -4px -4px 0 0px ' + floorBorderColor + '20',
+    borderImage: 'repeating-linear-gradient(90deg, ' + floorBorderColor + ' 0px, ' + floorBorderColor + ' 4px, transparent 4px, transparent 8px) 4',
+    borderWidth: '4px',
+    borderStyle: 'solid',
+  }
+
   if (!zone) {
     return (
       <div className="h-full flex items-center justify-center bg-raised">
@@ -1983,7 +2038,7 @@ function Game({ character, user, onEndRun }) {
     }
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden" style={pixelBorderStyle}>
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
@@ -2421,12 +2476,10 @@ function Game({ character, user, onEndRun }) {
                     )}
                     {playerJunkBag.filter(function(j) { return !j.consumable }).map(function(junk) {
                       return (
-                        <div key={junk.id} className={'flex items-center justify-between p-3 rounded-lg text-sm font-sans border ' +
-                          (junk.isTreasure ? 'bg-gold/10 border-gold/40' : 'bg-raised border-border')}>
+                        <div key={junk.id} className="flex items-center justify-between p-3 rounded-lg text-sm font-sans border bg-raised border-border">
                           <div className="flex flex-col">
-                            <span className={junk.isTreasure ? 'text-gold font-display' : 'text-ink'}>{junk.name}</span>
-                            {junk.isTreasure && <span className="text-purple-400 text-[9px]">Montor's Treasure — Gift: {junk.gift}</span>}
-                            {junk.description && junk.isTreasure && <span className="text-ink-dim text-[9px] italic">{junk.description}</span>}
+                            <span className="text-ink">{junk.name}</span>
+                            {junk.isTreasure && junk.description && <span className="text-ink-dim text-[9px] italic">{junk.description}</span>}
                           </div>
                           <div className="flex items-center gap-2">
                             {!junk.isTreasure && <span className="text-gold text-xs font-display">x{junk.count}</span>}
@@ -2478,20 +2531,37 @@ function Game({ character, user, onEndRun }) {
               {/* Old keystone rooms now just empty */}
 
               {/* Zone door (locked/unlocked) */}
-              {currentChamber.isZoneDoor && !currentChamber.cleared && (
-                <div className="flex flex-col items-center gap-3">
-                  <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
-                  <p className="text-ink text-sm italic">A heavy door. {hasZoneKey ? 'Your key fits the lock.' : 'Locked. You need a key.'}</p>
-                  {hasZoneKey ? (
-                    <button onClick={handleOpenZoneDoor}
-                      className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
-                      Open Door
-                    </button>
-                  ) : (
-                    <p className="text-red-400 text-xs font-sans">Find the key to proceed.</p>
-                  )}
-                </div>
-              )}
+              {currentChamber.isZoneDoor && (function() {
+                var doorUnlocked = zone.zoneDoorUnlocked
+                var canOpen = doorUnlocked || hasZoneKey
+                return (
+                  <div className="flex flex-col items-center gap-3">
+                    <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
+                    {doorUnlocked ? (
+                      <React.Fragment>
+                        <p className="text-ink text-sm italic">The heavy door stands open.</p>
+                        <button onClick={handleOpenZoneDoor}
+                          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
+                          Pass Through
+                        </button>
+                      </React.Fragment>
+                    ) : hasZoneKey ? (
+                      <React.Fragment>
+                        <p className="text-ink text-sm italic">A heavy door. Your key fits the lock.</p>
+                        <button onClick={handleOpenZoneDoor}
+                          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
+                          Open Door
+                        </button>
+                      </React.Fragment>
+                    ) : (
+                      <React.Fragment>
+                        <p className="text-ink text-sm italic">A heavy door, locked and cold.</p>
+                        <p className="text-red-400 text-xs font-sans">Find the key to proceed.</p>
+                      </React.Fragment>
+                    )}
+                  </div>
+                )
+              })()}
 
               {/* Stairwell descent (locked until terminal activated + boss defeated) */}
               {currentChamber.type === 'stairwell_descent' && !currentChamber.cleared && (function() {
@@ -2514,7 +2584,18 @@ function Game({ character, user, onEndRun }) {
                     ) : (
                       <div className="flex flex-col items-center gap-2">
                         <p className="text-ink text-sm italic">Stone steps spiral downward. The way is sealed.</p>
-                        {!terminalActivated && <p className="text-red-400 text-xs font-sans">A terminal must be activated. Search the junk piles.</p>}
+                        {!terminalActivated && (function() {
+                          var floorHints = {
+                            grounds: 'The steps are buried under rotting leaves and garden debris. If someone cleared this mess, perhaps a way down could be found.',
+                            underground: 'Broken crates and spoiled provisions choke the landing. Somewhere beneath the filth, there must be a way through.',
+                            underbelly: 'The stairwell reeks. Rusted pipes and slime cover everything. Clean enough away and something might reveal itself.',
+                            quarters: 'Moth-eaten curtains and shattered furniture block the descent. The clutter hides more than it should.',
+                            works: 'Slag and bent tools are piled waist-high on the steps. Dig through the worst of it and the way might open.',
+                            deep: 'Dust and silence. The steps vanish into debris so old it has turned to stone. Something must be uncovered first.'
+                          }
+                          var floorId = zone ? zone.floorId : 'grounds'
+                          return <p className="text-ink-dim text-xs font-sans italic">{floorHints[floorId] || floorHints.grounds}</p>
+                        })()}
                         {terminalActivated && !bossCleared && <p className="text-red-400 text-xs font-sans">The guardian still blocks the way.</p>}
                       </div>
                     )}
@@ -3134,11 +3215,9 @@ function Game({ character, user, onEndRun }) {
                     )}
 
                     {searchResult.treasure && (
-                      <div className="p-4 rounded-lg border-2 border-gold/60 bg-gold/10 text-center">
-                        <p className="text-gold font-display text-xl">{searchResult.treasure.name}</p>
-                        <p className="text-ink text-xs font-sans mt-1 italic">{searchResult.treasure.description}</p>
-                        <p className="text-gold/80 text-sm font-sans mt-2 italic">"{searchResult.treasure.montorReaction}"</p>
-                        <p className="text-purple-400 text-[10px] font-sans mt-1">Gift: {searchResult.treasure.gift}</p>
+                      <div className="p-2 rounded-lg border border-border bg-surface text-center">
+                        <p className="text-ink text-sm font-sans">{searchResult.treasure.name}</p>
+                        <p className="text-ink-dim text-[10px] font-sans mt-1 italic">{searchResult.treasure.description}</p>
                       </div>
                     )}
 
@@ -3177,7 +3256,7 @@ function Game({ character, user, onEndRun }) {
   if (gamePhase === 'chamber') {
     var chamberNow = zone.chambers[zone.playerPosition]
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden" style={pixelBorderStyle}>
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{chamberNow.label}</span>
@@ -3279,7 +3358,7 @@ function Game({ character, user, onEndRun }) {
     var combatChamber = zone.chambers[zone.playerPosition]
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden">
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden" style={pixelBorderStyle}>
         {/* Stats overlay (read-only during combat) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
