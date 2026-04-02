@@ -180,6 +180,7 @@ function Game({ character, user, onEndRun }) {
 
   var godModeRef = useRef(false)
   var transitionGuardRef = useRef(0)
+  var combatGuardRef = useRef(0)
 
   // Block taps for 400ms after screen transitions to prevent bleed-through
   function guardedSetPhase(phase) {
@@ -188,6 +189,14 @@ function Game({ character, user, onEndRun }) {
   }
   function isGuarded() {
     return Date.now() - transitionGuardRef.current < 400
+  }
+  // Combat-specific guard — block input for 350ms after combat phase changes
+  function guardedSetCombatPhase(phase) {
+    combatGuardRef.current = Date.now()
+    setCombatPhase(phase)
+  }
+  function isCombatGuarded() {
+    return Date.now() - combatGuardRef.current < 350
   }
 
   // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
@@ -608,7 +617,7 @@ function Game({ character, user, onEndRun }) {
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
     var firstActor = getActor(bs, firstTurnId)
-    setCombatPhase(firstActor && firstActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+    guardedSetCombatPhase(firstActor && firstActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
   }
 
   // === ENEMY TURN ===
@@ -619,34 +628,49 @@ function Game({ character, user, onEndRun }) {
     // Tick conditions on enemy's turn start
     var tickResult = tickTurnStart(battle, currentId)
     var tickedBattle = tickResult.newBattle
-    if (tickResult.damage > 0) {
-      addLog({ type: 'condition', text: tickResult.narrative, tier: 'glancing' })
-    }
-    if (tickResult.died) {
-      setBattle(tickedBattle)
-      var endCheck = checkBattleEnd(tickedBattle)
-      if (endCheck === 'victory') {
-        var xpGained = calculateXp(tickedBattle)
-        var newXp = totalXp + xpGained
-        setTotalXp(newXp)
-        checkLevelUp(newXp)
-        transitionGuardRef.current = Date.now(); setCombatPhase('victory')
-        return
+
+    // Split narrative into individual log lines
+    if (tickResult.narrative) {
+      var eParts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
+      for (var ei = 0; ei < eParts.length; ei++) {
+        var ePart = eParts[ei].replace(/\.+$/, '')
+        var eTier = 'glancing'
+        if (ePart.indexOf('turn lost') !== -1 || ePart.indexOf('skip') !== -1) eTier = 'miss'
+        addLog({ type: 'condition', text: ePart, tier: eTier })
       }
-      // Enemy died from conditions — skip their turn
-      var nextB = advanceTurn(tickedBattle)
-      setBattle(nextB)
-      var nextA = getActor(nextB, getCurrentTurnId(nextB))
-      setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-      return
+    }
+
+    var hasEnemyConditionEffects = tickResult.damage > 0 || tickResult.narrative
+    var enemyCondDelay = hasEnemyConditionEffects ? 1000 : 0
+
+    if (tickResult.died) {
+      var diedTimeout = setTimeout(function() {
+        setBattle(tickedBattle)
+        var endCheck = checkBattleEnd(tickedBattle)
+        if (endCheck === 'victory') {
+          var xpGained = calculateXp(tickedBattle)
+          var newXp = totalXp + xpGained
+          setTotalXp(newXp)
+          checkLevelUp(newXp)
+          transitionGuardRef.current = Date.now(); guardedSetCombatPhase('victory')
+          return
+        }
+        // Enemy died from conditions — skip their turn
+        var nextB = advanceTurn(tickedBattle)
+        setBattle(nextB)
+        var nextA = getActor(nextB, getCurrentTurnId(nextB))
+        guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      }, enemyCondDelay)
+      return function() { clearTimeout(diedTimeout) }
     }
     if (tickResult.skipped) {
-      addLog({ type: 'condition', text: tickResult.narrative, tier: 'miss' })
-      var nextB2 = advanceTurn(tickedBattle)
-      setBattle(nextB2)
-      var nextA2 = getActor(nextB2, getCurrentTurnId(nextB2))
-      setCombatPhase(nextA2 && nextA2.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-      return
+      var skipTimeout = setTimeout(function() {
+        var nextB2 = advanceTurn(tickedBattle)
+        setBattle(nextB2)
+        var nextA2 = getActor(nextB2, getCurrentTurnId(nextB2))
+        guardedSetCombatPhase(nextA2 && nextA2.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      }, enemyCondDelay)
+      return function() { clearTimeout(skipTimeout) }
     }
 
     var attackOut = resolveEnemyAttack(tickedBattle, currentId)
@@ -654,7 +678,7 @@ function Game({ character, user, onEndRun }) {
       setEnemyAttackInfo({ attackOut: attackOut })
       setEnemyRollerKey(function(k) { return k + 1 })
     }
-    var timeout = setTimeout(function() { setCombatPhase('enemyRolling') }, 800)
+    var timeout = setTimeout(function() { guardedSetCombatPhase('enemyRolling') }, Math.max(800, enemyCondDelay))
     return function() { clearTimeout(timeout) }
   }, [combatPhase, battle, gamePhase])
 
@@ -715,7 +739,7 @@ function Game({ character, user, onEndRun }) {
     setEnemyAttackInfo(null)
 
     var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
-    setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+    guardedSetCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
   }
 
   // === PLAYER TURN ===
@@ -731,8 +755,18 @@ function Game({ character, user, onEndRun }) {
     }
 
     var tickResult = tickTurnStart(battle, playerUid)
-    if (tickResult.damage > 0 || tickResult.narrative) {
-      addLog({ type: 'condition', text: tickResult.narrative, tier: 'glancing' })
+
+    // Split narrative into individual lines for readable display
+    if (tickResult.narrative) {
+      var parts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
+      for (var ni = 0; ni < parts.length; ni++) {
+        var part = parts[ni].replace(/\.+$/, '')
+        // Colour-code: damage = yellow, skip = red, buffs = amber
+        var logTier = 'glancing'
+        if (part.indexOf('turn lost') !== -1 || part.indexOf('paralysed') !== -1 || part.indexOf('skip') !== -1) logTier = 'miss'
+        else if (part.indexOf('ADRENALINE') !== -1) logTier = 'crit'
+        addLog({ type: 'condition', text: part, tier: logTier })
+      }
     }
     setBattle(tickResult.newBattle)
     setPlayerHp(tickResult.newBattle.players[playerUid].currentHp)
@@ -742,15 +776,23 @@ function Game({ character, user, onEndRun }) {
       guardedSetPhase('defeat')
       return
     }
+
+    // Show condition effects for a beat before acting/skipping
+    var hasConditionEffects = tickResult.damage > 0 || tickResult.narrative
+    var conditionDisplayTime = hasConditionEffects ? 1200 : 0
+
     if (tickResult.skipped) {
-      setCombatPhase('playerSkipped')
+      // Show condition effects first, then show skip banner
       setTimeout(function() {
-        var nextB = advanceTurn(tickResult.newBattle)
-        setBattle(nextB)
-        var nextA = getActor(nextB, getCurrentTurnId(nextB))
-        setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-        setPlayerConditionTicked(false)
-      }, 1500)
+        guardedSetCombatPhase('playerSkipped')
+        setTimeout(function() {
+          var nextB = advanceTurn(tickResult.newBattle)
+          setBattle(nextB)
+          var nextA = getActor(nextB, getCurrentTurnId(nextB))
+          guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+          setPlayerConditionTicked(false)
+        }, 2000)
+      }, conditionDisplayTime)
       return
     }
     setPlayerConditionTicked(true)
@@ -805,7 +847,7 @@ function Game({ character, user, onEndRun }) {
 
   // Direct attack — click enemy card to attack without going through CombatRoller button
   function handlePlayerAttackDirect(enemyId) {
-    if (pendingAttackResult) return
+    if (isCombatGuarded() || pendingAttackResult) return
     setSelectedTarget(enemyId)
     var rollResult = d20Attack(strMod + accuracyBonus, critThreshold)
     if (godModeRef.current) {
@@ -849,6 +891,7 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handlePlayerComplete() {
+    if (isCombatGuarded()) return
     if (!pendingAttackResult) return
     var attackOut = pendingAttackResult
     var r = attackOut.result
@@ -916,7 +959,7 @@ function Game({ character, user, onEndRun }) {
       setTotalXp(newXp)
       checkLevelUp(newXp)
       setBattle(updatedBattle)
-      setCombatPhase('victory')
+      guardedSetCombatPhase('victory')
       var newZone = Object.assign({}, zone, {
         chambers: zone.chambers.map(function(ch) {
           if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
@@ -953,7 +996,7 @@ function Game({ character, user, onEndRun }) {
     if (!targetStillAlive) setSelectedTarget(null)
 
     var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
-    setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+    guardedSetCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
   }
 
   // === FLEE ===
@@ -1039,7 +1082,7 @@ function Game({ character, user, onEndRun }) {
       setBattle(nextBattle)
       setGamePhase('combat')
       var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
-      setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      guardedSetCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
     }
   }
 
@@ -1166,7 +1209,7 @@ function Game({ character, user, onEndRun }) {
       setBattle(nextBattle)
       setSelectedTarget(null)
       var nextActor = getActor(nextBattle, getCurrentTurnId(nextBattle))
-      setCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+      guardedSetCombatPhase(nextActor && nextActor.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
     }
   }
 
@@ -2637,7 +2680,7 @@ function Game({ character, user, onEndRun }) {
         {/* Last action — replaces scrolling combat log */}
         {combatLog.length > 0 && (
           <div className="mb-2 shrink-0">
-            {combatLog.slice(-2).map(function(entry, i) {
+            {combatLog.slice(-4).map(function(entry, i) {
               var logColour = 'text-ink-dim'
               if (entry.tier === 'crit') logColour = 'text-crimson'
               else if (entry.tier === 'hit') logColour = 'text-amber-500'
@@ -2709,9 +2752,13 @@ function Game({ character, user, onEndRun }) {
           )}
 
           {combatPhase === 'playerSkipped' && (
-            <div className="p-4 border-2 border-red-500/40 rounded-lg bg-red-500/10 text-center animate-pulse">
-              <p className="text-red-400 text-lg font-display">Turn Lost!</p>
-              <p className="text-ink text-sm">{combatLog.length > 0 ? combatLog[combatLog.length - 1].text : 'You can\'t act!'}</p>
+            <div className="p-4 border-2 border-red-500/40 rounded-lg bg-red-500/10 text-center">
+              <p className="text-red-400 text-xl font-display animate-pulse">Turn Lost!</p>
+              <div className="mt-2 space-y-1">
+                {combatLog.slice(-3).map(function(entry, i) {
+                  return <p key={i} className="text-ink text-sm">{entry.text}</p>
+                })}
+              </div>
             </div>
           )}
 

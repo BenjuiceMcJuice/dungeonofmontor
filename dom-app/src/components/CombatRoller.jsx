@@ -29,6 +29,7 @@ function getDamageFontSize(dmg) {
 }
 
 function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMod, buttonLabel, colour, autoRoll, resolvedDamage, damageBreakdown, doubleStrike, doubleStrikeDamage, offhandHit, offhandDamage, attackerName, targetName }) {
+  var lastTapRef = useRef(0)
   var resolvedDamageRef = useRef(resolvedDamage)
   resolvedDamageRef.current = resolvedDamage
   var breakdownRef = useRef(damageBreakdown)
@@ -174,7 +175,7 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
   }
 
   return (
-    <div className="flex flex-col items-center gap-3" onClick={showContinue ? function() { if (onComplete) onComplete(attackResult, 0) } : undefined} style={showContinue ? { cursor: 'pointer' } : undefined}>
+    <div className="flex flex-col items-center gap-3" onClick={showContinue ? function() { var now = Date.now(); if (now - lastTapRef.current < 400) return; lastTapRef.current = now; if (onComplete) onComplete(attackResult, 0) } : undefined} style={showContinue ? { cursor: 'pointer' } : undefined}>
       {/* Dice row */}
       <div className="flex items-center justify-center gap-4">
         <div className="flex flex-col items-center gap-1">
