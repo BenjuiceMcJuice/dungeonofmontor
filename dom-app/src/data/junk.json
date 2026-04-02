@@ -1,89 +1,214 @@
 {
   "junkPools": {
-    "grounds": [
-      { "id": "broken_gnome",      "name": "Broken Gnome",        "sellPrice": 1 },
-      { "id": "rusty_trowel",      "name": "Rusty Trowel",        "sellPrice": 1 },
-      { "id": "dried_flowers",     "name": "Dried Flowers",       "sellPrice": 1 },
-      { "id": "empty_seed_packet", "name": "Empty Seed Packet",   "sellPrice": 1 },
-      { "id": "cracked_pot",       "name": "Cracked Pot",         "sellPrice": 2 },
-      { "id": "tangled_hose",      "name": "Tangled Hose",        "sellPrice": 1 },
-      { "id": "faded_label",       "name": "Faded Plant Label",   "sellPrice": 1 },
-      { "id": "snapped_rake",      "name": "Snapped Rake Handle", "sellPrice": 1 },
-      { "id": "worm",              "name": "Worm",                "sellPrice": 1 },
-      { "id": "bird_bath_chunk",   "name": "Bird Bath Fragment",  "sellPrice": 2 }
-    ],
-    "underground": [
-      { "id": "loose_brick",       "name": "Loose Brick",         "sellPrice": 1 },
-      { "id": "rusty_chain",       "name": "Rusty Chain",         "sellPrice": 2 },
-      { "id": "rat_droppings",     "name": "Rat Droppings",       "sellPrice": 1 },
-      { "id": "damp_rag",          "name": "Damp Rag",            "sellPrice": 1 },
-      { "id": "bent_nail",         "name": "Bent Nail",           "sellPrice": 1 },
-      { "id": "mouldy_sock",       "name": "Mouldy Sock",         "sellPrice": 1 },
-      { "id": "cracked_bottle",    "name": "Cracked Bottle",      "sellPrice": 1 },
-      { "id": "cobweb_ball",       "name": "Ball of Cobwebs",     "sellPrice": 1 },
-      { "id": "broken_lantern",    "name": "Broken Lantern",      "sellPrice": 2 },
-      { "id": "single_boot",       "name": "Single Boot",         "sellPrice": 1 }
-    ],
-    "underbelly": [
-      { "id": "cracked_pipe",      "name": "Cracked Pipe",        "sellPrice": 1 },
-      { "id": "slime_clump",       "name": "Clump of Slime",      "sellPrice": 1 },
-      { "id": "rusty_valve",       "name": "Rusty Valve",         "sellPrice": 2 },
-      { "id": "rotting_plank",     "name": "Rotting Plank",       "sellPrice": 1 },
-      { "id": "broken_grate",      "name": "Broken Grate",        "sellPrice": 2 },
-      { "id": "mould_scraping",    "name": "Mould Scraping",      "sellPrice": 1 },
-      { "id": "dead_rat",          "name": "Dead Rat",            "sellPrice": 1 },
-      { "id": "soggy_paper",       "name": "Soggy Paper",         "sellPrice": 1 },
-      { "id": "drain_cover",       "name": "Drain Cover",         "sellPrice": 2 },
-      { "id": "fungal_growth",     "name": "Fungal Growth",       "sellPrice": 1 }
-    ],
-    "quarters": [
-      { "id": "torn_curtain",      "name": "Torn Curtain",        "sellPrice": 1 },
-      { "id": "broken_mirror",     "name": "Broken Mirror Shard", "sellPrice": 2 },
-      { "id": "moth_eaten_sock",   "name": "Moth-Eaten Sock",     "sellPrice": 1 },
-      { "id": "dusty_book",        "name": "Dusty Book",          "sellPrice": 2 },
-      { "id": "snapped_quill",     "name": "Snapped Quill",       "sellPrice": 1 },
-      { "id": "candle_stub",       "name": "Candle Stub",         "sellPrice": 1 },
-      { "id": "tarnished_button",  "name": "Tarnished Button",    "sellPrice": 1 },
-      { "id": "cracked_inkwell",   "name": "Cracked Inkwell",     "sellPrice": 2 },
-      { "id": "hair_ribbon",       "name": "Hair Ribbon",         "sellPrice": 1 },
-      { "id": "chipped_teacup",    "name": "Chipped Teacup",      "sellPrice": 2 }
-    ],
-    "works": [
-      { "id": "bent_gear",         "name": "Bent Gear",           "sellPrice": 2 },
-      { "id": "slag_lump",         "name": "Lump of Slag",        "sellPrice": 1 },
-      { "id": "broken_bellows",    "name": "Broken Bellows",      "sellPrice": 2 },
-      { "id": "twisted_wire",      "name": "Twisted Wire",        "sellPrice": 1 },
-      { "id": "cracked_crucible",  "name": "Cracked Crucible",    "sellPrice": 2 },
-      { "id": "coal_dust",         "name": "Handful of Coal Dust","sellPrice": 1 },
-      { "id": "snapped_tong",      "name": "Snapped Tong",        "sellPrice": 1 },
-      { "id": "melted_screw",      "name": "Melted Screw",        "sellPrice": 1 },
-      { "id": "burnt_leather",     "name": "Burnt Leather Strip",  "sellPrice": 1 },
-      { "id": "iron_filing",       "name": "Iron Filings",        "sellPrice": 2 }
-    ],
-    "deep": [
-      { "id": "cave_crystal",      "name": "Cave Crystal",        "sellPrice": 3 },
-      { "id": "bone_fragment",     "name": "Bone Fragment",        "sellPrice": 1 },
-      { "id": "petrified_wood",    "name": "Petrified Wood",       "sellPrice": 2 },
-      { "id": "strange_fossil",    "name": "Strange Fossil",       "sellPrice": 3 },
-      { "id": "shadow_dust",       "name": "Shadow Dust",          "sellPrice": 2 },
-      { "id": "void_pebble",       "name": "Void Pebble",          "sellPrice": 2 },
-      { "id": "dried_stalactite",  "name": "Dried Stalactite",     "sellPrice": 2 },
-      { "id": "glowing_lichen",    "name": "Glowing Lichen",       "sellPrice": 2 },
-      { "id": "ancient_coin",      "name": "Ancient Coin",         "sellPrice": 3 },
-      { "id": "cracked_geode",     "name": "Cracked Geode",        "sellPrice": 3 }
-    ],
-    "domain": [
-      { "id": "throne_splinter",   "name": "Throne Splinter",      "sellPrice": 3 },
-      { "id": "montor_hair",       "name": "Montor's Hair",        "sellPrice": 1 },
-      { "id": "ripped_tapestry",   "name": "Ripped Tapestry",      "sellPrice": 2 },
-      { "id": "crown_fragment",    "name": "Crown Fragment",        "sellPrice": 3 },
-      { "id": "empty_vial",        "name": "Empty Vial",            "sellPrice": 2 },
-      { "id": "broken_sceptre",    "name": "Broken Sceptre Tip",    "sellPrice": 3 },
-      { "id": "scorch_mark",       "name": "Scorched Fabric",       "sellPrice": 1 },
-      { "id": "dust_of_ages",      "name": "Dust of Ages",          "sellPrice": 2 },
-      { "id": "void_shard_sliver", "name": "Void Shard Sliver",     "sellPrice": 3 },
-      { "id": "montors_note",      "name": "Montor's Crumpled Note","sellPrice": 2 }
-    ]
+    "grounds": {
+      "useless": [
+        { "id": "broken_gnome",      "name": "Broken Gnome",        "sellPrice": 1 },
+        { "id": "rusty_trowel",      "name": "Rusty Trowel",        "sellPrice": 1 },
+        { "id": "empty_seed_packet", "name": "Empty Seed Packet",   "sellPrice": 1 },
+        { "id": "cracked_pot",       "name": "Cracked Pot",         "sellPrice": 2 },
+        { "id": "tangled_hose",      "name": "Tangled Hose",        "sellPrice": 1 },
+        { "id": "faded_label",       "name": "Faded Plant Label",   "sellPrice": 1 },
+        { "id": "snapped_rake",      "name": "Snapped Rake Handle", "sellPrice": 1 },
+        { "id": "bird_bath_chunk",   "name": "Bird Bath Fragment",  "sellPrice": 2 }
+      ],
+      "consumable": [
+        { "id": "strange_mushroom",  "name": "Strange Mushroom",    "sellPrice": 2, "consumeRisk": 3,
+          "good": { "effect": "stat_buff", "stat": "per", "value": 2, "turns": 3, "text": "Your senses sharpen." },
+          "bad":  { "effect": "condition", "condition": "POISON", "text": "Definitely not edible." }
+        },
+        { "id": "dried_flowers",     "name": "Dried Flowers",       "sellPrice": 1, "consumeRisk": 1,
+          "good": { "effect": "heal", "value": 5, "text": "Smells lovely. Feels better." },
+          "bad":  { "effect": "condition", "condition": "NAUSEA", "text": "Pollen up the nose." }
+        },
+        { "id": "worm",              "name": "Worm",                "sellPrice": 1, "consumeRisk": 2,
+          "good": { "effect": "heal", "value": 8, "text": "Protein. Chewy." },
+          "bad":  { "effect": "condition", "condition": "NAUSEA", "text": "Wriggled on the way down." }
+        },
+        { "id": "garden_berry",      "name": "Garden Berry",        "sellPrice": 2, "consumeRisk": 3,
+          "good": { "effect": "stat_buff", "stat": "agi", "value": 2, "turns": 3, "text": "Tingly. You feel lighter." },
+          "bad":  { "effect": "condition", "condition": "POISON", "text": "Not a berry. A spore." }
+        }
+      ]
+    },
+    "underground": {
+      "useless": [
+        { "id": "loose_brick",       "name": "Loose Brick",         "sellPrice": 1 },
+        { "id": "rusty_chain",       "name": "Rusty Chain",         "sellPrice": 2 },
+        { "id": "rat_droppings",     "name": "Rat Droppings",       "sellPrice": 1 },
+        { "id": "damp_rag",          "name": "Damp Rag",            "sellPrice": 1 },
+        { "id": "bent_nail",         "name": "Bent Nail",           "sellPrice": 1 },
+        { "id": "cobweb_ball",       "name": "Ball of Cobwebs",     "sellPrice": 1 },
+        { "id": "broken_lantern",    "name": "Broken Lantern",      "sellPrice": 2 },
+        { "id": "single_boot",       "name": "Single Boot",         "sellPrice": 1 }
+      ],
+      "consumable": [
+        { "id": "mouldy_sock",       "name": "Mouldy Sock",         "sellPrice": 1, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "def", "value": 3, "turns": 3, "text": "The mould hardens your skin. Somehow." },
+          "bad":  { "effect": "condition", "condition": "POISON", "text": "You put it in your mouth. Why." }
+        },
+        { "id": "cracked_bottle",    "name": "Cracked Bottle",      "sellPrice": 1, "consumeRisk": 3,
+          "good": { "effect": "heal", "value": 12, "text": "Dregs of something medicinal." },
+          "bad":  { "effect": "condition", "condition": "DAZE", "text": "Dregs of something alcoholic." }
+        },
+        { "id": "cellar_wine",       "name": "Cellar Wine",         "sellPrice": 3, "consumeRisk": 2,
+          "good": { "effect": "stat_buff", "stat": "str", "value": 2, "turns": 3, "text": "Dutch courage." },
+          "bad":  { "effect": "condition", "condition": "DAZE", "text": "Gone off. Head spinning." }
+        },
+        { "id": "rat_jerky",         "name": "Rat Jerky",           "sellPrice": 1, "consumeRisk": 2,
+          "good": { "effect": "heal", "value": 10, "text": "Chewy. Nutritious. Don't ask." },
+          "bad":  { "effect": "condition", "condition": "NAUSEA", "text": "Still had fur on it." }
+        }
+      ]
+    },
+    "underbelly": {
+      "useless": [
+        { "id": "cracked_pipe",      "name": "Cracked Pipe",        "sellPrice": 1 },
+        { "id": "rusty_valve",       "name": "Rusty Valve",         "sellPrice": 2 },
+        { "id": "rotting_plank",     "name": "Rotting Plank",       "sellPrice": 1 },
+        { "id": "broken_grate",      "name": "Broken Grate",        "sellPrice": 2 },
+        { "id": "dead_rat",          "name": "Dead Rat",            "sellPrice": 1 },
+        { "id": "soggy_paper",       "name": "Soggy Paper",         "sellPrice": 1 },
+        { "id": "drain_cover",       "name": "Drain Cover",         "sellPrice": 2 }
+      ],
+      "consumable": [
+        { "id": "slime_clump",       "name": "Clump of Slime",      "sellPrice": 1, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "def", "value": 3, "turns": 3, "text": "Coats your skin. Armour-ish." },
+          "bad":  { "effect": "condition", "condition": "SLUGGISH", "text": "Now you're coated. And slow." }
+        },
+        { "id": "fungal_growth",     "name": "Fungal Growth",       "sellPrice": 1, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "per", "value": 3, "turns": 3, "text": "Colours are... brighter." },
+          "bad":  { "effect": "condition", "condition": "BLIND", "text": "Colours are... gone." }
+        },
+        { "id": "mould_scraping",    "name": "Mould Scraping",      "sellPrice": 1, "consumeRisk": 3,
+          "good": { "effect": "heal", "value": 15, "text": "Penicillin? Close enough." },
+          "bad":  { "effect": "condition", "condition": "POISON", "text": "That was not penicillin." }
+        },
+        { "id": "bin_juice",         "name": "Bin Juice",           "sellPrice": 1, "consumeRisk": 5,
+          "good": { "effect": "stat_buff", "stat": "str", "value": 4, "turns": 3, "text": "POWER. Disgusting, disgusting power." },
+          "bad":  { "effect": "condition", "condition": "POISON", "text": "Immediate regret." }
+        }
+      ]
+    },
+    "quarters": {
+      "useless": [
+        { "id": "torn_curtain",      "name": "Torn Curtain",        "sellPrice": 1 },
+        { "id": "broken_mirror",     "name": "Broken Mirror Shard", "sellPrice": 2 },
+        { "id": "moth_eaten_sock",   "name": "Moth-Eaten Sock",     "sellPrice": 1 },
+        { "id": "snapped_quill",     "name": "Snapped Quill",       "sellPrice": 1 },
+        { "id": "tarnished_button",  "name": "Tarnished Button",    "sellPrice": 1 },
+        { "id": "cracked_inkwell",   "name": "Cracked Inkwell",     "sellPrice": 2 },
+        { "id": "hair_ribbon",       "name": "Hair Ribbon",         "sellPrice": 1 }
+      ],
+      "consumable": [
+        { "id": "dusty_book",        "name": "Dusty Book",          "sellPrice": 2, "consumeRisk": 1,
+          "good": { "effect": "stat_buff", "stat": "int", "value": 2, "turns": 3, "text": "You learn something. Briefly." },
+          "bad":  { "effect": "condition", "condition": "BORED", "text": "It's a tax ledger." }
+        },
+        { "id": "candle_stub",       "name": "Candle Stub",         "sellPrice": 1, "consumeRisk": 2,
+          "good": { "effect": "stat_buff", "stat": "per", "value": 2, "turns": 3, "text": "Light reveals all." },
+          "bad":  { "effect": "condition", "condition": "BLIND", "text": "Wax in the eyes." }
+        },
+        { "id": "chipped_teacup",    "name": "Chipped Teacup",      "sellPrice": 2, "consumeRisk": 2,
+          "good": { "effect": "heal", "value": 12, "text": "Cold dregs. But restorative." },
+          "bad":  { "effect": "condition", "condition": "NAUSEA", "text": "Something was growing in it." }
+        },
+        { "id": "dusty_wine",        "name": "Dusty Wine",          "sellPrice": 3, "consumeRisk": 2,
+          "good": { "effect": "heal", "value": 20, "text": "Vintage. Excellent." },
+          "bad":  { "effect": "condition", "condition": "DAZE", "text": "Vinegar. Your eyes water." }
+        }
+      ]
+    },
+    "works": {
+      "useless": [
+        { "id": "bent_gear",         "name": "Bent Gear",           "sellPrice": 2 },
+        { "id": "slag_lump",         "name": "Lump of Slag",        "sellPrice": 1 },
+        { "id": "broken_bellows",    "name": "Broken Bellows",      "sellPrice": 2 },
+        { "id": "twisted_wire",      "name": "Twisted Wire",        "sellPrice": 1 },
+        { "id": "cracked_crucible",  "name": "Cracked Crucible",    "sellPrice": 2 },
+        { "id": "snapped_tong",      "name": "Snapped Tong",        "sellPrice": 1 },
+        { "id": "melted_screw",      "name": "Melted Screw",        "sellPrice": 1 }
+      ],
+      "consumable": [
+        { "id": "coal_dust",         "name": "Handful of Coal Dust","sellPrice": 1, "consumeRisk": 3,
+          "good": { "effect": "stat_buff", "stat": "def", "value": 3, "turns": 2, "text": "Blackens the skin. Toughens it." },
+          "bad":  { "effect": "condition", "condition": "BLIND", "text": "In your eyes. Everywhere." }
+        },
+        { "id": "burnt_leather",     "name": "Burnt Leather Strip", "sellPrice": 1, "consumeRisk": 3,
+          "good": { "effect": "stat_buff", "stat": "end", "value": 2, "turns": 3, "text": "Tough to chew. Tougher to digest. You feel hardy." },
+          "bad":  { "effect": "condition", "condition": "NAUSEA", "text": "Leather is not food." }
+        },
+        { "id": "iron_filing",       "name": "Iron Filings",        "sellPrice": 2, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "str", "value": 3, "turns": 3, "text": "Iron in the blood. Literally." },
+          "bad":  { "effect": "condition", "condition": "BLEED", "text": "Iron in the throat. Literally." }
+        },
+        { "id": "molten_drip",       "name": "Molten Drip",         "sellPrice": 2, "consumeRisk": 5,
+          "good": { "effect": "stat_buff", "stat": "str", "value": 5, "turns": 2, "text": "BURNING POWER. It hurts but you're stronger." },
+          "bad":  { "effect": "condition", "condition": "BURN", "text": "It's lava. You drank lava." }
+        }
+      ]
+    },
+    "deep": {
+      "useless": [
+        { "id": "bone_fragment",     "name": "Bone Fragment",        "sellPrice": 1 },
+        { "id": "petrified_wood",    "name": "Petrified Wood",       "sellPrice": 2 },
+        { "id": "dried_stalactite",  "name": "Dried Stalactite",     "sellPrice": 2 },
+        { "id": "ancient_coin",      "name": "Ancient Coin",         "sellPrice": 3 },
+        { "id": "cracked_geode",     "name": "Cracked Geode",        "sellPrice": 3 }
+      ],
+      "consumable": [
+        { "id": "cave_crystal",      "name": "Cave Crystal",         "sellPrice": 3, "consumeRisk": 3,
+          "good": { "effect": "stat_buff", "stat": "int", "value": 3, "turns": 3, "text": "It hums. Your mind clears." },
+          "bad":  { "effect": "condition", "condition": "DAZE", "text": "It hums. Your mind breaks." }
+        },
+        { "id": "strange_fossil",    "name": "Strange Fossil",       "sellPrice": 3, "consumeRisk": 3,
+          "good": { "effect": "stat_buff", "stat": "def", "value": 3, "turns": 3, "text": "Skin hardens like ancient stone." },
+          "bad":  { "effect": "condition", "condition": "SLUGGISH", "text": "Limbs stiffen like ancient stone." }
+        },
+        { "id": "shadow_dust",       "name": "Shadow Dust",          "sellPrice": 2, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "agi", "value": 4, "turns": 2, "text": "You flicker. Hard to see. Hard to hit." },
+          "bad":  { "effect": "condition", "condition": "BLIND", "text": "The shadows swallow your sight." }
+        },
+        { "id": "glowing_lichen",    "name": "Glowing Lichen",       "sellPrice": 2, "consumeRisk": 3,
+          "good": { "effect": "heal", "value": 25, "text": "Warm glow spreads through you." },
+          "bad":  { "effect": "condition", "condition": "BURN", "text": "The glow is too warm. Way too warm." }
+        },
+        { "id": "void_pebble",       "name": "Void Pebble",          "sellPrice": 2, "consumeRisk": 5,
+          "good": { "effect": "stat_buff_all", "value": 2, "turns": 2, "text": "Everything sharpens. You feel... complete." },
+          "bad":  { "effect": "condition_double", "conditions": ["FEAR", "BLIND"], "text": "The void looks back." }
+        }
+      ]
+    },
+    "domain": {
+      "useless": [
+        { "id": "throne_splinter",   "name": "Throne Splinter",      "sellPrice": 3 },
+        { "id": "montor_hair",       "name": "Montor's Hair",        "sellPrice": 1 },
+        { "id": "ripped_tapestry",   "name": "Ripped Tapestry",      "sellPrice": 2 },
+        { "id": "scorch_mark",       "name": "Scorched Fabric",      "sellPrice": 1 },
+        { "id": "dust_of_ages",      "name": "Dust of Ages",         "sellPrice": 2 }
+      ],
+      "consumable": [
+        { "id": "crown_fragment",    "name": "Crown Fragment",        "sellPrice": 3, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "cha", "value": 4, "turns": 3, "text": "You feel... regal." },
+          "bad":  { "effect": "condition", "condition": "CHARM", "text": "Montor's will seeps through." }
+        },
+        { "id": "empty_vial",        "name": "Empty Vial",            "sellPrice": 2, "consumeRisk": 3,
+          "good": { "effect": "heal", "value": 20, "text": "A residue clings to the glass. Healing." },
+          "bad":  { "effect": "condition", "condition": "POISON", "text": "A residue clings to the glass. Not healing." }
+        },
+        { "id": "broken_sceptre",    "name": "Broken Sceptre Tip",    "sellPrice": 3, "consumeRisk": 4,
+          "good": { "effect": "stat_buff", "stat": "wis", "value": 3, "turns": 3, "text": "Power flows from the broken tip." },
+          "bad":  { "effect": "condition", "condition": "FRENZY", "text": "Montor's rage flows through you." }
+        },
+        { "id": "void_shard_sliver", "name": "Void Shard Sliver",     "sellPrice": 3, "consumeRisk": 5,
+          "good": { "effect": "stat_buff_all", "value": 3, "turns": 2, "text": "Reality bends. You are MORE." },
+          "bad":  { "effect": "condition_double", "conditions": ["FEAR", "SAD"], "text": "Reality bends. You are LESS." }
+        },
+        { "id": "montors_note",      "name": "Montor's Crumpled Note","sellPrice": 2, "consumeRisk": 1,
+          "good": { "effect": "stat_buff", "stat": "int", "value": 2, "turns": 3, "text": "His handwriting is terrible. But insightful." },
+          "bad":  { "effect": "condition", "condition": "SAD", "text": "It's a shopping list. For one." }
+        }
+      ]
+    }
   },
   "conditionHazards": {
     "grounds":     ["POISON", "NAUSEA"],
@@ -102,5 +227,19 @@
     "works":       { "small": "Some scattered metal scraps", "medium": "A pile of forge waste and broken parts", "large": "A massive slag heap with things buried inside" },
     "deep":        { "small": "A cluster of strange rocks", "medium": "A cairn of fallen stone and bones", "large": "A vast rockfall hiding who knows what" },
     "domain":      { "small": "Scraps of Montor's possessions", "medium": "A heap of ruined finery", "large": "A throne room's worth of debris" }
+  },
+  "consumeRiskTable": {
+    "1": { "goodChance": 0.90, "label": "Almost certainly fine" },
+    "2": { "goodChance": 0.70, "label": "Probably fine" },
+    "3": { "goodChance": 0.50, "label": "Coin flip" },
+    "4": { "goodChance": 0.30, "label": "Probably bad" },
+    "5": { "goodChance": 0.15, "label": "Almost certainly bad" }
+  },
+  "perInspectHints": {
+    "veryLow":  ["???", "No clue", "Could be anything"],
+    "low":      ["Looks dodgy", "Might be useful", "Risky"],
+    "medium":   ["Smells off", "Could heal", "Seems potent", "Feels warm"],
+    "high":     ["Likely safe", "Likely poisonous", "Healing residue", "Stat boost?"],
+    "exact":    true
   }
 }

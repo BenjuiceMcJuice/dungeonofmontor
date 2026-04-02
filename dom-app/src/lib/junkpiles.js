@@ -223,10 +223,31 @@ function inspectPile(pile, perStat) {
 
   var perMod = perStat ? getModifier(perStat) : 0
   var inspectRoll = roll(20) + perMod
-  var accurate = inspectRoll >= 12
+  var risk = pile.riskLevel
+  var hints = RISK_HINTS[risk] || RISK_HINTS[3]
+  var hint
 
-  var hints = RISK_HINTS[pile.riskLevel] || RISK_HINTS[3]
-  var hint = accurate ? hints.accurate : hints.vague
+  if (inspectRoll <= 5) {
+    // Very low PER — can be MISLEADING (shows wrong risk hint)
+    var fakeRisk = Math.max(1, Math.min(5, risk + (Math.random() < 0.5 ? 2 : -2)))
+    var fakeHints = RISK_HINTS[fakeRisk] || RISK_HINTS[3]
+    hint = fakeHints.accurate  // looks accurate but is wrong
+  } else if (inspectRoll <= 9) {
+    hint = hints.vague
+  } else if (inspectRoll <= 13) {
+    hint = hints.accurate
+  } else if (inspectRoll <= 17) {
+    hint = hints.accurate
+    // High PER — add risk number hint
+    hint = hint + ' (Risk ' + risk + '/5)'
+  } else {
+    // Very high PER — exact info
+    hint = hints.accurate + ' (Risk ' + risk + '/5)'
+    // Terminal sensing
+    if (pile.hasTerminal) {
+      hint = hint + ' — something hums beneath...'
+    }
+  }
 
   pile.inspected = true
   pile.inspectHint = hint
@@ -253,7 +274,7 @@ function getAvailableCleanLevels(pile) {
 // Returns { quality, roll, natRoll, cleanLevel, gold, junk, item,
 //           dangerTriggered, dangerType, dangerDetail, perSaveRoll, agiSaveRoll,
 //           perSaved, agiSaved, enemy, condition, terminal, xp, narrative }
-function resolveSearch(pile, perStat, agiStat, cleanLevel) {
+function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   if (pile.depleted || pile.layersRemaining <= 0) return null
 
   var config = CLEAN_CONFIG[cleanLevel] || CLEAN_CONFIG[1]
@@ -308,8 +329,22 @@ function resolveSearch(pile, perStat, agiStat, cleanLevel) {
   if (quality === 'excellent') result.gold = Math.round(result.gold * 1.5)
 
   // === JUNK ITEM ===
-  var pool = JUNK_POOLS[floorId] || JUNK_POOLS['grounds']
-  result.junk = pool[Math.floor(Math.random() * pool.length)]
+  // LCK affects whether you find consumable vs useless junk
+  // Higher LCK = more likely to find consumable (useful) junk
+  var floorPool = JUNK_POOLS[floorId] || JUNK_POOLS['grounds']
+  var useless = floorPool.useless || []
+  var consumable = floorPool.consumable || []
+  var lckMod = lckStat ? getModifier(lckStat) : 0
+  // Base 30% chance of consumable, +5% per LCK mod
+  var consumableChance = Math.min(0.7, Math.max(0.1, 0.30 + lckMod * 0.05))
+  if (consumable.length > 0 && Math.random() < consumableChance) {
+    var picked = consumable[Math.floor(Math.random() * consumable.length)]
+    result.junk = Object.assign({}, picked, { consumable: true })
+  } else if (useless.length > 0) {
+    result.junk = Object.assign({}, useless[Math.floor(Math.random() * useless.length)], { consumable: false })
+  } else {
+    result.junk = null
+  }
 
   // === REAL ITEM ===
   var prefix = getFloorLootPrefix(floorId)
@@ -415,6 +450,66 @@ function applySearch(pile, cleanLevel) {
 }
 
 // ============================================================
+// JUNK CONSUME — risk/reward based on consumeRisk + LCK
+// ============================================================
+
+var CONSUME_RISK_TABLE = junkData.consumeRiskTable
+
+// Inspect a consumable junk item — PER determines how much you learn
+function inspectJunkItem(junkItem, perStat) {
+  if (!junkItem.consumable || !junkItem.consumeRisk) return '???'
+
+  var perMod = perStat ? getModifier(perStat) : 0
+  var inspectRoll = roll(20) + perMod
+  var risk = junkItem.consumeRisk
+  var riskInfo = CONSUME_RISK_TABLE[String(risk)]
+
+  if (inspectRoll <= 5) {
+    // Very low — no clue
+    return '???'
+  } else if (inspectRoll <= 9) {
+    // Vague
+    var vague = ['Looks dodgy', 'Might be useful', 'Risky', 'Who knows']
+    return vague[Math.floor(Math.random() * vague.length)]
+  } else if (inspectRoll <= 13) {
+    // Directional
+    return riskInfo ? riskInfo.label : 'Unknown risk'
+  } else if (inspectRoll <= 17) {
+    // Good — risk label + likely outcome
+    var likely = (riskInfo && riskInfo.goodChance >= 0.5) ? 'Likely helpful' : 'Likely harmful'
+    return likely + ' (' + (riskInfo ? riskInfo.label : '???') + ')'
+  } else {
+    // Exact — show what it does
+    var goodText = junkItem.good ? junkItem.good.text : '?'
+    var badText = junkItem.bad ? junkItem.bad.text : '?'
+    return 'Good: ' + goodText + ' / Bad: ' + badText
+  }
+}
+
+// Consume a junk item — returns { success, effect }
+// LCK nudges the good/bad chance in your favour
+function consumeJunk(junkItem, lckStat) {
+  if (!junkItem.consumable || !junkItem.consumeRisk) return null
+
+  var risk = junkItem.consumeRisk
+  var riskInfo = CONSUME_RISK_TABLE[String(risk)]
+  var baseGoodChance = riskInfo ? riskInfo.goodChance : 0.5
+
+  // LCK modifier adjusts chance: +3% per LCK mod
+  var lckMod = lckStat ? getModifier(lckStat) : 0
+  var goodChance = Math.min(0.95, Math.max(0.05, baseGoodChance + lckMod * 0.03))
+
+  var isGood = Math.random() < goodChance
+
+  if (isGood && junkItem.good) {
+    return { success: true, effect: Object.assign({}, junkItem.good), narrative: junkItem.good.text }
+  } else if (junkItem.bad) {
+    return { success: false, effect: Object.assign({}, junkItem.bad), narrative: junkItem.bad.text }
+  }
+  return { success: false, effect: null, narrative: 'Nothing happens.' }
+}
+
+// ============================================================
 // EXPORTS
 // ============================================================
 
@@ -425,6 +520,8 @@ export {
   getAvailableCleanLevels,
   resolveSearch,
   applySearch,
+  inspectJunkItem,
+  consumeJunk,
   CLEAN_CONFIG,
   PILE_COUNTS,
   PILE_DESCRIPTIONS,
