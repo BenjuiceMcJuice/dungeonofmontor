@@ -2585,16 +2585,13 @@ function Game({ character, user, onEndRun }) {
                         var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
                         var sizeColour = pile.size === 'large' ? 'border-gold/50 bg-gold/10' : pile.size === 'medium' ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
                         var searchesLeft = pile.maxSearches - pile.searched
-                        var riskLabel = pile.size === 'large' ? 'Risky' : pile.size === 'medium' ? 'Moderate' : 'Safe'
-                        var riskColour = pile.size === 'large' ? 'text-red-400' : pile.size === 'medium' ? 'text-amber-400' : 'text-green-400'
                         return (
                           <button key={pile.id}
                             onClick={function() { handleSearchPile(pile.id) }}
                             className={'flex flex-col items-center gap-0.5 p-2.5 rounded-lg border-2 transition-all cursor-pointer hover:border-gold hover:scale-105 ' + sizeColour}
                           >
                             <span className="text-ink text-sm font-display">{sizeLabel}</span>
-                            <span className={riskColour + ' text-[9px] font-sans'}>{riskLabel}</span>
-                            <span className="text-ink-faint text-[8px] font-sans">{searchesLeft} {searchesLeft === 1 ? 'layer' : 'layers'} deep</span>
+                            <span className="text-ink-faint text-[9px] font-sans">{searchesLeft} {searchesLeft === 1 ? 'layer' : 'layers'}</span>
                           </button>
                         )
                       })}
