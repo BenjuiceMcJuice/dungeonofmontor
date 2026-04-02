@@ -185,26 +185,21 @@ function createPile(id, size, floorId) {
 // ============================================================
 
 function placeTerminal(chambers) {
-  var candidates = []
+  // Prefer size 3 piles, then size 2, then any pile
+  var candidates3 = []
+  var candidates2 = []
+  var candidatesAny = []
   for (var ci = 0; ci < chambers.length; ci++) {
     var ch = chambers[ci]
     if (!ch.junkPiles) continue
     for (var pi = 0; pi < ch.junkPiles.length; pi++) {
       var pile = ch.junkPiles[pi]
-      if (pile.size >= 2) {
-        candidates.push({ chamberIdx: ci, pileIdx: pi })
-      }
+      if (pile.size >= 3) candidates3.push({ chamberIdx: ci, pileIdx: pi })
+      else if (pile.size >= 2) candidates2.push({ chamberIdx: ci, pileIdx: pi })
+      else candidatesAny.push({ chamberIdx: ci, pileIdx: pi })
     }
   }
-
-  if (candidates.length === 0) {
-    for (var fi = 0; fi < chambers.length; fi++) {
-      if (chambers[fi].junkPiles && chambers[fi].junkPiles.length > 0) {
-        candidates.push({ chamberIdx: fi, pileIdx: 0 })
-        break
-      }
-    }
-  }
+  var candidates = candidates3.length > 0 ? candidates3 : candidates2.length > 0 ? candidates2 : candidatesAny
 
   if (candidates.length === 0) return
 
@@ -427,9 +422,8 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   }
 
   // === TERMINAL ===
-  // Only revealed by clean level 3 (deep clean) that fully depletes the pile
-  if (pile.hasTerminal && !pile.terminalRevealed && config.terminalReveal) {
-    // Check this clean would deplete the pile
+  // Terminal revealed when you fully deplete the pile (any clean level that reaches the bottom)
+  if (pile.hasTerminal && !pile.terminalRevealed) {
     if (pile.layersRemaining - config.layersCost <= 0) {
       result.terminal = true
       pile.terminalRevealed = true
