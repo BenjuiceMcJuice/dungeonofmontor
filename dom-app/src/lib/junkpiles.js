@@ -68,41 +68,44 @@ var RISK_HINTS = {
 // ============================================================
 
 // Clean level 1/2/3 — must have enough layers remaining
+// Reward design: 3× Careful must give LESS total than 1× Deep.
+// Per-layer value: Careful=0.3, Thorough=0.85/layer, Deep=1.5/layer
+// So 3× Careful = 0.9 total, 1× Deep = 4.5 total. Deep is 5× better but 10× riskier.
 var CLEAN_CONFIG = {
   1: {
     label: 'Careful Clean',
     description: 'One layer. Slow and steady.',
     layersCost: 1,
-    goldMul: 0.5,
-    itemChance: 0.10,
+    goldMul: 0.3,
+    itemChance: 0.05,
     lootTable: 'standard',
-    enemyMul: 0.2,
-    conditionMul: 0.2,
-    xpMul: 0.5,
+    enemyMul: 0.1,
+    conditionMul: 0.1,
+    xpMul: 0.3,
     terminalReveal: false,
   },
   2: {
     label: 'Thorough Search',
     description: 'Two layers at once. Some noise.',
     layersCost: 2,
-    goldMul: 1.5,
-    itemChance: 0.30,
+    goldMul: 1.7,
+    itemChance: 0.25,
     lootTable: 'elite',
     enemyMul: 1.0,
     conditionMul: 1.0,
-    xpMul: 1.5,
+    xpMul: 1.7,
     terminalReveal: false,
   },
   3: {
     label: 'Deep Clean',
     description: 'Everything. All at once.',
     layersCost: 3,
-    goldMul: 3.0,
+    goldMul: 4.5,
     itemChance: 0.50,
     lootTable: 'chest',
-    enemyMul: 2.0,
-    conditionMul: 1.5,
-    xpMul: 3.0,
+    enemyMul: 2.5,
+    conditionMul: 2.0,
+    xpMul: 4.5,
     terminalReveal: true,
   },
 }
