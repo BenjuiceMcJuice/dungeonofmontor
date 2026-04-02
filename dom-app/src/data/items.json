@@ -600,7 +600,7 @@
     "rarity": "rare", "effect": "apply_condition", "effectCondition": "ADRENALINE",
     "giftPower": "blood",
     "buyPrice": 40, "sellPrice": 16,
-    "description": "Syringe from the medicine cabinet. Guaranteed crit next attack, +3 STR. Then the crash."
+    "description": "Syringe from the medicine cabinet. +6 STR for 2 turns. Then the crash."
   },
   "fortify_draught": {
     "id": "fortify_draught", "name": "Thick Gloop", "type": "consumable",

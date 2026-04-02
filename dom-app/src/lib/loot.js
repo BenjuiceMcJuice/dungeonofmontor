@@ -207,7 +207,7 @@ function applyConsumable(item, playerState) {
     result.stateChanges.damageAllEnemies = item.effectValue
   } else if (item.effect === 'apply_condition') {
     result.description = item.effectCondition === 'ADRENALINE'
-      ? 'ADRENALINE! Guaranteed crit, +3 STR. Brace for the crash.'
+      ? 'ADRENALINE! +6 STR for 2 turns. Brace for the crash.'
       : item.effectCondition + ' applied!'
     result.stateChanges.applyCondition = item.effectCondition
   } else if (item.effect === 'random_effect') {

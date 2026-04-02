@@ -180,7 +180,7 @@ function tickConditions(statusEffects, currentHp, maxHp) {
         skipped = true
       } else {
         // Fight — adrenaline surge, apply ADRENALINE condition
-        narratives.push('ADRENALINE! Fear triggers fight response!')
+        narratives.push('ADRENALINE! Fear triggers fight response — +6 STR!')
         var adrenalineDef = CONDITIONS['ADRENALINE']
         if (adrenalineDef) {
           // Remove existing body condition to make room, then add ADRENALINE
