@@ -69,7 +69,6 @@
         { "itemId": "chainmail_common",          "weight": 6,  "minRarity": "uncommon" },
         { "itemId": "montors_pruning_shears",    "weight": 6,  "minRarity": "common" },
         { "itemId": "montors_ice_pick",          "weight": 4,  "minRarity": "rare" },
-        { "itemId": "montors_fireplace_poker",   "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_curtain_rod",       "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_cleaver",           "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_nail_file",         "weight": 4,  "minRarity": "uncommon" },
@@ -128,13 +127,13 @@
         { "itemId": "axe_base",                     "weight": 5,  "minRarity": "common" },
         { "itemId": "montors_mums_rolling_pin",     "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_pot_lid",              "weight": 4,  "minRarity": "uncommon" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_bread_knife",     "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_ice_pick",             "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_candle_snuffer",       "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_toasting_fork",        "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_coal_shovel",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_door_knocker",         "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_nail_file",            "weight": 3,  "minRarity": "uncommon" },
         { "itemId": "montors_welcome_mat",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_dressing_gown",        "weight": 4,  "minRarity": "rare" },
         { "itemId": "rage_draught",                 "weight": 6,  "minRarity": "common" },
@@ -158,12 +157,12 @@
       "entries": [
         { "itemId": "greater_health_potion",        "weight": 8,  "minRarity": "common" },
         { "itemId": "montors_mums_rolling_pin",     "weight": 5,  "minRarity": "common" },
-        { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_mums_bread_knife",     "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_ice_pick",             "weight": 5,  "minRarity": "common" },
         { "itemId": "montors_cheese_wire",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_icicle",               "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_weathervane",          "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_candle_snuffer",       "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_candlestick",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_pestle",               "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_pickaxe",              "weight": 3,  "minRarity": "rare" },
@@ -182,12 +181,8 @@
         { "itemId": "rage_draught",                 "weight": 5,  "minRarity": "common" },
         { "itemId": "montors_homebrew",             "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_void_cleaver",         "weight": 1,  "minRarity": "epic" },
         { "itemId": "montors_last_stand_brooch",    "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_sabatier_hardened",    "weight": 1,  "minRarity": "rare" },
-        { "itemId": "montors_letter_knife",         "weight": 1,  "minRarity": "rare" },
-        { "itemId": "montors_grandfather_clock_hand","weight": 1, "minRarity": "epic" },
-        { "itemId": "montors_skeleton_key",         "weight": 1,  "minRarity": "epic" },
+        { "itemId": "montors_door_knocker",         "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_magnifying_glass",     "weight": 2,  "minRarity": "rare" }
       ]
     },
@@ -217,10 +212,10 @@
       "entries": [
         { "itemId": "greater_health_potion",        "weight": 12, "minRarity": "common" },
         { "itemId": "montors_ice_pick",             "weight": 5,  "minRarity": "uncommon" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_rolling_pin",     "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_door_knocker",         "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_executioners_hatchet", "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_weathervane",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_pot_lid",              "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_welcome_mat",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "rage_draught",                 "weight": 6,  "minRarity": "common" },
@@ -237,9 +232,9 @@
       "entries": [
         { "itemId": "greater_health_potion",        "weight": 8,  "minRarity": "common" },
         { "itemId": "montors_homebrew",             "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_mums_bread_knife",     "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_sledgehammer",         "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_pickaxe",              "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_dressing_gown",        "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 2,  "minRarity": "epic" },
@@ -247,8 +242,8 @@
         { "itemId": "montors_loaded_dice",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_mirror_shield",        "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_last_stand_brooch",    "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_hardened_pestle",      "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_void_cleaver",         "weight": 1,  "minRarity": "epic" }
+        { "itemId": "montors_cheese_wire",          "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_executioners_hatchet", "weight": 2,  "minRarity": "rare" }
       ]
     },
 
@@ -275,9 +270,9 @@
       "entries": [
         { "itemId": "montors_homebrew",             "weight": 6,  "minRarity": "common" },
         { "itemId": "montors_mums_bread_knife",     "weight": 5,  "minRarity": "uncommon" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_executioners_hatchet", "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_candlestick",          "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_coal_shovel",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_dressing_gown",        "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_welcome_mat",          "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 3,  "minRarity": "rare" },
@@ -285,9 +280,10 @@
         { "itemId": "montors_mums_wedding_ring",    "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_thimble",              "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_last_stand_brooch",    "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_void_cleaver",         "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_flagpole",             "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_sabatier_hardened",    "weight": 2,  "minRarity": "rare" }
+        { "itemId": "montors_sabatier_hardened",    "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_hardened_pestle",      "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_letter_knife",         "weight": 2,  "minRarity": "rare" }
       ]
     },
     "quarters_chest": {
@@ -296,10 +292,10 @@
       "itemDropChance": 0.9,
       "entries": [
         { "itemId": "montors_homebrew",             "weight": 5,  "minRarity": "common" },
-        { "itemId": "montors_void_cleaver",         "weight": 3,  "minRarity": "epic" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 3,  "minRarity": "epic" },
-        { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "rare" },
+        { "itemId": "montors_sledgehammer",         "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 4,  "minRarity": "rare" },
+        { "itemId": "montors_toasting_fork",        "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_dressing_gown",        "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_welcome_mat",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_loaded_dice",          "weight": 3,  "minRarity": "rare" },
@@ -322,7 +318,7 @@
         { "itemId": "greater_health_potion",        "weight": 12, "minRarity": "common" },
         { "itemId": "montors_homebrew",             "weight": 6,  "minRarity": "common" },
         { "itemId": "montors_mums_rolling_pin",     "weight": 5,  "minRarity": "uncommon" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "uncommon" },
+        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_tenderiser",           "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_coal_shovel",          "weight": 3,  "minRarity": "uncommon" },
         { "itemId": "montors_candlestick",          "weight": 3,  "minRarity": "uncommon" },
@@ -338,8 +334,8 @@
       "itemDropChance": 0.65,
       "entries": [
         { "itemId": "montors_homebrew",             "weight": 5,  "minRarity": "common" },
-        { "itemId": "montors_void_cleaver",         "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "uncommon" },
+        { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "rare" },
+        { "itemId": "montors_pickaxe",              "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_mums_bread_knife",     "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_sledgehammer",         "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_door_knocker",         "weight": 3,  "minRarity": "rare" },
@@ -358,12 +354,12 @@
       "goldMin": 25, "goldMax": 60,
       "itemDropChance": 0.9,
       "entries": [
-        { "itemId": "montors_void_cleaver",         "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 3,  "minRarity": "epic" },
         { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "epic" },
         { "itemId": "montors_grans_lottery_ticket", "weight": 3,  "minRarity": "epic" },
         { "itemId": "montors_homebrew",             "weight": 5,  "minRarity": "common" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
+        { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "rare" },
+        { "itemId": "montors_hardened_pestle",      "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_loaded_dice",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mirror_shield",        "weight": 3,  "minRarity": "rare" },
@@ -383,8 +379,8 @@
       "entries": [
         { "itemId": "montors_homebrew",             "weight": 12, "minRarity": "common" },
         { "itemId": "greater_health_potion",        "weight": 8,  "minRarity": "common" },
-        { "itemId": "montors_void_cleaver",         "weight": 3,  "minRarity": "uncommon" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "uncommon" },
+        { "itemId": "montors_void_cleaver",         "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_bread_knife",     "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_executioners_hatchet", "weight": 3,  "minRarity": "uncommon" },
         { "itemId": "montors_dressing_gown",        "weight": 3,  "minRarity": "rare" },
@@ -399,11 +395,11 @@
       "itemDropChance": 0.7,
       "entries": [
         { "itemId": "montors_homebrew",             "weight": 6,  "minRarity": "common" },
-        { "itemId": "montors_void_cleaver",         "weight": 4,  "minRarity": "uncommon" },
+        { "itemId": "montors_void_cleaver",         "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_grans_lottery_ticket", "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "uncommon" },
+        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_sledgehammer",         "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_last_stand_brooch",    "weight": 3,  "minRarity": "rare" },
@@ -445,12 +441,13 @@
       "itemDropChance": 0.6,
       "entries": [
         { "itemId": "montors_homebrew",             "weight": 8,  "minRarity": "common" },
-        { "itemId": "montors_void_cleaver",         "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_fireplace_poker",      "weight": 4,  "minRarity": "uncommon" },
         { "itemId": "montors_last_stand_brooch",    "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_loaded_dice",          "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "rare" }
+        { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_hardened_cleaver",     "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_skeleton_key",         "weight": 2,  "minRarity": "epic" },
+        { "itemId": "montors_grandfather_clock_hand","weight": 2, "minRarity": "epic" }
       ]
     },
     "domain_elite": {
@@ -458,7 +455,7 @@
       "goldMin": 25, "goldMax": 60,
       "itemDropChance": 0.75,
       "entries": [
-        { "itemId": "montors_void_cleaver",         "weight": 5,  "minRarity": "uncommon" },
+        { "itemId": "montors_void_cleaver",         "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_grans_lottery_ticket", "weight": 3,  "minRarity": "rare" },
@@ -466,8 +463,8 @@
         { "itemId": "montors_last_stand_brooch",    "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mirror_shield",        "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_loaded_dice",          "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_grandfather_clock_hand","weight": 2, "minRarity": "rare" },
-        { "itemId": "montors_skeleton_key",         "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_grandfather_clock_hand","weight": 2, "minRarity": "epic" },
+        { "itemId": "montors_skeleton_key",         "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_lightning_rod",        "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_hardened_shield",      "weight": 2,  "minRarity": "epic" }
       ]
@@ -477,7 +474,7 @@
       "goldMin": 40, "goldMax": 100,
       "itemDropChance": 1.0,
       "entries": [
-        { "itemId": "montors_void_cleaver",         "weight": 6,  "minRarity": "uncommon" },
+        { "itemId": "montors_void_cleaver",         "weight": 6,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_grans_lottery_ticket", "weight": 4,  "minRarity": "rare" },
