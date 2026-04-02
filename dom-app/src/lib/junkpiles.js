@@ -15,19 +15,19 @@ var PILE_DESCRIPTIONS = junkData.pileDescriptions
 // ============================================================
 
 var PILE_COUNTS = {
-  combat_standard: { min: 0, max: 2 },
-  combat_elite:    { min: 1, max: 2 },
+  combat_standard: { min: 1, max: 3 },
+  combat_elite:    { min: 1, max: 3 },
   mini_boss:       { min: 1, max: 2 },
   boss:            { min: 1, max: 1, forceSize: 'large' },
-  merchant:        { min: 0, max: 1 },
-  quest_npc:       { min: 0, max: 1 },
-  rest:            { min: 0, max: 2 },
-  event:           { min: 0, max: 2 },
-  zone_door:       { min: 0, max: 0 },
-  keystone:        { min: 0, max: 1 },
-  stairwell_entry: { min: 0, max: 0 },
+  merchant:        { min: 1, max: 2 },
+  quest_npc:       { min: 1, max: 2 },
+  rest:            { min: 1, max: 2 },
+  event:           { min: 1, max: 3 },
+  zone_door:       { min: 0, max: 1 },
+  keystone:        { min: 1, max: 2 },
+  stairwell_entry: { min: 0, max: 1 },
   stairwell_descent: { min: 0, max: 0 },
-  empty:           { min: 1, max: 2 },
+  empty:           { min: 2, max: 3 },
 }
 
 // ============================================================
