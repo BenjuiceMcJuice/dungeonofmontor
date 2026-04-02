@@ -4,9 +4,10 @@ import { d20Attack, d20Flee } from '../lib/dice.js'
 import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentChambers, getDoorDirection, ZONES, FLOORS } from '../lib/dungeon.js'
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, applyConsumable } from '../lib/loot.js'
+import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
-import { isFleeBlocked, areItemsBlocked } from '../lib/conditions.js'
+import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
+import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
 import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
@@ -19,6 +20,12 @@ import DoorSprite from '../components/DoorSprite.jsx'
 import ChamberIcon from '../components/ChamberIcon.jsx'
 
 var MAX_LOG_ENTRIES = 6
+
+// Condition ID → display name (e.g. "BLEED" → "Bleeding", "FEAR" → "Afraid")
+function condName(id) {
+  var c = conditionsData.conditions[id]
+  return c ? c.name : id
+}
 
 // Direction labels
 var DIR_LABELS = { N: 'North', S: 'South', E: 'East', W: 'West' }
@@ -526,7 +533,9 @@ function Game({ character, user, onEndRun }) {
     } else if (action === 'merchant_tab') {
       setChamberContent(Object.assign({}, chamberContent, { showSell: data === 'sell' }))
     } else if (action === 'buy' && data) {
-      var price = data.buyPrice || data.cost || 0
+      var chaModBuy = getModifier(character.stats.cha || 10)
+      var basePrice = data.buyPrice || data.cost || 0
+      var price = Math.max(1, basePrice - Math.max(0, Math.round(basePrice * chaModBuy * 0.05)))
       if ((playerGold || 0) >= price) {
         setPlayerGold(playerGold - price)
         setPlayerInventory(function(prev) { return prev.concat([Object.assign({}, data)]) })
@@ -670,12 +679,12 @@ function Game({ character, user, onEndRun }) {
       addLog({ type: 'player', text: 'Reflected ' + r.reflectDamage + ' damage back!' + (r.reflectKill ? ' It dies!' : ''), tier: 'hit' })
     }
     if (r.conditionBlocked) {
-      addLog({ type: 'player', text: r.conditionBlocked + ' blocked by immunity!', tier: 'hit' })
+      addLog({ type: 'player', text: condName(r.conditionBlocked) + ' blocked by immunity!', tier: 'hit' })
     }
 
     // Log condition applied
     if (r.conditionApplied) {
-      addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
+      addLog({ type: 'condition', text: r.target + ' is now ' + condName(r.conditionApplied) + '!', tier: 'hit' })
     }
 
     var updatedBattle = attackOut.newBattle
@@ -734,11 +743,14 @@ function Game({ character, user, onEndRun }) {
       return
     }
     if (tickResult.skipped) {
-      var nextB = advanceTurn(tickResult.newBattle)
-      setBattle(nextB)
-      var nextA = getActor(nextB, getCurrentTurnId(nextB))
-      setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-      setPlayerConditionTicked(false)
+      setCombatPhase('playerSkipped')
+      setTimeout(function() {
+        var nextB = advanceTurn(tickResult.newBattle)
+        setBattle(nextB)
+        var nextA = getActor(nextB, getCurrentTurnId(nextB))
+        setCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+        setPlayerConditionTicked(false)
+      }, 1500)
       return
     }
     setPlayerConditionTicked(true)
@@ -842,6 +854,9 @@ function Game({ character, user, onEndRun }) {
     var r = attackOut.result
     var logEntry = formatAttackLog(r, 'player')
     addLog({ type: 'player', text: logEntry.text, tier: logEntry.tier })
+    if (r.adrenalineCrit) {
+      addLog({ type: 'condition', text: 'ADRENALINE! Guaranteed crit!', tier: 'crit' })
+    }
     if (r.doubleStrike) {
       addLog({ type: 'player', text: 'Double strike! ' + r.doubleStrikeDamage + ' bonus damage!', tier: 'crit' })
     }
@@ -857,10 +872,31 @@ function Game({ character, user, onEndRun }) {
       addLog({ type: 'player', text: 'Off-hand swings... misses.', tier: 'miss' })
     }
     if (r.offhandCondition) {
-      addLog({ type: 'condition', text: r.target + ' is now ' + r.offhandCondition + '! (off-hand)', tier: 'hit' })
+      addLog({ type: 'condition', text: r.target + ' is now ' + condName(r.offhandCondition) + '! (off-hand)', tier: 'hit' })
     }
     if (r.conditionApplied) {
-      addLog({ type: 'condition', text: r.target + ' is now ' + r.conditionApplied + '!', tier: 'hit' })
+      addLog({ type: 'condition', text: r.target + ' is now ' + condName(r.conditionApplied) + '!', tier: 'hit' })
+    }
+    if (r.doubleCondition) {
+      addLog({ type: 'condition', text: 'Magnifying Glass: ' + condName(r.conditionApplied) + ' applied twice!', tier: 'crit' })
+    }
+    // Lottery ticket — winning roll awards a random rare item
+    if (r.lotteryWin) {
+      var rareItems = Object.values(ITEMS).filter(function(it) { return it.rarity === 'rare' })
+      if (rareItems.length > 0) {
+        var prize = Object.assign({}, rareItems[Math.floor(Math.random() * rareItems.length)])
+        setPlayerInventory(function(prev) { return prev.concat([prize]) })
+        addLog({ type: 'player', text: 'JACKPOT! Rolled a ' + r.lotteryNumber + '! Won: ' + prize.name + '!', tier: 'crit' })
+        // Remove the matched number so each number only wins once
+        if (character.equipped && character.equipped.relics) {
+          for (var lri = 0; lri < character.equipped.relics.length; lri++) {
+            var lr = character.equipped.relics[lri]
+            if (lr.passiveEffect === 'lottery' && lr.lotteryNumbers) {
+              lr.lotteryNumbers = lr.lotteryNumbers.filter(function(n) { return n !== r.lotteryNumber })
+            }
+          }
+        }
+      }
     }
     setPendingAttackResult(null)
 
@@ -1075,6 +1111,21 @@ function Game({ character, user, onEndRun }) {
       })
       updatedBattleForItem = Object.assign({}, updatedBattleForItem, { enemies: damagedEnemies })
     }
+    // Apply condition (Adrenaline Shot etc.)
+    if (result.stateChanges.applyCondition && battle) {
+      var condPlayers = {}
+      Object.keys(updatedBattleForItem.players).forEach(function(uid) {
+        var p = updatedBattleForItem.players[uid]
+        var newEffects = uid === user.uid
+          ? applyConditionToEffects(p.statusEffects, result.stateChanges.applyCondition, 'consumable')
+          : p.statusEffects.slice()
+        condPlayers[uid] = Object.assign({}, p, {
+          combatStats: Object.assign({}, p.combatStats),
+          statusEffects: newEffects,
+        })
+      })
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, { players: condPlayers })
+    }
     if (result.stateChanges.guaranteedFlee) {
       // Remove item, then auto-flee successfully
       setPlayerInventory(function(prev) {
@@ -1156,6 +1207,15 @@ function Game({ character, user, onEndRun }) {
     if (item.passiveEffect === 'hp_bonus' && item.passiveValue) {
       character.maxHp += item.passiveValue
       setPlayerHp(function(hp) { return Math.min(hp + item.passiveValue, character.maxHp) })
+    }
+
+    // Lottery ticket — scratch off and generate 2 winning numbers (2-20)
+    if (item.passiveEffect === 'lottery' && !item.lotteryNumbers) {
+      var n1 = 2 + Math.floor(Math.random() * 19) // 2-20
+      var n2 = n1
+      while (n2 === n1) n2 = 2 + Math.floor(Math.random() * 19)
+      item.lotteryNumbers = [n1, n2].sort(function(a, b) { return a - b })
+      addLog({ type: 'player', text: 'Scratched off Gran\'s ticket... lucky numbers: ' + item.lotteryNumbers[0] + ' and ' + item.lotteryNumbers[1] + '!', tier: 'crit' })
     }
 
     // Remove equipped item from inventory, add old item back
@@ -1341,7 +1401,9 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handleNpcBuy(item) {
-    var price = item.buyPrice || item.cost || 0
+    var chaModNpc = getModifier(character.stats.cha || 10)
+    var basePriceNpc = item.buyPrice || item.cost || 0
+    var price = Math.max(1, basePriceNpc - Math.max(0, Math.round(basePriceNpc * chaModNpc * 0.05)))
     if (playerGold < price) return
     setPlayerGold(playerGold - price)
     setPlayerInventory(function(prev) { return prev.concat([Object.assign({}, item)]) })
@@ -2046,7 +2108,9 @@ function Game({ character, user, onEndRun }) {
                       </div>
                       <div className="flex flex-col gap-2 w-full max-h-40 overflow-y-auto">
                         {!npc.showSell && npc.items.map(function(item, i) {
-                          var price = item.buyPrice || item.cost || 0
+                          var npcBasePr = item.buyPrice || item.cost || 0
+                          var npcChaMod = getModifier(character.stats.cha || 10)
+                          var price = Math.max(1, npcBasePr - Math.max(0, Math.round(npcBasePr * npcChaMod * 0.05)))
                           var canAfford = playerGold >= price
                           return (
                             <div key={'buy-' + i} className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans">
@@ -2071,7 +2135,9 @@ function Game({ character, user, onEndRun }) {
                           <p className="text-ink-faint text-xs italic text-center">Sold out.</p>
                         )}
                         {npc.showSell && playerInventory.map(function(item, i) {
-                          var sellPrice = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+                          var baseSellNpc = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+                          var sellChaMod = getModifier(character.stats.cha || 10)
+                          var sellPrice = Math.max(1, baseSellNpc + Math.max(0, Math.round(baseSellNpc * sellChaMod * 0.05)))
                           return (
                             <div key={'sell-' + i} className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans">
                               <div className="flex flex-col items-start">
@@ -2367,7 +2433,7 @@ function Game({ character, user, onEndRun }) {
           <ChamberView
             chamber={chamberNow}
             content={chamberContent}
-            playerState={{ gold: playerGold, currentHp: playerHp, maxHp: character.maxHp, inventory: playerInventory }}
+            playerState={{ gold: playerGold, currentHp: playerHp, maxHp: character.maxHp, inventory: playerInventory, cha: character.stats.cha || 10 }}
             onAction={handleChamberAction}
             onContinue={handleChamberContinue}
           />
@@ -2616,6 +2682,13 @@ function Game({ character, user, onEndRun }) {
                   )
                 })}
               </div>
+            </div>
+          )}
+
+          {combatPhase === 'playerSkipped' && (
+            <div className="p-4 border-2 border-red-500/40 rounded-lg bg-red-500/10 text-center animate-pulse">
+              <p className="text-red-400 text-lg font-display">Turn Lost!</p>
+              <p className="text-ink text-sm">{combatLog.length > 0 ? combatLog[combatLog.length - 1].text : 'You can\'t act!'}</p>
             </div>
           )}
 

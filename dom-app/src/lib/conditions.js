@@ -69,6 +69,8 @@ function applyCondition(statusEffects, conditionId, source) {
     skipChance: def.skipChance || 0,
     skipFleeChance: def.skipFleeChance || 0,
     forceTier: def.forceTier || null,
+    forceCrit: def.forceCrit || false,
+    triggersOnExpiry: def.triggersOnExpiry || null,
     missChance: def.missChance || 0,
     allRollsMod: def.allRollsMod || 0,
     attacksRandom: def.attacksRandom || false,
@@ -153,18 +155,37 @@ function tickConditions(statusEffects, currentHp, maxHp) {
       c.drainedStats[drainStat] = (c.drainedStats[drainStat] || 0) + (c.statDrainValue || -1)
     }
 
-    // Skip chance (NAUSEA, CHARM)
+    // Skip chance (NAUSEA, CHARM, BURN, BORED)
     if (c.skipChance > 0 && !skipped) {
       if (Math.random() < c.skipChance) {
         skipped = true
-        narratives.push(c.name + ': turn skipped!')
+        var skipReasons = {
+          'Burning': 'Flailing in panic — turn lost!',
+          'Nauseous': 'Retching — turn lost!',
+          'Charmed': 'Staring dreamily into nothing — turn lost!',
+          'Bored': 'Yawning mid-fight — turn lost!',
+          'Crash': 'Adrenaline crash — body gave out!',
+        }
+        narratives.push(skipReasons[c.name] || c.name + ' — turn lost!')
       }
     }
 
-    // FEAR: flee if HP < 50%
-    if (c.fleeIfLowHp && currentHp < maxHp * 0.5) {
-      narratives.push(c.name + ': paralysed with fear.')
-      skipped = true
+    // FEAR: fight-or-flight if HP < 50%
+    if (c.fleeIfLowHp && currentHp < maxHp * 0.5 && !skipped) {
+      if (Math.random() < 0.4) {
+        // Flight — paralysed
+        narratives.push('Paralysed with fear — turn lost!')
+        skipped = true
+      } else {
+        // Fight — adrenaline surge, apply ADRENALINE condition
+        narratives.push('ADRENALINE! Fear triggers fight response!')
+        var adrenalineDef = CONDITIONS['ADRENALINE']
+        if (adrenalineDef) {
+          // Remove existing body condition to make room, then add ADRENALINE
+          newEffects = newEffects.filter(function(e) { return e.slot !== 'body' })
+          newEffects.push(applyCondition([], 'ADRENALINE', 'fear_response')[0])
+        }
+      }
     }
 
     // Tick down duration (null = permanent until cured)
@@ -172,6 +193,16 @@ function tickConditions(statusEffects, currentHp, maxHp) {
       c.turnsRemaining--
       if (c.turnsRemaining <= 0) {
         narratives.push(c.name + ' wears off.')
+        // Trigger follow-up condition on expiry (e.g. ADRENALINE → CRASH)
+        if (c.triggersOnExpiry && CONDITIONS[c.triggersOnExpiry]) {
+          var followUp = applyCondition([], c.triggersOnExpiry, 'expiry')[0]
+          if (followUp) {
+            // Don't add yet — collect and add after loop to avoid slot conflicts
+            newEffects = newEffects.filter(function(e) { return e.slot !== followUp.slot })
+            newEffects.push(followUp)
+            narratives.push(followUp.name + ' kicks in.')
+          }
+        }
         continue // expired
       }
     }
@@ -222,6 +253,14 @@ function getForcedTier(statusEffects) {
     if (statusEffects[i].forceTier) return statusEffects[i].forceTier
   }
   return null
+}
+
+// Check if next attack is forced to crit (ADRENALINE)
+function hasForceCrit(statusEffects) {
+  for (var i = 0; i < statusEffects.length; i++) {
+    if (statusEffects[i].forceCrit) return true
+  }
+  return false
 }
 
 // Get extra miss chance from conditions
@@ -304,6 +343,7 @@ export {
   getAllRollsMod,
   getConditionStatMod,
   getForcedTier,
+  hasForceCrit,
   getMissChance,
   areItemsBlocked,
   isFleeBlocked,

@@ -92,6 +92,21 @@
       "defPenalty": -1,
       "description": "50% miss chance. -1 DEF — can't see attacks coming."
     },
+    "ADRENALINE": {
+      "id": "ADRENALINE", "slot": "body", "name": "Adrenaline",
+      "turns": 1,
+      "forceCrit": true,
+      "statModifier": { "stat": "str", "value": 3 },
+      "triggersOnExpiry": "ADRENALINE_CRASH",
+      "description": "Fight response! Guaranteed crit, +3 STR. Then the crash hits."
+    },
+    "ADRENALINE_CRASH": {
+      "id": "ADRENALINE_CRASH", "slot": "body", "name": "Crash",
+      "turns": 1,
+      "skipChance": 0.6,
+      "statModifier": { "stat": "str", "value": -2 },
+      "description": "The adrenaline wore off. 60% skip, -2 STR. Body gave everything it had."
+    },
     "BLOODLUST": {
       "id": "BLOODLUST", "slot": "mind", "name": "Bloodlust",
       "turns": null,

@@ -1,5 +1,6 @@
 // ChamberView — renders the interaction UI for non-combat chambers
 // Combat chambers are handled by the existing Game combat system
+import { getModifier } from '../lib/classes.js'
 
 function ChamberView({ chamber, content, playerState, onAction, onContinue }) {
   if (!content) return null
@@ -54,7 +55,9 @@ function ChamberView({ chamber, content, playerState, onAction, onContinue }) {
 
         <div className="flex flex-col gap-2 w-full max-w-xs max-h-48 overflow-y-auto">
           {!showSell && content.items && content.items.map(function(item, i) {
-            var price = item.buyPrice || item.cost || 0
+            var basePrice = item.buyPrice || item.cost || 0
+            var chaMod = getModifier(playerState.cha || 10)
+            var price = Math.max(1, basePrice - Math.max(0, Math.round(basePrice * chaMod * 0.05)))
             var canAfford = (playerState.gold || 0) >= price
             return (
               <div key={'buy-' + i}
@@ -84,7 +87,9 @@ function ChamberView({ chamber, content, playerState, onAction, onContinue }) {
             )
           })}
           {showSell && playerState.inventory && playerState.inventory.map(function(item, i) {
-            var sellPrice = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+            var baseSell = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+            var chaSellMod = getModifier(playerState.cha || 10)
+            var sellPrice = Math.max(1, baseSell + Math.max(0, Math.round(baseSell * chaSellMod * 0.05)))
             return (
               <div key={'sell-' + i}
                 className="flex items-center justify-between p-3 rounded-lg border border-border-hl bg-surface text-sm font-sans"

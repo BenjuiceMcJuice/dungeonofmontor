@@ -52,7 +52,8 @@
         { "itemId": "greater_health_potion",     "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_fireplace_poker",   "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_mums_bread_knife",  "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_mums_rolling_pin",  "weight": 2,  "minRarity": "rare" }
+        { "itemId": "montors_mums_rolling_pin",  "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_adrenaline_shot",   "weight": 2,  "minRarity": "rare" }
       ]
     },
     "garden_chest": {
@@ -91,7 +92,8 @@
         { "itemId": "montors_letter_opener",     "weight": 1,  "minRarity": "rare" },
         { "itemId": "montors_cheese_wire",       "weight": 1,  "minRarity": "rare" },
         { "itemId": "montors_candlestick",       "weight": 1,  "minRarity": "rare" },
-        { "itemId": "montors_void_cleaver",      "weight": 1,  "minRarity": "epic" }
+        { "itemId": "montors_void_cleaver",      "weight": 1,  "minRarity": "epic" },
+        { "itemId": "montors_magnifying_glass", "weight": 2,  "minRarity": "rare" }
       ]
     },
     "underground_standard": {
@@ -135,9 +137,11 @@
         { "itemId": "montors_thimble",              "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_monocle",              "weight": 1,  "minRarity": "epic" },
-        { "itemId": "montors_lottery_ticket",       "weight": 1,  "minRarity": "epic" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 1,  "minRarity": "epic" },
         { "itemId": "montors_dinner_tray",          "weight": 2,  "minRarity": "rare" },
-        { "itemId": "montors_last_stand_brooch",    "weight": 3,  "minRarity": "rare" }
+        { "itemId": "montors_last_stand_brooch",    "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_magnifying_glass",     "weight": 2,  "minRarity": "rare" },
+        { "itemId": "montors_adrenaline_shot",      "weight": 3,  "minRarity": "rare" }
       ]
     },
     "underground_chest": {
@@ -159,7 +163,7 @@
         { "itemId": "montors_loaded_dice",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_hand_mirror",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 2,  "minRarity": "epic" },
-        { "itemId": "montors_lottery_ticket",       "weight": 2,  "minRarity": "epic" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 2,  "minRarity": "epic" },
         { "itemId": "montors_bath_bomb",            "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "fortify_draught",              "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "rage_draught",                 "weight": 6,  "minRarity": "common" },
@@ -171,7 +175,8 @@
         { "itemId": "montors_sabatier",             "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_cheese_wire",          "weight": 2,  "minRarity": "rare" },
         { "itemId": "montors_grandfather_clock_hand","weight": 1, "minRarity": "epic" },
-        { "itemId": "montors_skeleton_key",         "weight": 1,  "minRarity": "epic" }
+        { "itemId": "montors_skeleton_key",         "weight": 1,  "minRarity": "epic" },
+        { "itemId": "montors_magnifying_glass",     "weight": 3,  "minRarity": "rare" }
       ]
     },
 
@@ -279,7 +284,7 @@
         { "itemId": "montors_hand_mirror",          "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_last_stand_brooch",    "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "epic" },
-        { "itemId": "montors_lottery_ticket",       "weight": 2,  "minRarity": "epic" }
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 2,  "minRarity": "epic" }
       ]
     },
 
@@ -324,7 +329,7 @@
         { "itemId": "montors_void_cleaver",         "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 4,  "minRarity": "epic" },
         { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "epic" },
-        { "itemId": "montors_lottery_ticket",       "weight": 3,  "minRarity": "epic" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 3,  "minRarity": "epic" },
         { "itemId": "montors_homebrew",             "weight": 6,  "minRarity": "common" },
         { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_dinner_tray",          "weight": 5,  "minRarity": "rare" },
@@ -359,7 +364,7 @@
         { "itemId": "montors_void_cleaver",         "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 3,  "minRarity": "rare" },
-        { "itemId": "montors_lottery_ticket",       "weight": 3,  "minRarity": "rare" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 3,  "minRarity": "rare" },
         { "itemId": "montors_fireplace_poker",      "weight": 5,  "minRarity": "uncommon" },
         { "itemId": "montors_dinner_tray",          "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_last_stand_brooch",    "weight": 4,  "minRarity": "rare" },
@@ -375,7 +380,7 @@
         { "itemId": "montors_void_cleaver",         "weight": 6,  "minRarity": "rare" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 4,  "minRarity": "rare" },
-        { "itemId": "montors_lottery_ticket",       "weight": 4,  "minRarity": "rare" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_homebrew",             "weight": 6,  "minRarity": "common" },
         { "itemId": "montors_loaded_dice",          "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_hand_mirror",          "weight": 5,  "minRarity": "rare" },
@@ -411,7 +416,7 @@
         { "itemId": "montors_void_cleaver",         "weight": 6,  "minRarity": "uncommon" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 4,  "minRarity": "rare" },
-        { "itemId": "montors_lottery_ticket",       "weight": 4,  "minRarity": "rare" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 4,  "minRarity": "rare" },
         { "itemId": "montors_homebrew",             "weight": 8,  "minRarity": "common" },
         { "itemId": "montors_last_stand_brooch",    "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_hand_mirror",          "weight": 4,  "minRarity": "rare" },
@@ -426,7 +431,7 @@
         { "itemId": "montors_void_cleaver",         "weight": 8,  "minRarity": "uncommon" },
         { "itemId": "montors_mums_wedding_ring",    "weight": 6,  "minRarity": "rare" },
         { "itemId": "montors_monocle",              "weight": 5,  "minRarity": "rare" },
-        { "itemId": "montors_lottery_ticket",       "weight": 5,  "minRarity": "rare" },
+        { "itemId": "montors_grans_lottery_ticket",       "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_homebrew",             "weight": 6,  "minRarity": "common" },
         { "itemId": "montors_last_stand_brooch",    "weight": 5,  "minRarity": "rare" },
         { "itemId": "montors_loaded_dice",          "weight": 5,  "minRarity": "rare" },

@@ -3,7 +3,7 @@
 // Uses 4-tier attack resolution: Crit / Hit / Glancing Blow / Miss
 import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
-import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, getMissChance } from './conditions.js'
+import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance } from './conditions.js'
 
 // Deep-clone battle state for immutable updates
 function cloneBattle(bs) {
@@ -208,6 +208,12 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     attackResult = Object.assign({}, attackResult, { tier: forcedTier, tierName: forcedTier === 3 ? 'glancing' : attackResult.tierName })
   }
 
+  // Apply forced crit (ADRENALINE)
+  var isForcedCrit = hasForceCrit(player.statusEffects)
+  if (isForcedCrit && attackResult.tier > 1) {
+    attackResult = Object.assign({}, attackResult, { tier: 1, tierName: 'crit' })
+  }
+
   // Apply miss chance
   if (missChance > 0 && attackResult.tier <= 3 && Math.random() < missChance) {
     attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
@@ -222,6 +228,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     damage: 0,
     enemyDefeated: false,
     conditionApplied: null,
+    adrenalineCrit: isForcedCrit,
   }
 
   // Calculate damage based on tier
@@ -273,6 +280,17 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       if (rollConditionApplication(attackResult.tier, intStat, weapon.conditionChance || 1.0)) {
         enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon')
         result.conditionApplied = weapon.conditionOnHit
+        // Magnifying Glass — conditions apply twice
+        var hasDoubleCondition = false
+        if (player.equipped && player.equipped.relics) {
+          for (var dci = 0; dci < player.equipped.relics.length; dci++) {
+            if (player.equipped.relics[dci].passiveEffect === 'double_condition') { hasDoubleCondition = true; break }
+          }
+        }
+        if (hasDoubleCondition) {
+          enemy.statusEffects = applyCondition(enemy.statusEffects, weapon.conditionOnHit, 'weapon')
+          result.doubleCondition = true
+        }
       }
     }
 
@@ -290,6 +308,20 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     if (enemy.currentHp <= 0) {
       enemy.isDown = true
       result.enemyDefeated = true
+    }
+
+    // Lottery ticket — check if natural d20 matches a winning number
+    if (player.equipped && player.equipped.relics) {
+      for (var lti = 0; lti < player.equipped.relics.length; lti++) {
+        var lotteryRelic = player.equipped.relics[lti]
+        if (lotteryRelic.passiveEffect === 'lottery' && lotteryRelic.lotteryNumbers) {
+          var natRoll = attackResult.roll
+          if (lotteryRelic.lotteryNumbers.indexOf(natRoll) !== -1) {
+            result.lotteryWin = true
+            result.lotteryNumber = natRoll
+          }
+        }
+      }
     }
 
     // Double strike — daggers get a chance for a bonus attack (scales with AGI)
@@ -327,6 +359,16 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           if (rollConditionApplication(offhandRoll.tier, offInt, offhand.conditionChance || 1.0)) {
             enemy.statusEffects = applyCondition(enemy.statusEffects || [], offhand.conditionOnHit, 'offhand_weapon')
             result.offhandCondition = offhand.conditionOnHit
+            // Magnifying Glass — double condition on offhand too
+            if (player.equipped && player.equipped.relics) {
+              for (var odci = 0; odci < player.equipped.relics.length; odci++) {
+                if (player.equipped.relics[odci].passiveEffect === 'double_condition') {
+                  enemy.statusEffects = applyCondition(enemy.statusEffects, offhand.conditionOnHit, 'offhand_weapon')
+                  result.doubleConditionOffhand = true
+                  break
+                }
+              }
+            }
           }
         }
         if (enemy.currentHp <= 0) {
