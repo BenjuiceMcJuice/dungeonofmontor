@@ -5,6 +5,39 @@ import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.j
 import { getModifier } from './classes.js'
 import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance, getDamageTakenMultiplier } from './conditions.js'
 
+// Helper: collect all passive items from player equipment (relics + rings + armour + helmet + boots + amulet)
+function getPlayerPassiveItems(player) {
+  var items = []
+  if (!player.equipped) return items
+  var eq = player.equipped
+  if (eq.relics) { for (var i = 0; i < eq.relics.length; i++) items.push(eq.relics[i]) }
+  if (eq.rings) { for (var ri = 0; ri < eq.rings.length; ri++) items.push(eq.rings[ri]) }
+  if (eq.armour) items.push(eq.armour)
+  if (eq.helmet) items.push(eq.helmet)
+  if (eq.boots) items.push(eq.boots)
+  if (eq.amulet) items.push(eq.amulet)
+  return items
+}
+
+// Helper: check if any passive item has a specific effect
+function hasPassiveEffect(player, effectName) {
+  var items = getPlayerPassiveItems(player)
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].passiveEffect === effectName) return true
+  }
+  return false
+}
+
+// Helper: get total passive value for a specific effect
+function getPassiveTotalCombat(player, effectName) {
+  var total = 0
+  var items = getPlayerPassiveItems(player)
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].passiveEffect === effectName) total += (items[i].passiveValue || 0)
+  }
+  return total
+}
+
 // Deep-clone battle state for immutable updates
 function cloneBattle(bs) {
   return {
@@ -41,14 +74,23 @@ function createBattleState(players, enemies) {
       var w = char.equipped.weapon
       var a = char.equipped.armour
       var o = char.equipped.offhand
+      var h = char.equipped.helmet
+      var b = char.equipped.boots
       if (w && w.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + w.agiPenalty)
       if (a && a.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + a.agiPenalty)
       if (o && o.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + o.agiPenalty)
+      if (h && h.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + h.agiPenalty)
+      if (b && b.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + b.agiPenalty)
+      // AGI bonuses from boots
+      if (b && b.agiBonus) combatStats.agi += b.agiBonus
     }
 
     var agiMod = getModifier(combatStats.agi)
     var weaponInitBonus = (char.equipped && char.equipped.weapon) ? (char.equipped.weapon.initBonus || 0) : 1 // unarmed: +1 init
-    var initRoll = rollWithMod(20, agiMod + weaponInitBonus)
+    // Init bonuses from boots/helmet
+    var bootInitBonus = (char.equipped && char.equipped.boots && char.equipped.boots.initBonus) || 0
+    var helmetInitBonus = (char.equipped && char.equipped.helmet && char.equipped.helmet.initBonus) || 0
+    var initRoll = rollWithMod(20, agiMod + weaponInitBonus + bootInitBonus + helmetInitBonus)
 
     playerStates[p.uid] = {
       uid: p.uid,
@@ -201,15 +243,13 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   if (!attackResult) {
     var accBonus = (player.equipped && player.equipped.weapon) ? (player.equipped.weapon.accuracyBonus || 0) : -1 // unarmed: -1 accuracy
     // Nudge — +1 to d20 rolls
-    var nudgeBonus = 0
+    var nudgeBonus = getPassiveTotalCombat(player, 'd20_nudge')
     var chaosShift = 0
-    if (player.equipped && player.equipped.relics) {
-      for (var ni = 0; ni < player.equipped.relics.length; ni++) {
-        if (player.equipped.relics[ni].passiveEffect === 'd20_nudge') nudgeBonus += (player.equipped.relics[ni].passiveValue || 1)
-        if (player.equipped.relics[ni].passiveEffect === 'chaos_shift') {
-          var range = player.equipped.relics[ni].passiveValue || 2
-          chaosShift = Math.floor(Math.random() * (range * 2 + 1)) - range
-        }
+    var passiveItems = getPlayerPassiveItems(player)
+    for (var ni = 0; ni < passiveItems.length; ni++) {
+      if (passiveItems[ni].passiveEffect === 'chaos_shift') {
+        var range = passiveItems[ni].passiveValue || 2
+        chaosShift = Math.floor(Math.random() * (range * 2 + 1)) - range
       }
     }
     attackResult = d20Attack(strMod + rollsMod + accBonus + nudgeBonus + chaosShift, 20)
@@ -263,15 +303,10 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       dmgResult = Object.assign({}, dmgResult, { roll: Math.max(1, dmgResult.roll + attackResult.chaosShift) })
     }
 
-    // Reroll ones — Loaded Dice
-    if (dmgResult.roll === 1 && player.equipped && player.equipped.relics) {
-      for (var rri = 0; rri < player.equipped.relics.length; rri++) {
-        if (player.equipped.relics[rri].passiveEffect === 'reroll_ones') {
-          dmgResult = rollDamage(weaponDie, strMod)
-          result.rerolled = true
-          break
-        }
-      }
+    // Reroll ones — Loaded Dice / Rabbit's Foot
+    if (dmgResult.roll === 1 && hasPassiveEffect(player, 'reroll_ones')) {
+      dmgResult = rollDamage(weaponDie, strMod)
+      result.rerolled = true
     }
 
     var weapon = player.equipped && player.equipped.weapon
@@ -308,13 +343,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
         enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon')
         result.conditionApplied = weapon.conditionOnHit
         // Magnifying Glass — conditions apply twice
-        var hasDoubleCondition = false
-        if (player.equipped && player.equipped.relics) {
-          for (var dci = 0; dci < player.equipped.relics.length; dci++) {
-            if (player.equipped.relics[dci].passiveEffect === 'double_condition') { hasDoubleCondition = true; break }
-          }
-        }
-        if (hasDoubleCondition) {
+        if (hasPassiveEffect(player, 'double_condition')) {
           enemy.statusEffects = applyCondition(enemy.statusEffects, weapon.conditionOnHit, 'weapon')
           result.doubleCondition = true
         }
@@ -330,14 +359,11 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     }
 
     // Lifesteal — heal % of damage dealt
-    if (breakdown.final > 0 && player.equipped && player.equipped.relics) {
-      for (var li = 0; li < player.equipped.relics.length; li++) {
-        if (player.equipped.relics[li].passiveEffect === 'lifesteal') {
-          var healAmount = Math.max(1, Math.round(breakdown.final * player.equipped.relics[li].passiveValue))
-          player.currentHp = Math.min(player.currentHp + healAmount, player.maxHp)
-          result.lifestealHeal = healAmount
-        }
-      }
+    var lifestealTotal = getPassiveTotalCombat(player, 'lifesteal')
+    if (breakdown.final > 0 && lifestealTotal > 0) {
+      var healAmount = Math.max(1, Math.round(breakdown.final * lifestealTotal))
+      player.currentHp = Math.min(player.currentHp + healAmount, player.maxHp)
+      result.lifestealHeal = healAmount
     }
 
     if (enemy.currentHp <= 0) {
@@ -418,6 +444,13 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.isDown = true
           result.enemyDefeated = true
         }
+        // Twin Fangs — dual daggers OR amulet grant: if main hand AND offhand both hit, apply free BLEED
+        var hasTwinFangs = (offhand.weaponType === 'dagger' && player.equipped.weapon && player.equipped.weapon.weaponType === 'dagger') ||
+            (player.equipped.amulet && player.equipped.amulet.twinFangsGrant)
+        if (!enemy.isDown && result.tier <= 3 && hasTwinFangs) {
+          enemy.statusEffects = applyCondition(enemy.statusEffects || [], 'BLEED', 'twin_fangs')
+          result.twinFangs = true
+        }
       } else {
         result.offhandMiss = true
       }
@@ -494,19 +527,9 @@ function resolveEnemyAttack(battleState, enemyId) {
       return { newBattle: bs, result: result }
     }
 
-    // Dodge chance — AGI base (2% per mod) + equipment (Shadow Cloak etc.)
+    // Dodge chance — AGI base (2% per mod) + all equipment with dodge_chance
     var agiDodge = getModifier(target.combatStats.agi || 10) * 0.02
-    var dodgeChance = Math.max(0, agiDodge)
-    if (target.equipped && target.equipped.armour && target.equipped.armour.passiveEffect === 'dodge_chance') {
-      dodgeChance += target.equipped.armour.passiveValue || 0
-    }
-    if (target.equipped && target.equipped.relics) {
-      for (var di = 0; di < target.equipped.relics.length; di++) {
-        if (target.equipped.relics[di].passiveEffect === 'dodge_chance') {
-          dodgeChance += (target.equipped.relics[di].passiveValue || 0)
-        }
-      }
-    }
+    var dodgeChance = Math.max(0, agiDodge) + getPassiveTotalCombat(target, 'dodge_chance')
     if (dodgeChance > 0 && Math.random() < Math.min(dodgeChance, 0.35)) {
       attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
       result.attackRoll = attackResult
@@ -527,17 +550,7 @@ function resolveEnemyAttack(battleState, enemyId) {
     result.damageBreakdown = breakdown
 
     // Damage reflect — Spiked Plate etc.
-    var reflectDmg = 0
-    if (target.equipped && target.equipped.armour && target.equipped.armour.passiveEffect === 'damage_reflect') {
-      reflectDmg += (target.equipped.armour.passiveValue || 0)
-    }
-    if (target.equipped && target.equipped.relics) {
-      for (var rfi = 0; rfi < target.equipped.relics.length; rfi++) {
-        if (target.equipped.relics[rfi].passiveEffect === 'damage_reflect') {
-          reflectDmg += (target.equipped.relics[rfi].passiveValue || 0)
-        }
-      }
-    }
+    var reflectDmg = getPassiveTotalCombat(target, 'damage_reflect')
     if (reflectDmg > 0 && breakdown.final > 0) {
       enemy.currentHp = Math.max(0, enemy.currentHp - reflectDmg)
       result.reflectDamage = reflectDmg

@@ -86,13 +86,26 @@ function Preparation({ character, onReady }) {
     var returnItem = null
 
     if (item.type === 'weapon' && item.slot === 'weapon') {
-      returnItem = newEquipped.weapon
-      newEquipped.weapon = item
-      // Heavy weapons can't use shields — unequip offhand
-      if (item.hand === 'heavy' && newEquipped.offhand && newEquipped.offhand.slot === 'offhand') {
-        var shieldReturn = newEquipped.offhand
-        newEquipped.offhand = null
-        setInventory(function(prev) { return prev.concat([shieldReturn]) })
+      // Dagger can go to offhand if main hand is a dagger or sword and offhand is empty
+      if (item.weaponType === 'dagger' && newEquipped.weapon &&
+          (newEquipped.weapon.weaponType === 'dagger' || newEquipped.weapon.weaponType === 'sword') &&
+          !newEquipped.offhand) {
+        newEquipped.offhand = item
+      } else {
+        returnItem = newEquipped.weapon
+        newEquipped.weapon = item
+        // Heavy weapons can't use shields — unequip offhand
+        if (item.hand === 'heavy' && newEquipped.offhand && newEquipped.offhand.slot === 'offhand') {
+          var shieldReturn = newEquipped.offhand
+          newEquipped.offhand = null
+          setInventory(function(prev) { return prev.concat([shieldReturn]) })
+        }
+        // Heavy weapons can't dual wield — unequip offhand weapon too
+        if (item.hand === 'heavy' && newEquipped.offhand && newEquipped.offhand.type === 'weapon') {
+          var weaponReturn = newEquipped.offhand
+          newEquipped.offhand = null
+          setInventory(function(prev) { return prev.concat([weaponReturn]) })
+        }
       }
     } else if (item.type === 'armour' && item.slot === 'offhand') {
       // Can't equip shield with heavy weapon
@@ -102,6 +115,19 @@ function Preparation({ character, onReady }) {
     } else if (item.type === 'armour' && item.slot === 'armour') {
       returnItem = newEquipped.armour
       newEquipped.armour = item
+    } else if (item.slot === 'helmet') {
+      returnItem = newEquipped.helmet
+      newEquipped.helmet = item
+    } else if (item.slot === 'boots') {
+      returnItem = newEquipped.boots
+      newEquipped.boots = item
+    } else if (item.slot === 'amulet') {
+      returnItem = newEquipped.amulet
+      newEquipped.amulet = item
+    } else if (item.type === 'ring' && item.slot === 'ring') {
+      if (!newEquipped.rings) newEquipped.rings = []
+      if (newEquipped.rings.length >= 2) return
+      newEquipped.rings = newEquipped.rings.concat([item])
     } else {
       return
     }
@@ -221,6 +247,55 @@ function Preparation({ character, onReady }) {
                   className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
               </div>
             )}
+            {equipped.helmet && (
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-ink-faint uppercase">Helmet</span>
+                  <span className="text-ink text-sm font-sans">{equipped.helmet.name}</span>
+                  <span className="text-ink-dim text-[10px]">+{equipped.helmet.defBonus || 0} DEF{equipped.helmet.agiPenalty ? ', ' + equipped.helmet.agiPenalty + ' AGI' : ''}</span>
+                </div>
+                <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.helmet]) }); setEquipped(function(e) { return Object.assign({}, e, { helmet: null }) }) }}
+                  className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+              </div>
+            )}
+            {equipped.boots && (
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-ink-faint uppercase">Boots</span>
+                  <span className="text-ink text-sm font-sans">{equipped.boots.name}</span>
+                  <span className="text-ink-dim text-[10px]">{equipped.boots.agiBonus ? '+' + equipped.boots.agiBonus + ' AGI' : ''}{equipped.boots.defBonus ? (equipped.boots.agiBonus ? ', ' : '') + '+' + equipped.boots.defBonus + ' DEF' : ''}{equipped.boots.initBonus ? (equipped.boots.agiBonus || equipped.boots.defBonus ? ', ' : '') + '+' + equipped.boots.initBonus + ' init' : ''}</span>
+                </div>
+                <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.boots]) }); setEquipped(function(e) { return Object.assign({}, e, { boots: null }) }) }}
+                  className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+              </div>
+            )}
+            {equipped.amulet && (
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-ink-faint uppercase">Amulet</span>
+                  <span className="text-ink text-sm font-sans">{equipped.amulet.name}</span>
+                  <span className="text-ink-dim text-[10px]">{equipped.amulet.description}</span>
+                </div>
+                <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.amulet]) }); setEquipped(function(e) { return Object.assign({}, e, { amulet: null }) }) }}
+                  className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+              </div>
+            )}
+            {equipped.rings && equipped.rings.map(function(ring, ri) {
+              return (
+                <div key={'ring-' + ri} className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-ink-faint uppercase">Ring {ri + 1}</span>
+                    <span className="text-ink text-sm font-sans">{ring.name}</span>
+                    <span className="text-ink-dim text-[10px]">{ring.description}</span>
+                  </div>
+                  <button onClick={function() {
+                    var ringItem = equipped.rings[ri]
+                    setInventory(function(inv) { return inv.concat([ringItem]) })
+                    setEquipped(function(e) { var nr = e.rings.slice(); nr.splice(ri, 1); return Object.assign({}, e, { rings: nr }) })
+                  }} className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -237,6 +312,8 @@ function Preparation({ character, onReady }) {
                   <span className="text-ink-faint text-[10px]">
                     {item.type === 'weapon' ? item.weaponType + ', d' + item.damageDie + (item.defIgnore ? ', ignores ' + Math.round(item.defIgnore * 100) + '% DEF' : '') + (item.doubleStrikeBase ? ', ' + Math.round(item.doubleStrikeBase * 100) + '% double strike' : '') :
                      item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
+                     item.type === 'armour' && item.slot === 'helmet' ? 'helmet, +' + (item.defBonus || 0) + ' DEF' + (item.agiPenalty ? ', ' + item.agiPenalty + ' AGI' : '') :
+                     item.type === 'armour' && item.slot === 'boots' ? 'boots' + (item.agiBonus ? ', +' + item.agiBonus + ' AGI' : '') + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') + (item.initBonus ? ', +' + item.initBonus + ' init' : '') :
                      item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
                      item.description || item.type}
                   </span>

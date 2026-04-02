@@ -96,14 +96,28 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-02 | Void relics — Nudge (+1 d20), Chaos Marble (±2 all dice) | ✅ Done |
 | 2026-04-02 | God mode — invincible + one-shot toggles for testing | ✅ Done |
 | 2026-04-02 | Item + weapon compendium docs | ✅ Done |
+| 2026-04-02 | Bidirectional zone doors — unlocked state persists, correct placement | ✅ Done |
+| 2026-04-02 | Montor's Gifts appear as regular junk — no special announcements | ✅ Done |
+| 2026-04-02 | Atmospheric stairwell hints — floor-specific flavour text | ✅ Done |
+| 2026-04-02 | Floor-themed pixelated borders — 6 floor colours across all phases | ✅ Done |
+| 2026-04-02 | Full-screen stats panel — overlay with green/red buff colouring, base values, active effects | ✅ Done |
+| 2026-04-02 | Stats + Bag header always visible — consistent across doors, chamber, combat | ✅ Done |
+| 2026-04-02 | Read-only combat inventory — equipped + carried items, no actions | ✅ Done |
+| 2026-04-02 | Junk search ghost overlay bug fixed — untracked setTimeout cleaned up | ✅ Done |
+| 2026-04-02 | Junk consumables wire stat buffs + conditions into game state | ✅ Done |
+| 2026-04-02 | All interactions as full-screen overlays — merchant, NPC, chest, corpse, junk search | ✅ Done |
+| 2026-04-02 | Junk search enemies trigger real combat — ambush = enemy first strike | ✅ Done |
+| 2026-04-02 | Combat corpses append not overwrite — junk search combat preserves existing corpses | ✅ Done |
+| 2026-04-02 | Balance: Thorough/Deep Clean risk+reward increased | ✅ Done |
+| 2026-04-02 | Adrenaline rebalanced — +6 STR for 2 turns, crash: 50% skip, -3 STR | ✅ Done |
+| 2026-04-02 | **Montor's Gift system fully implemented** — gifts.json, gifts.js, safe room multi-step overlay, 4 slots (body/mind/weapon/shield), all 16 petal effects wired | ✅ Done |
 |            | **Next up** | |
-|            | Skyrim-style stat display — green/red buffs, active effects with durations | ⬜ |
-|            | Junk pile enemy ambushes → trigger actual combat | ⬜ |
-|            | Wire junk consume stat buffs properly into game state | ⬜ |
 |            | Wire remaining passives — reflect_conditions, last_stand, see_enemy_hp_exact | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
-|            | Montor's Gift system — find/break/apply at terminals/restore to Void Chamber | ⬜ |
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
+|            | Gift leveling (Hades-style) + mono-gift synergy bonuses | ⬜ |
+|            | 5 more gift types — stone, bile, blood, ember, void | ⬜ |
+|            | The Dump — pre-run junk trade hub for permanent unlocks | ⬜ |
 
 ---
 

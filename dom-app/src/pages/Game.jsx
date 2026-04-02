@@ -35,27 +35,81 @@ var DIR_LABELS = { N: 'North', S: 'South', E: 'East', W: 'West' }
 
 var MONTOR_WHISPERS = dialogueData.montorWhispers
 
-// Helper: get total passive value from equipped relics + armour
-function getPassiveTotal(equipped, effectName) {
-  var total = 0
-  if (equipped && equipped.relics) {
-    for (var i = 0; i < equipped.relics.length; i++) {
-      if (equipped.relics[i].passiveEffect === effectName) total += (equipped.relics[i].passiveValue || 0)
+// Helper: collect all equipped items that can have passive effects
+function getAllPassiveItems(equipped) {
+  var items = []
+  if (!equipped) return items
+  if (equipped.relics) { for (var i = 0; i < equipped.relics.length; i++) items.push(equipped.relics[i]) }
+  if (equipped.rings) { for (var ri = 0; ri < equipped.rings.length; ri++) items.push(equipped.rings[ri]) }
+  if (equipped.armour) items.push(equipped.armour)
+  if (equipped.helmet) items.push(equipped.helmet)
+  if (equipped.boots) items.push(equipped.boots)
+  if (equipped.amulet) items.push(equipped.amulet)
+  return items
+}
+
+// Helper: get active set bonuses from equipped items
+function getSetBonuses(equipped) {
+  if (!equipped) return []
+  var items = getAllPassiveItems(equipped)
+  // Also count weapon and offhand for sets
+  if (equipped.weapon) items.push(equipped.weapon)
+  if (equipped.offhand) items.push(equipped.offhand)
+
+  // Count pieces per setId
+  var setCounts = {}
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].setId) {
+      setCounts[items[i].setId] = (setCounts[items[i].setId] || 0) + 1
     }
   }
-  if (equipped && equipped.armour && equipped.armour.passiveEffect === effectName) {
-    total += (equipped.armour.passiveValue || 0)
+
+  // Collect active bonuses — use highest threshold reached
+  var bonuses = []
+  for (var setId in setCounts) {
+    var count = setCounts[setId]
+    // Find any item with setBonuses for this setId
+    for (var si = 0; si < items.length; si++) {
+      if (items[si].setId === setId && items[si].setBonuses) {
+        // Find highest active threshold
+        for (var threshold = count; threshold >= 2; threshold--) {
+          var bonus = items[si].setBonuses[String(threshold)]
+          if (bonus) {
+            bonuses.push(bonus)
+            break
+          }
+        }
+        break // only need one item's setBonuses definition
+      }
+    }
+  }
+  return bonuses
+}
+
+// Helper: get total passive value from all equipped items + set bonuses
+function getPassiveTotal(equipped, effectName) {
+  var total = 0
+  var items = getAllPassiveItems(equipped)
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].passiveEffect === effectName) total += (items[i].passiveValue || 0)
+  }
+  // Add set bonus contributions
+  var setBonuses = getSetBonuses(equipped)
+  for (var si = 0; si < setBonuses.length; si++) {
+    if (setBonuses[si].passiveEffect === effectName) total += (setBonuses[si].passiveValue || 0)
+    if (setBonuses[si].secondEffect === effectName) total += (setBonuses[si].secondValue || 0)
   }
   return total
 }
 
-// Helper: check if equipped relics block a condition (immunity or resist roll)
+// Helper: check if equipped items block a condition (immunity or resist roll)
 // Returns { blocked: bool, type: 'immune'|'resisted'|null }
 function checkConditionResist(equipped, conditionId) {
-  if (!equipped || !equipped.relics) return { blocked: false, type: null }
+  if (!equipped) return { blocked: false, type: null }
+  var items = getAllPassiveItems(equipped)
   var resistChance = 0
-  for (var i = 0; i < equipped.relics.length; i++) {
-    var r = equipped.relics[i]
+  for (var i = 0; i < items.length; i++) {
+    var r = items[i]
     // Full immunity
     if (r.passiveEffect === 'condition_immunity' && r.passiveCondition === conditionId) {
       return { blocked: true, type: 'immune' }
@@ -646,6 +700,8 @@ function Game({ character, user, onEndRun }) {
           var totalDef = (character.stats.def || 10)
           if (character.equipped && character.equipped.armour) totalDef += character.equipped.armour.defBonus || 0
           if (character.equipped && character.equipped.offhand) totalDef += character.equipped.offhand.defBonus || 0
+          if (character.equipped && character.equipped.helmet) totalDef += character.equipped.helmet.defBonus || 0
+          if (character.equipped && character.equipped.boots) totalDef += character.equipped.boots.defBonus || 0
           defReduction = Math.floor(getModifier(totalDef))
         }
         var finalDmg = Math.max(1, baseDmg - defReduction)
@@ -703,8 +759,21 @@ function Game({ character, user, onEndRun }) {
       // Cap at 1-2 enemies for junk encounters
       if (enemies.length > 2) enemies = enemies.slice(0, 2)
       startCombat(enemies, zone, zone.playerPosition)
-      // Ambush: enemy gets first strike
+      // Ambush: enemy gets first strike — must also fix turn order
+      // so currentTurnIndex points to an enemy, not the player
       if (pendingEnemy === 'ambush') {
+        setBattle(function(prev) {
+          // Find first enemy in turn order
+          for (var ai = 0; ai < prev.turnOrder.length; ai++) {
+            if (prev.enemies.some(function(e) { return e.id === prev.turnOrder[ai] })) {
+              if (ai !== prev.currentTurnIndex) {
+                return Object.assign({}, prev, { currentTurnIndex: ai })
+              }
+              break
+            }
+          }
+          return prev
+        })
         guardedSetCombatPhase('enemyWindup')
       }
     }
@@ -1059,9 +1128,17 @@ function Game({ character, user, onEndRun }) {
     if (attackOut) {
       setEnemyAttackInfo({ attackOut: attackOut })
       setEnemyRollerKey(function(k) { return k + 1 })
+      var timeout = setTimeout(function() { guardedSetCombatPhase('enemyRolling') }, Math.max(800, enemyCondDelay))
+      return function() { clearTimeout(timeout) }
     }
-    var timeout = setTimeout(function() { guardedSetCombatPhase('enemyRolling') }, Math.max(800, enemyCondDelay))
-    return function() { clearTimeout(timeout) }
+    // Defensive: if attack couldn't resolve (e.g. currentId isn't an enemy), skip turn
+    var skipFallback = setTimeout(function() {
+      var nextB3 = advanceTurn(tickedBattle)
+      setBattle(nextB3)
+      var nextA3 = getActor(nextB3, getCurrentTurnId(nextB3))
+      guardedSetCombatPhase(nextA3 && nextA3.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+    }, 200)
+    return function() { clearTimeout(skipFallback) }
   }, [combatPhase, battle, gamePhase])
 
   function handleEnemyRollForRoller() {
@@ -1378,6 +1455,9 @@ function Game({ character, user, onEndRun }) {
       addLog({ type: 'player', text: 'Off-hand strike! ' + r.offhandDamage + ' bonus damage!', tier: 'hit' })
     } else if (r.offhandMiss) {
       addLog({ type: 'player', text: 'Off-hand swings... misses.', tier: 'miss' })
+    }
+    if (r.twinFangs) {
+      addLog({ type: 'condition', text: 'Twin Fangs! Both blades connect — ' + r.target + ' bleeds!', tier: 'crit' })
     }
     if (r.offhandCondition) {
       addLog({ type: 'condition', text: r.target + ' is now ' + condName(r.offhandCondition) + '! (off-hand)', tier: 'hit' })
@@ -1778,8 +1858,10 @@ function Game({ character, user, onEndRun }) {
     var returnItem = null
 
     if (item.type === 'weapon' && item.slot === 'weapon') {
-      // Daggers can dual wield — if main hand already has a dagger and offhand is empty
-      if (item.weaponType === 'dagger' && newEquipped.weapon && newEquipped.weapon.weaponType === 'dagger' && !newEquipped.offhand) {
+      // Dagger can go to offhand if main hand is a dagger or sword and offhand is empty
+      if (item.weaponType === 'dagger' && newEquipped.weapon &&
+          (newEquipped.weapon.weaponType === 'dagger' || newEquipped.weapon.weaponType === 'sword') &&
+          !newEquipped.offhand) {
         newEquipped.offhand = item
       } else {
         returnItem = newEquipped.weapon
@@ -1801,6 +1883,19 @@ function Game({ character, user, onEndRun }) {
     } else if (item.type === 'armour' && item.slot === 'armour') {
       returnItem = newEquipped.armour
       newEquipped.armour = item
+    } else if (item.slot === 'helmet') {
+      returnItem = newEquipped.helmet
+      newEquipped.helmet = item
+    } else if (item.slot === 'boots') {
+      returnItem = newEquipped.boots
+      newEquipped.boots = item
+    } else if (item.slot === 'amulet') {
+      returnItem = newEquipped.amulet
+      newEquipped.amulet = item
+    } else if (item.type === 'ring' && item.slot === 'ring') {
+      if (!newEquipped.rings) newEquipped.rings = []
+      if (newEquipped.rings.length >= 2) return // ring slots full
+      newEquipped.rings = newEquipped.rings.concat([item])
     } else if (item.type === 'relic' && item.slot === 'relic') {
       if (!newEquipped.relics) newEquipped.relics = []
       // Only condition resist/immunity relics count toward 3-slot cap
@@ -1877,6 +1972,42 @@ function Game({ character, user, onEndRun }) {
     var newRelics = character.equipped.relics.slice()
     newRelics.splice(relicIndex, 1)
     character.equipped = Object.assign({}, character.equipped, { relics: newRelics })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipHelmet() {
+    if (!character.equipped || !character.equipped.helmet) return
+    var item = character.equipped.helmet
+    character.equipped = Object.assign({}, character.equipped, { helmet: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipBoots() {
+    if (!character.equipped || !character.equipped.boots) return
+    var item = character.equipped.boots
+    character.equipped = Object.assign({}, character.equipped, { boots: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipAmulet() {
+    if (!character.equipped || !character.equipped.amulet) return
+    var item = character.equipped.amulet
+    character.equipped = Object.assign({}, character.equipped, { amulet: null })
+    setPlayerInventory(function(prev) { return prev.concat([item]) })
+  }
+
+  function handleUnequipRing(ringIndex) {
+    if (!character.equipped || !character.equipped.rings) return
+    var item = character.equipped.rings[ringIndex]
+    if (!item) return
+    // Remove hp_bonus when unequipping ring
+    if (item.passiveEffect === 'hp_bonus' && item.passiveValue) {
+      character.maxHp -= item.passiveValue
+      setPlayerHp(function(hp) { return Math.min(hp, character.maxHp) })
+    }
+    var newRings = character.equipped.rings.slice()
+    newRings.splice(ringIndex, 1)
+    character.equipped = Object.assign({}, character.equipped, { rings: newRings })
     setPlayerInventory(function(prev) { return prev.concat([item]) })
   }
 
@@ -2616,7 +2747,7 @@ function Game({ character, user, onEndRun }) {
         {showInventoryPanel && (function() {
           var tabs = [
             { id: 'weapons',     label: 'Arms',    types: ['weapon'] },
-            { id: 'wearables',   label: 'Wear',    types: ['armour'] },
+            { id: 'wearables',   label: 'Wear',    types: ['armour', 'ring', 'amulet'] },
             { id: 'relics',      label: 'Relics',  types: ['relic'] },
             { id: 'consumables', label: 'Use',     types: ['consumable'] },
             { id: 'junk',        label: 'Junk',    types: ['junk'] },
@@ -2769,6 +2900,78 @@ function Game({ character, user, onEndRun }) {
                           </button>
                         )}
                       </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.helmet && (
+                    <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-amber-400 uppercase tracking-wide">Helmet</span>
+                          <span className="text-ink">{character.equipped.helmet.name}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.helmet.defBonus || 0} DEF{character.equipped.helmet.agiPenalty ? ', ' + character.equipped.helmet.agiPenalty + ' AGI' : ''}{character.equipped.helmet.setId ? ' [SET]' : ''}</span>
+                        </div>
+                        {canEquipNow && (
+                          <button onClick={handleUnequipHelmet}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.boots && (
+                    <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-emerald-400 uppercase tracking-wide">Boots</span>
+                          <span className="text-ink">{character.equipped.boots.name}</span>
+                          <span className="text-ink-faint text-[10px]">{character.equipped.boots.agiBonus ? '+' + character.equipped.boots.agiBonus + ' AGI' : ''}{character.equipped.boots.defBonus ? (character.equipped.boots.agiBonus ? ', ' : '') + '+' + character.equipped.boots.defBonus + ' DEF' : ''}{character.equipped.boots.initBonus ? ', +' + character.equipped.boots.initBonus + ' init' : ''}{character.equipped.boots.setId ? ' [SET]' : ''}</span>
+                        </div>
+                        {canEquipNow && (
+                          <button onClick={handleUnequipBoots}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.amulet && (
+                    <div className="p-2 rounded bg-violet-500/10 border border-violet-500/20 text-sm font-sans">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-violet-400 uppercase tracking-wide">Amulet</span>
+                          <span className="text-ink">{character.equipped.amulet.name}</span>
+                          <span className="text-ink-faint text-[10px]">{character.equipped.amulet.description}</span>
+                        </div>
+                        {canEquipNow && (
+                          <button onClick={handleUnequipAmulet}
+                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+                            Unequip
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {character.equipped && character.equipped.rings && character.equipped.rings.length > 0 && (
+                    <div className="p-2 rounded bg-cyan-500/10 border border-cyan-500/20 text-sm font-sans">
+                      <span className="text-[10px] text-cyan-400 uppercase tracking-wide">Rings ({character.equipped.rings.length}/2)</span>
+                      {character.equipped.rings.map(function(ring, ri) {
+                        return (
+                          <div key={ri} className="flex items-center justify-between mt-1">
+                            <div className="flex flex-col">
+                              <span className="text-ink text-xs">{ring.name}</span>
+                              <span className="text-ink-faint text-[10px]">{ring.description}</span>
+                            </div>
+                            {canEquipNow && (
+                              <button onClick={function() { handleUnequipRing(ri) }}
+                                className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
+                                Unequip
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -4514,6 +4717,21 @@ function Game({ character, user, onEndRun }) {
               </div>
             )
           })()}
+
+          {/* Fallback: if no action rendered (stuck state), let player recover */}
+          {!isPlayerTurn && combatPhase !== 'enemyWindup' && combatPhase !== 'enemyRolling' && combatPhase !== 'playerSkipped' && (
+            <div className="p-4 border-2 border-border rounded-lg bg-surface text-center">
+              <p className="text-ink-dim text-sm">Waiting...</p>
+              <button onClick={function() {
+                var nextB = advanceTurn(battle)
+                setBattle(nextB)
+                var nextA = getActor(nextB, getCurrentTurnId(nextB))
+                guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+              }} className="mt-2 py-1.5 px-4 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-xs">
+                Continue
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Party bar */}

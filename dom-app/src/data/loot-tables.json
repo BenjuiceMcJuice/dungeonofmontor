@@ -134,6 +134,51 @@
           "itemId": "montors_comfort_blanket",
           "weight": 3,
           "minRarity": "common"
+        },
+        {
+          "itemId": "montors_curtain_ring",
+          "weight": 5,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_washer_ring",
+          "weight": 5,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_mums_thimble_ring",
+          "weight": 4,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_colander",
+          "weight": 4,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_saucepan",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_wellies",
+          "weight": 5,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_slippers",
+          "weight": 5,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_apron_armour",
+          "weight": 4,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_dog_tag",
+          "weight": 3,
+          "minRarity": "common"
         }
       ]
     },
@@ -272,6 +317,56 @@
           "itemId": "montors_comfort_blanket",
           "weight": 3,
           "minRarity": "common"
+        },
+        {
+          "itemId": "montors_rubber_band_ring",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_key_ring",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_bowler_hat",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_cricket_helmet",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_mums_heels",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_hiking_boots",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_duffel_coat",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_mums_locket",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_bifocals",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_sunday_shirt",
+          "weight": 2,
+          "minRarity": "uncommon"
         }
       ]
     },
@@ -572,6 +667,46 @@
         {
           "itemId": "montors_stink_bomb",
           "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_pipe_ring",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_grans_ring",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_hair_dryer_hood",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_dancing_shoes",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_mums_fur_coat",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_rabbits_foot",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_mums_crucifix",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_sunday_shirt",
+          "weight": 2,
           "minRarity": "uncommon"
         }
       ]
@@ -2271,6 +2406,51 @@
           "itemId": "montors_shield_polish",
           "weight": 1,
           "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_newsboy_cap",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_tweed_overcoat",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_hobnail_boots",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_sovereign_ring",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_engagement_ring",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_knight_helm",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_iron_boots",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_suit_of_armour",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_lodestone",
+          "weight": 1,
+          "minRarity": "epic"
         }
       ]
     },
