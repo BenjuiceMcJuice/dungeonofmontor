@@ -3,7 +3,7 @@
 // Uses 4-tier attack resolution: Crit / Hit / Glancing Blow / Miss
 import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
-import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance } from './conditions.js'
+import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance, getDamageTakenMultiplier } from './conditions.js'
 
 // Deep-clone battle state for immutable updates
 function cloneBattle(bs) {
@@ -47,7 +47,7 @@ function createBattleState(players, enemies) {
     }
 
     var agiMod = getModifier(combatStats.agi)
-    var weaponInitBonus = (char.equipped && char.equipped.weapon && char.equipped.weapon.initBonus) || 0
+    var weaponInitBonus = (char.equipped && char.equipped.weapon) ? (char.equipped.weapon.initBonus || 0) : 1 // unarmed: +1 init
     var initRoll = rollWithMod(20, agiMod + weaponInitBonus)
 
     playerStates[p.uid] = {
@@ -199,7 +199,7 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
 
   // If no pre-rolled result provided, roll now (includes weapon accuracy bonus)
   if (!attackResult) {
-    var accBonus = (player.equipped && player.equipped.weapon && player.equipped.weapon.accuracyBonus) || 0
+    var accBonus = (player.equipped && player.equipped.weapon) ? (player.equipped.weapon.accuracyBonus || 0) : -1 // unarmed: -1 accuracy
     attackResult = d20Attack(strMod + rollsMod + accBonus, 20)
   }
 
@@ -233,12 +233,16 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
 
   // Calculate damage based on tier
   if (attackResult.tier <= 3) {
-    var weaponDie = 6
+    var weaponDie = 4 // unarmed: d4
+    var unarmedStrBonus = 0
     if (player.equipped && player.equipped.weapon) {
       weaponDie = player.equipped.weapon.damageDie || player.equipped.weapon.die || 6
+    } else {
+      // Unarmed — STR mod counts double for damage
+      unarmedStrBonus = Math.max(0, strMod)
     }
 
-    var dmgResult = rollDamage(weaponDie, strMod)
+    var dmgResult = rollDamage(weaponDie, strMod + unarmedStrBonus)
 
     // Reroll ones — Loaded Dice
     if (dmgResult.roll === 1 && player.equipped && player.equipped.relics) {
@@ -269,6 +273,10 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
 
     var breakdown = calculateTierDamage(dmgResult.roll, strMod + intDmgBonus, attackResult.tier, effectiveDef, 2.0)
 
+    // Brittle — FROST increases damage taken
+    var enemyBrittleMul = getDamageTakenMultiplier(enemy.statusEffects || [])
+    if (enemyBrittleMul > 1) breakdown.final = Math.round(breakdown.final * enemyBrittleMul)
+
     enemy.currentHp = Math.max(0, enemy.currentHp - breakdown.final)
     result.damage = breakdown.final
     result.damageBreakdown = breakdown
@@ -291,6 +299,14 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.statusEffects = applyCondition(enemy.statusEffects, weapon.conditionOnHit, 'weapon')
           result.doubleCondition = true
         }
+      }
+    }
+
+    // Stagger — heavy weapons can DAZE enemies on hit
+    if (weapon && weapon.staggerChance && breakdown.final > 0 && !enemy.isDown) {
+      if (Math.random() < weapon.staggerChance) {
+        enemy.statusEffects = applyCondition(enemy.statusEffects || [], 'DAZE', 'stagger')
+        result.staggerApplied = true
       }
     }
 
@@ -468,6 +484,10 @@ function resolveEnemyAttack(battleState, enemyId) {
     var dmgResult = rollDamage(enemy.weaponDie, strMod)
     var defWithConditions = target.combatStats.def + getConditionStatMod(target.statusEffects, 'def')
     var breakdown = calculateTierDamage(dmgResult.roll, strMod, attackResult.tier, Math.max(0, defWithConditions), 2.0)
+
+    // Brittle — FROST increases damage taken
+    var brittleMul = getDamageTakenMultiplier(target.statusEffects || [])
+    if (brittleMul > 1) breakdown.final = Math.round(breakdown.final * brittleMul)
 
     target.currentHp = Math.max(0, target.currentHp - breakdown.final)
     result.damage = breakdown.final

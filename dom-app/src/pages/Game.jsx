@@ -291,9 +291,11 @@ function Game({ character, user, onEndRun }) {
     })
     setZone(newZone)
 
-    // Relic passive: regen_per_chamber — heal on entering a new chamber
-    var regenAmount = getPassiveTotal(character.equipped, 'regen_per_chamber')
-    if (regenAmount > 0) {
+    var chamber = newZone.chambers[targetId]
+
+    // Passive regen on entering NEW chambers — baseline 1 HP + relic bonuses
+    if (!chamber.cleared && !chamber.corpses) {
+      var regenAmount = 1 + getPassiveTotal(character.equipped, 'regen_per_chamber')
       setPlayerHp(function(hp) { return Math.min(hp + regenAmount, character.maxHp) })
     }
 
@@ -303,8 +305,6 @@ function Game({ character, user, onEndRun }) {
     if (whisper) {
       setTimeout(function() { setMontorWhisper(null) }, 4000)
     }
-
-    var chamber = newZone.chambers[targetId]
 
     // If already cleared or has corpses (fought), just show doors (backtracking)
     if (chamber.cleared || chamber.corpses) {
@@ -880,6 +880,9 @@ function Game({ character, user, onEndRun }) {
     if (r.doubleCondition) {
       addLog({ type: 'condition', text: 'Magnifying Glass: ' + condName(r.conditionApplied) + ' applied twice!', tier: 'crit' })
     }
+    if (r.staggerApplied) {
+      addLog({ type: 'condition', text: 'Stagger! ' + r.target + ' is Dazed!', tier: 'hit' })
+    }
     // Lottery ticket — winning roll awards a random rare item
     if (r.lotteryWin) {
       var rareItems = Object.values(ITEMS).filter(function(it) { return it.rarity === 'rare' })
@@ -1182,8 +1185,19 @@ function Game({ character, user, onEndRun }) {
       } else {
         returnItem = newEquipped.weapon
         newEquipped.weapon = item
+        // Heavy weapons can't use shields — unequip offhand shield
+        if (item.hand === 'heavy' && newEquipped.offhand && newEquipped.offhand.slot === 'offhand') {
+          var shieldReturn = newEquipped.offhand
+          newEquipped.offhand = null
+          // Return shield to inventory
+          var newInv2 = character.inventory.slice()
+          if (shieldReturn) newInv2.push(shieldReturn)
+          character.inventory = newInv2
+        }
       }
     } else if (item.type === 'armour' && item.slot === 'offhand') {
+      // Can't equip shield with heavy weapon
+      if (newEquipped.weapon && newEquipped.weapon.hand === 'heavy') return
       returnItem = newEquipped.offhand
       newEquipped.offhand = item
     } else if (item.type === 'armour' && item.slot === 'armour') {
@@ -1771,16 +1785,25 @@ function Game({ character, user, onEndRun }) {
               </div>
 
               {/* Currently equipped (weapons/armour tabs) */}
-              {activeTab.id === 'weapons' && character.equipped && character.equipped.weapon && (
+              {activeTab.id === 'weapons' && character.equipped && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-[10px] text-gold uppercase tracking-wide">Main Hand</span>
-                        <span className="text-ink">{character.equipped.weapon.name}</span>
-                        <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg ({character.equipped.weapon.weaponType || 'weapon'})</span>
+                        {character.equipped.weapon ? (
+                          <>
+                            <span className="text-ink">{character.equipped.weapon.name}</span>
+                            <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg ({character.equipped.weapon.weaponType || 'weapon'})</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-ink">Fists</span>
+                            <span className="text-ink-faint text-[10px]">d4 dmg, -1 accuracy, 2x STR bonus (unarmed)</span>
+                          </>
+                        )}
                       </div>
-                      {canEquipNow && (
+                      {canEquipNow && character.equipped.weapon && (
                         <button onClick={handleUnequipWeapon}
                           className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
                           Unequip
@@ -1886,7 +1909,7 @@ function Game({ character, user, onEndRun }) {
                       </div>
                       <p className="text-ink text-sm italic mb-3">{detailItem.description || ''}</p>
                       <div className="flex flex-col gap-1.5 text-xs text-ink mb-3">
-                        {detailItem.type === 'weapon' && <span>Type: {detailItem.weaponType || 'weapon'} | Damage: d{detailItem.damageDie || detailItem.die} | Speed: {detailItem.speed || 'normal'}</span>}
+                        {detailItem.type === 'weapon' && <span>Type: {detailItem.weaponType || 'weapon'} | Damage: d{detailItem.damageDie || detailItem.die}{detailItem.hand ? ' | ' + detailItem.hand : ''}</span>}
                         {detailItem.type === 'weapon' && detailItem.defIgnore > 0 && <span>Ignores {Math.round(detailItem.defIgnore * 100)}% of enemy DEF</span>}
                         {detailItem.type === 'weapon' && detailItem.doubleStrikeBase > 0 && <span>{Math.round(detailItem.doubleStrikeBase * 100)}% double strike chance (scales with AGI)</span>}
                         {detailItem.conditionOnHit && <span>Applies {detailItem.conditionOnHit} on hit</span>}
@@ -2800,8 +2823,8 @@ function Game({ character, user, onEndRun }) {
             </div>
             <div className="flex items-center justify-between mt-1">
               <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
-                {character.equipped && character.equipped.weapon && (
-                  <span className="text-ink">{character.equipped.weapon.name}</span>
+                {character.equipped && (
+                  <span className="text-ink">{character.equipped.weapon ? character.equipped.weapon.name : 'Fists'}</span>
                 )}
                 {character.equipped && character.equipped.armour && (
                   <span>+{character.equipped.armour.defBonus} DEF</span>

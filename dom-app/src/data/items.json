@@ -1,36 +1,49 @@
 {
-  "dagger_common": {
-    "id": "dagger_common", "name": "Some Bloke's Dagger", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+  "___COMMENT_WEAPONS": "=== TIER 1: BASE WEAPONS (common, starter shop, no giftPower) ===",
+
+  "dagger_base": {
+    "id": "dagger_base", "name": "Rusty Dagger", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
     "rarity": "common", "damageDie": 4, "attackStat": "str",
     "buyPrice": 8, "sellPrice": 3,
     "description": "Left behind by someone who didn't make it. Quick, at least."
   },
-  "shortsword_common": {
-    "id": "shortsword_common", "name": "Boring Sword", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+  "sword_base": {
+    "id": "sword_base", "name": "Sword", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
     "rarity": "common", "damageDie": 6, "attackStat": "str",
     "buyPrice": 15, "sellPrice": 6,
     "description": "Reliable. Dull. +1 accuracy. Like its previous owner."
   },
-  "longsword_common": {
-    "id": "longsword_common", "name": "Slightly Less Boring Sword", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
-    "rarity": "common", "damageDie": 8, "attackStat": "str",
-    "buyPrice": 25, "sellPrice": 10,
-    "description": "Longer. Still boring. But it works."
-  },
-  "mace_common": {
-    "id": "mace_common", "name": "Dull Mace", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5, "agiPenalty": -1,
+  "spear_base": {
+    "id": "spear_base", "name": "Spear", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
     "rarity": "common", "damageDie": 6, "attackStat": "str",
-    "buyPrice": 20, "sellPrice": 8,
-    "description": "Blunt. Heavy. -1 AGI. Punches through armour though."
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Long reach. Strike first, ask questions never."
   },
+  "mace_base": {
+    "id": "mace_base", "name": "Mace", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.25, "agiPenalty": -1,
+    "staggerChance": 0.15,
+    "rarity": "common", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "Blunt. Heavy. Punches through armour. 15% stagger."
+  },
+  "axe_base": {
+    "id": "axe_base", "name": "Battle Axe", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.2,
+    "rarity": "common", "damageDie": 10, "attackStat": "str",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Big. Slow. Hits like a falling tree. 20% stagger."
+  },
+
+  "___COMMENT_GIFTED_DAGGER": "=== TIER 2: MONTOR'S GIFTED DAGGERS (has giftPower) ===",
 
   "montors_peeling_knife": {
     "id": "montors_peeling_knife", "name": "Montor's Peeling Knife", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
     "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
     "conditionOnHit": "POISON", "conditionChance": 1.0,
     "giftPower": "bile",
@@ -39,157 +52,401 @@
   },
   "montors_pruning_shears": {
     "id": "montors_pruning_shears", "name": "Montor's Pruning Shears", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
     "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
     "conditionOnHit": "BLEED", "conditionChance": 1.0,
-    "giftPower": "petal",
-    "buyPrice": 28, "sellPrice": 11,
+    "giftPower": "blood",
+    "buyPrice": 24, "sellPrice": 10,
     "description": "For the garden. Grows back sharper each time."
   },
-  "montors_ice_pick": {
-    "id": "montors_ice_pick", "name": "Montor's Ice Pick", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
-    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+  "montors_candle_snuffer": {
+    "id": "montors_candle_snuffer", "name": "Montor's Candle Snuffer", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 0.8,
+    "giftPower": "ember",
+    "buyPrice": 32, "sellPrice": 13,
+    "description": "Ironic. It puts out candles but sets everything else on fire."
+  },
+  "montors_icicle": {
+    "id": "montors_icicle", "name": "Montor's Icicle", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
     "conditionOnHit": "FROST", "conditionChance": 1.0,
     "giftPower": "stone",
-    "buyPrice": 45, "sellPrice": 18,
-    "description": "Keeps the drinks cold. And the enemies."
-  },
-  "montors_fireplace_poker": {
-    "id": "montors_fireplace_poker", "name": "Montor's Fireplace Poker", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5,
-    "rarity": "rare", "damageDie": 8, "attackStat": "str",
-    "conditionOnHit": "BURN", "conditionChance": 1.0,
-    "giftPower": "ember",
-    "buyPrice": 55, "sellPrice": 22,
-    "description": "Still hot. Always hot. Melts through armour."
-  },
-  "montors_mums_bread_knife": {
-    "id": "montors_mums_bread_knife", "name": "Montor's Mum's Bread Knife", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0,
-    "rarity": "rare", "damageDie": 8, "attackStat": "str",
-    "conditionOnHit": "FEAR", "conditionChance": 0.7,
-    "giftPower": "blood",
-    "buyPrice": 50, "sellPrice": 20,
-    "description": "She could silence a room. So can this."
-  },
-  "montors_tenderiser": {
-    "id": "montors_tenderiser", "name": "Montor's Tenderiser", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.5,
-    "rarity": "uncommon", "damageDie": 8, "attackStat": "str", "agiPenalty": -1,
-    "conditionOnHit": "DAZE", "conditionChance": 1.0,
-    "giftPower": "stone",
-    "buyPrice": 35, "sellPrice": 14,
-    "description": "For meat. You're meat."
-  },
-  "montors_mums_rolling_pin": {
-    "id": "montors_mums_rolling_pin", "name": "Montor's Mum's Rolling Pin", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.5,
-    "rarity": "uncommon", "damageDie": 10, "attackStat": "str", "agiPenalty": -2,
-    "giftPower": "stone",
-    "buyPrice": 40, "sellPrice": 16,
-    "description": "She didn't need magic. Neither does this."
-  },
-  "montors_void_cleaver": {
-    "id": "montors_void_cleaver", "name": "Montor's Void Cleaver", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.3,
-    "rarity": "epic", "damageDie": 10, "attackStat": "str",
-    "conditionOnHit": "FEAR", "conditionChance": 0.5,
-    "giftPower": ["void", "blood"],
-    "buyPrice": 100, "sellPrice": 40,
-    "description": "Montor's personal blade. He's noticed it's missing."
-  },
-  "montors_sabatier": {
-    "id": "montors_sabatier", "name": "Montor's Sabatier", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
-    "rarity": "rare", "damageDie": 8, "attackStat": "str",
-    "buyPrice": 45, "sellPrice": 18,
-    "description": "French. Precise. d8, +2 accuracy. He only used it for cheese. A Gift would make it sing."
-  },
-  "montors_letter_opener": {
-    "id": "montors_letter_opener", "name": "Montor's Letter Opener", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.3, "defIgnore": 0, "initBonus": 2,
-    "rarity": "rare", "damageDie": 4, "attackStat": "str",
-    "buyPrice": 35, "sellPrice": 14,
-    "description": "Silver. Monogrammed. 30% double strike, +2 initiative. Waiting for a Gift."
-  },
-  "montors_candlestick": {
-    "id": "montors_candlestick", "name": "Montor's Candlestick", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.6, "agiPenalty": -1,
-    "rarity": "rare", "damageDie": 8, "attackStat": "str",
-    "buyPrice": 40, "sellPrice": 16,
-    "description": "Solid brass. d8, ignores 60% DEF. Colonel Montor. In the dungeon. With this."
-  },
-  "montors_umbrella": {
-    "id": "montors_umbrella", "name": "Montor's Umbrella", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.15, "accuracyBonus": 1,
-    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
-    "buyPrice": 25, "sellPrice": 10,
-    "description": "Hidden blade inside. d6, +1 accuracy, 15% DEF ignore. He takes it everywhere."
-  },
-  "montors_cheese_wire": {
-    "id": "montors_cheese_wire", "name": "Montor's Cheese Wire", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.25, "defIgnore": 0.3, "initBonus": 1,
-    "rarity": "rare", "damageDie": 4, "attackStat": "str",
-    "buyPrice": 38, "sellPrice": 15,
-    "description": "Thin. Silent. d4, 25% double strike, ignores 30% DEF. Cuts through anything."
-  },
-  "montors_mums_ladle": {
-    "id": "montors_mums_ladle", "name": "Montor's Mum's Ladle", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0.5, "agiPenalty": -1,
-    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
-    "buyPrice": 22, "sellPrice": 9,
-    "description": "She could stir a pot and crack a skull in the same motion. d6, 50% DEF ignore."
-  },
-  "montors_pestle": {
-    "id": "montors_pestle", "name": "Montor's Pestle", "type": "weapon", "slot": "weapon",
-    "weaponType": "mace", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.7, "agiPenalty": -2,
-    "rarity": "rare", "damageDie": 10, "attackStat": "str",
-    "buyPrice": 50, "sellPrice": 20,
-    "description": "Marble. d10, ignores 70% DEF, -2 AGI. He ground spices with it. And other things."
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "Snapped from the eaves. Never melts. Freeze them, then shatter them."
   },
   "montors_nail_file": {
     "id": "montors_nail_file", "name": "Montor's Nail File", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.35, "defIgnore": 0, "initBonus": 2,
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.3, "defIgnore": 0, "initBonus": 2,
     "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
-    "buyPrice": 20, "sellPrice": 8,
-    "description": "Tiny. Vicious. 35% double strike, +2 initiative. He was very particular about his nails."
+    "conditionOnHit": "FEAR", "conditionChance": 0.5,
+    "giftPower": "void",
+    "buyPrice": 26, "sellPrice": 10,
+    "description": "Tiny. Vicious. He was very particular about his nails."
+  },
+  "montors_cheese_wire": {
+    "id": "montors_cheese_wire", "name": "Montor's Cheese Wire", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "DAZE", "conditionChance": 0.7,
+    "giftPower": "stone",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "Thin. Silent. Cuts through anything. Leaves them seeing stars."
+  },
+
+  "___COMMENT_GIFTED_SWORD": "=== TIER 2: MONTOR'S GIFTED SWORDS ===",
+
+  "montors_umbrella": {
+    "id": "montors_umbrella", "name": "Montor's Umbrella", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "POISON", "conditionChance": 0.8,
+    "giftPower": "bile",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Hidden blade inside. Tipped with something green. He takes it everywhere."
+  },
+  "montors_letter_opener": {
+    "id": "montors_letter_opener", "name": "Montor's Letter Opener", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 1.0,
+    "giftPower": "blood",
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "Silver. Monogrammed. Paper cuts that never heal."
+  },
+  "montors_fireplace_poker": {
+    "id": "montors_fireplace_poker", "name": "Montor's Fireplace Poker", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 1.0,
+    "giftPower": "ember",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "Still hot. Always hot. Sears on contact."
+  },
+  "montors_ice_pick": {
+    "id": "montors_ice_pick", "name": "Montor's Ice Pick", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "FROST", "conditionChance": 1.0,
+    "giftPower": "stone",
+    "buyPrice": 38, "sellPrice": 15,
+    "description": "Keeps the drinks cold. And the enemies."
+  },
+  "montors_mums_bread_knife": {
+    "id": "montors_mums_bread_knife", "name": "Montor's Mum's Bread Knife", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 0.7,
+    "giftPower": "blood",
+    "buyPrice": 42, "sellPrice": 17,
+    "description": "She could silence a room. So can this."
+  },
+  "montors_sabatier": {
+    "id": "montors_sabatier", "name": "Montor's Sabatier", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "DAZE", "conditionChance": 0.6,
+    "giftPower": "stone",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "French. Precise. The flat of the blade rattles the skull."
+  },
+
+  "___COMMENT_GIFTED_SPEAR": "=== TIER 2: MONTOR'S GIFTED SPEARS ===",
+
+  "montors_garden_fork": {
+    "id": "montors_garden_fork", "name": "Montor's Garden Fork", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "POISON", "conditionChance": 1.0,
+    "giftPower": "petal",
+    "buyPrice": 24, "sellPrice": 10,
+    "description": "Prongs caked in compost. The compost is alive."
+  },
+  "montors_fishing_spear": {
+    "id": "montors_fishing_spear", "name": "Montor's Fishing Spear", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 1.0,
+    "giftPower": "blood",
+    "buyPrice": 26, "sellPrice": 10,
+    "description": "Barbed. What it catches, it keeps."
+  },
+  "montors_toasting_fork": {
+    "id": "montors_toasting_fork", "name": "Montor's Toasting Fork", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 0.8,
+    "giftPower": "ember",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "Made for crumpets. The prongs glow red."
   },
   "montors_curtain_rod": {
     "id": "montors_curtain_rod", "name": "Montor's Curtain Rod", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2,
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 3,
     "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
-    "buyPrice": 18, "sellPrice": 7,
-    "description": "Long reach. Surprisingly whippy. d6, +2 accuracy. The curtains are on the floor now."
+    "conditionOnHit": "FROST", "conditionChance": 0.8,
+    "giftPower": "stone",
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "Long reach. Cold brass. The curtains are on the floor now."
   },
-  "montors_grandfather_clock_hand": {
-    "id": "montors_grandfather_clock_hand", "name": "Montor's Grandfather Clock Hand", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "slow", "doubleStrikeBase": 0, "defIgnore": 0.3, "accuracyBonus": 1, "agiPenalty": -2,
-    "rarity": "epic", "damageDie": 12, "attackStat": "str",
-    "buyPrice": 80, "sellPrice": 32,
-    "description": "The minute hand. Six feet of brass. d12, 30% DEF ignore, -2 AGI. Time stops for no one."
+  "montors_broom_handle": {
+    "id": "montors_broom_handle", "name": "Montor's Broom Handle", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 0.5,
+    "giftPower": "void",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Snapped in half. The jagged end does the talking."
   },
+  "montors_weathervane": {
+    "id": "montors_weathervane", "name": "Montor's Weathervane", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "DAZE", "conditionChance": 0.7,
+    "giftPower": "stone",
+    "buyPrice": 34, "sellPrice": 14,
+    "description": "Arrow-shaped tip. Ripped from the roof. One good crack to the temple."
+  },
+
+  "___COMMENT_GIFTED_MACE": "=== TIER 2: MONTOR'S GIFTED MACES ===",
+
+  "montors_mums_ladle": {
+    "id": "montors_mums_ladle", "name": "Montor's Mum's Ladle", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.25, "agiPenalty": -1,
+    "staggerChance": 0.15,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "POISON", "conditionChance": 0.8,
+    "giftPower": "bile",
+    "buyPrice": 24, "sellPrice": 10,
+    "description": "She stirred things best left unstirred. Something green drips from it."
+  },
+  "montors_tenderiser": {
+    "id": "montors_tenderiser", "name": "Montor's Tenderiser", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.3, "agiPenalty": -1,
+    "staggerChance": 0.2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 1.0,
+    "giftPower": "blood",
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "For meat. You're meat. The spikes leave marks."
+  },
+  "montors_candlestick": {
+    "id": "montors_candlestick", "name": "Montor's Candlestick", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.3, "agiPenalty": -1,
+    "staggerChance": 0.15,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 1.0,
+    "giftPower": "ember",
+    "buyPrice": 38, "sellPrice": 15,
+    "description": "Solid brass. Still lit. Colonel Montor. In the dungeon. With this."
+  },
+  "montors_pestle": {
+    "id": "montors_pestle", "name": "Montor's Pestle", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.35, "agiPenalty": -1,
+    "staggerChance": 0.2,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "FROST", "conditionChance": 1.0,
+    "giftPower": "stone",
+    "buyPrice": 36, "sellPrice": 14,
+    "description": "Marble. Cold to the touch. Grinds spices. Grinds bones."
+  },
+  "montors_mums_rolling_pin": {
+    "id": "montors_mums_rolling_pin", "name": "Montor's Mum's Rolling Pin", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.25, "agiPenalty": -1,
+    "staggerChance": 0.25,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 0.7,
+    "giftPower": "blood",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "She didn't need magic. Neither does this. The thud alone terrifies."
+  },
+  "montors_door_knocker": {
+    "id": "montors_door_knocker", "name": "Montor's Door Knocker", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.3, "agiPenalty": -1,
+    "staggerChance": 0.3,
+    "rarity": "rare", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "DAZE", "conditionChance": 1.0,
+    "giftPower": "stone",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "Brass lion head. Knock knock. Lights out."
+  },
+
+  "___COMMENT_GIFTED_AXE": "=== TIER 2: MONTOR'S GIFTED AXES ===",
+
+  "montors_woodsmans_axe": {
+    "id": "montors_woodsmans_axe", "name": "Montor's Woodsman's Axe", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.2,
+    "rarity": "uncommon", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "POISON", "conditionChance": 0.7,
+    "giftPower": "petal",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "Sap-stained. The tree sap is toxic. So is everything in Montor's garden."
+  },
+  "montors_cleaver": {
+    "id": "montors_cleaver", "name": "Montor's Cleaver", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.2,
+    "rarity": "uncommon", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 1.0,
+    "giftPower": "blood",
+    "buyPrice": 32, "sellPrice": 13,
+    "description": "Kitchen grade. Butcher grade. The edge never dulls."
+  },
+  "montors_coal_shovel": {
+    "id": "montors_coal_shovel", "name": "Montor's Coal Shovel", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.25,
+    "rarity": "rare", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 1.0,
+    "giftPower": "ember",
+    "buyPrice": 42, "sellPrice": 17,
+    "description": "Full of embers. Swings like a cricket bat. Everything catches fire."
+  },
+  "montors_pickaxe": {
+    "id": "montors_pickaxe", "name": "Montor's Pickaxe", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.15, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.2,
+    "rarity": "rare", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "FROST", "conditionChance": 0.8,
+    "giftPower": "stone",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "Caked in frozen rock dust. Each hit cracks like permafrost."
+  },
+  "montors_executioners_hatchet": {
+    "id": "montors_executioners_hatchet", "name": "Montor's Executioner's Hatchet", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.25,
+    "rarity": "rare", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 0.8,
+    "giftPower": "void",
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Ceremonial. Notched. They see it and they know what's coming."
+  },
+  "montors_sledgehammer": {
+    "id": "montors_sledgehammer", "name": "Montor's Sledgehammer", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.1, "agiPenalty": -2, "accuracyBonus": -1,
+    "staggerChance": 0.35,
+    "rarity": "rare", "damageDie": 10, "attackStat": "str",
+    "conditionOnHit": "DAZE", "conditionChance": 1.0,
+    "giftPower": "stone",
+    "buyPrice": 48, "sellPrice": 19,
+    "description": "Not subtle. Not fast. But nothing stays standing."
+  },
+
+  "___COMMENT_HARDENED": "=== TIER 3: MONTOR'S HARDENED WEAPONS (strong stats, NO giftPower) ===",
+
   "montors_skeleton_key": {
     "id": "montors_skeleton_key", "name": "Montor's Skeleton Key", "type": "weapon", "slot": "weapon",
-    "weaponType": "dagger", "speed": "fast", "doubleStrikeBase": 0.4, "defIgnore": 0.5, "initBonus": 3,
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.4, "defIgnore": 0.3, "initBonus": 3,
     "rarity": "epic", "damageDie": 4, "attackStat": "str",
     "buyPrice": 90, "sellPrice": 36,
-    "description": "Opens anything. Including enemies. d4, 40% double strike, 50% DEF ignore, +3 init. Broken."
+    "description": "Opens anything. Including enemies. 40% double strike, 30% DEF ignore, +3 init."
+  },
+  "montors_letter_knife": {
+    "id": "montors_letter_knife", "name": "Montor's Letter Knife", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.35, "defIgnore": 0, "initBonus": 2,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Silver. Perfectly balanced. 35% double strike, +2 init. A precision instrument."
   },
   "montors_family_heirloom": {
     "id": "montors_family_heirloom", "name": "Montor's Family Heirloom", "type": "weapon", "slot": "weapon",
-    "weaponType": "sword", "speed": "normal", "doubleStrikeBase": 0.15, "defIgnore": 0.25, "accuracyBonus": 3,
-    "rarity": "legendary", "damageDie": 10, "attackStat": "str",
-    "buyPrice": 200, "sellPrice": 80,
-    "description": "His grandmother forged it. d10, +3 accuracy, 15% double strike, 25% DEF ignore. It hums when you hold it."
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0.15, "defIgnore": 0.2, "accuracyBonus": 3,
+    "rarity": "epic", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 120, "sellPrice": 48,
+    "description": "His grandmother forged it. d8, +3 accuracy, 15% double strike. It hums when you hold it."
+  },
+  "montors_sabatier_hardened": {
+    "id": "montors_sabatier_hardened", "name": "Montor's Hardened Sabatier", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0.15, "accuracyBonus": 3,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "French steel, honed by dungeon air. d8, +3 accuracy, 15% DEF ignore."
+  },
+  "montors_flagpole": {
+    "id": "montors_flagpole", "name": "Montor's Flagpole", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0.1, "initBonus": 4,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Still has the flag on it. d8, +4 init. Always strikes first."
+  },
+  "montors_lightning_rod": {
+    "id": "montors_lightning_rod", "name": "Montor's Lightning Rod", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0.2, "initBonus": 3, "accuracyBonus": 1,
+    "rarity": "epic", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 100, "sellPrice": 40,
+    "description": "Ripped from the roof. Copper tip still hums. d8, +3 init, +1 accuracy, 20% DEF ignore."
+  },
+  "montors_void_cleaver": {
+    "id": "montors_void_cleaver", "name": "Montor's Void Cleaver", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.5, "agiPenalty": -1,
+    "staggerChance": 0.3,
+    "rarity": "epic", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 110, "sellPrice": 44,
+    "description": "Montor's personal mace. d8, 50% DEF ignore, 30% stagger. He's noticed it's missing."
+  },
+  "montors_hardened_pestle": {
+    "id": "montors_hardened_pestle", "name": "Montor's Hardened Pestle", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.45, "agiPenalty": -2,
+    "staggerChance": 0.25,
+    "rarity": "rare", "damageDie": 8, "attackStat": "str",
+    "buyPrice": 65, "sellPrice": 26,
+    "description": "Marble. Reinforced. d8, 45% DEF ignore, 25% stagger. He ground spices with it. And other things."
+  },
+  "montors_grandfather_clock_hand": {
+    "id": "montors_grandfather_clock_hand", "name": "Montor's Grandfather Clock Hand", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.2, "agiPenalty": -2, "accuracyBonus": -1,
+    "staggerChance": 0.3,
+    "rarity": "epic", "damageDie": 12, "attackStat": "str",
+    "buyPrice": 100, "sellPrice": 40,
+    "description": "The minute hand. Six feet of brass. d12, 20% DEF ignore, 30% stagger. Time stops for no one."
+  },
+  "montors_hardened_cleaver": {
+    "id": "montors_hardened_cleaver", "name": "Montor's Hardened Cleaver", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.15, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0.25,
+    "rarity": "rare", "damageDie": 12, "attackStat": "str",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "Tempered in the furnace. d12, 15% DEF ignore, 25% stagger. Cleaner cuts."
   },
 
+  "___COMMENT_UNIQUE": "=== TIER 4: UNIQUE WEAPONS (legendary, rule-breaking) ===",
+
+  "montors_mums_slipper": {
+    "id": "montors_mums_slipper", "name": "Montor's Mum's Slipper", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.5, "agiPenalty": 0,
+    "staggerChance": 0.5,
+    "rarity": "legendary", "damageDie": 8, "attackStat": "str",
+    "conditionOnHit": "FEAR", "conditionChance": 1.0,
+    "buyPrice": 200, "sellPrice": 80,
+    "description": "Everyone feared it. d8, 50% DEF ignore, 50% stagger, guaranteed FEAR. No AGI penalty. She was fast."
+  },
+  "montors_family_sword": {
+    "id": "montors_family_sword", "name": "Montor's Family Sword", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0.2, "defIgnore": 0.25, "accuracyBonus": 3,
+    "rarity": "legendary", "damageDie": 10, "attackStat": "str",
+    "buyPrice": 250, "sellPrice": 100,
+    "description": "His grandmother forged it. His mother wielded it. d10, +3 accuracy, 20% double strike, 25% DEF ignore. It sings."
+  },
+
+  "___COMMENT_SHIELDS": "=== SHIELDS ===",
+
+  "shield_base": {
+    "id": "shield_base", "name": "Shield", "type": "armour", "slot": "offhand",
+    "rarity": "common", "defBonus": 1, "agiPenalty": 0,
+    "passiveEffect": "block_chance", "passiveValue": 0.10,
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "A plank with a handle nailed on. 10% block. It's something."
+  },
   "wooden_shield": {
     "id": "wooden_shield", "name": "Bit of Wood", "type": "armour", "slot": "offhand",
     "rarity": "common", "defBonus": 2, "agiPenalty": 0,
     "passiveEffect": "block_chance", "passiveValue": 0.15,
     "buyPrice": 10, "sellPrice": 4,
-    "description": "It's a plank. With a handle. 15% block."
+    "description": "A better plank. With a better handle. 15% block."
   },
   "montors_pot_lid": {
     "id": "montors_pot_lid", "name": "Montor's Pot Lid", "type": "armour", "slot": "offhand",
@@ -197,7 +454,25 @@
     "passiveEffect": "block_chance", "passiveValue": 0.2,
     "giftPower": "stone",
     "buyPrice": 25, "sellPrice": 10,
-    "description": "Dented. Scorched. Blocks surprisingly well."
+    "description": "Dented. Scorched. Blocks surprisingly well. 20% block."
+  },
+  "montors_chopping_board": {
+    "id": "montors_chopping_board", "name": "Montor's Chopping Board", "type": "armour", "slot": "offhand",
+    "rarity": "uncommon", "defBonus": 2, "agiPenalty": 0,
+    "passiveEffect": "block_chance", "passiveValue": 0.15,
+    "conditionOnBlock": "BLEED",
+    "giftPower": "blood",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Knife marks everywhere. Splinters on impact. 15% block, BLEED on block."
+  },
+  "montors_frying_pan": {
+    "id": "montors_frying_pan", "name": "Montor's Frying Pan", "type": "armour", "slot": "offhand",
+    "rarity": "uncommon", "defBonus": 3, "agiPenalty": -1,
+    "passiveEffect": "block_chance", "passiveValue": 0.2,
+    "conditionOnBlock": "BURN",
+    "giftPower": "ember",
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "Cast iron. Still warm. 20% block, BURN on block."
   },
   "montors_dinner_tray": {
     "id": "montors_dinner_tray", "name": "Montor's Dinner Tray", "type": "armour", "slot": "offhand",
@@ -205,8 +480,26 @@
     "passiveEffect": "block_chance", "passiveValue": 0.25,
     "giftPower": ["stone", "ember"],
     "buyPrice": 45, "sellPrice": 18,
-    "description": "Silver. Monogrammed 'M'. Reflects fire. 25% block."
+    "description": "Silver. Monogrammed 'M'. 25% block."
   },
+  "montors_mirror_shield": {
+    "id": "montors_mirror_shield", "name": "Montor's Hand Mirror", "type": "armour", "slot": "offhand",
+    "rarity": "rare", "defBonus": 2, "agiPenalty": 0,
+    "passiveEffect": "block_chance", "passiveValue": 0.15,
+    "conditionOnBlock": "DAZE",
+    "giftPower": "void",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "They see themselves and hesitate. 15% block, DAZE on block."
+  },
+  "montors_hardened_shield": {
+    "id": "montors_hardened_shield", "name": "Montor's Reinforced Tray", "type": "armour", "slot": "offhand",
+    "rarity": "epic", "defBonus": 5, "agiPenalty": -1,
+    "passiveEffect": "block_chance", "passiveValue": 0.30,
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "Hammered flat by the smith. +5 DEF, 30% block. A proper shield from improper materials."
+  },
+
+  "___COMMENT_ARMOUR": "=== ARMOUR ===",
 
   "leather_common": {
     "id": "leather_common", "name": "Tatty Leather", "type": "armour", "slot": "armour",
@@ -236,6 +529,8 @@
     "buyPrice": 50, "sellPrice": 20,
     "description": "Threadbare. Smells of pipe smoke. Somehow invisible."
   },
+
+  "___COMMENT_CONSUMABLES": "=== CONSUMABLES ===",
 
   "health_potion": {
     "id": "health_potion", "name": "Dodgy Red Liquid", "type": "consumable",
@@ -314,6 +609,8 @@
     "description": "Drink it. Skin hardens. +4 DEF for 3 turns. Try not to think about the texture."
   },
 
+  "___COMMENT_RELICS": "=== RELICS ===",
+
   "montors_signet_ring": {
     "id": "montors_signet_ring", "name": "Montor's Signet Ring", "type": "relic", "slot": "relic",
     "rarity": "uncommon", "passiveEffect": "hp_bonus", "passiveValue": 5,
@@ -326,14 +623,14 @@
     "rarity": "uncommon", "passiveEffect": "regen_per_chamber", "passiveValue": 2,
     "giftPower": "petal",
     "buyPrice": 30, "sellPrice": 12,
-    "description": "A pressed flower in resin. Heals 2 HP per chamber."
+    "description": "A pressed flower in resin. Heals 2 HP per new chamber."
   },
   "montors_greenhouse_key": {
     "id": "montors_greenhouse_key", "name": "Montor's Greenhouse Key", "type": "relic", "slot": "relic",
     "rarity": "rare", "passiveEffect": "regen_per_chamber", "passiveValue": 4,
     "giftPower": ["petal", "stone"],
     "buyPrice": 55, "sellPrice": 22,
-    "description": "Opens nothing now. But the vines still grow around it. Heals 4 HP per chamber."
+    "description": "Opens nothing now. But the vines still grow around it. Heals 4 HP per new chamber."
   },
   "montors_lucky_penny": {
     "id": "montors_lucky_penny", "name": "Montor's Lucky Penny", "type": "relic", "slot": "relic",
@@ -400,14 +697,6 @@
     "giftPower": "void",
     "buyPrice": 60, "sellPrice": 24,
     "description": "Ones become twos. He cheats at everything."
-  },
-  "montors_hand_mirror": {
-    "id": "montors_hand_mirror", "name": "Montor's Hand Mirror", "type": "relic", "slot": "relic",
-    "rarity": "rare",
-    "passiveEffect": "reflect_conditions", "passiveValue": 0.25,
-    "giftPower": "void",
-    "buyPrice": 45, "sellPrice": 18,
-    "description": "He checks his hair constantly. 25% chance to reflect conditions back."
   },
   "montors_magnifying_glass": {
     "id": "montors_magnifying_glass", "name": "Montor's Magnifying Glass", "type": "relic", "slot": "relic",

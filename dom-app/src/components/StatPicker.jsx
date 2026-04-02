@@ -55,7 +55,7 @@ var STAT_INFO = {
   vit: {
     name: 'Vitality', abbrev: 'VIT', group: 'Body',
     summary: 'Max HP.',
-    detail: 'Max HP = 25 + (VIT × 3). Each +1 VIT gives +3 max HP. Survive longer, take more risks.',
+    detail: 'Max HP = 20 + (VIT × 5). Each +1 VIT gives +5 max HP. Survive longer, take more risks.',
     tip: 'Best for: Survival builds, tanking without DEF.',
   },
   cha: {
