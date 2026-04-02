@@ -227,7 +227,7 @@ function generateFloor(floorId, collectedTreasures) {
     montorLine: floorDef.montorLine,
     zones: zones,
     currentZoneIndex: 0,
-    stairwellZoneIndex: stairwellZoneIndex,
+    stairwellZoneIndex: 0,
   }
 }
 
