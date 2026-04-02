@@ -2522,6 +2522,37 @@ function Game({ character, user, onEndRun }) {
                 </div>
               )}
 
+              {/* Terminal in room — revealed after clearing a junk pile */}
+              {currentChamber.terminalRevealed && !currentChamber.terminalActivated && (
+                <div className="flex flex-col items-center gap-2">
+                  <button onClick={function() {
+                    setZone(function(prevZone) {
+                      return Object.assign({}, prevZone, {
+                        terminalFound: true,
+                        chambers: prevZone.chambers.map(function(ch) {
+                          if (ch.id !== zone.playerPosition) return ch
+                          return Object.assign({}, ch, { terminalActivated: true })
+                        })
+                      })
+                    })
+                  }}
+                    className="flex flex-col items-center gap-1 p-3 rounded-lg border-2 border-purple-400/50 bg-purple-400/10 cursor-pointer hover:border-purple-400 transition-all animate-pulse"
+                  >
+                    <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                    <span className="text-purple-400 text-xs font-display">TERMINAL</span>
+                    <span className="text-purple-300 text-[9px] font-sans">Tap to activate</span>
+                  </button>
+                  <p className="text-purple-300 text-xs italic text-center max-w-xs">Something hums beneath the debris. Ancient power stirs.</p>
+                </div>
+              )}
+              {currentChamber.terminalActivated && (
+                <div className="flex flex-col items-center gap-2">
+                  <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
+                  <p className="text-purple-400 text-sm font-display">Terminal Active</p>
+                  <p className="text-purple-300 text-xs italic">The stairwell is unlocked.</p>
+                </div>
+              )}
+
               {/* NPC in room (merchant/quest) */}
               {currentChamber.npc && !lootingNpcId && !lootingChestId && !lootingCorpseId ? (function() {
                 var npc = currentChamber.npc
