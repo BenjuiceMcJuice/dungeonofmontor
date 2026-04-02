@@ -530,7 +530,7 @@
     "description": "Threadbare. Smells of pipe smoke. Somehow invisible."
   },
 
-  "___COMMENT_CONSUMABLES": "=== CONSUMABLES ===",
+  "___COMMENT_CONSUMABLES": "=== CONSUMABLES — Healing ===",
 
   "health_potion": {
     "id": "health_potion", "name": "Dodgy Red Liquid", "type": "consumable",
@@ -609,109 +609,415 @@
     "description": "Drink it. Skin hardens. +4 DEF for 3 turns. Try not to think about the texture."
   },
 
+  "___COMMENT_TONICS": "=== CONSUMABLES — Stat Tonics ===",
+
+  "tonic_str": {
+    "id": "tonic_str", "name": "Montor's Beef Broth", "type": "consumable",
+    "rarity": "uncommon", "effect": "stat_buff", "effectStat": "str", "effectValue": 3, "effectDuration": 4,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Thick. Meaty. +3 STR for 4 turns. Made from something."
+  },
+  "tonic_agi": {
+    "id": "tonic_agi", "name": "Montor's Nettle Tea", "type": "consumable",
+    "rarity": "uncommon", "effect": "stat_buff", "effectStat": "agi", "effectValue": 3, "effectDuration": 4,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Stings the tongue. +3 AGI for 4 turns. Move faster, think faster."
+  },
+  "tonic_per": {
+    "id": "tonic_per", "name": "Montor's Eye Drops", "type": "consumable",
+    "rarity": "uncommon", "effect": "stat_buff", "effectStat": "per", "effectValue": 3, "effectDuration": 4,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Burns. Then everything sharpens. +3 PER for 4 turns."
+  },
+  "tonic_int": {
+    "id": "tonic_int", "name": "Montor's Brain Tonic", "type": "consumable",
+    "rarity": "uncommon", "effect": "stat_buff", "effectStat": "int", "effectValue": 3, "effectDuration": 4,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Fizzy. Tastes of metal. +3 INT for 4 turns. Conditions land harder."
+  },
+  "tonic_lck": {
+    "id": "tonic_lck", "name": "Montor's Gran's Cordial", "type": "consumable",
+    "rarity": "rare", "effect": "stat_buff", "effectStat": "lck", "effectValue": 3, "effectDuration": 4,
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "Gran's secret recipe. +3 LCK for 4 turns. Everything goes your way."
+  },
+  "tonic_all": {
+    "id": "tonic_all", "name": "Montor's Mum's Sunday Roast", "type": "consumable",
+    "rarity": "epic", "effect": "stat_buff_all", "effectValue": 2, "effectDuration": 3,
+    "buyPrice": 60, "sellPrice": 24,
+    "description": "Somehow still warm. +2 all stats for 3 turns. She'd be proud."
+  },
+
+  "___COMMENT_THROWABLES": "=== CONSUMABLES — Throwables & AoE ===",
+
+  "montors_grans_perfume": {
+    "id": "montors_grans_perfume", "name": "Montor's Gran's Perfume", "type": "consumable",
+    "rarity": "rare", "effect": "damage_all_enemies", "effectValue": 12,
+    "giftPower": "bile",
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "One spray clears the room. 12 damage to all enemies. She wore it to church."
+  },
+  "montors_pepper_pot": {
+    "id": "montors_pepper_pot", "name": "Montor's Pepper Pot", "type": "consumable",
+    "rarity": "uncommon", "effect": "condition_all_enemies", "effectCondition": "BLIND",
+    "giftPower": "petal",
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "Shake vigorously. Everyone sneezes. All enemies BLINDED."
+  },
+  "montors_stink_bomb": {
+    "id": "montors_stink_bomb", "name": "Montor's Stink Bomb", "type": "consumable",
+    "rarity": "uncommon", "effect": "condition_all_enemies", "effectCondition": "NAUSEA",
+    "giftPower": "bile",
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Found under his bed. All enemies NAUSEOUS. Even you feel a bit off."
+  },
+  "montors_flash_powder": {
+    "id": "montors_flash_powder", "name": "Montor's Flash Powder", "type": "consumable",
+    "rarity": "rare", "effect": "condition_all_enemies", "effectCondition": "DAZE",
+    "giftPower": "ember",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "From the workshop. BANG. All enemies DAZED. Your ears ring."
+  },
+  "montors_mums_cooking_wine": {
+    "id": "montors_mums_cooking_wine", "name": "Montor's Mum's Cooking Wine", "type": "consumable",
+    "rarity": "uncommon", "effect": "heal_and_buff", "effectHeal": 20, "effectStat": "str", "effectValue": 2, "effectDuration": 3,
+    "giftPower": "blood",
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Heal 20 HP, +2 STR for 3 turns. She put it in everything."
+  },
+  "montors_ice_cube_tray": {
+    "id": "montors_ice_cube_tray", "name": "Montor's Ice Cube Tray", "type": "consumable",
+    "rarity": "rare", "effect": "condition_all_enemies", "effectCondition": "FROST",
+    "giftPower": "stone",
+    "buyPrice": 32, "sellPrice": 13,
+    "description": "Throw the whole tray. All enemies FROZEN. Brittle and slow."
+  },
+  "montors_mustard_gas": {
+    "id": "montors_mustard_gas", "name": "Montor's Mustard Jar", "type": "consumable",
+    "rarity": "rare", "effect": "condition_all_enemies", "effectCondition": "POISON",
+    "giftPower": "bile",
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "English mustard. Industrial strength. All enemies POISONED."
+  },
+  "montors_firecracker": {
+    "id": "montors_firecracker", "name": "Montor's Firecracker", "type": "consumable",
+    "rarity": "uncommon", "effect": "damage_all_enemies", "effectValue": 6,
+    "giftPower": "ember",
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Left over from bonfire night. 6 damage to all enemies. Small but loud."
+  },
+  "montors_mums_hairspray": {
+    "id": "montors_mums_hairspray", "name": "Montor's Mum's Hairspray", "type": "consumable",
+    "rarity": "epic", "effect": "damage_and_condition_all", "effectValue": 8, "effectCondition": "BURN",
+    "giftPower": "ember",
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "Flammable. Very flammable. 8 damage + BURN to all enemies. Don't use near candles."
+  },
+  "montors_bucket_of_water": {
+    "id": "montors_bucket_of_water", "name": "Montor's Bucket of Water", "type": "consumable",
+    "rarity": "common", "effect": "cure_all_conditions", "effectValue": 1,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "Splash. Cures ALL your conditions. Cold. Refreshing. Undignified."
+  },
+
   "___COMMENT_RELICS": "=== RELICS ===",
+
+  "___COMMENT_RELICS_UTILITY": "=== RELICS — Utility ===",
 
   "montors_signet_ring": {
     "id": "montors_signet_ring", "name": "Montor's Signet Ring", "type": "relic", "slot": "relic",
     "rarity": "uncommon", "passiveEffect": "hp_bonus", "passiveValue": 15,
     "giftPower": "stone",
     "buyPrice": 35, "sellPrice": 14,
-    "description": "His seal. Worn smooth. +15 max HP. Makes you feel... considerably sturdier."
+    "description": "+15 max HP. His seal. Worn smooth."
   },
   "montors_garden_charm": {
     "id": "montors_garden_charm", "name": "Montor's Garden Charm", "type": "relic", "slot": "relic",
     "rarity": "uncommon", "passiveEffect": "regen_per_chamber", "passiveValue": 2,
     "giftPower": "petal",
     "buyPrice": 30, "sellPrice": 12,
-    "description": "A pressed flower in resin. Heals 2 HP per new chamber."
+    "description": "Heals 2 HP per new chamber. A pressed flower in resin."
   },
   "montors_greenhouse_key": {
     "id": "montors_greenhouse_key", "name": "Montor's Greenhouse Key", "type": "relic", "slot": "relic",
     "rarity": "rare", "passiveEffect": "regen_per_chamber", "passiveValue": 4,
     "giftPower": ["petal", "stone"],
     "buyPrice": 55, "sellPrice": 22,
-    "description": "Opens nothing now. But the vines still grow around it. Heals 4 HP per new chamber."
+    "description": "Heals 4 HP per new chamber. The vines still grow around it."
   },
   "montors_lucky_penny": {
     "id": "montors_lucky_penny", "name": "Montor's Lucky Penny", "type": "relic", "slot": "relic",
     "rarity": "uncommon", "passiveEffect": "lck_bonus", "passiveValue": 2,
     "giftPower": "petal",
     "buyPrice": 30, "sellPrice": 12,
-    "description": "+2 LCK — better loot rarity and crit chance. Found in the fountain."
-  },
-  "montors_mums_bandage": {
-    "id": "montors_mums_bandage", "name": "Montor's Mum's Bandage", "type": "relic", "slot": "relic",
-    "rarity": "uncommon", "passiveEffect": "condition_immunity", "passiveCondition": "BLEED",
-    "giftPower": "blood",
-    "buyPrice": 25, "sellPrice": 10,
-    "description": "She always had one ready. Stops the bleeding before it starts."
-  },
-  "montors_herb_pouch": {
-    "id": "montors_herb_pouch", "name": "Montor's Herb Pouch", "type": "relic", "slot": "relic",
-    "rarity": "uncommon", "passiveEffect": "condition_immunity", "passiveCondition": "POISON",
-    "giftPower": "bile",
-    "buyPrice": 25, "sellPrice": 10,
-    "description": "Dried garden herbs. Smell awful. Poison can't touch you."
-  },
-  "montors_nightlight": {
-    "id": "montors_nightlight", "name": "Montor's Nightlight", "type": "relic", "slot": "relic",
-    "rarity": "rare", "passiveEffect": "condition_immunity", "passiveCondition": "FEAR",
-    "giftPower": "void",
-    "buyPrice": 40, "sellPrice": 16,
-    "description": "He's had it since he was small. The dark can't find you."
+    "description": "+2 LCK. Better loot and crits. Found in the fountain."
   },
   "montors_thimble": {
     "id": "montors_thimble", "name": "Montor's Thimble", "type": "relic", "slot": "relic",
     "rarity": "rare", "passiveEffect": "crit_bonus", "passiveValue": 1,
     "giftPower": "blood",
     "buyPrice": 55, "sellPrice": 22,
-    "description": "Tiny. Sharp. Crits on 19+. His mum used it for sewing. And threats."
+    "description": "Crits on 19+. His mum used it for sewing. And threats."
   },
   "montors_mums_wedding_ring": {
     "id": "montors_mums_wedding_ring", "name": "Montor's Mum's Wedding Ring", "type": "relic", "slot": "relic",
     "rarity": "epic", "passiveEffect": "lifesteal", "passiveValue": 0.1,
     "giftPower": ["blood", "void"],
     "buyPrice": 80, "sellPrice": 32,
-    "description": "She never took it off. Heals 10% of damage dealt. The ring remembers."
+    "description": "10% lifesteal. She never took it off. The ring remembers."
   },
   "montors_grans_lottery_ticket": {
     "id": "montors_grans_lottery_ticket", "name": "Montor's Gran's Lottery Ticket", "type": "relic", "slot": "relic",
-    "rarity": "epic",
-    "passiveEffect": "lottery", "passiveValue": 0,
+    "rarity": "epic", "passiveEffect": "lottery", "passiveValue": 0,
     "giftPower": "void",
     "buyPrice": 100, "sellPrice": 1,
-    "description": "Scratch it off. Two numbers. If any d20 roll matches, you win something rare. Gran always won."
+    "description": "If any d20 matches your numbers, you win something rare."
   },
   "montors_monocle": {
     "id": "montors_monocle", "name": "Montor's Monocle", "type": "relic", "slot": "relic",
-    "rarity": "epic",
-    "passiveEffect": "see_enemy_hp_exact", "passiveValue": 1,
+    "rarity": "epic", "passiveEffect": "see_enemy_hp_exact", "passiveValue": 1,
     "giftPower": "void",
     "buyPrice": 70, "sellPrice": 28,
-    "description": "See their exact HP. Knowledge is half the battle. Montor wants it back."
+    "description": "See exact enemy HP. Knowledge is half the battle."
   },
   "montors_loaded_dice": {
     "id": "montors_loaded_dice", "name": "Montor's Loaded Dice", "type": "relic", "slot": "relic",
-    "rarity": "rare",
-    "passiveEffect": "reroll_ones", "passiveValue": 1,
+    "rarity": "rare", "passiveEffect": "reroll_ones", "passiveValue": 1,
     "giftPower": "void",
     "buyPrice": 60, "sellPrice": 24,
     "description": "Ones become twos. He cheats at everything."
   },
   "montors_magnifying_glass": {
     "id": "montors_magnifying_glass", "name": "Montor's Magnifying Glass", "type": "relic", "slot": "relic",
-    "rarity": "rare",
-    "passiveEffect": "double_condition", "passiveValue": 1,
+    "rarity": "rare", "passiveEffect": "double_condition", "passiveValue": 1,
     "giftPower": "bile",
     "buyPrice": 55, "sellPrice": 22,
-    "description": "Everything looks bigger through it. Weapon conditions apply twice on hit."
+    "description": "Weapon conditions apply twice on hit."
   },
   "montors_last_stand_brooch": {
     "id": "montors_last_stand_brooch", "name": "Montor's Last Stand Brooch", "type": "relic", "slot": "relic",
-    "rarity": "rare",
-    "passiveEffect": "last_stand", "passiveValue": 1,
+    "rarity": "rare", "passiveEffect": "last_stand", "passiveValue": 1,
     "giftPower": ["blood", "stone"],
     "buyPrice": 50, "sellPrice": 20,
-    "description": "Pinned to his coat the day he built the dungeon. +1 DEF per 20% HP missing."
+    "description": "+1 DEF per 20% HP missing. Pinned to his coat the day he built the dungeon."
+  },
+  "montors_compass": {
+    "id": "montors_compass", "name": "Montor's Compass", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "per_bonus", "passiveValue": 2,
+    "giftPower": "void",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "+2 PER. Points somewhere. Not north. Better searches, better inspections."
+  },
+  "montors_pocket_watch": {
+    "id": "montors_pocket_watch", "name": "Montor's Pocket Watch", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "init_bonus", "passiveValue": 2,
+    "giftPower": "void",
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "+2 initiative. Always ahead. Ticks backwards."
+  },
+  "montors_mums_apron": {
+    "id": "montors_mums_apron", "name": "Montor's Mum's Apron", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "search_bonus", "passiveValue": 2,
+    "giftPower": "petal",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "+2 to all junk pile search rolls. She could find anything."
+  },
+  "montors_coin_purse": {
+    "id": "montors_coin_purse", "name": "Montor's Coin Purse", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "gold_bonus", "passiveValue": 0.25,
+    "giftPower": "petal",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "+25% gold from all sources. Jingles suspiciously."
+  },
+
+  "___COMMENT_RELICS_RESIST": "=== RELICS — Condition Resistance (tiered) ===",
+
+  "montors_plaster": {
+    "id": "montors_plaster", "name": "Montor's Plaster", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "condition_resist", "passiveCondition": "BLEED", "passiveValue": 0.25,
+    "giftPower": "blood",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "25% BLEED resist. Slightly sticky. Better than nothing."
+  },
+  "montors_mums_bandage": {
+    "id": "montors_mums_bandage", "name": "Montor's Mum's Bandage", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_resist", "passiveCondition": "BLEED", "passiveValue": 0.50,
+    "giftPower": "blood",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "50% BLEED resist. She always had one ready."
+  },
+  "montors_tourniquette": {
+    "id": "montors_tourniquette", "name": "Montor's Tourniquette", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist", "passiveCondition": "BLEED", "passiveValue": 0.75,
+    "giftPower": "blood",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "75% BLEED resist. Tight. Professional. She was a nurse before Montor."
+  },
+  "montors_blood_ward": {
+    "id": "montors_blood_ward", "name": "Montor's Blood Ward", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "condition_immunity", "passiveCondition": "BLEED",
+    "giftPower": "blood",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "100% BLEED immunity. Your blood stays inside. Always."
+  },
+
+  "montors_herb_sachet": {
+    "id": "montors_herb_sachet", "name": "Montor's Herb Sachet", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "condition_resist", "passiveCondition": "POISON", "passiveValue": 0.25,
+    "giftPower": "bile",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "25% POISON resist. Smells of lavender and denial."
+  },
+  "montors_herb_pouch": {
+    "id": "montors_herb_pouch", "name": "Montor's Herb Pouch", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_resist", "passiveCondition": "POISON", "passiveValue": 0.50,
+    "giftPower": "bile",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "50% POISON resist. Dried garden herbs. Smell awful."
+  },
+  "montors_antivenom_vial": {
+    "id": "montors_antivenom_vial", "name": "Montor's Antivenom Vial", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist", "passiveCondition": "POISON", "passiveValue": 0.75,
+    "giftPower": "bile",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "75% POISON resist. Milked from his own snakes. Apparently."
+  },
+  "montors_bile_ward": {
+    "id": "montors_bile_ward", "name": "Montor's Bile Ward", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "condition_immunity", "passiveCondition": "POISON",
+    "giftPower": "bile",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "100% POISON immunity. Nothing toxic can reach you."
+  },
+
+  "montors_spark_guard": {
+    "id": "montors_spark_guard", "name": "Montor's Spark Guard", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "condition_resist", "passiveCondition": "BURN", "passiveValue": 0.25,
+    "giftPower": "ember",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "25% BURN resist. A wire mesh glove. Smells of soot."
+  },
+  "montors_oven_mitt": {
+    "id": "montors_oven_mitt", "name": "Montor's Oven Mitt", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_resist", "passiveCondition": "BURN", "passiveValue": 0.50,
+    "giftPower": "ember",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "50% BURN resist. Scorched but functional. His mum's."
+  },
+  "montors_fire_blanket": {
+    "id": "montors_fire_blanket", "name": "Montor's Fire Blanket", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist", "passiveCondition": "BURN", "passiveValue": 0.75,
+    "giftPower": "ember",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "75% BURN resist. Rolled up under the kitchen sink."
+  },
+  "montors_ember_ward": {
+    "id": "montors_ember_ward", "name": "Montor's Ember Ward", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "condition_immunity", "passiveCondition": "BURN",
+    "giftPower": "ember",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "100% BURN immunity. Fire finds someone else."
+  },
+
+  "montors_woolly_hat": {
+    "id": "montors_woolly_hat", "name": "Montor's Woolly Hat", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "condition_resist", "passiveCondition": "FROST", "passiveValue": 0.25,
+    "giftPower": "stone",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "25% FROST resist. Itchy. Hand-knitted by Gran."
+  },
+  "montors_thermal_vest": {
+    "id": "montors_thermal_vest", "name": "Montor's Thermal Vest", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_resist", "passiveCondition": "FROST", "passiveValue": 0.50,
+    "giftPower": "stone",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "50% FROST resist. M&S. Surprisingly effective against magical cold."
+  },
+  "montors_hot_water_bottle": {
+    "id": "montors_hot_water_bottle", "name": "Montor's Hot Water Bottle", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist", "passiveCondition": "FROST", "passiveValue": 0.75,
+    "giftPower": "stone",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "75% FROST resist. Still warm after centuries. She made it for him."
+  },
+  "montors_frost_ward": {
+    "id": "montors_frost_ward", "name": "Montor's Frost Ward", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "condition_immunity", "passiveCondition": "FROST",
+    "giftPower": "stone",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "100% FROST immunity. Cold can't find you."
+  },
+
+  "montors_comfort_blanket": {
+    "id": "montors_comfort_blanket", "name": "Montor's Comfort Blanket", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "condition_resist", "passiveCondition": "FEAR", "passiveValue": 0.25,
+    "giftPower": "void",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "25% FEAR resist. Threadbare. Smells of childhood."
+  },
+  "montors_nightlight": {
+    "id": "montors_nightlight", "name": "Montor's Nightlight", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_resist", "passiveCondition": "FEAR", "passiveValue": 0.50,
+    "giftPower": "void",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "50% FEAR resist. He's had it since he was small."
+  },
+  "montors_teddy_bear": {
+    "id": "montors_teddy_bear", "name": "Montor's Teddy Bear", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist", "passiveCondition": "FEAR", "passiveValue": 0.75,
+    "giftPower": "void",
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "75% FEAR resist. One eye missing. Still fiercely protective."
+  },
+  "montors_void_ward": {
+    "id": "montors_void_ward", "name": "Montor's Void Ward", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "condition_immunity", "passiveCondition": "FEAR",
+    "giftPower": "void",
+    "buyPrice": 70, "sellPrice": 28,
+    "description": "100% FEAR immunity. The dark can't find you."
+  },
+
+  "___COMMENT_RELICS_COMBO": "=== RELICS — Combo Resistance ===",
+
+  "montors_first_aid_kit": {
+    "id": "montors_first_aid_kit", "name": "Montor's First Aid Kit", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "condition_resist_multi", "passiveConditions": ["BLEED", "POISON"], "passiveValue": 0.25,
+    "giftPower": ["blood", "bile"],
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "25% BLEED + POISON resist. Plasters, herbs, and hope."
+  },
+  "montors_hazmat_gloves": {
+    "id": "montors_hazmat_gloves", "name": "Montor's Hazmat Gloves", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist_multi", "passiveConditions": ["POISON", "BURN"], "passiveValue": 0.50,
+    "giftPower": ["bile", "ember"],
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "50% POISON + BURN resist. From the workshop. Yellow rubber."
+  },
+  "montors_winter_coat": {
+    "id": "montors_winter_coat", "name": "Montor's Winter Coat", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist_multi", "passiveConditions": ["FROST", "FEAR"], "passiveValue": 0.50,
+    "giftPower": ["stone", "void"],
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "50% FROST + FEAR resist. Warm and reassuring. Smells of pipe smoke."
+  },
+  "montors_mums_medicine_cabinet": {
+    "id": "montors_mums_medicine_cabinet", "name": "Montor's Mum's Medicine Cabinet", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "condition_resist_multi", "passiveConditions": ["BLEED", "POISON", "BURN"], "passiveValue": 0.50,
+    "giftPower": ["blood", "bile", "ember"],
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "50% resist to BLEED, POISON, and BURN. She was prepared for everything."
+  },
+  "montors_anxiety_blanket": {
+    "id": "montors_anxiety_blanket", "name": "Montor's Anxiety Blanket", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "condition_resist_multi", "passiveConditions": ["FEAR", "DAZE", "CHARM"], "passiveValue": 0.50,
+    "giftPower": "void",
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "50% resist to FEAR, DAZE, and CHARM. All mind conditions. Weighted."
+  },
+  "montors_hazard_suit": {
+    "id": "montors_hazard_suit", "name": "Montor's Hazard Suit", "type": "relic", "slot": "relic",
+    "rarity": "legendary", "passiveEffect": "condition_resist_all", "passiveValue": 0.35,
+    "buyPrice": 150, "sellPrice": 60,
+    "description": "35% resist to ALL conditions. Sealed. Uncomfortable. Extremely effective."
   }
 }

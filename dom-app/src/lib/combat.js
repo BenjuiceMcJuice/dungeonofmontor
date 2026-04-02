@@ -517,20 +517,33 @@ function resolveEnemyAttack(battleState, enemyId) {
       if (enemy.currentHp <= 0) { enemy.isDown = true; result.reflectKill = true }
     }
 
-    // Enemy innate condition application (blocked by condition_immunity relics)
+    // Enemy innate condition application (blocked by relics: immunity, resist, multi, all)
     var enemyCond = getEnemyCondition(enemy.archetypeKey)
     if (enemyCond) {
-      var isImmune = false
+      var condBlocked = false
+      var condResistType = null
       if (target.equipped && target.equipped.relics) {
+        var resistChance = 0
         for (var ri = 0; ri < target.equipped.relics.length; ri++) {
-          if (target.equipped.relics[ri].passiveEffect === 'condition_immunity' &&
-              target.equipped.relics[ri].passiveCondition === enemyCond.conditionId) {
-            isImmune = true
-            break
+          var rel = target.equipped.relics[ri]
+          if (rel.passiveEffect === 'condition_immunity' && rel.passiveCondition === enemyCond.conditionId) {
+            condBlocked = true; condResistType = 'immune'; break
+          }
+          if (rel.passiveEffect === 'condition_resist' && rel.passiveCondition === enemyCond.conditionId) {
+            resistChance = Math.max(resistChance, rel.passiveValue || 0)
+          }
+          if (rel.passiveEffect === 'condition_resist_multi' && rel.passiveConditions && rel.passiveConditions.indexOf(enemyCond.conditionId) !== -1) {
+            resistChance = Math.max(resistChance, rel.passiveValue || 0)
+          }
+          if (rel.passiveEffect === 'condition_resist_all') {
+            resistChance = Math.max(resistChance, rel.passiveValue || 0)
           }
         }
+        if (!condBlocked && resistChance > 0 && Math.random() < resistChance) {
+          condBlocked = true; condResistType = 'resisted'
+        }
       }
-      if (!isImmune) {
+      if (!condBlocked) {
         var enemyInt = enemy.stats.int || 10
         if (rollConditionApplication(attackResult.tier, enemyInt, enemyCond.chance)) {
           target.statusEffects = applyCondition(target.statusEffects, enemyCond.conditionId, 'enemy')
@@ -538,6 +551,7 @@ function resolveEnemyAttack(battleState, enemyId) {
         }
       } else {
         result.conditionBlocked = enemyCond.conditionId
+        result.conditionResistType = condResistType
       }
     }
 

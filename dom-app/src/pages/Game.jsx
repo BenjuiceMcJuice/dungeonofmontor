@@ -47,13 +47,39 @@ function getPassiveTotal(equipped, effectName) {
   return total
 }
 
-// Helper: check if equipped relics grant immunity to a condition
-function hasConditionImmunity(equipped, conditionId) {
-  if (!equipped || !equipped.relics) return false
+// Helper: check if equipped relics block a condition (immunity or resist roll)
+// Returns { blocked: bool, type: 'immune'|'resisted'|null }
+function checkConditionResist(equipped, conditionId) {
+  if (!equipped || !equipped.relics) return { blocked: false, type: null }
+  var resistChance = 0
   for (var i = 0; i < equipped.relics.length; i++) {
-    if (equipped.relics[i].passiveEffect === 'condition_immunity' && equipped.relics[i].passiveCondition === conditionId) return true
+    var r = equipped.relics[i]
+    // Full immunity
+    if (r.passiveEffect === 'condition_immunity' && r.passiveCondition === conditionId) {
+      return { blocked: true, type: 'immune' }
+    }
+    // Single condition resist
+    if (r.passiveEffect === 'condition_resist' && r.passiveCondition === conditionId) {
+      resistChance = Math.max(resistChance, r.passiveValue || 0)
+    }
+    // Multi condition resist
+    if (r.passiveEffect === 'condition_resist_multi' && r.passiveConditions && r.passiveConditions.indexOf(conditionId) !== -1) {
+      resistChance = Math.max(resistChance, r.passiveValue || 0)
+    }
+    // All condition resist
+    if (r.passiveEffect === 'condition_resist_all') {
+      resistChance = Math.max(resistChance, r.passiveValue || 0)
+    }
   }
-  return false
+  if (resistChance > 0 && Math.random() < resistChance) {
+    return { blocked: true, type: 'resisted' }
+  }
+  return { blocked: false, type: null }
+}
+
+// Backwards compat wrapper
+function hasConditionImmunity(equipped, conditionId) {
+  return checkConditionResist(equipped, conditionId).blocked
 }
 
 // Map chamber types to centre icon keys (after clearing)
@@ -558,19 +584,11 @@ function Game({ character, user, onEndRun }) {
     }
     // Apply condition hazard — check immunity relics first, then DEF reduces physical damage
     if (result.condition && !result.agiSaved) {
-      // Check condition immunity from relics
-      var isImmune = false
-      if (character.equipped && character.equipped.relics) {
-        for (var ri = 0; ri < character.equipped.relics.length; ri++) {
-          if (character.equipped.relics[ri].passiveEffect === 'condition_immunity' &&
-              character.equipped.relics[ri].passiveCondition === result.condition) {
-            isImmune = true
-            break
-          }
-        }
-      }
-      if (isImmune) {
+      // Check condition resistance from relics (immunity, resist chance, multi, all)
+      var resistResult = checkConditionResist(character.equipped, result.condition)
+      if (resistResult.blocked) {
         result.trapImmune = true
+        result.trapResistType = resistResult.type // 'immune' or 'resisted'
         result.condition = null // negated
       } else {
         var trapBaseDamage = { POISON: 6, NAUSEA: 3, BLIND: 2, DAZE: 2, SLUGGISH: 4, FEAR: 3, CHARM: 2, BURN: 10, FROST: 5, BLEED: 5, FRENZY: 4, BORED: 1, SAD: 2 }
@@ -2849,7 +2867,9 @@ function Game({ character, user, onEndRun }) {
                     )}
                     {searchResult.trapImmune && (
                       <div className="p-2 rounded border border-green-400/40 bg-green-400/5">
-                        <p className="text-green-400">Trap triggered — but you're immune!</p>
+                        <p className="text-green-400">
+                          {searchResult.trapResistType === 'immune' ? 'Trap triggered — but you\'re immune!' : 'Trap triggered — resisted!'}
+                        </p>
                       </div>
                     )}
                     {searchResult.condition && (
