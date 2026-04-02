@@ -25,7 +25,7 @@ var PILE_COUNTS = {
   event:           { min: 1, max: 3 },
   zone_door:       { min: 0, max: 1 },
   keystone:        { min: 1, max: 2 },
-  stairwell_entry: { min: 0, max: 1 },
+  stairwell_entry: { min: 1, max: 2 },
   stairwell_descent: { min: 0, max: 0 },
   empty:           { min: 2, max: 3 },
 }

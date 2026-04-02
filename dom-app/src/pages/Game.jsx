@@ -2864,7 +2864,7 @@ function Game({ character, user, onEndRun }) {
           var ql = { excellent: 'EXCELLENT!', good: 'Good find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
 
           return (
-            <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6">
+            <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6 overflow-y-auto py-8">
 
               {/* Screen 1: Rolling + Landed + Save — all on one screen */}
               {searchPhase !== 'reveal' && (
