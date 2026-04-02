@@ -3573,6 +3573,98 @@ function Game({ character, user, onEndRun }) {
           )
         })()}
 
+        {/* Read-only inventory overlay (combat) */}
+        {showInventoryPanel && (function() {
+          var sections = [
+            { label: 'Weapons', items: playerInventory.filter(function(i) { return i.type === 'weapon' }) },
+            { label: 'Armour', items: playerInventory.filter(function(i) { return i.type === 'armour' }) },
+            { label: 'Relics', items: playerInventory.filter(function(i) { return i.type === 'relic' }) },
+            { label: 'Consumables', items: playerInventory.filter(function(i) { return i.type === 'consumable' }) },
+          ]
+          return (
+            <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="font-display text-lg text-gold">Inventory (read-only)</span>
+                <button onClick={function() { setShowInventoryPanel(false) }}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Close
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <p className="text-ink-faint text-[10px] font-sans mb-3 italic">Use items via the Use Item / Throw actions during your turn.</p>
+                {/* Equipped */}
+                <div className="mb-3">
+                  <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Equipped</span>
+                  <div className="flex flex-col gap-1 mt-1">
+                    <div className="p-2 rounded bg-gold/10 border border-gold/20 text-xs font-sans">
+                      <span className="text-[10px] text-gold uppercase">Weapon:</span> <span className="text-ink">{character.equipped && character.equipped.weapon ? character.equipped.weapon.name : 'Fists'}</span>
+                    </div>
+                    {character.equipped && character.equipped.armour && (
+                      <div className="p-2 rounded bg-gold/10 border border-gold/20 text-xs font-sans">
+                        <span className="text-[10px] text-gold uppercase">Armour:</span> <span className="text-ink">{character.equipped.armour.name} (+{character.equipped.armour.defBonus} DEF)</span>
+                      </div>
+                    )}
+                    {character.equipped && character.equipped.offhand && (
+                      <div className="p-2 rounded bg-gold/10 border border-gold/20 text-xs font-sans">
+                        <span className="text-[10px] text-gold uppercase">Off-hand:</span> <span className="text-ink">{character.equipped.offhand.name}</span>
+                      </div>
+                    )}
+                    {character.equipped && character.equipped.relics && character.equipped.relics.map(function(r, ri) {
+                      return (
+                        <div key={ri} className="p-2 rounded bg-purple-400/10 border border-purple-400/20 text-xs font-sans">
+                          <span className="text-[10px] text-purple-400 uppercase">Relic:</span> <span className="text-ink">{r.name}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+                {/* Carried items by section */}
+                {sections.map(function(sec) {
+                  if (sec.items.length === 0) return null
+                  return (
+                    <div key={sec.label} className="mb-3">
+                      <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">{sec.label} ({sec.items.length})</span>
+                      <div className="flex flex-col gap-1 mt-1">
+                        {sec.items.map(function(item, ii) {
+                          return (
+                            <div key={ii} className="p-2 rounded bg-raised border border-border text-xs font-sans flex items-center justify-between">
+                              <span className="text-ink">{item.name}</span>
+                              <span className="text-ink-faint text-[10px]">
+                                {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
+                                 item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                                 item.description || ''}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+                {/* Junk bag summary */}
+                {playerJunkBag.length > 0 && (
+                  <div className="mb-3">
+                    <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Junk ({playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)} items)</span>
+                    <div className="flex flex-col gap-1 mt-1">
+                      {playerJunkBag.map(function(junk) {
+                        return (
+                          <div key={junk.id} className="p-2 rounded bg-raised border border-border text-xs font-sans flex items-center justify-between">
+                            <span className="text-ink">{junk.name}</span>
+                            <span className="text-ink-faint text-[10px]">{junk.consumable ? 'consumable' : ''} x{junk.count}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+                {playerInventory.length === 0 && playerJunkBag.length === 0 && (
+                  <p className="text-ink-faint text-xs italic text-center p-4">No items.</p>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col items-start">
