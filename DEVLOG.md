@@ -86,8 +86,20 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-02 | Loot table rebalance + weapon compendium doc | ✅ Done |
 | 2026-04-02 | Junk piles — PER-based search, 3 pile sizes, XP, junk bag, terminal placement | ✅ Done |
 | 2026-04-02 | Removed chest/trap/hidden room types — replaced with junk pile rooms | ✅ Done |
+| 2026-04-02 | Junk search redesign — clean levels, inspect, PER/AGI saves, dice animation | ✅ Done |
+| 2026-04-02 | Consumable junk — eat/drink risk/reward, PER inspection, LCK quality | ✅ Done |
+| 2026-04-02 | 130+ items — tiered resist relics, stat tonics, AoE throwables, permanent stat boosts | ✅ Done |
+| 2026-04-02 | Combat UI — Use Item/Throw actions, read-only Stats/Bag, condition stack display | ✅ Done |
+| 2026-04-02 | Dungeon rework — every zone self-contained (terminal + boss + stairwell) | ✅ Done |
+| 2026-04-02 | Terminals unlock stairwells (replaced keystones), tappable in room | ✅ Done |
+| 2026-04-02 | Montor's treasures — 6 gift artefacts hidden in junk, one per floor | ✅ Done |
+| 2026-04-02 | Void relics — Nudge (+1 d20), Chaos Marble (±2 all dice) | ✅ Done |
+| 2026-04-02 | God mode — invincible + one-shot toggles for testing | ✅ Done |
+| 2026-04-02 | Item + weapon compendium docs | ✅ Done |
 |            | **Next up** | |
-|            | Junk pile polish — enemy ambushes from piles, condition hazards applied | ⬜ |
+|            | Skyrim-style stat display — green/red buffs, active effects with durations | ⬜ |
+|            | Junk pile enemy ambushes → trigger actual combat | ⬜ |
+|            | Wire junk consume stat buffs properly into game state | ⬜ |
 |            | Wire remaining passives — reflect_conditions, last_stand, see_enemy_hp_exact | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Montor's Gift system — find/break/apply at terminals/restore to Void Chamber | ⬜ |
