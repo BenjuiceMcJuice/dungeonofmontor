@@ -801,6 +801,20 @@
     "buyPrice": 50, "sellPrice": 20,
     "description": "+1 DEF per 20% HP missing. Pinned to his coat the day he built the dungeon."
   },
+  "montors_nudge": {
+    "id": "montors_nudge", "name": "Montor's Nudge", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "d20_nudge", "passiveValue": 1,
+    "giftPower": "void",
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "+1 to all d20 rolls. A gentle push from Montor. He's watching."
+  },
+  "montors_chaos_marble": {
+    "id": "montors_chaos_marble", "name": "Montor's Chaos Marble", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "chaos_shift", "passiveValue": 2,
+    "giftPower": "void",
+    "buyPrice": 75, "sellPrice": 30,
+    "description": "All dice shift randomly by -2 to +2. Could save you. Could doom you. Montor loves it."
+  },
   "montors_compass": {
     "id": "montors_compass", "name": "Montor's Compass", "type": "relic", "slot": "relic",
     "rarity": "uncommon", "passiveEffect": "per_bonus", "passiveValue": 2,

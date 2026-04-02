@@ -1106,6 +1106,13 @@ function Game({ character, user, onEndRun }) {
     if (r.rerolled) {
       addLog({ type: 'player', text: 'Loaded Dice: rerolled a 1!', tier: 'hit' })
     }
+    if (r.attackRoll && r.attackRoll.nudge) {
+      addLog({ type: 'player', text: 'Montor\'s Nudge: +' + r.attackRoll.nudge + ' to roll!', tier: 'hit' })
+    }
+    if (r.attackRoll && r.attackRoll.chaosShift) {
+      var shift = r.attackRoll.chaosShift
+      addLog({ type: 'player', text: 'Chaos Marble: dice shifted ' + (shift > 0 ? '+' : '') + shift + '!', tier: shift > 0 ? 'crit' : 'miss' })
+    }
     if (r.offhandHit) {
       addLog({ type: 'player', text: 'Off-hand strike! ' + r.offhandDamage + ' bonus damage!', tier: 'hit' })
     } else if (r.offhandMiss) {
