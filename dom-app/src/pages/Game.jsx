@@ -634,7 +634,6 @@ function Game({ character, user, onEndRun }) {
   }
 
   function handleDismissSearch() {
-    if (Date.now() - searchTapGuardRef.current < 400) return
     if (searchDiceRef.current) clearInterval(searchDiceRef.current)
     setSearchResult(null)
     setSearchingPileId(null)
@@ -2914,6 +2913,11 @@ function Game({ character, user, onEndRun }) {
 
           return (
             <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6 overflow-y-auto py-8">
+              {/* Emergency close — always available */}
+              <button onClick={handleDismissSearch}
+                className="absolute top-3 right-3 text-ink-faint text-xs border border-border px-2 py-1 rounded hover:text-ink z-50">
+                X
+              </button>
 
               {/* Screen 1: Rolling + Landed + Save — all on one screen */}
               {searchPhase !== 'reveal' && (
