@@ -5,7 +5,7 @@ import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentC
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
-import { resolveSearch, applySearch, inspectPile, DEPTH_CONFIG } from '../lib/junkpiles.js'
+import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, CLEAN_CONFIG } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
@@ -456,48 +456,45 @@ function Game({ character, user, onEndRun }) {
   }
 
   // --- Junk pile search ---
-  var [searchPhase, setSearchPhase] = useState(null) // null | 'inspect' | 'choose' | 'rolling' | 'landed' | 'reveal'
+  // Phases: null → 'choose' → 'rolling' → 'landed' → 'save_rolling' → 'save_landed' → 'reveal'
+  var [searchPhase, setSearchPhase] = useState(null)
   var [searchDiceDisplay, setSearchDiceDisplay] = useState(null)
+  var [searchSaveDiceDisplay, setSearchSaveDiceDisplay] = useState(null)
   var searchDiceRef = useRef(null)
 
-  // Step 1: Tap pile → inspect (show risk hint)
+  // Step 1: Tap pile → inspect + show clean level choices
   function handleInspectPile(pileId) {
     if (searchPhase) return
     var chamber = zone.chambers[zone.playerPosition]
     var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === pileId })
     if (!pile || pile.depleted) return
 
-    var perStat = character.stats.per || 6
-    inspectPile(pile, perStat)
-
-    // Update zone so inspectHint persists
+    inspectPile(pile, character.stats.per || 6)
     setZone(Object.assign({}, zone, {
       chambers: zone.chambers.map(function(ch) {
         if (ch.id !== zone.playerPosition) return ch
         return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
       })
     }))
-
     setSearchingPileId(pileId)
     setSearchPhase('choose')
   }
 
-  // Step 2: Choose depth → dice roll → reveal
-  function handleChooseDepth(depthKey) {
+  // Step 2: Choose clean level → resolve → dice animation
+  function handleChooseCleanLevel(level) {
     if (searchPhase !== 'choose') return
     var chamber = zone.chambers[zone.playerPosition]
     var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === searchingPileId })
     if (!pile || pile.depleted) return
 
-    var perStat = character.stats.per || 6
-    var result = resolveSearch(pile, perStat, depthKey)
+    var result = resolveSearch(pile, character.stats.per || 6, character.stats.agi || 10, level)
     if (!result) return
 
-    applySearch(pile)
+    applySearch(pile, level)
     setSearchResult(result)
     setSearchPhase('rolling')
 
-    // Dice rolling animation
+    // Dice roll animation — search roll
     var rollCount = 0
     searchDiceRef.current = setInterval(function() {
       setSearchDiceDisplay(Math.floor(Math.random() * 20) + 1)
@@ -507,48 +504,64 @@ function Game({ character, user, onEndRun }) {
         setSearchDiceDisplay(result.natRoll)
         setSearchPhase('landed')
 
+        // After landing: if danger triggered, show save roll. Otherwise go to reveal.
         setTimeout(function() {
-          // Award gold
-          if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold })
-
-          // Award XP
-          if (result.xp > 0) {
-            var newXp = totalXp + result.xp
-            setTotalXp(newXp)
-            checkLevelUp(newXp)
-          }
-
-          // Collect junk
-          if (result.junk) {
-            setPlayerJunkBag(function(bag) {
-              var existing = bag.find(function(j) { return j.id === result.junk.id })
-              if (existing) {
-                return bag.map(function(j) {
-                  if (j.id === result.junk.id) return Object.assign({}, j, { count: j.count + 1 })
-                  return j
-                })
+          if (result.dangerTriggered) {
+            setSearchPhase('save_rolling')
+            // Save dice animation
+            var saveCount = 0
+            searchDiceRef.current = setInterval(function() {
+              setSearchSaveDiceDisplay(Math.floor(Math.random() * 20) + 1)
+              saveCount++
+              if (saveCount > 10) {
+                clearInterval(searchDiceRef.current)
+                var saveRoll = result.dangerType === 'enemy' ? result.perSaveRoll : result.agiSaveRoll
+                setSearchSaveDiceDisplay(saveRoll || '?')
+                setSearchPhase('save_landed')
+                setTimeout(function() {
+                  applySearchRewards(result)
+                  setSearchPhase('reveal')
+                }, 1200)
               }
-              return bag.concat([{ id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }])
-            })
+            }, 80)
+          } else {
+            applySearchRewards(result)
+            setSearchPhase('reveal')
           }
-
-          // Collect real item
-          if (result.item) {
-            setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
-          }
-
-          // Update zone state
-          setZone(Object.assign({}, zone, {
-            chambers: zone.chambers.map(function(ch) {
-              if (ch.id !== zone.playerPosition) return ch
-              return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
-            })
-          }))
-
-          setSearchPhase('reveal')
         }, 1200)
       }
     }, 80)
+  }
+
+  // Apply gold, xp, junk, items to player state
+  function applySearchRewards(result) {
+    if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold })
+    if (result.xp > 0) {
+      var newXp = totalXp + result.xp
+      setTotalXp(newXp)
+      checkLevelUp(newXp)
+    }
+    if (result.junk) {
+      setPlayerJunkBag(function(bag) {
+        var existing = bag.find(function(j) { return j.id === result.junk.id })
+        if (existing) {
+          return bag.map(function(j) {
+            if (j.id === result.junk.id) return Object.assign({}, j, { count: j.count + 1 })
+            return j
+          })
+        }
+        return bag.concat([{ id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }])
+      })
+    }
+    if (result.item) {
+      setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
+    }
+    setZone(Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id !== zone.playerPosition) return ch
+        return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
+      })
+    }))
   }
 
   function handleDismissSearch() {
@@ -557,6 +570,7 @@ function Game({ character, user, onEndRun }) {
     setSearchingPileId(null)
     setSearchPhase(null)
     setSearchDiceDisplay(null)
+    setSearchSaveDiceDisplay(null)
   }
 
   function handleCancelSearch() {
@@ -2605,16 +2619,15 @@ function Game({ character, user, onEndRun }) {
                 return (
                   <div className="flex flex-wrap justify-center gap-2 mt-2">
                     {activePiles.map(function(pile) {
-                      var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
-                      var sizeColour = pile.size === 'large' ? 'border-gold/50 bg-gold/10' : pile.size === 'medium' ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
-                      var layersLeft = pile.maxLayers - pile.currentLayer
+                      var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
+                      var sizeColour = pile.size === 3 ? 'border-gold/50 bg-gold/10' : pile.size === 2 ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
                       return (
                         <button key={pile.id}
                           onClick={function() { handleInspectPile(pile.id) }}
                           className={'flex flex-col items-center gap-0.5 p-2.5 rounded-lg border-2 transition-all cursor-pointer hover:border-gold hover:scale-105 ' + sizeColour}
                         >
                           <span className="text-ink text-sm font-display">{sizeLabel}</span>
-                          <span className="text-ink-faint text-[9px] font-sans">{layersLeft} {layersLeft === 1 ? 'layer' : 'layers'}</span>
+                          <span className="text-ink-faint text-[9px] font-sans">{pile.layersRemaining} {pile.layersRemaining === 1 ? 'layer' : 'layers'}</span>
                           {pile.inspected && <span className="text-ink-dim text-[8px] italic">{pile.inspectHint}</span>}
                         </button>
                       )
@@ -2623,30 +2636,31 @@ function Game({ character, user, onEndRun }) {
                 )
               })()}
 
-              {/* Search: Choose depth */}
+              {/* Search: Choose clean level */}
               {searchPhase === 'choose' && (function() {
-                var chamber2 = zone.chambers[zone.playerPosition]
-                var pile = chamber2.junkPiles && chamber2.junkPiles.find(function(p) { return p.id === searchingPileId })
+                var ch2 = zone.chambers[zone.playerPosition]
+                var pile = ch2.junkPiles && ch2.junkPiles.find(function(p) { return p.id === searchingPileId })
                 if (!pile) return null
-                var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
+                var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
+                var levels = getAvailableCleanLevels(pile)
                 return (
                   <div className="flex flex-col items-center gap-3 p-3 max-w-xs">
                     <p className="text-ink text-sm font-display">{sizeLabel}</p>
                     <p className="text-ink-dim text-xs italic text-center">{pile.inspectHint || pile.description}</p>
-                    <p className="text-ink-faint text-[10px]">Layer {pile.currentLayer + 1} of {pile.maxLayers} — how do you search?</p>
+                    <p className="text-ink-faint text-[10px]">{pile.layersRemaining} {pile.layersRemaining === 1 ? 'layer' : 'layers'} remaining</p>
                     <div className="flex flex-col gap-2 w-full">
-                      {['sift', 'rummage', 'deep_clean'].map(function(key) {
-                        var d = DEPTH_CONFIG[key]
-                        var depthColour = key === 'deep_clean' ? 'border-red-400/50 hover:border-red-400 text-red-400' :
-                          key === 'rummage' ? 'border-amber-400/50 hover:border-amber-400 text-amber-400' :
+                      {levels.map(function(lvl) {
+                        var c = CLEAN_CONFIG[lvl]
+                        var lvlColour = lvl === 3 ? 'border-red-400/50 hover:border-red-400 text-red-400' :
+                          lvl === 2 ? 'border-amber-400/50 hover:border-amber-400 text-amber-400' :
                           'border-green-400/50 hover:border-green-400 text-green-400'
                         return (
-                          <button key={key}
-                            onClick={function() { handleChooseDepth(key) }}
-                            className={'p-2.5 rounded-lg border-2 bg-surface transition-all cursor-pointer text-left ' + depthColour}
+                          <button key={lvl}
+                            onClick={function() { handleChooseCleanLevel(lvl) }}
+                            className={'p-2.5 rounded-lg border-2 bg-surface transition-all cursor-pointer text-left ' + lvlColour}
                           >
-                            <span className="font-display text-sm">{d.label}</span>
-                            <span className="text-ink-dim text-xs font-sans ml-2">{d.description}</span>
+                            <span className="font-display text-sm">{c.label}</span>
+                            <span className="text-ink-dim text-xs font-sans ml-2">{c.description}</span>
                           </button>
                         )
                       })}
@@ -2656,7 +2670,7 @@ function Game({ character, user, onEndRun }) {
                 )
               })()}
 
-              {/* Search: Dice rolling */}
+              {/* Search: Dice rolling (main search) */}
               {searchPhase === 'rolling' && (
                 <div className="flex flex-col items-center gap-3 p-4">
                   <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
@@ -2664,47 +2678,80 @@ function Game({ character, user, onEndRun }) {
                     {searchDiceDisplay || '?'}
                   </div>
                   <p className="text-ink-faint text-xs italic animate-pulse">
-                    {searchResult && searchResult.depthKey === 'deep_clean' ? 'Tearing through it...' :
-                     searchResult && searchResult.depthKey === 'rummage' ? 'Rummaging...' :
+                    {searchResult && searchResult.cleanLevel === 3 ? 'Tearing through everything...' :
+                     searchResult && searchResult.cleanLevel === 2 ? 'Searching thoroughly...' :
                      'Sifting carefully...'}
                   </p>
                 </div>
               )}
 
-              {/* Search: Dice landed */}
+              {/* Search: Dice landed (main search) */}
               {searchPhase === 'landed' && searchResult && (function() {
-                var qualColour = searchResult.quality === 'excellent' ? 'text-gold border-gold bg-gold/10' :
+                var qc = searchResult.quality === 'excellent' ? 'text-gold border-gold bg-gold/10' :
                   searchResult.quality === 'good' ? 'text-green-400 border-green-400 bg-green-400/10' :
                   searchResult.quality === 'decent' ? 'text-ink border-border-hl bg-surface' :
                   searchResult.quality === 'poor' ? 'text-ink-dim border-border bg-bg' :
                   'text-red-400 border-red-400 bg-red-400/10'
-                var qualLabel = searchResult.quality === 'excellent' ? 'EXCELLENT!' :
-                  searchResult.quality === 'good' ? 'Good find!' :
-                  searchResult.quality === 'decent' ? 'Decent.' :
-                  searchResult.quality === 'poor' ? 'Poor...' :
-                  'FUMBLE!'
+                var ql = { excellent: 'EXCELLENT!', good: 'Good find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
                 return (
                   <div className="flex flex-col items-center gap-3 p-4">
-                    <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + qualColour}
+                    <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + qc}
                       style={{ width: '4.5rem', height: '4.5rem' }}>
                       {searchResult.natRoll}
                     </div>
-                    <p className={'text-xl font-display ' + qualColour.split(' ')[0]}>{qualLabel}</p>
+                    <p className={'text-xl font-display ' + qc.split(' ')[0]}>{ql[searchResult.quality]}</p>
+                    {searchResult.dangerTriggered && (
+                      <p className="text-red-400 text-xs animate-pulse">Danger...</p>
+                    )}
                   </div>
                 )
               })()}
 
-              {/* Search: Reveal loot */}
+              {/* Search: Save roll (PER for enemies, AGI for traps) */}
+              {searchPhase === 'save_rolling' && searchResult && (
+                <div className="flex flex-col items-center gap-3 p-4">
+                  <p className="text-red-400 text-sm font-display">
+                    {searchResult.dangerType === 'enemy' ? 'Something stirs!' : 'TRAP!'}
+                  </p>
+                  <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-red-400/50 bg-red-400/10 text-red-400 animate-pulse"
+                    style={{ width: '4.5rem', height: '4.5rem' }}>
+                    {searchSaveDiceDisplay || '?'}
+                  </div>
+                  <p className="text-ink-faint text-xs italic animate-pulse">
+                    {searchResult.dangerType === 'enemy' ? 'PER save...' : 'AGI save...'}
+                  </p>
+                </div>
+              )}
+
+              {/* Search: Save landed */}
+              {searchPhase === 'save_landed' && searchResult && (function() {
+                var saved = searchResult.dangerType === 'enemy' ? searchResult.perSaved : searchResult.agiSaved
+                var saveColour = saved ? 'text-green-400 border-green-400 bg-green-400/10' : 'text-red-400 border-red-400 bg-red-400/10'
+                var saveRoll = searchResult.dangerType === 'enemy' ? searchResult.perSaveRoll : searchResult.agiSaveRoll
+                return (
+                  <div className="flex flex-col items-center gap-3 p-4">
+                    <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + saveColour}
+                      style={{ width: '4.5rem', height: '4.5rem' }}>
+                      {saveRoll}
+                    </div>
+                    <p className={'text-lg font-display ' + saveColour.split(' ')[0]}>
+                      {saved ? (searchResult.dangerType === 'enemy' ? 'Spotted it!' : 'Dodged!') :
+                       (searchResult.dangerType === 'enemy' ? (searchResult.enemy === 'ambush' ? 'AMBUSH!' : 'Too late!') : 'Hit!')}
+                    </p>
+                  </div>
+                )
+              })()}
+
+              {/* Search: Reveal */}
               {searchPhase === 'reveal' && searchResult && (
                 <div onClick={handleDismissSearch} className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gold/30 bg-surface cursor-pointer max-w-xs">
                   <p className={'text-base font-display ' + (
                     searchResult.quality === 'excellent' ? 'text-gold' :
                     searchResult.quality === 'good' ? 'text-green-400' :
                     searchResult.quality === 'decent' ? 'text-ink' :
-                    searchResult.quality === 'poor' ? 'text-ink-dim' :
-                    'text-red-400'
+                    searchResult.quality === 'poor' ? 'text-ink-dim' : 'text-red-400'
                   )}>
-                    {searchResult.depthLabel}
+                    {searchResult.cleanLabel}
                   </p>
                   <div className="flex flex-col gap-1.5 text-sm font-sans text-center w-full">
                     {searchResult.gold > 0 && <p className="text-gold font-display">+{searchResult.gold}g</p>}
@@ -2718,17 +2765,21 @@ function Game({ character, user, onEndRun }) {
                     )}
                     {searchResult.condition && (
                       <div className="p-2 rounded border border-red-400/40 bg-red-400/5">
-                        <p className="text-red-400">Hazard: {searchResult.condition}!</p>
+                        <p className="text-red-400">{searchResult.agiSaved ? 'Trap dodged!' : 'TRAP: ' + searchResult.condition + '!'}</p>
                       </div>
                     )}
                     {searchResult.enemy && (
                       <div className="p-2 rounded border border-red-400/40 bg-red-400/5">
-                        <p className="text-red-400">{searchResult.enemy === 'ambush' ? 'AMBUSH!' : searchResult.enemy === 'spotted' ? 'Something lurking...' : 'Something bursts out!'}</p>
+                        <p className="text-red-400">
+                          {searchResult.perSaved ? 'Spotted something — it backs away.' :
+                           searchResult.enemy === 'ambush' ? 'AMBUSHED!' :
+                           'Something bursts out!'}
+                        </p>
                       </div>
                     )}
                     {searchResult.terminal && (
                       <div className="p-2 rounded border border-purple-400/40 bg-purple-400/5">
-                        <p className="text-purple-400">A strange terminal hums beneath the junk...</p>
+                        <p className="text-purple-400">A terminal hums beneath the junk...</p>
                       </div>
                     )}
                     {searchResult.narrative.slice(1).map(function(line, i) {
