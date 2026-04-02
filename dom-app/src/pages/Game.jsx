@@ -5,7 +5,7 @@ import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentC
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
-import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, CLEAN_CONFIG } from '../lib/junkpiles.js'
+import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspectJunkItem, consumeJunk, CLEAN_CONFIG } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
@@ -487,7 +487,7 @@ function Game({ character, user, onEndRun }) {
     var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === searchingPileId })
     if (!pile || pile.depleted) return
 
-    var result = resolveSearch(pile, character.stats.per || 6, character.stats.agi || 10, level)
+    var result = resolveSearch(pile, character.stats.per || 6, character.stats.agi || 10, character.stats.lck || 10, level)
     if (!result) return
 
     applySearch(pile, level)
@@ -1893,10 +1893,11 @@ function Game({ character, user, onEndRun }) {
         {/* Inventory panel — full screen overlay */}
         {showInventoryPanel && (function() {
           var tabs = [
-            { id: 'weapons', label: 'Weapons', types: ['weapon'] },
-            { id: 'armour',  label: 'Armour',  types: ['armour', 'relic'] },
-            { id: 'items',   label: 'Items',   types: ['consumable'] },
-            { id: 'junk',    label: 'Junk',    types: ['junk'] },
+            { id: 'weapons',     label: 'Weapons',     types: ['weapon'] },
+            { id: 'wearables',   label: 'Wearables',   types: ['armour'] },
+            { id: 'relics',      label: 'Relics',      types: ['relic'] },
+            { id: 'consumables', label: 'Consumables',  types: ['consumable'] },
+            { id: 'junk',        label: 'Junk',         types: ['junk'] },
           ]
           var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
           var filteredRaw = []
@@ -1921,12 +1922,19 @@ function Game({ character, user, onEndRun }) {
           // Count items per tab for badges
           var tabCounts = {}
           for (var ci = 0; ci < tabs.length; ci++) {
-            tabCounts[tabs[ci].id] = 0
-            if (tabs[ci].id === 'junk') {
-              tabCounts['junk'] = playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)
+            var tabId = tabs[ci].id
+            tabCounts[tabId] = 0
+            if (tabId === 'junk') {
+              tabCounts[tabId] = playerJunkBag.filter(function(j) { return !j.consumable }).reduce(function(s, j) { return s + j.count }, 0)
+            } else if (tabId === 'consumables') {
+              // Regular consumables from inventory + consumable junk
+              for (var pi2 = 0; pi2 < playerInventory.length; pi2++) {
+                if (playerInventory[pi2].type === 'consumable') tabCounts[tabId]++
+              }
+              tabCounts[tabId] += playerJunkBag.filter(function(j) { return j.consumable }).reduce(function(s, j) { return s + j.count }, 0)
             } else {
               for (var pi = 0; pi < playerInventory.length; pi++) {
-                if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabs[ci].id]++
+                if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabId]++
               }
             }
           }
@@ -2005,7 +2013,7 @@ function Game({ character, user, onEndRun }) {
                   )}
                 </div>
               )}
-              {activeTab.id === 'armour' && (
+              {activeTab.id === 'wearables' || activeTab.id === 'relics' && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.armour && (
                     <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
@@ -2152,13 +2160,53 @@ function Game({ character, user, onEndRun }) {
                   </div>
                 )}
 
-                {/* Junk bag tab */}
+                {/* Consumables tab — potions + consumable junk */}
+                {activeTab.id === 'consumables' && (
+                  <div className="flex flex-col gap-1">
+                    {/* Consumable junk from junk bag */}
+                    {playerJunkBag.filter(function(j) { return j.consumable }).map(function(junk) {
+                      var hint = inspectJunkItem(junk, character.stats.per || 6)
+                      return (
+                        <div key={junk.id} className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans border border-amber-500/30">
+                          <div className="flex flex-col">
+                            <span className="text-ink">{junk.name} {junk.count > 1 ? '×' + junk.count : ''}</span>
+                            <span className="text-ink-dim text-[10px] italic">{hint}</span>
+                          </div>
+                          <button onClick={function() {
+                            var result = consumeJunk(junk, character.stats.lck || 10)
+                            if (!result) return
+                            // Remove one from bag
+                            setPlayerJunkBag(function(bag) {
+                              return bag.map(function(j) {
+                                if (j.id !== junk.id) return j
+                                return Object.assign({}, j, { count: j.count - 1 })
+                              }).filter(function(j) { return j.count > 0 })
+                            })
+                            // Apply effect
+                            if (result.success && result.effect) {
+                              if (result.effect.effect === 'heal') {
+                                setPlayerHp(function(hp) { return Math.min(hp + result.effect.value, character.maxHp) })
+                              }
+                              // stat_buff and conditions would need combat integration — for now just show narrative
+                            }
+                            alert(result.success ? '✓ ' + result.narrative : '✗ ' + result.narrative)
+                          }}
+                            className="text-xs px-3 py-1 rounded border border-amber-400/40 text-amber-400 hover:border-amber-400 transition-colors">
+                            Use
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Junk bag tab — sell-only trash */}
                 {activeTab.id === 'junk' && (
                   <div className="flex flex-col gap-1">
                     {playerJunkBag.length === 0 && (
                       <p className="text-ink-faint text-xs italic text-center p-4">No junk collected yet. Search piles in rooms to find junk.</p>
                     )}
-                    {playerJunkBag.map(function(junk) {
+                    {playerJunkBag.filter(function(j) { return !j.consumable }).map(function(junk) {
                       return (
                         <div key={junk.id} className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans border border-border">
                           <span className="text-ink">{junk.name}</span>
@@ -2169,6 +2217,9 @@ function Game({ character, user, onEndRun }) {
                         </div>
                       )
                     })}
+                    {playerJunkBag.filter(function(j) { return j.consumable }).length > 0 && (
+                      <p className="text-ink-faint text-[10px] text-center mt-2 italic">Consumable junk is in the Consumables tab</p>
+                    )}
                     {playerJunkBag.length > 0 && (
                       <p className="text-ink-faint text-[10px] text-center mt-1">
                         Total: {playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)} items
