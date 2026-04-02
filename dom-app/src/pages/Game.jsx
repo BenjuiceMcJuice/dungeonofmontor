@@ -189,6 +189,8 @@ function Game({ character, user, onEndRun }) {
   var [showInventoryPanel, setShowInventoryPanel] = useState(false)
   var [showCharPanel, setShowCharPanel] = useState(false)
   var [combatItemPhase, setCombatItemPhase] = useState(null) // null | 'use' | 'throw'
+  var [consumeResult, setConsumeResult] = useState(null) // { success, narrative, junkName }
+  var [expandedJunkId, setExpandedJunkId] = useState(null)
   var [inventoryTab, setInventoryTab] = useState('weapons')
   var [selectedItemIdx, setSelectedItemIdx] = useState(null)
 
@@ -1952,11 +1954,11 @@ function Game({ character, user, onEndRun }) {
         {/* Inventory panel — full screen overlay */}
         {showInventoryPanel && (function() {
           var tabs = [
-            { id: 'weapons',     label: 'Weapons',     types: ['weapon'] },
-            { id: 'wearables',   label: 'Wearables',   types: ['armour'] },
-            { id: 'relics',      label: 'Relics',      types: ['relic'] },
-            { id: 'consumables', label: 'Consumables',  types: ['consumable'] },
-            { id: 'junk',        label: 'Junk',         types: ['junk'] },
+            { id: 'weapons',     label: 'Arms',    types: ['weapon'] },
+            { id: 'wearables',   label: 'Wear',    types: ['armour'] },
+            { id: 'relics',      label: 'Relics',  types: ['relic'] },
+            { id: 'consumables', label: 'Use',     types: ['consumable'] },
+            { id: 'junk',        label: 'Junk',    types: ['junk'] },
           ]
           var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
           var filteredRaw = []
@@ -2222,40 +2224,79 @@ function Game({ character, user, onEndRun }) {
                 {/* Consumables tab — potions + consumable junk */}
                 {activeTab.id === 'consumables' && (
                   <div className="flex flex-col gap-1">
-                    {/* Consumable junk from junk bag */}
-                    {playerJunkBag.filter(function(j) { return j.consumable }).map(function(junk) {
+                    {/* Consume result banner */}
+                    {consumeResult && (
+                      <div onClick={function() { setConsumeResult(null) }}
+                        className={'p-3 rounded-lg border text-center cursor-pointer mb-1 ' +
+                          (consumeResult.success ? 'border-green-400/40 bg-green-400/5' : 'border-red-400/40 bg-red-400/5')}>
+                        <p className={'text-sm font-display ' + (consumeResult.success ? 'text-green-400' : 'text-red-400')}>
+                          {consumeResult.junkName}
+                        </p>
+                        <p className={'text-xs font-sans mt-1 ' + (consumeResult.success ? 'text-green-300' : 'text-red-300')}>
+                          {consumeResult.narrative}
+                        </p>
+                        <p className="text-ink-faint text-[9px] mt-1">Tap to dismiss</p>
+                      </div>
+                    )}
+
+                    {/* Consumable junk from junk bag — sorted by risk if PER can tell */}
+                    {playerJunkBag.filter(function(j) { return j.consumable }).sort(function(a, b) {
+                      return (a.consumeRisk || 3) - (b.consumeRisk || 3)
+                    }).map(function(junk) {
                       var hint = inspectJunkItem(junk, character.stats.per || 6)
+                      var isExpanded = expandedJunkId === junk.id
+                      var riskColour = !junk.consumeRisk ? 'border-border' :
+                        junk.consumeRisk <= 2 ? 'border-green-400/30' :
+                        junk.consumeRisk <= 3 ? 'border-amber-400/30' :
+                        'border-red-400/30'
                       return (
-                        <div key={junk.id} className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans border border-amber-500/30">
-                          <div className="flex flex-col">
-                            <span className="text-ink">{junk.name} {junk.count > 1 ? '×' + junk.count : ''}</span>
-                            <span className="text-ink-dim text-[10px] italic">{hint}</span>
-                          </div>
-                          <button onClick={function() {
-                            var result = consumeJunk(junk, character.stats.lck || 10)
-                            if (!result) return
-                            // Remove one from bag
-                            setPlayerJunkBag(function(bag) {
-                              return bag.map(function(j) {
-                                if (j.id !== junk.id) return j
-                                return Object.assign({}, j, { count: j.count - 1 })
-                              }).filter(function(j) { return j.count > 0 })
-                            })
-                            // Apply effect
-                            if (result.success && result.effect) {
-                              if (result.effect.effect === 'heal') {
-                                setPlayerHp(function(hp) { return Math.min(hp + result.effect.value, character.maxHp) })
-                              }
-                              // stat_buff and conditions would need combat integration — for now just show narrative
-                            }
-                            alert(result.success ? '✓ ' + result.narrative : '✗ ' + result.narrative)
-                          }}
-                            className="text-xs px-3 py-1 rounded border border-amber-400/40 text-amber-400 hover:border-amber-400 transition-colors">
-                            Use
+                        <div key={junk.id} className={'rounded-lg bg-raised text-sm font-sans ' + riskColour + ' border'}>
+                          <button onClick={function() { setExpandedJunkId(isExpanded ? null : junk.id) }}
+                            className="flex items-center justify-between w-full p-3 text-left">
+                            <div className="flex flex-col">
+                              <span className="text-ink">{junk.name} {junk.count > 1 ? <span className="text-gold text-xs">×{junk.count}</span> : ''}</span>
+                              <span className="text-ink-dim text-[10px] italic">{hint}</span>
+                            </div>
+                            <span className="text-ink-faint text-[10px]">{isExpanded ? '▲' : '▼'}</span>
                           </button>
+                          {isExpanded && (
+                            <div className="px-3 pb-3 flex flex-col gap-2">
+                              <p className="text-ink-faint text-[10px]">Sell: {junk.sellPrice}g</p>
+                              {canEquipNow && (
+                                <button onClick={function() {
+                                  var result = consumeJunk(junk, character.stats.lck || 10)
+                                  if (!result) return
+                                  setPlayerJunkBag(function(bag) {
+                                    return bag.map(function(j) {
+                                      if (j.id !== junk.id) return j
+                                      return Object.assign({}, j, { count: j.count - 1 })
+                                    }).filter(function(j) { return j.count > 0 })
+                                  })
+                                  if (result.success && result.effect) {
+                                    if (result.effect.effect === 'heal') {
+                                      setPlayerHp(function(hp) { return Math.min(hp + result.effect.value, character.maxHp) })
+                                    }
+                                  }
+                                  setConsumeResult({ success: result.success, narrative: result.narrative, junkName: junk.name })
+                                  setExpandedJunkId(null)
+                                }}
+                                  className={'py-2 px-4 rounded-lg border text-xs font-sans transition-colors ' +
+                                    (junk.consumeRisk >= 4 ? 'border-red-400/50 text-red-400 hover:border-red-400' :
+                                     junk.consumeRisk >= 3 ? 'border-amber-400/50 text-amber-400 hover:border-amber-400' :
+                                     'border-green-400/50 text-green-400 hover:border-green-400')}>
+                                  {junk.consumeRisk >= 4 ? 'Consume (risky!)' : junk.consumeRisk >= 3 ? 'Consume (50/50)' : 'Consume'}
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )
                     })}
+
+                    {playerJunkBag.filter(function(j) { return j.consumable }).length === 0 &&
+                     filteredItems.length === 0 && (
+                      <p className="text-ink-faint text-xs italic text-center p-4">No consumables. Search junk piles to find some.</p>
+                    )}
                   </div>
                 )}
 
