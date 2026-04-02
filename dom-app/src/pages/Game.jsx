@@ -135,6 +135,7 @@ function Game({ character, user, onEndRun }) {
   var [activeBuffs, setActiveBuffs] = useState([])
   var [hasZoneKey, setHasZoneKey] = useState(false)
   var [floorsCompleted, setFloorsCompleted] = useState([])
+  var [collectedTreasures, setCollectedTreasures] = useState([])
   var [runLevel, setRunLevel] = useState(0)
   var [pendingLevelUp, setPendingLevelUp] = useState(null) // { hpGain, statPick } or null
 
@@ -293,7 +294,7 @@ function Game({ character, user, onEndRun }) {
   // Init floor — start at Garden
   useEffect(function() {
     window.scrollTo(0, 0)
-    var f = generateFloor('grounds')
+    var f = generateFloor('grounds', collectedTreasures)
     setFloor(f)
     setZone(f.zones[0])
     setHasZoneKey(false)
@@ -600,6 +601,15 @@ function Game({ character, user, onEndRun }) {
     if (result.item) {
       setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
     }
+    // Treasure — Montor's gift artefact
+    if (result.treasure) {
+      setCollectedTreasures(function(prev) { return prev.concat([result.treasure.id]) })
+      setPlayerInventory(function(inv) { return inv.concat([{
+        id: result.treasure.id, name: result.treasure.name, type: 'treasure',
+        description: result.treasure.description, gift: result.treasure.gift,
+        sellPrice: 0,
+      }]) })
+    }
     // Apply condition hazard — check immunity relics first, then DEF reduces physical damage
     if (result.condition && !result.agiSaved) {
       // Check condition resistance from relics (immunity, resist chance, multi, all)
@@ -747,7 +757,7 @@ function Game({ character, user, onEndRun }) {
 
     // Generate next floor
     setFloorsCompleted(function(prev) { return prev.concat([floor.floorId]) })
-    var nextFloor = generateFloor(nextFloorId)
+    var nextFloor = generateFloor(nextFloorId, collectedTreasures)
     setFloor(nextFloor)
     setZone(nextFloor.zones[0])
     setHasZoneKey(false)
@@ -3112,6 +3122,15 @@ function Game({ character, user, onEndRun }) {
                       <div className="p-3 rounded-lg border-2 border-purple-400/50 bg-purple-400/5 text-center">
                         <p className="text-purple-400 font-display text-xl">Terminal Found</p>
                         <p className="text-purple-300 text-xs font-sans mt-1">Something hums beneath the junk...</p>
+                      </div>
+                    )}
+
+                    {searchResult.treasure && (
+                      <div className="p-4 rounded-lg border-2 border-gold/60 bg-gold/10 text-center">
+                        <p className="text-gold font-display text-xl">{searchResult.treasure.name}</p>
+                        <p className="text-ink text-xs font-sans mt-1 italic">{searchResult.treasure.description}</p>
+                        <p className="text-gold/80 text-sm font-sans mt-2 italic">"{searchResult.treasure.montorReaction}"</p>
+                        <p className="text-purple-400 text-[10px] font-sans mt-1">Gift: {searchResult.treasure.gift}</p>
                       </div>
                     )}
 

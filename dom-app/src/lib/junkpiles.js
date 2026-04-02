@@ -8,6 +8,7 @@ import junkData from '../data/junk.json'
 
 var JUNK_POOLS = junkData.junkPools
 var CONDITION_HAZARDS = junkData.conditionHazards
+var TREASURES = junkData.treasures
 var PILE_DESCRIPTIONS = junkData.pileDescriptions
 
 // ============================================================
@@ -210,6 +211,38 @@ function placeTerminal(chambers) {
 }
 
 // ============================================================
+// TREASURE PLACEMENT — one gift treasure per floor, hidden in a pile
+// ============================================================
+
+function placeTreasure(chambers, floorId, collectedTreasures) {
+  var treasure = TREASURES[floorId]
+  if (!treasure) return
+  // Skip if already collected this treasure
+  if (collectedTreasures && collectedTreasures.indexOf(treasure.id) !== -1) return
+
+  // Pick a random pile (any size — treasure can be anywhere)
+  var candidates = []
+  for (var ci = 0; ci < chambers.length; ci++) {
+    var ch = chambers[ci]
+    if (!ch.junkPiles) continue
+    for (var pi = 0; pi < ch.junkPiles.length; pi++) {
+      candidates.push({ chamberIdx: ci, pileIdx: pi })
+    }
+  }
+  if (candidates.length === 0) return
+
+  var pick = candidates[Math.floor(Math.random() * candidates.length)]
+  var pile = chambers[pick.chamberIdx].junkPiles[pick.pileIdx]
+  pile.hasTreasure = true
+  pile.treasureData = treasure
+}
+
+// Get treasure data for a floor
+function getTreasure(floorId) {
+  return TREASURES[floorId] || null
+}
+
+// ============================================================
 // INSPECT — free action, reveals risk hint
 // ============================================================
 
@@ -241,6 +274,17 @@ function inspectPile(pile, perStat) {
     // Terminal sensing
     if (pile.hasTerminal) {
       hint = hint + ' — something hums beneath...'
+    }
+    // Treasure sensing
+    if (pile.hasTreasure) {
+      hint = hint + ' — ' + pile.treasureData.perHint
+    }
+  }
+
+  // Treasure sensing at lower PER threshold (14+)
+  if (inspectRoll >= 14 && pile.hasTreasure && pile.treasureData) {
+    if (hint.indexOf(pile.treasureData.perHint) === -1) {
+      hint = hint + ' — ' + pile.treasureData.perHint
     }
   }
 
@@ -431,6 +475,14 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
     }
   }
 
+  // === TREASURE ===
+  // Montor's gift treasure — found when you search the pile that contains it
+  if (pile.hasTreasure && pile.treasureData) {
+    result.treasure = Object.assign({}, pile.treasureData)
+    pile.hasTreasure = false // consumed — won't appear again
+    result.narrative.push(pile.treasureData.montorReaction)
+  }
+
   // === XP ===
   var baseXp = getBaseXp(risk)
   var xpQualMul = { fumble: 0.25, poor: 0.5, decent: 1, good: 1.5, excellent: 2 }
@@ -546,6 +598,8 @@ function consumeJunk(junkItem, lckStat) {
 export {
   generateJunkPiles,
   placeTerminal,
+  placeTreasure,
+  getTreasure,
   inspectPile,
   getAvailableCleanLevels,
   resolveSearch,

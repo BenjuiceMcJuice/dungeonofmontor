@@ -241,5 +241,55 @@
     "medium":   ["Smells off", "Could heal", "Seems potent", "Feels warm"],
     "high":     ["Likely safe", "Likely poisonous", "Healing residue", "Stat boost?"],
     "exact":    true
+  },
+  "treasures": {
+    "grounds": {
+      "id": "montors_favourite_gnome",
+      "name": "Montor's Favourite Gnome",
+      "gift": "petal",
+      "description": "A ceramic garden gnome. Chipped. One eye missing. Loved.",
+      "montorReaction": "Gerald! ...I raised him from a pebble.",
+      "perHint": "Something beloved is buried here..."
+    },
+    "underground": {
+      "id": "montors_gravy_boat",
+      "name": "Montor's Gravy Boat",
+      "gift": "stone",
+      "description": "Grandmother's gravy boat. The gravy inside never cools.",
+      "montorReaction": "That was grandmother's. She'll haunt YOU now.",
+      "perHint": "Something old and important is buried here..."
+    },
+    "underbelly": {
+      "id": "montors_toilet_seat",
+      "name": "Montor's Toilet Seat",
+      "gift": "bile",
+      "description": "Porcelain. Cracked clean in half. Something hisses from below.",
+      "montorReaction": "Do you have ANY idea how hard it is to get a plumber down here?",
+      "perHint": "Something awful but powerful is buried here..."
+    },
+    "quarters": {
+      "id": "montors_music_box",
+      "name": "Montor's Music Box",
+      "gift": "blood",
+      "description": "Wind it backwards. The melody inverts. It won't stop playing.",
+      "montorReaction": "That was the only thing that helped me sleep.",
+      "perHint": "Something personal is buried here..."
+    },
+    "works": {
+      "id": "montors_best_tongs",
+      "name": "Montor's Best Tongs",
+      "gift": "ember",
+      "description": "Calibrated tongs. Centuries of precision. Still warm.",
+      "montorReaction": "Those were CALIBRATED. Centuries of calibration. Gone.",
+      "perHint": "Something forged with care is buried here..."
+    },
+    "deep": {
+      "id": "montors_night_light",
+      "name": "Montor's Night Light",
+      "gift": "void",
+      "description": "Blow it out. The darkness rushes in and curls around your fingers.",
+      "montorReaction": "...",
+      "perHint": "Something dark and precious is buried here..."
+    }
   }
 }
