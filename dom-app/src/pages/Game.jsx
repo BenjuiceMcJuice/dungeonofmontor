@@ -456,7 +456,9 @@ function Game({ character, user, onEndRun }) {
   }
 
   // --- Junk pile search ---
-  var [searchPhase, setSearchPhase] = useState(null) // null | 'rummaging' | 'roll' | 'reveal'
+  var [searchPhase, setSearchPhase] = useState(null) // null | 'rolling' | 'landed' | 'reveal'
+  var [searchDiceDisplay, setSearchDiceDisplay] = useState(null)
+  var searchDiceRef = useRef(null)
 
   function handleSearchPile(pileId) {
     if (searchPhase) return // already searching
@@ -464,67 +466,78 @@ function Game({ character, user, onEndRun }) {
     var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === pileId })
     if (!pile || pile.depleted) return
 
+    // Resolve immediately but don't show yet
+    var perStat = character.stats.per || 6
+    var result = resolveSearch(pile, perStat)
+    if (!result) return
+
+    applySearch(pile)
+    setSearchResult(result)
     setSearchingPileId(pileId)
-    setSearchPhase('rummaging')
+    setSearchPhase('rolling')
 
-    // Phase 1: Rummaging (800ms)
-    setTimeout(function() {
-      var perStat = character.stats.per || 6
-      var result = resolveSearch(pile, perStat)
-      if (!result) { setSearchPhase(null); setSearchingPileId(null); return }
+    // Phase 1: Dice rolling animation (1200ms) — random numbers cycling
+    var rollCount = 0
+    searchDiceRef.current = setInterval(function() {
+      setSearchDiceDisplay(Math.floor(Math.random() * 20) + 1)
+      rollCount++
+      if (rollCount > 12) {
+        clearInterval(searchDiceRef.current)
+        // Land on real roll
+        setSearchDiceDisplay(result.natRoll)
+        setSearchPhase('landed')
 
-      applySearch(pile)
-      setSearchResult(result)
-      setSearchPhase('roll')
+        // Phase 2: Show landed result + quality (1200ms)
+        setTimeout(function() {
+          // Award gold
+          if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold })
 
-      // Phase 2: Show roll (1500ms)
-      setTimeout(function() {
-        // Award gold
-        if (result.gold > 0) setPlayerGold(function(g) { return g + result.gold })
+          // Award XP
+          if (result.xp > 0) {
+            var newXp = totalXp + result.xp
+            setTotalXp(newXp)
+            checkLevelUp(newXp)
+          }
 
-        // Award XP
-        if (result.xp > 0) {
-          var newXp = totalXp + result.xp
-          setTotalXp(newXp)
-          checkLevelUp(newXp)
-        }
+          // Collect junk
+          if (result.junk) {
+            setPlayerJunkBag(function(bag) {
+              var existing = bag.find(function(j) { return j.id === result.junk.id })
+              if (existing) {
+                return bag.map(function(j) {
+                  if (j.id === result.junk.id) return Object.assign({}, j, { count: j.count + 1 })
+                  return j
+                })
+              }
+              return bag.concat([{ id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }])
+            })
+          }
 
-        // Collect junk
-        if (result.junk) {
-          setPlayerJunkBag(function(bag) {
-            var existing = bag.find(function(j) { return j.id === result.junk.id })
-            if (existing) {
-              return bag.map(function(j) {
-                if (j.id === result.junk.id) return Object.assign({}, j, { count: j.count + 1 })
-                return j
-              })
-            }
-            return bag.concat([{ id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }])
-          })
-        }
+          // Collect real item
+          if (result.item) {
+            setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
+          }
 
-        // Collect real item
-        if (result.item) {
-          setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
-        }
+          // Update zone state
+          setZone(Object.assign({}, zone, {
+            chambers: zone.chambers.map(function(ch) {
+              if (ch.id !== zone.playerPosition) return ch
+              return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
+            })
+          }))
 
-        // Update zone state
-        setZone(Object.assign({}, zone, {
-          chambers: zone.chambers.map(function(ch) {
-            if (ch.id !== zone.playerPosition) return ch
-            return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
-          })
-        }))
-
-        setSearchPhase('reveal')
-      }, 1500)
-    }, 800)
+          setSearchPhase('reveal')
+        }, 1200)
+      }
+    }, 80)
   }
 
   function handleDismissSearch() {
+    if (searchDiceRef.current) clearInterval(searchDiceRef.current)
     setSearchResult(null)
     setSearchingPileId(null)
     setSearchPhase(null)
+    setSearchDiceDisplay(null)
   }
 
   // --- Keystone press ---
@@ -2591,16 +2604,19 @@ function Game({ character, user, onEndRun }) {
                 )
               })()}
 
-              {/* Search Phase 1: Rummaging */}
-              {searchPhase === 'rummaging' && (
+              {/* Search Phase 1: Dice rolling */}
+              {searchPhase === 'rolling' && (
                 <div className="flex flex-col items-center gap-3 p-4">
-                  <p className="text-ink text-lg font-display animate-pulse">Rummaging...</p>
-                  <p className="text-ink-faint text-xs italic">You dig through the pile...</p>
+                  <div className="w-18 h-18 rounded-xl flex items-center justify-center font-display text-3xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
+                    style={{ width: '4.5rem', height: '4.5rem' }}>
+                    {searchDiceDisplay || '?'}
+                  </div>
+                  <p className="text-ink-faint text-xs italic animate-pulse">Searching...</p>
                 </div>
               )}
 
-              {/* Search Phase 2: The Roll */}
-              {searchPhase === 'roll' && searchResult && (function() {
+              {/* Search Phase 2: Dice landed + quality */}
+              {searchPhase === 'landed' && searchResult && (function() {
                 var qualColour = searchResult.quality === 'excellent' ? 'text-gold border-gold bg-gold/10' :
                   searchResult.quality === 'good' ? 'text-green-400 border-green-400 bg-green-400/10' :
                   searchResult.quality === 'decent' ? 'text-ink border-border-hl bg-surface' :
@@ -2613,15 +2629,11 @@ function Game({ character, user, onEndRun }) {
                   'FUMBLE!'
                 return (
                   <div className="flex flex-col items-center gap-3 p-4">
-                    <div className={'w-16 h-16 rounded-xl flex items-center justify-center font-display text-2xl border-2 ' + qualColour}>
+                    <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + qualColour}
+                      style={{ width: '4.5rem', height: '4.5rem' }}>
                       {searchResult.natRoll}
                     </div>
-                    <div className="flex items-center gap-1 text-xs font-sans text-ink-dim">
-                      <span>d20: {searchResult.natRoll}</span>
-                      <span>+ PER: {getModifier(character.stats.per || 6) >= 0 ? '+' : ''}{getModifier(character.stats.per || 6)}</span>
-                      <span>= {searchResult.roll}</span>
-                    </div>
-                    <p className={'text-lg font-display ' + qualColour.split(' ')[0]}>{qualLabel}</p>
+                    <p className={'text-xl font-display ' + qualColour.split(' ')[0]}>{qualLabel}</p>
                   </div>
                 )
               })()}
