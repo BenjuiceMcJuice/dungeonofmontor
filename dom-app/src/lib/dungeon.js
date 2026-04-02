@@ -98,18 +98,9 @@ function generateZone(zoneId, options) {
 
   for (var i = 0; i < templates.length; i++) {
     var t = templates[i]
-    if (t.type === 'stairwell_entry' && isFirstZone) { entry = t }
-    else if (t.type === 'stairwell_entry' && !isFirstZone) { rest.push(t) } // non-first zones use entry as a normal room
-    else if (t.type === 'stairwell_descent' && hasStairwell) { descent = t }
-    else if (t.type === 'stairwell_descent' && !hasStairwell) {
-      // Replace stairwell with an extra combat room if this zone doesn't have it
-      rest.push({ type: 'combat_standard', label: zoneDef.templates[2].label, safe: false, icon: '⚔' })
-    }
-    else if (t.type === 'boss' && hasStairwell) { boss = t }
-    else if (t.type === 'boss' && !hasStairwell) {
-      // Replace boss with extra loot if no stairwell in this zone
-      rest.push({ type: 'loot', label: 'Abandoned Stash', safe: true, icon: '◆' })
-    }
+    if (t.type === 'stairwell_entry') { entry = t }
+    else if (t.type === 'stairwell_descent') { descent = t }
+    else if (t.type === 'boss') { boss = t }
     else { rest.push(t) }
   }
 
@@ -214,13 +205,11 @@ function generateFloor(floorId) {
   if (!floorDef) return null
 
   var zoneIds = floorDef.zones
-  // Stairwell goes in one random zone
-  var stairwellZoneIndex = Math.floor(Math.random() * zoneIds.length)
-
+  // Every zone now has stairwell + boss (self-contained)
   var zones = []
   for (var i = 0; i < zoneIds.length; i++) {
     var zone = generateZone(zoneIds[i], {
-      hasStairwell: i === stairwellZoneIndex,
+      hasStairwell: true,
       isFirstZone: i === 0,
     })
     if (zone) zones.push(zone)
