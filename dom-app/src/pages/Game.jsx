@@ -5,6 +5,7 @@ import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentC
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
+import { resolveSearch, applySearch } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
@@ -255,6 +256,9 @@ function Game({ character, user, onEndRun }) {
   var [lootingChestId, setLootingChestId] = useState(null)
   var [lootingNpcId, setLootingNpcId] = useState(null)
   var [montorWhisper, setMontorWhisper] = useState(null)
+  var [searchingPileId, setSearchingPileId] = useState(null)
+  var [searchResult, setSearchResult] = useState(null)
+  var [playerJunkBag, setPlayerJunkBag] = useState([])
   var logRef = useRef(null)
 
   // Init floor — start at Garden
@@ -449,6 +453,74 @@ function Game({ character, user, onEndRun }) {
     })
     setZone(newZone)
     setChambersCleared(chambersCleared + 1)
+  }
+
+  // --- Junk pile search ---
+  function handleSearchPile(pileId) {
+    if (searchResult) return // already showing a result
+    var chamber = zone.chambers[zone.playerPosition]
+    var pile = chamber.junkPiles && chamber.junkPiles.find(function(p) { return p.id === pileId })
+    if (!pile || pile.depleted) return
+
+    var perStat = character.stats.per || 6
+    var result = resolveSearch(pile, perStat)
+    if (!result) return
+
+    // Apply search to pile state
+    applySearch(pile)
+
+    // Award gold
+    if (result.gold > 0) {
+      setPlayerGold(function(g) { return g + result.gold })
+    }
+
+    // Award XP
+    if (result.xp > 0) {
+      var newXp = totalXp + result.xp
+      setTotalXp(newXp)
+      checkLevelUp(newXp)
+    }
+
+    // Collect junk item into junkBag
+    if (result.junk) {
+      setPlayerJunkBag(function(bag) {
+        var existing = bag.find(function(j) { return j.id === result.junk.id })
+        if (existing) {
+          return bag.map(function(j) {
+            if (j.id === result.junk.id) return Object.assign({}, j, { count: j.count + 1 })
+            return j
+          })
+        }
+        return bag.concat([{ id: result.junk.id, name: result.junk.name, sellPrice: result.junk.sellPrice, count: 1 }])
+      })
+    }
+
+    // Collect real item into inventory
+    if (result.item) {
+      setPlayerInventory(function(inv) { return inv.concat([Object.assign({}, result.item)]) })
+    }
+
+    // Apply condition hazard
+    if (result.condition) {
+      // Apply to player via battle if in combat, or just track it for display
+      result.conditionApplied = true
+    }
+
+    // Update zone state (pile may now be depleted)
+    setZone(Object.assign({}, zone, {
+      chambers: zone.chambers.map(function(ch) {
+        if (ch.id !== zone.playerPosition) return ch
+        return Object.assign({}, ch, { junkPiles: ch.junkPiles.slice() })
+      })
+    }))
+
+    setSearchingPileId(pileId)
+    setSearchResult(result)
+  }
+
+  function handleDismissSearch() {
+    setSearchResult(null)
+    setSearchingPileId(null)
   }
 
   // --- Keystone press ---
@@ -1769,6 +1841,7 @@ function Game({ character, user, onEndRun }) {
             { id: 'weapons', label: 'Weapons', types: ['weapon'] },
             { id: 'armour',  label: 'Armour',  types: ['armour', 'relic'] },
             { id: 'items',   label: 'Items',   types: ['consumable'] },
+            { id: 'junk',    label: 'Junk',    types: ['junk'] },
           ]
           var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
           var filteredRaw = []
@@ -1794,8 +1867,12 @@ function Game({ character, user, onEndRun }) {
           var tabCounts = {}
           for (var ci = 0; ci < tabs.length; ci++) {
             tabCounts[tabs[ci].id] = 0
-            for (var pi = 0; pi < playerInventory.length; pi++) {
-              if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabs[ci].id]++
+            if (tabs[ci].id === 'junk') {
+              tabCounts['junk'] = playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)
+            } else {
+              for (var pi = 0; pi < playerInventory.length; pi++) {
+                if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabs[ci].id]++
+              }
             }
           }
 
@@ -1990,7 +2067,7 @@ function Game({ character, user, onEndRun }) {
                   )
                 })()}
 
-                {selectedItemIdx === null && (
+                {selectedItemIdx === null && activeTab.id !== 'junk' && (
                   <div className="flex flex-col gap-1">
                     {filteredItems.map(function(entry) {
                       var item = entry.item
@@ -2017,6 +2094,32 @@ function Game({ character, user, onEndRun }) {
                         </button>
                       )
                     })}
+                  </div>
+                )}
+
+                {/* Junk bag tab */}
+                {activeTab.id === 'junk' && (
+                  <div className="flex flex-col gap-1">
+                    {playerJunkBag.length === 0 && (
+                      <p className="text-ink-faint text-xs italic text-center p-4">No junk collected yet. Search piles in rooms to find junk.</p>
+                    )}
+                    {playerJunkBag.map(function(junk) {
+                      return (
+                        <div key={junk.id} className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans border border-border">
+                          <span className="text-ink">{junk.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gold text-xs font-display">x{junk.count}</span>
+                            <span className="text-ink-faint text-[10px]">{junk.sellPrice}g ea</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {playerJunkBag.length > 0 && (
+                      <p className="text-ink-faint text-[10px] text-center mt-1">
+                        Total: {playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)} items
+                        ({playerJunkBag.reduce(function(s, j) { return s + (j.count * j.sellPrice) }, 0)}g sell value)
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -2453,6 +2556,57 @@ function Game({ character, user, onEndRun }) {
                   ? 'The entrance to the garden. Overgrown walls rise on all sides.'
                   : 'The chamber is still. ' + doors.length + (doors.length === 1 ? ' door leads onward.' : ' doors lead onward.')}
               </p>
+
+              {/* Junk piles — shown after combat cleared or in safe rooms */}
+              {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchResult && (function() {
+                var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
+                if (activePiles.length === 0) return null
+                return (
+                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    {activePiles.map(function(pile) {
+                      var sizeLabel = pile.size === 'large' ? 'Mound' : pile.size === 'medium' ? 'Heap' : 'Scraps'
+                      var sizeColour = pile.size === 'large' ? 'border-gold/50 bg-gold/10' : pile.size === 'medium' ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
+                      var searchesLeft = pile.maxSearches - pile.searched
+                      return (
+                        <button key={pile.id}
+                          onClick={function() { handleSearchPile(pile.id) }}
+                          className={'flex flex-col items-center gap-0.5 p-2 rounded-lg border transition-all cursor-pointer hover:border-gold ' + sizeColour}
+                        >
+                          <span className="text-ink text-xs font-display">{sizeLabel}</span>
+                          <span className="text-ink-faint text-[9px] font-sans">Search ({searchesLeft})</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+
+              {/* Search result overlay */}
+              {searchResult && (
+                <div onClick={handleDismissSearch} className="flex flex-col items-center gap-2 p-3 rounded-lg border border-gold/30 bg-surface cursor-pointer max-w-xs">
+                  <p className={'text-sm font-display ' + (
+                    searchResult.quality === 'excellent' ? 'text-gold' :
+                    searchResult.quality === 'good' ? 'text-green-400' :
+                    searchResult.quality === 'decent' ? 'text-ink' :
+                    searchResult.quality === 'poor' ? 'text-ink-dim' :
+                    'text-red-400'
+                  )}>
+                    {searchResult.narrative[0]} (d20: {searchResult.roll})
+                  </p>
+                  <div className="flex flex-col gap-1 text-xs font-sans text-center">
+                    {searchResult.gold > 0 && <p className="text-gold">+{searchResult.gold}g</p>}
+                    {searchResult.xp > 0 && <p className="text-blue">+{searchResult.xp} XP</p>}
+                    {searchResult.junk && <p className="text-ink-dim">Found: {searchResult.junk.name}</p>}
+                    {searchResult.item && <p className="text-amber-400">Found: {searchResult.item.name}!</p>}
+                    {searchResult.condition && <p className="text-red-400">Hazard: {searchResult.condition}!</p>}
+                    {searchResult.terminal && <p className="text-purple-400">A terminal hums beneath the junk...</p>}
+                    {searchResult.narrative.slice(1).map(function(line, i) {
+                      return <p key={i} className="text-ink-faint italic">{line}</p>
+                    })}
+                  </div>
+                  <p className="text-ink-faint text-[9px]">Tap to dismiss</p>
+                </div>
+              )}
             </div>
 
             {/* East door — pinned right */}
