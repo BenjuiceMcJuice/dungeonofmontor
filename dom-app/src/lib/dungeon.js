@@ -3,7 +3,7 @@
 
 import { generateCombatEnemies, generateBoss } from './enemies.js'
 import { getMerchantItems } from './loot.js'
-import { generateJunkPiles, placeTerminal } from './junkpiles.js'
+import { generateJunkPiles, placeTerminal, placeTreasure } from './junkpiles.js'
 import zoneData from '../data/zones.json'
 
 var FLOORS = zoneData.floors
@@ -188,6 +188,9 @@ function generateZone(zoneId, options) {
   // Place one terminal per zone (hidden in a medium/large pile)
   placeTerminal(zone.chambers)
 
+  // Place floor treasure in a junk pile (if not already collected)
+  placeTreasure(zone.chambers, zoneDef.floorId, options.collectedTreasures || [])
+
   return zone
 }
 
@@ -200,7 +203,7 @@ function generateGardenZone() {
 // FLOOR GENERATION — creates all zones for a floor
 // ============================================================
 
-function generateFloor(floorId) {
+function generateFloor(floorId, collectedTreasures) {
   var floorDef = FLOORS[floorId]
   if (!floorDef) return null
 
@@ -211,6 +214,7 @@ function generateFloor(floorId) {
     var zone = generateZone(zoneIds[i], {
       hasStairwell: true,
       isFirstZone: i === 0,
+      collectedTreasures: collectedTreasures || [],
     })
     if (zone) zones.push(zone)
   }
