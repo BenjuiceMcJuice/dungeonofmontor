@@ -323,6 +323,14 @@ function Game({ character, user, onEndRun }) {
     setLootingChestId(null)
     setLootingNpcId(null)
     setShowInventoryPanel(false)
+    setShowCharPanel(false)
+    // Reset any open search state
+    if (searchDiceRef.current) clearInterval(searchDiceRef.current)
+    setSearchPhase(null)
+    setSearchResult(null)
+    setSearchingPileId(null)
+    setSearchDiceDisplay(null)
+    setSearchSaveDiceDisplay(null)
 
     var newZone = Object.assign({}, zone, {
       playerPosition: targetId,
