@@ -613,10 +613,10 @@
 
   "montors_signet_ring": {
     "id": "montors_signet_ring", "name": "Montor's Signet Ring", "type": "relic", "slot": "relic",
-    "rarity": "uncommon", "passiveEffect": "hp_bonus", "passiveValue": 5,
+    "rarity": "uncommon", "passiveEffect": "hp_bonus", "passiveValue": 15,
     "giftPower": "stone",
     "buyPrice": 35, "sellPrice": 14,
-    "description": "His seal. Worn smooth. Makes you feel... sturdier."
+    "description": "His seal. Worn smooth. +15 max HP. Makes you feel... considerably sturdier."
   },
   "montors_garden_charm": {
     "id": "montors_garden_charm", "name": "Montor's Garden Charm", "type": "relic", "slot": "relic",
