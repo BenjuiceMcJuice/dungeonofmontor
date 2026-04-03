@@ -3677,26 +3677,26 @@ function Game({ character, user, onEndRun }) {
                   <div className="flex flex-col items-center gap-3">
                     <ChamberIcon iconKey="stairs_down" theme={zone.doorTheme || 'garden'} scale={4} />
                     {doorUnlocked ? (
-                      <React.Fragment>
+                      <>
                         <p className="text-ink text-sm italic">The heavy door stands open.</p>
                         <button onClick={handleOpenZoneDoor}
                           className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
                           Pass Through
                         </button>
-                      </React.Fragment>
+                      </>
                     ) : hasZoneKey ? (
-                      <React.Fragment>
+                      <>
                         <p className="text-ink text-sm italic">A heavy door. Your key fits the lock.</p>
                         <button onClick={handleOpenZoneDoor}
                           className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-base">
                           Open Door
                         </button>
-                      </React.Fragment>
+                      </>
                     ) : (
-                      <React.Fragment>
+                      <>
                         <p className="text-ink text-sm italic">A heavy door, locked and cold.</p>
                         <p className="text-red-400 text-xs font-sans">Find the key to proceed.</p>
-                      </React.Fragment>
+                      </>
                     )}
                   </div>
                 )
