@@ -423,10 +423,10 @@ function Preparation({ character, onReady }) {
                   <span className="text-ink">{item.name}</span>
                   <span className="text-ink-faint text-[10px]">
                     {item.type === 'weapon' ? item.weaponType + ', d' + item.damageDie + (item.defIgnore ? ', ignores ' + Math.round(item.defIgnore * 100) + '% DEF' : '') + (item.doubleStrikeBase ? ', ' + Math.round(item.doubleStrikeBase * 100) + '% double strike' : '') :
-                     item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
+                     item.type === 'armour' && item.slot === 'offhand' ? '+' + (item.defBonus || 0) + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
                      item.type === 'armour' && item.slot === 'helmet' ? 'helmet, +' + (item.defBonus || 0) + ' DEF' + (item.agiPenalty ? ', ' + item.agiPenalty + ' AGI' : '') :
                      item.type === 'armour' && item.slot === 'boots' ? 'boots' + (item.agiBonus ? ', +' + item.agiBonus + ' AGI' : '') + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') + (item.initBonus ? ', +' + item.initBonus + ' init' : '') :
-                     item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                     item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
                      item.description || item.type}
                   </span>
                 </div>
