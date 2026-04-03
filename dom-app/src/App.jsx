@@ -7,6 +7,7 @@ import Game from './pages/Game.jsx'
 import Results from './pages/Results.jsx'
 import Preparation from './pages/Preparation.jsx'
 import LandingScene from './components/LandingScene.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './App.css'
 
 // Screens: home (auth) → landing (scene + name) → prep (stats + shop) → game (dungeon) → results → landing
@@ -57,14 +58,16 @@ function App() {
 
   if (screen === 'game' && character) {
     return (
-      <Game
-        character={character}
-        user={user}
-        onEndRun={function(result) {
-          setRunResult(result)
-          setScreen('results')
-        }}
-      />
+      <ErrorBoundary>
+        <Game
+          character={character}
+          user={user}
+          onEndRun={function(result) {
+            setRunResult(result)
+            setScreen('results')
+          }}
+        />
+      </ErrorBoundary>
     )
   }
 
