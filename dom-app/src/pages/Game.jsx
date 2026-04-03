@@ -203,6 +203,13 @@ function Game({ character, user, onEndRun }) {
   var [safeRoomGift, setSafeRoomGift] = useState(null) // the treasure being offered
   var [safeRoomSlotChoice, setSafeRoomSlotChoice] = useState(null) // body | mind | weapon | shield
   var [sporeCloudUsed, setSporeCloudUsed] = useState(false) // per-combat flag for Spore Cloud
+  var [bedrockCharges, setBedrockCharges] = useState(0) // Bedrock: hits remaining at 1 damage
+  var [erupted, setErupted] = useState(false) // Eruption: once per combat AoE
+  var [shadowStepUsed, setShadowStepUsed] = useState(false) // Shadow Step: first hit auto-miss
+  var [chaosRerollUsed, setChaosRerollUsed] = useState(false) // Chaos Reroll: force reroll
+  var [ironWillUsed, setIronWillUsed] = useState(false) // Iron Will: survive lethal once
+  var [harvestBuff, setHarvestBuff] = useState(0) // Harvest: bonus damage from kills
+  var [killsThisCombat, setKillsThisCombat] = useState(0) // Scent of Blood: kill counter
 
   var XP_THRESHOLDS = progressionData.xpThresholds
 
@@ -1066,6 +1073,7 @@ function Game({ character, user, onEndRun }) {
     bs.players[user.uid].currentHp = playerHp
     bs.players[user.uid].maxHp = character.maxHp
     bs.players[user.uid]._firstHitAvailable = true // Executioner's Coin
+    bs.players[user.uid]._gifts = giftSlots // Pass gifts to combat.js
     setBattle(bs)
     setSelectedTarget(null)
     setCombatLog([])
@@ -1073,6 +1081,13 @@ function Game({ character, user, onEndRun }) {
     setEnemyAttackInfo(null)
     // Reset per-combat gift flags
     setSporeCloudUsed(false)
+    setBedrockCharges(0)
+    setErupted(false)
+    setShadowStepUsed(false)
+    setChaosRerollUsed(false)
+    setIronWillUsed(false)
+    setHarvestBuff(0)
+    setKillsThisCombat(0)
     setGamePhase('combat')
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
@@ -1188,61 +1203,199 @@ function Game({ character, user, onEndRun }) {
       var bodyG = giftSlots.body
       var mindG = giftSlots.mind
       var shieldG = giftSlots.shield
+      var weaponGDef = giftSlots.weapon
       var attackerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
 
-      // Root Guard (shield): chance to fully block
+      // --- SHIELD GIFTS (reactive) ---
+
+      // Block chance (Root Guard, Granite Guard)
       if (shieldG && shieldG.effect === 'block_chance' && rollGiftChance(shieldG.chance)) {
-        pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp) // undo damage
-        addLog({ type: 'player', text: 'Root Guard blocks the attack completely!', tier: 'hit' })
+        pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp)
+        addLog({ type: 'player', text: shieldG.name + ' blocks the attack completely!', tier: 'hit' })
       }
 
-      // Thornhide (shield): reflect damage to attacker
+      // Reflect damage (Thornhide, Polished Granite, Flame Shield)
       if (shieldG && shieldG.effect === 'reflect_damage' && attackerEnemy && !attackerEnemy.isDown) {
         attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - shieldG.value)
-        addLog({ type: 'player', text: 'Thornhide reflects ' + shieldG.value + ' damage!', tier: 'hit' })
-        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled by thorns!', tier: 'crit' }) }
+        addLog({ type: 'player', text: shieldG.name + ' reflects ' + shieldG.value + ' damage!', tier: 'hit' })
+        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled!', tier: 'crit' }) }
       }
 
-      // Roothold (body): can't be reduced below minHpAfterHit by a single hit
+      // Block + condition (Glacial Wall/FROST, Bile Splash/NAUSEA, Toxic Shield)
+      if (shieldG && (shieldG.effect === 'block_condition' || shieldG.effect === 'block_chance_and_condition') && attackerEnemy && !attackerEnemy.isDown) {
+        // Block chance component
+        if (shieldG.effect === 'block_chance_and_condition' && rollGiftChance(shieldG.chance)) {
+          pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp)
+          addLog({ type: 'player', text: shieldG.name + ' blocks!', tier: 'hit' })
+        }
+        // Apply condition to attacker
+        var blockCondChance = shieldG.effect === 'block_condition' ? (shieldG.chance || 1.0) : 1.0
+        if (rollGiftChance(blockCondChance)) {
+          attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], shieldG.condition, 'gift')
+          addLog({ type: 'condition', text: shieldG.name + '! ' + attackerEnemy.name + ' ' + condName(shieldG.condition) + '!', tier: 'hit' })
+        }
+      }
+
+      // Block heals (Blood Absorb)
+      if (shieldG && shieldG.effect === 'block_heal' && r.blocked) {
+        pState.currentHp = Math.min(pState.currentHp + shieldG.value, pState.maxHp)
+        addLog({ type: 'player', text: shieldG.name + ': healed ' + shieldG.value + ' HP!', tier: 'hit' })
+      }
+
+      // Damage mirror (Mirror Shield — 25% of damage back)
+      if (shieldG && shieldG.effect === 'damage_mirror' && attackerEnemy && !attackerEnemy.isDown) {
+        var mirrorDmg = Math.max(1, Math.round(r.damage * shieldG.value))
+        attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - mirrorDmg)
+        addLog({ type: 'player', text: shieldG.name + ' reflects ' + mirrorDmg + ' damage!', tier: 'hit' })
+        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled!', tier: 'crit' }) }
+      }
+
+      // Block → gold (Smelt — 50% of blocked damage as gold)
+      if (shieldG && shieldG.effect === 'block_gold' && r.blocked) {
+        var goldGain = Math.max(1, Math.round(r.damage * shieldG.value))
+        setPlayerGold(function(g) { return g + goldGain })
+        addLog({ type: 'player', text: shieldG.name + ': smelted ' + goldGain + ' gold!', tier: 'hit' })
+      }
+
+      // Negate chance (Null Block — separate from dodge/block)
+      if (shieldG && shieldG.effect === 'negate_chance' && rollGiftChance(shieldG.chance)) {
+        pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp)
+        addLog({ type: 'player', text: shieldG.name + ' negates the attack!', tier: 'crit' })
+      }
+
+      // Counter-attack (Crimson Counter — 20% free hit back)
+      if (shieldG && shieldG.effect === 'counter_attack' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(shieldG.chance)) {
+        var counterDmg = Math.max(2, Math.round(r.damage * 0.5))
+        attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - counterDmg)
+        addLog({ type: 'player', text: shieldG.name + '! Counter-attack for ' + counterDmg + '!', tier: 'crit' })
+        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled!', tier: 'crit' }) }
+      }
+
+      // Eruption (ember shield): AoE when hit below 25% HP, once per combat
+      if (shieldG && shieldG.effect === 'threshold_aoe_damage' && !erupted) {
+        var eruptPercent = pState.currentHp / pState.maxHp
+        if (eruptPercent < shieldG.hpThreshold) {
+          setErupted(true)
+          updatedBattle.enemies.forEach(function(e) {
+            if (!e.isDown) {
+              e.currentHp = Math.max(0, e.currentHp - shieldG.value)
+              if (e.currentHp <= 0) e.isDown = true
+            }
+          })
+          addLog({ type: 'player', text: 'ERUPTION! ' + shieldG.value + ' damage to all enemies!', tier: 'crit' })
+        }
+      }
+
+      // --- BODY GIFTS (defensive) ---
+
+      // Roothold (petal): can't be reduced below minHpAfterHit
       if (bodyG && bodyG.effect === 'damage_floor' && pState.currentHp < bodyG.minHpAfterHit && pState.currentHp > 0) {
         pState.currentHp = bodyG.minHpAfterHit
-        addLog({ type: 'player', text: 'Roothold holds! HP can\'t drop below ' + bodyG.minHpAfterHit + '.', tier: 'hit' })
+        addLog({ type: 'player', text: bodyG.name + '! HP can\'t drop below ' + bodyG.minHpAfterHit + '.', tier: 'hit' })
       }
 
-      // Spore Cloud (body): when hit below threshold, DAZE all enemies (once per combat)
+      // Flat damage reduction (Ironhide): reduce incoming by flat amount
+      if (bodyG && bodyG.effect === 'flat_damage_reduction') {
+        var reduced = Math.min(r.damage, bodyG.value)
+        pState.currentHp = Math.min(pState.currentHp + reduced, pState.maxHp)
+        addLog({ type: 'player', text: bodyG.name + ' absorbs ' + reduced + ' damage!', tier: 'hit' })
+      }
+
+      // Bedrock: below 15% HP, next 3 hits deal only 1 damage
+      if (bodyG && bodyG.effect === 'bedrock') {
+        var bedrockPercent = (pState.currentHp + r.damage) / pState.maxHp // HP before this hit
+        if (bedrockCharges > 0) {
+          // Active — reduce to 1 damage
+          var bedrockSaved = r.damage - 1
+          if (bedrockSaved > 0) pState.currentHp = Math.min(pState.currentHp + bedrockSaved, pState.maxHp)
+          setBedrockCharges(bedrockCharges - 1)
+          addLog({ type: 'player', text: 'Bedrock! Only 1 damage (' + (bedrockCharges - 1) + ' charges left).', tier: 'hit' })
+        } else if (bedrockPercent <= bodyG.hpThreshold && pState.currentHp > 0) {
+          // Trigger — activate charges
+          setBedrockCharges(bodyG.charges)
+          var bedrockSaved2 = r.damage - 1
+          if (bedrockSaved2 > 0) pState.currentHp = Math.min(pState.currentHp + bedrockSaved2, pState.maxHp)
+          setBedrockCharges(bodyG.charges - 1)
+          addLog({ type: 'player', text: 'BEDROCK ACTIVATED! ' + bodyG.charges + ' hits reduced to 1 damage!', tier: 'crit' })
+        }
+      }
+
+      // Spore Cloud (petal body): DAZE all enemies below HP threshold
       if (bodyG && bodyG.effect === 'threshold_aoe_condition' && !sporeCloudUsed) {
-        var hpPercent = pState.currentHp / pState.maxHp
-        if (hpPercent < bodyG.hpThreshold) {
+        var sporePercent = pState.currentHp / pState.maxHp
+        if (sporePercent < bodyG.hpThreshold) {
           setSporeCloudUsed(true)
           updatedBattle.enemies.forEach(function(e) {
             if (!e.isDown) {
               e.statusEffects = applyConditionToEffects(e.statusEffects || [], bodyG.condition, 'gift')
             }
           })
-          addLog({ type: 'condition', text: 'Spore Cloud! All enemies DAZED!', tier: 'crit' })
+          addLog({ type: 'condition', text: 'Spore Cloud! All enemies ' + condName(bodyG.condition) + '!', tier: 'crit' })
         }
       }
 
-      // Toxic Spores (body): chance to poison attacker
+      // Reflect condition (Toxic Spores/POISON, Toxic Presence/POISON)
       if (bodyG && bodyG.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(bodyG.chance)) {
         attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], bodyG.condition, 'gift')
-        addLog({ type: 'condition', text: 'Toxic Spores! ' + attackerEnemy.name + ' poisoned!', tier: 'hit' })
+        addLog({ type: 'condition', text: bodyG.name + '! ' + attackerEnemy.name + ' ' + condName(bodyG.condition) + '!', tier: 'hit' })
       }
 
-      // Vine Parry (sword weapon gift): chance to SLUGGISH attacker when hit
-      var weaponGDef = giftSlots.weapon
+      // Reflect damage (Heat Aura — enemies take damage when they hit you)
+      if (bodyG && bodyG.effect === 'reflect_damage' && attackerEnemy && !attackerEnemy.isDown) {
+        attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - bodyG.value)
+        addLog({ type: 'player', text: bodyG.name + ' burns ' + attackerEnemy.name + ' for ' + bodyG.value + '!', tier: 'hit' })
+        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled!', tier: 'crit' }) }
+      }
+
+      // HP + damage reduction (Tempered — -1 all incoming)
+      if (bodyG && bodyG.effect === 'hp_and_damage_reduction') {
+        pState.currentHp = Math.min(pState.currentHp + bodyG.damageReduction, pState.maxHp)
+      }
+
+      // Dodge bonus (Phase Shift — handled in combat.js via getPassiveTotal)
+      // Burn immunity (Forge Body — handled via condition_immunity in checkConditionResist)
+
+      // Condition reflect (Void Skin — 25% chance condition hits attacker instead)
+      if (bodyG && bodyG.effect === 'condition_reflect' && r.conditionApplied && attackerEnemy && !attackerEnemy.isDown) {
+        if (rollGiftChance(bodyG.chance)) {
+          // Remove from player, apply to attacker
+          pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== r.conditionApplied })
+          attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], r.conditionApplied, 'gift')
+          addLog({ type: 'condition', text: 'Void Skin! ' + condName(r.conditionApplied) + ' reflected to ' + attackerEnemy.name + '!', tier: 'crit' })
+        }
+      }
+
+      // Shadow Step (void body): first attack auto-miss
+      if (bodyG && bodyG.effect === 'first_hit_dodge' && !shadowStepUsed) {
+        pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp)
+        setShadowStepUsed(true)
+        addLog({ type: 'player', text: 'Shadow Step! Attack passes through you!', tier: 'crit' })
+      }
+
+      // Iron Will (blood shield): survive lethal, once per combat
+      if (shieldG && shieldG.effect === 'last_stand' && pState.currentHp <= 0 && !ironWillUsed) {
+        pState.currentHp = 1
+        setIronWillUsed(true)
+        addLog({ type: 'player', text: 'Iron Will! Survived at 1 HP!', tier: 'crit' })
+      }
+
+      // --- WEAPON GIFTS (defensive — some weapon gifts trigger on being hit) ---
+
+      // Reflect condition from weapon (Vine Bind on being hit — no longer used but keep pattern)
       if (weaponGDef && weaponGDef.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(weaponGDef.chance)) {
         attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], weaponGDef.condition, 'gift')
-        addLog({ type: 'condition', text: 'Vine Parry! ' + attackerEnemy.name + ' SLUGGISH!', tier: 'hit' })
+        addLog({ type: 'condition', text: weaponGDef.name + '! ' + attackerEnemy.name + ' ' + condName(weaponGDef.condition) + '!', tier: 'hit' })
       }
 
-      // Fungal Confusion (mind): chance to CHARM attacker
+      // --- MIND GIFTS (defensive) ---
+
+      // Reflect condition from mind (Fungal Confusion)
       if (mindG && mindG.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(mindG.chance)) {
         attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], mindG.condition, 'gift')
-        addLog({ type: 'condition', text: 'Fungal Confusion! ' + attackerEnemy.name + ' turns on allies!', tier: 'crit' })
+        addLog({ type: 'condition', text: mindG.name + '! ' + attackerEnemy.name + ' ' + condName(mindG.condition) + '!', tier: 'crit' })
       }
 
-      // Deep Roots (mind): reduce body condition durations on player by 1
+      // Condition shorten (Deep Roots)
       if (mindG && mindG.effect === 'condition_shorten' && r.conditionApplied && pState) {
         var playerEffects = pState.statusEffects || []
         for (var dri = 0; dri < playerEffects.length; dri++) {
@@ -1250,8 +1403,13 @@ function Game({ character, user, onEndRun }) {
             playerEffects[dri].turnsRemaining = Math.max(1, playerEffects[dri].turnsRemaining - mindG.reduction)
           }
         }
-        if (r.conditionApplied) addLog({ type: 'player', text: 'Deep Roots: condition duration shortened!', tier: 'hit' })
+        addLog({ type: 'player', text: mindG.name + ': condition duration shortened!', tier: 'hit' })
       }
+
+      // Mind condition resist (Mountain Mind — 50% resist FEAR/DAZE/CHARM)
+      // Handled via checkConditionResist in combat.js
+
+      // Decay Aura (bile shield): passive 1 HP/turn to enemies — handled in enemy turn tick
     }
 
     // God mode: invincible — HP never below 1
@@ -1466,6 +1624,18 @@ function Game({ character, user, onEndRun }) {
     if (r.firstHitCrit) {
       addLog({ type: 'player', text: 'Executioner\'s Coin! 2x damage!', tier: 'crit' })
     }
+    if (r.voidStrike) {
+      addLog({ type: 'player', text: 'Void Strike! DEF ignored completely!', tier: 'crit' })
+    }
+    if (r.shadowBlade) {
+      addLog({ type: 'player', text: 'Shadow Blade! Miss turns to glancing blow!', tier: 'hit' })
+    }
+    if (r.entropyHigh) {
+      addLog({ type: 'player', text: 'Entropy Edge surges! +50% damage!', tier: 'crit' })
+    }
+    if (r.entropyLow) {
+      addLog({ type: 'player', text: 'Entropy Edge falters... -25% damage.', tier: 'miss' })
+    }
     if (r.lifestealHeal) {
       addLog({ type: 'player', text: 'Lifesteal: healed ' + r.lifestealHeal + ' HP.', tier: 'hit' })
     }
@@ -1523,43 +1693,130 @@ function Game({ character, user, onEndRun }) {
     var giftBattle = attackOut.newBattle
     var weaponG = giftSlots.weapon
     var mindG2 = giftSlots.mind
+    var bodyG2 = giftSlots.body
     var hitTarget = giftBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
 
     if (r.damage > 0 && hitTarget && !hitTarget.isDown) {
       var wt3 = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
 
-      // Weapon gifts per class
+      // --- PETAL WEAPON GIFTS (class-specific) ---
       if (weaponG && weaponG.appliedWeaponType === wt3) {
         // Briar Flurry (dagger): double strikes apply stacking bleed
         if (weaponG.effect === 'double_strike_bleed' && r.doubleStrike) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
           addLog({ type: 'condition', text: 'Briar Flurry! Stacking bleed on ' + hitTarget.name + '!', tier: 'crit' })
         }
-        // Thorn Reach (spear): +1 damage + first hit condition (tracked per combat)
-        if (weaponG.effect === 'bonus_damage_and_first_hit_condition' && !weaponG._firstHitUsed) {
-          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
-          weaponG._firstHitUsed = true
-          addLog({ type: 'condition', text: 'Thorn Reach! ' + hitTarget.name + ' SLUGGISH!', tier: 'hit' })
+        // Vine Bind (sword): 20% chance enemy skips next turn
+        if (weaponG.effect === 'hit_skip_chance' && rollGiftChance(weaponG.chance)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'DAZE', 'gift')
+          addLog({ type: 'condition', text: 'Vine Bind! ' + hitTarget.name + ' entangled!', tier: 'crit' })
         }
-        // Root Shatter (mace): DEF-ignoring hits apply condition
+        // Thorn Reach (spear): +2 damage + first hit applies 2 BLEED stacks
+        if (weaponG.effect === 'bonus_damage_and_first_hit_condition' && !weaponG._firstHitUsed) {
+          for (var trsi = 0; trsi < (weaponG.conditionStacks || 1); trsi++) {
+            hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          }
+          weaponG._firstHitUsed = true
+          addLog({ type: 'condition', text: 'Thorn Reach! ' + hitTarget.name + ' bleeds from the wound!', tier: 'hit' })
+        }
+        // Root Shatter (mace): DEF-ignoring hits apply DAZE
         if (weaponG.effect === 'def_ignore_condition' && r.damageBreakdown && r.damageBreakdown.defIgnored) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
           addLog({ type: 'condition', text: 'Root Shatter! ' + hitTarget.name + ' DAZED!', tier: 'hit' })
         }
-        // Spore Fist (fists): chance per hit
+        // Harvest (axe): on kill, heal 5 HP + next hit +3 damage
+        if (weaponG.effect === 'kill_heal_and_buff' && r.enemyDefeated) {
+          setPlayerHp(function(hp) { return Math.min(hp + weaponG.healValue, character.maxHp) })
+          setHarvestBuff(weaponG.buffDamage)
+          addLog({ type: 'player', text: 'Harvest! Heal ' + weaponG.healValue + ' HP + next hit +' + weaponG.buffDamage + ' damage!', tier: 'crit' })
+        }
+        // Pollen Fist (fists): 30% chance BLIND + 2 damage
+        if (weaponG.effect === 'hit_condition_and_damage' && rollGiftChance(weaponG.chance)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          hitTarget.currentHp = Math.max(0, hitTarget.currentHp - weaponG.bonusDamage)
+          addLog({ type: 'condition', text: 'Pollen Fist! ' + hitTarget.name + ' BLIND + ' + weaponG.bonusDamage + ' damage!', tier: 'crit' })
+          if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+        }
+        // Hit condition (Spore Fist legacy pattern)
         if (weaponG.effect === 'hit_condition' && rollGiftChance(weaponG.chance)) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
-          addLog({ type: 'condition', text: 'Spore Fist! ' + hitTarget.name + ' BLIND!', tier: 'hit' })
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
         }
-        // Vine Parry (sword): reflect on being hit — already handled in damage-taken section
-        // Wild Growth (axe): heal on kill
+        // Kill heal (Wild Growth legacy)
         if (weaponG.effect === 'kill_heal' && r.enemyDefeated) {
           setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
-          addLog({ type: 'player', text: 'Wild Growth! Heal ' + weaponG.value + ' HP from the kill.', tier: 'hit' })
+          addLog({ type: 'player', text: weaponG.name + '! Heal ' + weaponG.value + ' HP.', tier: 'hit' })
         }
       }
 
-      // Pollen Cloud (mind): on crit, all enemies BLIND
+      // --- UNIVERSAL WEAPON GIFTS (Stone/Bile/Blood/Ember/Void — not class-specific) ---
+      if (weaponG && !weaponG.appliedWeaponType) {
+        // Stagger bonus (Crushing Blow): +25% stagger on all weapons — handled in combat.js
+        // DEF ignore bonus (Earthshatter): +20% DEF ignore — handled in combat.js
+        // Crit multiplier (Avalanche): 2.5x crits — handled in combat.js
+        // Flat damage bonus (Molten Edge): +3 damage — handled in combat.js
+
+        // DEF shred (Acid Edge): reduce enemy DEF by 2 per hit
+        if (weaponG.effect === 'def_shred') {
+          hitTarget.stats = Object.assign({}, hitTarget.stats, { def: Math.max(0, (hitTarget.stats.def || 0) - weaponG.value) })
+          addLog({ type: 'condition', text: 'Acid Edge! ' + hitTarget.name + ' DEF -' + weaponG.value + ' (' + hitTarget.stats.def + ' remaining)!', tier: 'hit' })
+        }
+
+        // Hit condition (Toilet Hands/NAUSEA, Bloodletter/BLEED, Ignite/BURN)
+        if (weaponG.effect === 'hit_condition' && rollGiftChance(weaponG.chance)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
+        }
+
+        // Condition chance bonus (Corrosive Strike): +25% weapon condition chance — handled in combat.js
+
+        // Bleed damage bonus (Savage Strikes): +1 per bleed stack
+        if (weaponG.effect === 'bleed_damage_bonus' && hitTarget.statusEffects) {
+          var bleedStacks = 0
+          for (var bsi = 0; bsi < hitTarget.statusEffects.length; bsi++) {
+            if (hitTarget.statusEffects[bsi].id === 'BLEED') bleedStacks += (hitTarget.statusEffects[bsi].stacks || 1)
+          }
+          if (bleedStacks > 0) {
+            var bleedBonus = bleedStacks * weaponG.value
+            hitTarget.currentHp = Math.max(0, hitTarget.currentHp - bleedBonus)
+            r.damage += bleedBonus
+            addLog({ type: 'player', text: 'Savage Strikes! +' + bleedBonus + ' damage (' + bleedStacks + ' bleed stacks)!', tier: 'hit' })
+            if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+          }
+        }
+
+        // Crit bleed (Haemorrhage): crits apply 2 BLEED stacks
+        if (weaponG.effect === 'crit_bleed' && r.attackRoll && r.attackRoll.tierName === 'crit') {
+          for (var hbi = 0; hbi < weaponG.stacks; hbi++) {
+            hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
+          }
+          addLog({ type: 'condition', text: 'Haemorrhage! ' + weaponG.stacks + ' BLEED stacks from crit!', tier: 'crit' })
+        }
+
+        // Double strike AoE (Firestorm): double strikes splash 2 to others
+        if (weaponG.effect === 'double_strike_aoe' && r.doubleStrike) {
+          giftBattle.enemies.forEach(function(e) {
+            if (!e.isDown && e.id !== hitTarget.id) {
+              e.currentHp = Math.max(0, e.currentHp - weaponG.value)
+              if (e.currentHp <= 0) e.isDown = true
+            }
+          })
+          addLog({ type: 'player', text: 'Firestorm! ' + weaponG.value + ' AoE damage from double strike!', tier: 'crit' })
+        }
+
+        // Void Strike: 10% chance to ignore ALL DEF — handled in combat.js
+        // Shadow Blade: misses deal half damage — handled in combat.js
+        // Entropy Edge: random damage multiplier — handled in combat.js
+      }
+
+      // Track kills for Scent of Blood
+      if (r.enemyDefeated) {
+        setKillsThisCombat(function(k) { return k + 1 })
+      }
+
+      // --- MIND GIFTS (offensive) ---
+
+      // Pollen Cloud (petal mind): on crit, all enemies BLIND
       if (mindG2 && mindG2.effect === 'crit_aoe_condition' && r.attackRoll && r.attackRoll.tierName === 'crit') {
         giftBattle.enemies.forEach(function(e) {
           if (!e.isDown) {
@@ -1568,6 +1825,53 @@ function Game({ character, user, onEndRun }) {
         })
         addLog({ type: 'condition', text: 'Pollen Cloud! All enemies BLIND!', tier: 'crit' })
       }
+
+      // Chain Lightning (ember mind): crits deal 3 AoE to all enemies
+      if (mindG2 && mindG2.effect === 'crit_aoe_damage' && r.attackRoll && r.attackRoll.tierName === 'crit') {
+        giftBattle.enemies.forEach(function(e) {
+          if (!e.isDown && e.id !== hitTarget.id) {
+            e.currentHp = Math.max(0, e.currentHp - mindG2.value)
+            if (e.currentHp <= 0) e.isDown = true
+          }
+        })
+        addLog({ type: 'player', text: 'Chain Lightning! ' + mindG2.value + ' damage to all enemies!', tier: 'crit' })
+      }
+
+      // Scent of Blood (blood mind): +1 damage per kill this combat
+      if (mindG2 && mindG2.effect === 'kill_damage_bonus' && killsThisCombat > 0) {
+        var scentBonus = killsThisCombat * mindG2.value
+        hitTarget.currentHp = Math.max(0, hitTarget.currentHp - scentBonus)
+        r.damage += scentBonus
+        addLog({ type: 'player', text: 'Scent of Blood! +' + scentBonus + ' damage (' + killsThisCombat + ' kills)!', tier: 'hit' })
+        if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+      }
+
+      // Hyperspreader (bile mind): when poisoned enemy dies, all others get POISON
+      if (mindG2 && mindG2.effect === 'poison_spread_on_kill' && r.enemyDefeated) {
+        var deadEnemy = giftBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
+        var wasPoisoned = deadEnemy && deadEnemy.statusEffects && deadEnemy.statusEffects.some(function(c) { return c.id === 'POISON' })
+        if (wasPoisoned) {
+          giftBattle.enemies.forEach(function(e) {
+            if (!e.isDown) {
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], 'POISON', 'gift')
+            }
+          })
+          addLog({ type: 'condition', text: 'Hyperspreader! Poison spreads to all enemies!', tier: 'crit' })
+        }
+      }
+    }
+
+    // Harvest buff: apply bonus damage from previous kill (consumed on use)
+    if (harvestBuff > 0 && r.damage > 0) {
+      // Already factored into damage via combat.js — just clear the buff
+      setHarvestBuff(0)
+    }
+
+    // Body gift: lifesteal (Bloodpact)
+    if (bodyG2 && bodyG2.effect === 'lifesteal' && r.damage > 0) {
+      var giftLifesteal = Math.max(1, Math.round(r.damage * bodyG2.value))
+      setPlayerHp(function(hp) { return Math.min(hp + giftLifesteal, character.maxHp) })
+      addLog({ type: 'player', text: bodyG2.name + ': healed ' + giftLifesteal + ' HP!', tier: 'hit' })
     }
 
     setPendingAttackResult(null)
@@ -2485,9 +2789,15 @@ function Game({ character, user, onEndRun }) {
       else if (safeRoomSlotChoice === 'mind' && giftDef3) options = giftDef3.mind
       else if (safeRoomSlotChoice === 'shield' && giftDef3) options = giftDef3.shield
       else if (safeRoomSlotChoice === 'weapon' && giftDef3) {
-        var wt2 = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
-        var wEffect = giftDef3.weapon[wt2]
-        if (wEffect) options = [wEffect]
+        if (Array.isArray(giftDef3.weapon)) {
+          // Universal weapon gifts (Stone/Bile/Blood/Ember/Void)
+          options = giftDef3.weapon
+        } else {
+          // Class-specific weapon gifts (Petal)
+          var wt2 = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+          var wEffect = giftDef3.weapon[wt2]
+          if (wEffect) options = [wEffect]
+        }
       }
       var typeColors = { defence: 'border-blue/50 bg-blue/5', attack: 'border-red-400/50 bg-red-400/5', other: 'border-amber-400/50 bg-amber-400/5' }
       var typeLabels = { defence: 'Defence', attack: 'Attack', other: 'Utility' }
