@@ -174,6 +174,112 @@ function getMerchantItems(floorId) {
   return stock.filter(Boolean)
 }
 
+// Get peddler inventory — consumables only: health potions + random consumables
+function getPeddlerItems(floorId) {
+  var prefix = getFloorLootPrefix(floorId)
+
+  // Always stock 2x health potions
+  var stock = [getItem('health_potion'), getItem('health_potion')]
+
+  // Build pool of consumables from floor's loot tables
+  var pool = []
+  var tables = [prefix + '_standard', prefix + '_elite']
+  for (var ti = 0; ti < tables.length; ti++) {
+    var table = LOOT_TABLES[tables[ti]]
+    if (!table || !table.entries) continue
+    for (var i = 0; i < table.entries.length; i++) {
+      var entry = table.entries[i]
+      var item = ITEMS[entry.itemId]
+      if (!item || item.type !== 'consumable' || entry.itemId === 'health_potion') continue
+      var alreadyIn = pool.some(function(p) { return p.itemId === entry.itemId })
+      if (!alreadyIn) pool.push({ itemId: entry.itemId, weight: entry.weight })
+    }
+  }
+
+  // Pick 3-4 random consumables
+  var extraCount = 3 + Math.floor(Math.random() * 2)
+  for (var n = 0; n < extraCount && pool.length > 0; n++) {
+    var totalWeight = 0
+    for (var wi = 0; wi < pool.length; wi++) totalWeight += pool[wi].weight
+    var pick = Math.random() * totalWeight
+    var cumulative = 0
+    for (var pi = 0; pi < pool.length; pi++) {
+      cumulative += pool[pi].weight
+      if (pick <= cumulative) {
+        stock.push(getItem(pool[pi].itemId))
+        pool.splice(pi, 1)
+        break
+      }
+    }
+  }
+
+  return stock.filter(Boolean)
+}
+
+// Get tailor inventory — zone staples + random equipment + 1 premium CHA-gated item
+function getTailorItems(floorId, zoneDef) {
+  var prefix = getFloorLootPrefix(floorId)
+
+  // Zone staple items (guaranteed)
+  var stock = []
+  var staples = (zoneDef && zoneDef.tailorStaples) || []
+  for (var si = 0; si < staples.length; si++) {
+    var staple = getItem(staples[si])
+    if (staple) stock.push(staple)
+  }
+
+  // Build pool of equipment from floor's loot tables
+  var pool = []
+  var tables = [prefix + '_standard', prefix + '_elite']
+  for (var ti = 0; ti < tables.length; ti++) {
+    var table = LOOT_TABLES[tables[ti]]
+    if (!table || !table.entries) continue
+    for (var i = 0; i < table.entries.length; i++) {
+      var entry = table.entries[i]
+      var item = ITEMS[entry.itemId]
+      if (!item) continue
+      // Equipment only: weapons, armour, rings, amulets (not consumables, relics, junk)
+      if (item.type !== 'weapon' && item.type !== 'armour' && item.type !== 'ring' && item.type !== 'amulet') continue
+      // Skip items already in staples
+      var isStaple = staples.indexOf(entry.itemId) !== -1
+      if (isStaple) continue
+      var alreadyIn = pool.some(function(p) { return p.itemId === entry.itemId })
+      if (!alreadyIn) pool.push({ itemId: entry.itemId, weight: entry.weight })
+    }
+  }
+
+  // Pick 2-3 random equipment
+  var extraCount = 2 + Math.floor(Math.random() * 2)
+  for (var n = 0; n < extraCount && pool.length > 0; n++) {
+    var totalWeight = 0
+    for (var wi = 0; wi < pool.length; wi++) totalWeight += pool[wi].weight
+    var pick = Math.random() * totalWeight
+    var cumulative = 0
+    for (var pi = 0; pi < pool.length; pi++) {
+      cumulative += pool[pi].weight
+      if (pick <= cumulative) {
+        stock.push(getItem(pool[pi].itemId))
+        pool.splice(pi, 1)
+        break
+      }
+    }
+  }
+
+  // Premium item (CHA-gated) — marked so UI knows to gate it
+  var premiumId = zoneDef && zoneDef.tailorPremium
+  if (premiumId) {
+    var premiumItem = getItem(premiumId)
+    if (premiumItem) {
+      premiumItem.premium = true
+      // Premium items have inflated prices
+      premiumItem.buyPrice = Math.round((premiumItem.buyPrice || 50) * 2.5)
+      stock.push(premiumItem)
+    }
+  }
+
+  return stock.filter(Boolean)
+}
+
 // --- Consumable effect application ---
 // Returns a description of what happened + state changes
 
@@ -249,6 +355,8 @@ export {
   getItem,
   getItemsByType,
   getMerchantItems,
+  getPeddlerItems,
+  getTailorItems,
   applyConsumable,
   getFloorLootPrefix,
 }

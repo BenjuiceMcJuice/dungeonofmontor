@@ -508,13 +508,16 @@ function Game({ character, user, onEndRun }) {
     }
     // --- Merchant / Quest NPC --- NPC entity
     else if (content && (chamber.type === 'merchant' || chamber.type === 'quest_npc')) {
+      var zoneDef2 = ZONES[newZone.zoneId] || null
       var npc = {
         id: 'npc_' + targetId,
         type: chamber.type,
-        name: chamber.type === 'merchant' ? 'Wandering Vendor' : (content.npcName || 'Stranger'),
+        vendorType: content.vendorType || (chamber.type === 'merchant' ? 'tailor' : 'peddler'),
+        name: chamber.type === 'merchant' ? (zoneDef2 && zoneDef2.merchantName ? zoneDef2.merchantName : 'Vendor') : (content.npcName || 'Peddler'),
+        role: chamber.type === 'merchant' ? (zoneDef2 && zoneDef2.merchantRole ? zoneDef2.merchantRole : '') : 'Shouldn\'t be down here.',
         description: content.description,
         items: content.items || [],
-        reward: content.reward || null,
+        reward: null,
         interacted: false,
         showSell: false,
       }
@@ -3468,7 +3471,7 @@ function Game({ character, user, onEndRun }) {
                     >
                       <ChamberIcon iconKey="npc" theme="garden" scale={4} />
                       <span className="text-blue text-[9px] font-sans font-bold">
-                        {npc.type === 'merchant' ? 'TRADE' : 'TALK'}
+                        {npc.vendorType === 'tailor' ? 'TRADE' : 'BUY'}
                       </span>
                     </button>
                     <p className="text-ink-dim text-xs italic text-center max-w-xs">{npc.description}</p>
@@ -3623,124 +3626,103 @@ function Game({ character, user, onEndRun }) {
             backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
             backgroundSize: '8px 8px',
           }
-          if (npc.type === 'merchant') {
-            return (
-              <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
-                <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
-                <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
-                  <div className="flex flex-col">
-                    <span className="font-display text-lg text-gold">{npc.name}</span>
-                    <span className="text-gold text-xs font-sans">{playerGold} gold</span>
-                  </div>
-                  <button onClick={handleCloseNpc}
-                    className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
-                    Leave
-                  </button>
+          // Shared vendor UI for both tailor and peddler
+          var vendorAccent = npc.vendorType === 'tailor' ? 'gold' : 'emerald-400'
+          var vendorLabel = npc.vendorType === 'tailor' ? 'TRADE' : 'BUY'
+          var npcChaMod = getModifier(character.stats.cha || 10)
+          var playerCha = character.stats.cha || 10
+
+          return (
+            <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
+              <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
+                <div className="flex flex-col">
+                  <span className={'font-display text-lg text-' + vendorAccent}>{npc.name}</span>
+                  {npc.role && <span className="text-ink-dim text-[10px] font-sans italic">{npc.role}</span>}
+                  <span className="text-gold text-xs font-sans">{playerGold} gold</span>
                 </div>
-                <div className="flex gap-2 px-4 pt-3">
-                  <button onClick={function() { updateNpc(function(n) { return Object.assign({}, n, { showSell: false }) }) }}
+                <button onClick={handleCloseNpc}
+                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                  Leave
+                </button>
+              </div>
+              <div className="flex gap-2 px-4 pt-3">
+                <button onClick={function() { updateNpc(function(n) { return Object.assign({}, n, { showSell: false }) }) }}
+                  className={'px-4 py-1.5 rounded text-sm font-sans border transition-colors ' +
+                    (!npc.showSell ? 'border-' + vendorAccent + ' text-' + vendorAccent + ' bg-' + vendorAccent + '/10' : 'border-border text-ink-dim hover:text-ink')}>
+                  Buy
+                </button>
+                {playerInventory.length > 0 && (
+                  <button onClick={handleNpcSellToggle}
                     className={'px-4 py-1.5 rounded text-sm font-sans border transition-colors ' +
-                      (!npc.showSell ? 'border-gold text-gold bg-gold/10' : 'border-border text-ink-dim hover:text-ink')}>
-                    Buy
+                      (npc.showSell ? 'border-gold text-gold bg-gold/10' : 'border-border text-ink-dim hover:text-ink')}>
+                    Sell
                   </button>
-                  {playerInventory.length > 0 && (
-                    <button onClick={handleNpcSellToggle}
-                      className={'px-4 py-1.5 rounded text-sm font-sans border transition-colors ' +
-                        (npc.showSell ? 'border-gold text-gold bg-gold/10' : 'border-border text-ink-dim hover:text-ink')}>
-                      Sell
-                    </button>
-                  )}
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-                  {!npc.showSell && npc.items.map(function(item, i) {
-                    var npcBasePr = item.buyPrice || item.cost || 0
-                    var npcChaMod = getModifier(character.stats.cha || 10)
-                    var price = Math.max(1, npcBasePr - Math.max(0, Math.round(npcBasePr * npcChaMod * 0.05)))
-                    var canAfford = playerGold >= price
-                    return (
-                      <div key={'buy-' + i} className="flex items-center justify-between p-4 rounded-lg border border-border-hl bg-surface text-sm font-sans">
-                        <div className="flex flex-col items-start">
-                          <span className="text-ink text-base">{item.name}</span>
-                          <span className="text-ink-faint text-xs">
-                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg (' + (item.weaponType || 'weapon') + ')' :
-                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                             item.description || item.type}
-                          </span>
+                )}
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+                {!npc.showSell && npc.items.map(function(item, i) {
+                  var npcBasePr = item.buyPrice || item.cost || 0
+                  var price = Math.max(1, npcBasePr - Math.max(0, Math.round(npcBasePr * npcChaMod * 0.05)))
+                  var canAfford = playerGold >= price
+                  var isPremium = item.premium
+                  var chaLocked = isPremium && playerCha < 12
+                  return (
+                    <div key={'buy-' + i} className={'flex items-center justify-between p-4 rounded-lg border text-sm font-sans ' +
+                      (isPremium ? 'border-amber-400/40 bg-amber-400/5' : 'border-border-hl bg-surface')}>
+                      <div className="flex flex-col items-start flex-1 mr-3">
+                        <div className="flex items-center gap-2">
+                          <span className={'text-base ' + (isPremium ? 'text-amber-300' : 'text-ink')}>{item.name}</span>
+                          {isPremium && <span className="text-[9px] text-amber-400 uppercase tracking-wide border border-amber-400/30 px-1 rounded">Premium</span>}
                         </div>
+                        <span className="text-ink-faint text-xs">
+                          {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg (' + (item.weaponType || 'weapon') + ')' :
+                           item.type === 'armour' && item.slot === 'helmet' ? 'helmet, +' + (item.defBonus || 0) + ' DEF' :
+                           item.type === 'armour' && item.slot === 'boots' ? 'boots' + (item.agiBonus ? ', +' + item.agiBonus + ' AGI' : '') + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') :
+                           item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
+                           item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
+                           item.type === 'ring' ? 'ring' :
+                           item.type === 'amulet' ? 'amulet' :
+                           item.description || item.type}
+                        </span>
+                        {item.description && <span className="text-ink-faint text-[10px] italic mt-0.5">{item.description}</span>}
+                      </div>
+                      {chaLocked ? (
+                        <span className="text-amber-400/60 text-[10px] font-sans text-right leading-tight">Requires<br/>CHA 12+</span>
+                      ) : (
                         <button onClick={function() { if (canAfford) handleNpcBuy(item) }}
                           disabled={!canAfford}
                           className={'text-sm px-4 py-1.5 rounded border transition-colors ' +
                             (canAfford ? 'text-gold border-gold/40 hover:border-gold cursor-pointer' : 'text-ink-faint border-border opacity-50')}>
                           {price}g
                         </button>
-                      </div>
-                    )
-                  })}
-                  {!npc.showSell && npc.items.length === 0 && (
-                    <p className="text-ink-faint text-sm italic text-center py-4">Sold out.</p>
-                  )}
-                  {npc.showSell && playerInventory.map(function(item, i) {
-                    var baseSellNpc = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
-                    var sellChaMod = getModifier(character.stats.cha || 10)
-                    var sellPrice = Math.max(1, baseSellNpc + Math.max(0, Math.round(baseSellNpc * sellChaMod * 0.05)))
-                    return (
-                      <div key={'sell-' + i} className="flex items-center justify-between p-4 rounded-lg border border-border-hl bg-surface text-sm font-sans">
-                        <div className="flex flex-col items-start">
-                          <span className="text-ink text-base">{item.name}</span>
-                          <span className="text-ink-faint text-xs">
-                            {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                             item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
-                             item.description || item.type}
-                          </span>
-                        </div>
-                        <button onClick={function() { handleNpcSell(i, sellPrice) }}
-                          className="text-sm text-gold px-4 py-1.5 rounded border border-gold/40 hover:border-gold cursor-pointer transition-colors">
-                          Sell {sellPrice}g
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          }
-          // Quest NPC
-          return (
-            <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={interactionBg}>
-              <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg/80">
-                <span className="font-display text-lg text-blue">{npc.name}</span>
-                <button onClick={handleCloseNpc}
-                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
-                  Leave
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center gap-4">
-                <ChamberIcon iconKey="npc" theme="garden" scale={5} />
-                <p className="text-ink text-base italic text-center max-w-sm">{npc.description}</p>
-                {!npc.interacted ? (
-                  <div className="flex flex-col gap-3 w-full max-w-sm">
-                    <button onClick={handleNpcHelp}
-                      className="w-full p-4 rounded-lg border-2 border-blue/40 bg-surface text-base font-sans text-blue hover:border-blue transition-colors">
-                      Help them {npc.reward && npc.reward.gold ? '(reward: ' + npc.reward.gold + 'g)' : ''}
-                    </button>
-                    <button onClick={handleCloseNpc}
-                      className="w-full p-4 rounded-lg border border-border bg-surface text-base font-sans text-ink-dim hover:text-ink transition-colors">
-                      Ignore and leave
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <p className="text-blue text-lg">They thank you.</p>
-                    {npc.reward && npc.reward.gold && (
-                      <p className="text-gold text-lg font-display">+{npc.reward.gold} gold</p>
-                    )}
-                    <button onClick={handleCloseNpc}
-                      className="py-3 px-8 rounded-lg bg-surface border border-border text-ink-dim font-sans text-base hover:text-ink transition-colors">
-                      Continue
-                    </button>
-                  </div>
+                      )}
+                    </div>
+                  )
+                })}
+                {!npc.showSell && npc.items.length === 0 && (
+                  <p className="text-ink-faint text-sm italic text-center py-4">Sold out.</p>
                 )}
+                {npc.showSell && playerInventory.map(function(item, i) {
+                  var baseSellNpc = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
+                  var sellPrice = Math.max(1, baseSellNpc + Math.max(0, Math.round(baseSellNpc * npcChaMod * 0.05)))
+                  return (
+                    <div key={'sell-' + i} className="flex items-center justify-between p-4 rounded-lg border border-border-hl bg-surface text-sm font-sans">
+                      <div className="flex flex-col items-start">
+                        <span className="text-ink text-base">{item.name}</span>
+                        <span className="text-ink-faint text-xs">
+                          {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
+                           item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
+                           item.description || item.type}
+                        </span>
+                      </div>
+                      <button onClick={function() { handleNpcSell(i, sellPrice) }}
+                        className="text-sm text-gold px-4 py-1.5 rounded border border-gold/40 hover:border-gold cursor-pointer transition-colors">
+                        Sell {sellPrice}g
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )

@@ -2,7 +2,7 @@
 // Data loaded from JSON — see src/data/zones.json for floor and zone definitions
 
 import { generateCombatEnemies, generateBoss } from './enemies.js'
-import { getMerchantItems } from './loot.js'
+import { getMerchantItems, getPeddlerItems, getTailorItems } from './loot.js'
 import { generateJunkPiles, placeTerminal, placeTreasure } from './junkpiles.js'
 import zoneData from '../data/zones.json'
 
@@ -267,14 +267,16 @@ function generateChamberContent(chamber, difficulty, zoneDef) {
     content.hpRecovery = 0.35
     content.description = 'A sheltered space. The air is still.'
   } else if (chamber.type === 'merchant') {
-    content.items = getMerchantItems(zd.floorId)
-    content.description = 'A hooded figure sits cross-legged beside a threadbare mat of wares.'
+    content.items = getTailorItems(zd.floorId, zd)
+    content.vendorType = 'tailor'
+    content.description = (zd.merchantName || 'A vendor') + ' has set up shop. Equipment and wares on display.'
   } else if (chamber.type === 'empty') {
     content.description = 'A quiet space. Piles of junk litter the floor.'
   } else if (chamber.type === 'quest_npc') {
-    content.description = 'A figure leans against the wall. They raise a hand weakly.'
-    content.npcName = 'Wounded Traveller'
-    content.reward = { gold: 10 }
+    content.items = getPeddlerItems(zd.floorId)
+    content.vendorType = 'peddler'
+    content.npcName = 'Scavenging Peddler'
+    content.description = 'A hunched figure with a bulging sack. Potions clink inside.'
   } else if (chamber.type === 'event') {
     content.description = 'The air thickens. You feel watched.'
   } else if (chamber.type === 'stairwell_entry') {
