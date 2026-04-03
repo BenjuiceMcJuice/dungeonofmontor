@@ -87,16 +87,19 @@ function applyCondition(statusEffects, conditionId, source) {
     damageTakenMultiplier: def.damageTakenMultiplier || 1,
   }
 
-  // Non-stackable: remove existing condition in same slot, add new one
-  // If re-applying the SAME condition, preserve accumulated state (e.g. poison stat drains)
+  // Re-applying the SAME condition refreshes it, preserving accumulated state
+  // DIFFERENT conditions coexist — no slot replacement (you can be poisoned AND burning)
   var existing = statusEffects.find(function(c) { return c.id === def.id })
   if (existing) {
     // Keep accumulated stat drain progress
     if (existing.drainedStats) condition.drainedStats = Object.assign({}, existing.drainedStats)
     if (existing.statDrainIndex) condition.statDrainIndex = existing.statDrainIndex
+    // Replace same condition (refresh duration)
+    var filtered = statusEffects.filter(function(c) { return c.id !== def.id })
+    return filtered.concat([condition])
   }
-  var filtered = statusEffects.filter(function(c) { return c.slot !== def.slot })
-  return filtered.concat([condition])
+  // New condition — add alongside existing ones
+  return statusEffects.concat([condition])
 }
 
 // Remove a condition by ID
