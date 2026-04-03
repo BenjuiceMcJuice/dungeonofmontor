@@ -76,6 +76,18 @@ function Preparation({ character, onReady }) {
         if (returnItem) setInventory(function(inv) { return inv.concat([returnItem]) })
         return Object.assign({}, prev, { armour: boughtItem })
       })
+    } else if (boughtItem.slot === 'helmet') {
+      setEquipped(function(prev) {
+        var returnItem = prev.helmet
+        if (returnItem) setInventory(function(inv) { return inv.concat([returnItem]) })
+        return Object.assign({}, prev, { helmet: boughtItem })
+      })
+    } else if (boughtItem.slot === 'boots') {
+      setEquipped(function(prev) {
+        var returnItem = prev.boots
+        if (returnItem) setInventory(function(inv) { return inv.concat([returnItem]) })
+        return Object.assign({}, prev, { boots: boughtItem })
+      })
     } else {
       setInventory(function(prev) { return prev.concat([boughtItem]) })
     }
