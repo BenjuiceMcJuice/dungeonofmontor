@@ -5,7 +5,7 @@ import { generateGardenZone, generateFloor, generateChamberContent, getAdjacentC
 import { db } from '../lib/firebase.js'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateCombatLoot, generateChestLoot, getMerchantItems, getItem, getItemsByType, applyConsumable, ITEMS } from '../lib/loot.js'
-import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspectJunkItem, consumeJunk, CLEAN_CONFIG } from '../lib/junkpiles.js'
+import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspectJunkItem, consumeJunk, getTreasure, CLEAN_CONFIG } from '../lib/junkpiles.js'
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { generateCombatEnemies } from '../lib/enemies.js'
 import { getGiftDef, getGiftEffect, getWeaponGiftEffect, rollGiftChance } from '../lib/gifts.js'
@@ -360,7 +360,18 @@ function Game({ character, user, onEndRun }) {
   var [montorWhisper, setMontorWhisper] = useState(null)
   var [searchingPileId, setSearchingPileId] = useState(null)
   var [searchResult, setSearchResult] = useState(null)
-  var [playerJunkBag, setPlayerJunkBag] = useState([])
+  var [playerJunkBag, setPlayerJunkBag] = useState(function() {
+    if (character.godAllGifts) {
+      var allFloors = ['grounds', 'underground', 'underbelly', 'quarters', 'works', 'deep']
+      var treasures = []
+      for (var fi = 0; fi < allFloors.length; fi++) {
+        var t = getTreasure(allFloors[fi])
+        if (t) treasures.push(Object.assign({}, t, { isTreasure: true, count: 1 }))
+      }
+      return treasures
+    }
+    return []
+  })
   var logRef = useRef(null)
 
   // Init floor — start at Garden

@@ -12,6 +12,7 @@ function Preparation({ character, onReady }) {
   var [showGuide, setShowGuide] = useState(false)
   var [godInvincible, setGodInvincible] = useState(false)
   var [godOneShot, setGodOneShot] = useState(false)
+  var [godAllGifts, setGodAllGifts] = useState(false)
   var [freePoints, setFreePoints] = useState(startConfig.freeStatPoints || 10)
   var [gold, setGold] = useState(character.gold)
   var [inventory, setInventory] = useState(character.inventory.slice())
@@ -149,6 +150,7 @@ function Preparation({ character, onReady }) {
     character.gold = gold
     character.godInvincible = godInvincible
     character.godOneShot = godOneShot
+    character.godAllGifts = godAllGifts
     onReady(character)
   }
 
@@ -291,6 +293,11 @@ function Preparation({ character, onReady }) {
               <input type="checkbox" checked={godOneShot} onChange={function() { setGodOneShot(!godOneShot) }}
                 className="w-4 h-4 accent-red-400" />
               <span className={'text-xs font-sans ' + (godOneShot ? 'text-red-400' : 'text-ink-faint')}>One-Shot</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" checked={godAllGifts} onChange={function() { setGodAllGifts(!godAllGifts) }}
+                className="w-4 h-4 accent-purple-400" />
+              <span className={'text-xs font-sans ' + (godAllGifts ? 'text-purple-400' : 'text-ink-faint')}>All Gifts</span>
             </label>
           </div>
         </div>
