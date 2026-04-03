@@ -184,6 +184,7 @@ function Game({ character, user, onEndRun }) {
   var [gamePhase, setGamePhase] = useState('doors')
   var [chamberContent, setChamberContent] = useState(null)
   var [totalXp, setTotalXp] = useState(0)
+  var [lastXpGained, setLastXpGained] = useState(0)
   var [playerHp, setPlayerHp] = useState(character.maxHp)
   var [playerGold, setPlayerGold] = useState(character.gold || 0)
   var [chambersCleared, setChambersCleared] = useState(0)
@@ -753,12 +754,13 @@ function Game({ character, user, onEndRun }) {
     setSearchSaveDiceDisplay(null)
 
     if (pendingEnemy) {
-      // Generate low-level enemies from zone pool (always encounter level 1)
+      // Generate enemies scaled by search level
+      var junkEnemyLevel = (searchResult && searchResult.enemyLevel) || 1
+      var junkEnemyMax = (searchResult && searchResult.enemyMaxCount) || 2
       var zoneDef = ZONES[zone.zoneId] || null
       var pool = zoneDef ? zoneDef.encounterPools : null
-      var enemies = generateCombatEnemies('seasoned', 1, pool)
-      // Cap at 1-2 enemies for junk encounters
-      if (enemies.length > 2) enemies = enemies.slice(0, 2)
+      var enemies = generateCombatEnemies('seasoned', junkEnemyLevel, pool)
+      if (enemies.length > junkEnemyMax) enemies = enemies.slice(0, junkEnemyMax)
       startCombat(enemies, zone, zone.playerPosition)
       // Ambush: enemy gets first strike — must also fix turn order
       // so currentTurnIndex points to an enemy, not the player
@@ -1105,6 +1107,7 @@ function Game({ character, user, onEndRun }) {
           var xpGained = calculateXp(tickedBattle)
           var newXp = totalXp + xpGained
           setTotalXp(newXp)
+          setLastXpGained(xpGained)
           checkLevelUp(newXp)
           transitionGuardRef.current = Date.now(); guardedSetCombatPhase('victory')
           return
@@ -1585,6 +1588,7 @@ function Game({ character, user, onEndRun }) {
       var xpGained = calculateXp(updatedBattle)
       var newXp = totalXp + xpGained
       setTotalXp(newXp)
+      setLastXpGained(xpGained)
       checkLevelUp(newXp)
       setBattle(updatedBattle)
       guardedSetCombatPhase('victory')
@@ -4318,7 +4322,8 @@ function Game({ character, user, onEndRun }) {
           <h1 className="font-display text-4xl text-gold">Victory</h1>
           <p className="text-ink text-base italic">The chamber falls silent.</p>
           <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs">
-            <p className="text-ink text-sm">XP: <span className="text-gold font-display text-xl">{totalXp}</span></p>
+            <p className="text-green-400 font-display text-lg">+{lastXpGained} XP</p>
+            <p className="text-ink-dim text-sm mt-1">Total: {totalXp} XP</p>
             <p className="text-ink-dim text-sm mt-1">HP: {playerHp}/{character.maxHp}</p>
           </div>
 
