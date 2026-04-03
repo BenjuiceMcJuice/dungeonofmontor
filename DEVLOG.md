@@ -111,12 +111,20 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-02 | Balance: Thorough/Deep Clean risk+reward increased | ✅ Done |
 | 2026-04-02 | Adrenaline rebalanced — +6 STR for 2 turns, crash: 50% skip, -3 STR | ✅ Done |
 | 2026-04-02 | **Montor's Gift system fully implemented** — gifts.json, gifts.js, safe room multi-step overlay, 4 slots (body/mind/weapon/shield), all 16 petal effects wired | ✅ Done |
+| 2026-04-03 | 11 bug fixes — ambush lock, FEAR flash, zone door black screen, equip bugs, render fallthrough recovery | ✅ Done |
+| 2026-04-03 | Equipment expansion — 37+ items, 4 new slots (helmet/boots/amulet/rings), 2 set bonuses, inventory reorg | ✅ Done |
+| 2026-04-03 | All 6 gift types wired — stone/bile/blood/ember/void added, 429 lines combat integration | ✅ Done |
+| 2026-04-03 | NPC vendor split — Tailor (zone equipment + CHA premium) + Peddler (consumables) | ✅ Done |
+| 2026-04-03 | Multiple conditions coexist, condition enhancer items, dual wield sword+dagger | ✅ Done |
+| 2026-04-03 | Stats/combat polish — XP on victory, XP bar, END→regen, CHA→premium, How It Works guide | ✅ Done |
+| 2026-04-03 | ErrorBoundary for iOS crash diagnosis, bugs.md tracker created | ✅ Done |
+| 2026-04-03 | Docs consolidation — 27 fragmented files → 5 clean topic docs, Montor narrative rewrite | ✅ Done |
 |            | **Next up** | |
+|            | Diagnose Underground black screen (ErrorBoundary should capture details) | ⬜ |
 |            | Wire remaining passives — reflect_conditions, last_stand, see_enemy_hp_exact | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
 |            | Gift leveling (Hades-style) + mono-gift synergy bonuses | ⬜ |
-|            | 5 more gift types — stone, bile, blood, ember, void | ⬜ |
 |            | The Dump — pre-run junk trade hub for permanent unlocks | ⬜ |
 
 ---
