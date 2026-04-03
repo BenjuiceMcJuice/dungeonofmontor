@@ -24,86 +24,135 @@ Players are always the intruders. You're in his house. You're going through his 
 
 ---
 
-## 2. Montor's Gifts
+## 2. The Items & The Magic — The Core Narrative
 
-### Overview
+Montor's dungeon is full of his belongings. Six of them are special — tacky, sentimental family heirlooms that he treasures above all else. Unknown to Montor, these items also contain ancient magical power. A parasite. A corruption. The magic doesn't belong in them and Montor can sense it — something's wrong with his things, but he doesn't know what.
 
-Each floor of the dungeon is saturated with one of Montor's Gifts -- elemental essences that belong to him. Players steal these powers by finding and breaking Montor's prized possessions hidden in junk piles. The breaking is irreversible. Montor is furious.
+**The player** wants the magic. **Montor** wants his things back. These goals are in direct conflict — until they aren't.
 
-### The Treasures
+### The Duality
 
-| Floor | Treasure | How you break it | Gift released |
-|---|---|---|---|
-| 0 -- The Grounds | Montor's Favourite Gnome | Kick it. Gerald's head pops off. | **Petal** |
-| -1 -- The Underground | Montor's Gravy Boat | Tip it over. The gravy never stops. | **Stone** |
-| -2 -- The Underbelly | Montor's Toilet Seat | Slam the lid. It cracks in half. | **Bile** |
-| -3 -- The Quarters | Montor's Music Box | Wind it backwards. The melody inverts. | **Blood** |
-| -4 -- The Works | Montor's Best Tongs | Bend them. They snap. | **Ember** |
-| -5 -- The Deep | Montor's Night Light | Blow it out. The darkness rushes in. | **Void Shard** |
+To Montor, the Favourite Gnome is Gerald. He raised him from a pebble. The magic inside Gerald is irrelevant — he just wants his gnome.
 
-### The 6 Gifts
+To the player, Gerald is a vessel containing the Petal gift. The gnome is irrelevant — you just want the power.
 
-| Gift | Theme | Colour |
+By **smashing** the item, you separate the magic from the object. You get the power. The item is destroyed — or rather, the magic is drained from it. What's left is just a gnome again. Just a gravy boat. Just a toilet seat. Empty of power, but full of memory.
+
+By **giving** the empty husk back to Montor, you return what matters to him. He doesn't care that the magic is gone. He cares that Gerald is back, even in pieces.
+
+**This is the entire game.** The dungeon, the combat, the builds — they're the vehicle. The story is about a lonely old man and his things.
+
+### The Rules
+
+1. **You MUST smash an item to unlock its gift.** There is no other way to gain the power. Montor won't teach you. The terminals won't help. You must break his stuff.
+
+2. **Montor will not accept an un-smashed item.** If you try to give him Gerald while the magic is still inside, he refuses. "That's not right. Something's in it. Take it away." He can feel the corruption. He doesn't want it back until it's clean.
+
+3. **Once smashed, the gift is banked permanently.** It persists across runs. On future runs you can apply banked gifts at terminals — one gift per terminal, one terminal per zone.
+
+4. **On later runs, the item reappears.** Gerald is in the garden again every run. If you've already banked Petal, finding Gerald again gives you a choice: smash again (no benefit, just annoys Montor) or carry the empty husk to a safe room and **give it back**.
+
+5. **Giving items back is the endgame.** Once you're strong enough (all gifts banked across many runs), you can carry all 6 items through the dungeon without smashing any, giving each one back to Montor at safe rooms. Reach the Domain. Montor is in his throne room. All his things returned. Credits roll.
+
+### The Emotional Arc Across a Full Playthrough
+
+| Phase | Strategy | Montor's reaction |
 |---|---|---|
-| Petal | Nature -- pollen, thorns, vines, healing | Green |
-| Stone | Earth -- rock, weight, cold, endurance | Blue-grey |
-| Bile | Decay -- acid, rot, disease, weakening | Sickly yellow |
-| Blood | Flesh -- life, pain, regeneration, hunger | Crimson |
-| Ember | Fire -- heat, metal, forge, destruction | Orange |
-| Void Shard | Chaos -- shadow, entropy, dice manipulation | Black |
-
-### Application Slots
-
-Gifts are applied at safe rooms between floors. 4 slots are available:
-
-| Slot | Effect type |
-|---|---|
-| Body | Passive stat/mechanic bonus |
-| Mind | Passive perception/control bonus |
-| Weapon | Enchantment on equipped weapon |
-| Shield | Enchantment on equipped shield |
-
-One active boon per slot. Applying a new boon to an occupied slot replaces the old one permanently.
-
-### Current State: Petal Gift (fully implemented)
-
-The Petal gift is the only gift type currently implemented. It has 16 effects across all 4 slots, each with full and partial power versions:
-
-| Slot | Boon name | Full effect | Partial effect |
-|---|---|---|---|
-| Body | Bloomheart | Regen 2 HP per chamber | 1 HP per chamber |
-| Body | Thornhide | Reflect 2 damage on hit | Reflect 1 |
-| Body | Barkweave | +2 DEF permanently | +1 DEF |
-| Body | Roothold | Immune to knockback/stagger | 50% resist |
-| Mind | Pollen Sense | Searches always find something, +2 PER | +1 PER only |
-| Mind | Thorn Instinct | +2 initiative permanently | +1 initiative |
-| Mind | Verdant Calm | Immune to FEAR | 50% FEAR resist |
-| Mind | Root Memory | Reveal terminal location on floor | Narrow search area |
-| Weapon | Lifethorn | Heal 2 HP on each hit | Heal 1 HP |
-| Weapon | Vine Lash | 20% chance to POISON on hit | 10% chance |
-| Weapon | Thorn Strike | +2 damage permanently | +1 damage |
-| Weapon | Petal Edge | Crits apply BLEED | 50% chance |
-| Shield | Bark Shield | Blocking heals 3 HP | Heals 1 HP |
-| Shield | Thorn Guard | Blocking reflects 2 damage | Reflects 1 |
-| Shield | Pollen Burst | Blocking has 20% chance to DAZE | 10% chance |
-| Shield | Root Anchor | +5% block chance | +2% block chance |
-
-Gift activation uses a d20 + WIS roll at the safe room. Montor demands a sacrifice before allowing activation. Roll determines full/partial/no effect.
-
-### Future: 5 More Gift Types (planned)
-
-Stone, Bile, Blood, Ember, and Void Shard gifts are fully designed (see design specs) but not yet implemented in code. Each follows the same 4-slot pattern with effects themed to their element. Implementation is on the backlog.
+| Early runs | Smash everything — you need power to survive | Devastated. Hostile whispers. "You broke Gerald." |
+| Mid runs | Smash new gifts, give back ones you've already drained | Conflicted. Some warmth. "...you got it out. It's just a gnome again." |
+| Final run | Give everything back — you're powerful enough | Overwhelmed. Quiet. Home. The credits show Montor in a plain room, surrounded by his things. |
 
 ---
 
-## 3. Endgame Vision (planned)
+## 3. Montor's Gifts — Mechanics
 
-Across multiple runs, the endgame goal is to restore all 6 Gifts to the **Void Chamber** deep in the dungeon. Each Gift must be found, activated, and carried to the chamber. This requires multiple runs because:
-- Only one Gift can be found per floor per run
-- Unactivated Gifts are lost when a run ends
-- The Void Chamber is on the deepest floor
+### The 6 Treasures
 
-Restoring all Gifts completes a meta-progression arc. The exact rewards and final encounter are TBD.
+| Floor | Treasure | Gift Type | Theme |
+|---|---|---|---|
+| Grounds | Montor's Favourite Gnome (Gerald) | **Petal** | Nature — pollen, thorns, vines, healing |
+| Underground | Montor's Gravy Boat | **Stone** | Earth — rock, weight, cold, endurance |
+| Underbelly | Montor's Toilet Seat | **Bile** | Decay — acid, rot, disease, weakening |
+| Quarters | Montor's Music Box | **Blood** | Flesh — life, pain, regeneration, hunger |
+| Works | Montor's Best Tongs | **Ember** | Fire — heat, metal, forge, destruction |
+| Deep | Montor's Night Light | **Void** | Chaos — shadow, entropy, manipulation |
+
+### Application Slots (5)
+
+Gifts are applied at **terminals** — zone-themed interactables found by searching junk piles. One gift applied per terminal, one terminal per zone.
+
+| Slot | Effect type |
+|---|---|
+| Body | Defensive — HP, DEF, damage reduction, reactive effects |
+| Mind | Utility — perception, control, condition resistance |
+| Weapon | Offensive — damage, conditions, hit effects |
+| Shield | Reactive — block effects, counter-attacks, absorption |
+| Soul | Synergy — requires 2 soul gifts to activate (body + mind must be filled first) |
+
+### Terminal UI Flow
+
+1. Tap terminal in room
+2. "Select Gift" — shows banked gifts with icons
+3. Tap a gift → "Select Slot" — shows available slots (soul locked until body + mind filled)
+4. Each combo previews the power granted
+5. Toggle freely between gifts/slots until satisfied
+6. "Apply Gift" → power active for the rest of the run
+
+### Zone-Themed Terminals
+
+| Zone | Terminal | Description |
+|---|---|---|
+| Garden | Gnome Village | Circle of ceramic gnomes. One spot is empty. |
+| Great Hall | China Cabinet | Glass doors. Everything vibrates when you approach. |
+| Kitchen | Spice Rack | Jars of impossible things. Labels in handwriting you almost recognise. |
+| Sewers | Drain Shrine | Offerings left at a grate. Something watches from below. |
+| Cistern | Pipe Organ | Pipes hum a note that isn't music. |
+| Bedroom | Bedside Table | A drawer that won't stay closed. |
+| Study | Desk Drawer | Locked. But not to you. Not anymore. |
+| Forge | Anvil | Still hot. Always hot. |
+| Workshop | Workbench | Vice marks in the wood. Something was held here. |
+| Caverns | Rock Shrine | Stones arranged in a pattern that hurts to look at. |
+| Chasm | Void Well | Darkness that falls upward. |
+| Throne Room | Void Chamber | The final resting place. 6 pedestals wait. |
+
+### Cross-Run Progression
+
+- **Run 1:** Find gnome → smash → choose slot → petal gift banked. Die on floor 3.
+- **Run 2:** Start with petal banked. First terminal → apply petal to body. Stronger from floor 1. Find gravy boat → smash → stone banked. Die on floor 5.
+- **Run 3:** Start with petal + stone banked. Apply both by floor 2. Deeper progress. Find toilet seat → smash → bile banked.
+- **Run N:** All 6 gifts banked. Apply one per terminal as you descend. By floor 6 you have 5-6 active powers. Strong enough to carry items without smashing. Give them all back. Beat the game.
+
+### Safe Room Choices (when holding a treasure)
+
+| Scenario | SMASH | GIVE |
+|---|---|---|
+| First time finding item, never smashed | Extract power → gift banked | Montor refuses: "Something's in it. Take it away." |
+| Item already smashed on previous run | No benefit (already banked). Annoys Montor. | Montor accepts: "...you got it out. Thank you." Mood boost. |
+
+### Soul Synergies (21 unique pairings — planned)
+
+When two gifts are placed in the Soul slot, their pairing creates a unique synergy effect. Soul slot requires body AND mind to be filled first. 6 same-type pairs + 15 cross-type pairs = 21 total synergies. This is the endgame depth layer — implemented after base gift types are complete.
+
+### Current State
+
+- **Petal:** Fully implemented with 16 effects across body/mind/weapon/shield
+- **Stone, Bile, Blood, Ember, Void:** Designed, not yet implemented
+- **Soul slot:** Designed, not yet implemented
+- **Cross-run persistence:** Requires Firebase (Stage 2)
+- **Give mechanic:** Requires mood system (planned)
+
+### Gift Design Philosophy
+
+Every gift type should offer something for every slot, but each type leans in a direction:
+
+| Gift | Body lean | Mind lean | Weapon lean | Shield lean |
+|---|---|---|---|---|
+| Petal | Regen/heal | Perception/calm | Lifesteal/slow | Block + heal |
+| Stone | **Heavy DEF** | Stun resist | Stagger/crush | **Thorns/reflect** |
+| Bile | Poison aura | **Debuff enhance** | Corrosive hits | Toxic counter |
+| Blood | **Lifesteal** | Frenzy (dmg when hurt) | Bleed amplify | Absorb (block→HP) |
+| Ember | Burn aura | **AoE splash** | Ignite/damage boost | **Fire shield** |
+| Void | Evasion/phase | **Meta (rerolls)** | Chaos damage | Nullify attacks |
 
 ---
 
