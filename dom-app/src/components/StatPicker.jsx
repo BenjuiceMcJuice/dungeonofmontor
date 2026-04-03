@@ -42,9 +42,9 @@ var STAT_INFO = {
   },
   end: {
     name: 'Endurance', abbrev: 'END', group: 'Body',
-    summary: 'Carry capacity.',
-    detail: 'Carry capacity = 10 + END modifier. More END = carry more items and junk without being slowed down.',
-    tip: 'Best for: Hoarders, junk collectors.',
+    summary: 'HP regen per room.',
+    detail: 'Heal extra HP each time you enter a new room. Base 1 HP + END modifier per room. END 14 = 3 HP/room. Stacks with regen relics and gifts.',
+    tip: 'Best for: Tanky builds, potion-free runs.',
   },
   wis: {
     name: 'Wisdom', abbrev: 'WIS', group: 'Mental',
@@ -60,9 +60,9 @@ var STAT_INFO = {
   },
   cha: {
     name: 'Charisma', abbrev: 'CHA', group: 'Fortune',
-    summary: 'Merchant prices.',
-    detail: 'Buy prices reduced and sell prices increased based on CHA modifier. Higher CHA = better deals at all merchants.',
-    tip: 'Best for: Traders, gold-focused builds.',
+    summary: 'Prices + premium access.',
+    detail: 'Buy -5% and sell +5% per CHA modifier at all vendors. CHA 12+ unlocks premium items at the Tailor — rare gear only discerning characters can buy.',
+    tip: 'Best for: Economy builds, premium gear access.',
   },
 }
 

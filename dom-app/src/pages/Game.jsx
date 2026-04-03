@@ -2713,18 +2713,35 @@ function Game({ character, user, onEndRun }) {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-ink-dim text-xs font-sans">Level {character.level || 1} Knight</span>
-                </div>
+                {/* Level + XP bar */}
+                {(function() {
+                  var nextThreshold = XP_THRESHOLDS[runLevel]
+                  var prevXp = runLevel > 0 ? XP_THRESHOLDS[runLevel - 1].xp : 0
+                  var nextXp = nextThreshold ? nextThreshold.xp : prevXp
+                  var xpProgress = nextThreshold ? Math.min(1, (totalXp - prevXp) / Math.max(1, nextXp - prevXp)) : 1
+                  var isMaxLevel = !nextThreshold
+                  return (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gold font-display text-base">Level {runLevel + 1} Knight</span>
+                        <span className="text-ink-dim text-xs font-sans">{isMaxLevel ? 'Max Level' : totalXp + ' / ' + nextXp + ' XP'}</span>
+                      </div>
+                      <div className="w-full bg-bg rounded-full h-2 border border-border">
+                        <div className={'rounded-full h-full transition-all duration-300 ' + (isMaxLevel ? 'bg-gold' : 'bg-blue')}
+                          style={{ width: Math.round(xpProgress * 100) + '%' }} />
+                      </div>
+                    </div>
+                  )
+                })()}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
                   <div className="text-xs font-sans"><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
-                  <div className="text-xs font-sans"><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">DEF total:</span> <span className="text-ink">{totalDef} (reduces {Math.floor(totalDef / 2)})</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Dodge:</span> <span className="text-ink">{Math.round(Math.max(0, getModifier(character.stats.agi || 10) * 0.02 + getPassiveTotal(character.equipped, 'dodge_chance')) * 100)}%</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Weapon:</span> <span className="text-ink">{w ? w.name : 'None'}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Armour:</span> <span className="text-ink">{a ? a.name : 'None'}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Crit:</span> <span className="text-ink">{critThreshold}+ (nat d20)</span></div>
-                  <div className="text-xs font-sans"><span className="text-ink-dim">Dodge:</span> <span className="text-ink">{Math.round(Math.max(0, getModifier(character.stats.agi || 10) * 0.02 + getPassiveTotal(character.equipped, 'dodge_chance')) * 100)}%</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Regen:</span> <span className="text-ink">{1 + Math.max(0, getModifier(character.stats.end || 10)) + getPassiveTotal(character.equipped, 'regen_per_chamber')} HP/room</span></div>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {statRows.map(function(s) {
@@ -4216,11 +4233,27 @@ function Game({ character, user, onEndRun }) {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
+                {(function() {
+                  var nextT2 = XP_THRESHOLDS[runLevel]
+                  var prevX2 = runLevel > 0 ? XP_THRESHOLDS[runLevel - 1].xp : 0
+                  var nextX2 = nextT2 ? nextT2.xp : prevX2
+                  var xpP2 = nextT2 ? Math.min(1, (totalXp - prevX2) / Math.max(1, nextX2 - prevX2)) : 1
+                  var isMax2 = !nextT2
+                  return (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gold font-display text-base">Level {runLevel + 1}</span>
+                        <span className="text-ink-dim text-xs font-sans">{isMax2 ? 'Max Level' : totalXp + ' / ' + nextX2 + ' XP'}</span>
+                      </div>
+                      <div className="w-full bg-bg rounded-full h-2 border border-border">
+                        <div className={'rounded-full h-full transition-all duration-300 ' + (isMax2 ? 'bg-gold' : 'bg-blue')} style={{ width: Math.round(xpP2 * 100) + '%' }} />
+                      </div>
+                    </div>
+                  )
+                })()}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4 text-xs font-sans">
                   <div><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
                   <div><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
-                  <div><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
-                  <div><span className="text-ink-dim">DEF total:</span> <span className="text-ink">{totalDef} (reduces {Math.floor(totalDef / 2)})</span></div>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {statRows.map(function(s) {
@@ -4397,10 +4430,27 @@ function Game({ character, user, onEndRun }) {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
+                {(function() {
+                  var nextT3 = XP_THRESHOLDS[runLevel]
+                  var prevX3 = runLevel > 0 ? XP_THRESHOLDS[runLevel - 1].xp : 0
+                  var nextX3 = nextT3 ? nextT3.xp : prevX3
+                  var xpP3 = nextT3 ? Math.min(1, (totalXp - prevX3) / Math.max(1, nextX3 - prevX3)) : 1
+                  var isMax3 = !nextT3
+                  return (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gold font-display text-base">Level {runLevel + 1}</span>
+                        <span className="text-ink-dim text-xs font-sans">{isMax3 ? 'Max Level' : totalXp + ' / ' + nextX3 + ' XP'}</span>
+                      </div>
+                      <div className="w-full bg-bg rounded-full h-2 border border-border">
+                        <div className={'rounded-full h-full transition-all duration-300 ' + (isMax3 ? 'bg-gold' : 'bg-blue')} style={{ width: Math.round(xpP3 * 100) + '%' }} />
+                      </div>
+                    </div>
+                  )
+                })()}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4 text-xs font-sans">
                   <div><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
                   <div><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
-                  <div><span className="text-ink-dim">XP:</span> <span className="text-ink">{totalXp}</span></div>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {statRows.map(function(s) {
