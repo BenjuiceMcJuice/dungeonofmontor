@@ -2733,84 +2733,100 @@ function Game({ character, user, onEndRun }) {
           <button onClick={handleGiftPickerClose}
             className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">Done</button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-          {/* Unlocked gifts row */}
-          <div className="flex justify-center gap-2 mb-1">
+        <div className="flex-1 overflow-y-auto p-3">
+          {/* Unlocked gifts legend */}
+          <div className="flex justify-center gap-1.5 mb-3">
             {['petal', 'stone', 'bile', 'blood', 'ember', 'void'].map(function(gId) {
               var isUnlocked = unlockedGifts.indexOf(gId) !== -1
               var gc = giftColors[gId] || 'ink'
               return (
-                <div key={gId} className={'flex flex-col items-center px-2 py-1 rounded ' + (isUnlocked ? 'bg-' + gc + '/10 border border-' + gc + '/30' : 'bg-surface border border-border opacity-30')}>
-                  <span className={'text-[10px] font-display ' + (isUnlocked ? 'text-' + gc : 'text-ink-faint')}>{giftLabels[gId]}</span>
-                </div>
+                <span key={gId} className={'text-[9px] font-display px-1.5 py-0.5 rounded ' + (isUnlocked ? 'text-' + gc + ' bg-' + gc + '/10 border border-' + gc + '/30' : 'text-ink-faint bg-surface border border-border opacity-30')}>
+                  {giftLabels[gId]}
+                </span>
               )
             })}
           </div>
 
-          {/* Slot rows — each with gift select + power select */}
-          {slotNames.map(function(slot) {
-            var current = giftSlots[slot]
-            var slotLabel = slot.charAt(0).toUpperCase() + slot.slice(1)
-            var selectedGiftForSlot = giftPickerSlot === slot ? giftPickerGift : (current ? current.giftId : '')
-            var powerOptions = getOptionsForSlotGift(slot, selectedGiftForSlot)
+          {/* Table */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="grid grid-cols-12 bg-surface border-b border-border px-2 py-1.5">
+              <span className="col-span-2 text-[9px] text-ink-faint uppercase font-sans">Slot</span>
+              <span className="col-span-5 text-[9px] text-ink-faint uppercase font-sans">Gift</span>
+              <span className="col-span-5 text-[9px] text-ink-faint uppercase font-sans">Power</span>
+            </div>
 
-            return (
-              <div key={slot} className="p-3 rounded-lg border border-border-hl bg-surface">
-                <span className="font-display text-base text-gold">{slotLabel}</span>
+            {/* Rows */}
+            {slotNames.map(function(slot, si) {
+              var current = giftSlots[slot]
+              var slotLabel = slot.charAt(0).toUpperCase() + slot.slice(1)
+              var selectedGiftForSlot = giftPickerSlot === slot ? giftPickerGift : (current ? current.giftId : '')
+              var powerOptions = getOptionsForSlotGift(slot, selectedGiftForSlot)
+              var isExpanded = giftPickerSlot === slot
+              var slotTextColors = { body: 'text-red-400', mind: 'text-blue', weapon: 'text-amber-400', shield: 'text-emerald-400' }
 
-                {/* Gift select — themed buttons */}
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  <button
-                    onClick={function() { setGiftPickerSlot(slot); setGiftPickerGift(null) }}
-                    className={'px-2.5 py-1 rounded text-[10px] font-sans border transition-colors ' +
-                      (!selectedGiftForSlot ? 'border-ink-faint text-ink bg-bg' : 'border-border text-ink-faint hover:text-ink cursor-pointer')}>
-                    None
-                  </button>
-                  {unlockedGifts.map(function(gId) {
-                    var gc = giftColors[gId] || 'ink'
-                    var isSelected = selectedGiftForSlot === gId
-                    return (
-                      <button key={gId}
-                        onClick={function() { setGiftPickerSlot(slot); setGiftPickerGift(gId) }}
-                        className={'px-2.5 py-1 rounded text-[10px] font-display border transition-colors cursor-pointer ' +
-                          (isSelected ? 'border-' + gc + ' text-' + gc + ' bg-' + gc + '/15' : 'border-border text-ink-faint hover:text-' + gc + ' hover:border-' + gc + '/50')}>
-                        {giftLabels[gId]}
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {/* Power options */}
-                {selectedGiftForSlot && powerOptions.length > 0 && (
-                  <div className="mt-2 flex flex-col gap-1.5">
-                    {powerOptions.map(function(opt) {
-                      var isActive = current && current.id === opt.id && current.giftId === selectedGiftForSlot
-                      return (
-                        <button key={opt.id}
-                          onClick={function() {
-                            setGiftPickerSlot(slot)
-                            setGiftPickerGift(selectedGiftForSlot)
-                            handleGiftPickerApply(opt)
-                          }}
-                          className={'p-2.5 rounded border text-left text-sm font-sans transition-colors ' +
-                            (isActive ? 'border-gold bg-gold/10 text-gold' : 'border-border hover:border-gold/50 text-ink cursor-pointer')}>
-                          <span className="font-semibold">{opt.name}</span>
-                          {isActive && <span className="text-[9px] text-gold ml-2">ACTIVE</span>}
-                          <p className="text-ink-dim text-xs mt-0.5">{opt.description}</p>
-                        </button>
-                      )
-                    })}
+              return (
+                <div key={slot} className={si < slotNames.length - 1 ? 'border-b border-border' : ''}>
+                  {/* Compact row */}
+                  <div className="grid grid-cols-12 items-center px-2 py-2 cursor-pointer hover:bg-surface/50"
+                    onClick={function() { setGiftPickerSlot(isExpanded ? null : slot); setGiftPickerGift(selectedGiftForSlot || null) }}>
+                    <span className={'col-span-2 font-display text-sm ' + (slotTextColors[slot] || 'text-ink')}>{slotLabel}</span>
+                    <span className={'col-span-5 text-xs font-sans ' + (selectedGiftForSlot ? 'text-' + (giftColors[selectedGiftForSlot] || 'ink') : 'text-ink-faint')}>
+                      {selectedGiftForSlot ? giftLabels[selectedGiftForSlot] : '—'}
+                    </span>
+                    <span className="col-span-5 text-xs font-sans text-ink-dim">
+                      {current ? current.name : '—'}
+                    </span>
                   </div>
-                )}
 
-                {selectedGiftForSlot && powerOptions.length === 0 && (
-                  <p className="text-ink-faint text-xs italic mt-2">No powers for this weapon type.</p>
-                )}
-
-                {!selectedGiftForSlot && current && (
-                  <p className="text-ink-faint text-xs mt-2">Assigned: {current.name}</p>
-                )}
-              </div>
+                  {/* Expanded: gift buttons + power options */}
+                  {isExpanded && (
+                    <div className="px-2 pb-2 bg-bg/50">
+                      {/* Gift buttons */}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        <button onClick={function() { setGiftPickerGift(null) }}
+                          className={'px-2 py-0.5 rounded text-[9px] font-sans border transition-colors ' +
+                            (!selectedGiftForSlot ? 'border-ink-faint text-ink bg-bg' : 'border-border text-ink-faint hover:text-ink cursor-pointer')}>
+                          None
+                        </button>
+                        {unlockedGifts.map(function(gId) {
+                          var gc = giftColors[gId] || 'ink'
+                          var isSel = selectedGiftForSlot === gId
+                          return (
+                            <button key={gId} onClick={function() { setGiftPickerGift(gId) }}
+                              className={'px-2 py-0.5 rounded text-[9px] font-display border transition-colors cursor-pointer ' +
+                                (isSel ? 'border-' + gc + ' text-' + gc + ' bg-' + gc + '/15' : 'border-border text-ink-faint hover:text-' + gc)}>
+                              {giftLabels[gId]}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      {/* Power options */}
+                      {selectedGiftForSlot && powerOptions.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          {powerOptions.map(function(opt) {
+                            var isActive = current && current.id === opt.id && current.giftId === selectedGiftForSlot
+                            return (
+                              <button key={opt.id}
+                                onClick={function() { setGiftPickerGift(selectedGiftForSlot); handleGiftPickerApply(opt) }}
+                                className={'p-2 rounded border text-left transition-colors ' +
+                                  (isActive ? 'border-gold bg-gold/10' : 'border-border hover:border-gold/50 cursor-pointer')}>
+                                <div className="flex items-center gap-2">
+                                  <span className={'text-xs font-semibold ' + (isActive ? 'text-gold' : 'text-ink')}>{opt.name}</span>
+                                  {isActive && <span className="text-[8px] text-gold uppercase">Active</span>}
+                                </div>
+                                <p className="text-ink-dim text-[10px] mt-0.5">{opt.description}</p>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                      {selectedGiftForSlot && powerOptions.length === 0 && (
+                        <p className="text-ink-faint text-[10px] italic">No powers for this weapon type.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
             )
           })}
         </div>
