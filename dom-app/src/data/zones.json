@@ -58,6 +58,8 @@
       "bossType": "slug", "bossTier": "slate", "bossName": "The Overgrowth",
       "merchantName": "The Gardener", "merchantRole": "Montor's groundskeeper",
       "merchantGreeting": "Psst. Over here. Don't tell him I sold the shears.",
+      "tailorStaples": ["montors_wellies", "montors_colander"],
+      "tailorPremium": "montors_mums_locket",
       "encounterPools": {
         "1": { "types": ["rat", "slug", "moth"], "tiers": ["dust"], "count": [1, 1] },
         "2": { "types": ["rat", "slug", "moth"], "tiers": ["dust"], "count": [1, 2] },
@@ -88,6 +90,8 @@
       "enemyTypes": ["rat", "orc", "hound"], "enemyTiers": ["dust", "slate"],
       "bossType": "orc", "bossTier": "slate", "bossName": "Ironjaw",
       "merchantName": "The Butler", "merchantRole": "Montor's head of household",
+      "tailorStaples": ["montors_bowler_hat", "montors_sunday_shirt"],
+      "tailorPremium": "montors_claw_pendant",
       "merchantGreeting": "Master Montor won't notice one less goblet. Probably.",
       "encounterPools": {
         "1": { "types": ["rat", "orc", "hound"], "tiers": ["dust"], "count": [1, 2] },
@@ -119,6 +123,8 @@
       "enemyTypes": ["rat", "orc", "slug"], "enemyTiers": ["dust", "slate"],
       "bossType": "orc", "bossTier": "iron", "bossName": "The Kitchen Brute",
       "merchantName": "The Cook", "merchantRole": "Montor's kitchen staff",
+      "tailorStaples": ["montors_saucepan", "montors_apron_armour"],
+      "tailorPremium": "montors_claw_pendant",
       "merchantGreeting": "Take it. Less washing up for me.",
       "encounterPools": {
         "1": { "types": ["rat", "slug"], "tiers": ["dust", "slate"], "count": [1, 2] },
@@ -150,6 +156,8 @@
       "enemyTypes": ["rat", "slug", "spider"], "enemyTiers": ["slate", "iron"],
       "bossType": "spider", "bossTier": "iron", "bossName": "The Broodmother",
       "merchantName": "The Ratcatcher", "merchantRole": "Lives down here by choice. Apparently.",
+      "tailorStaples": ["montors_rubber_band_ring", "montors_hiking_boots"],
+      "tailorPremium": "montors_fever_stone",
       "merchantGreeting": "Found this in a wall. Don't ask which wall.",
       "encounterPools": {
         "1": { "types": ["rat", "spider"], "tiers": ["slate"], "count": [1, 2] },
@@ -181,6 +189,8 @@
       "enemyTypes": ["slug", "spider", "bat"], "enemyTiers": ["slate", "iron"],
       "bossType": "slug", "bossTier": "crimson", "bossName": "The Bile King",
       "merchantName": "The Plumber", "merchantRole": "Montor's pipe specialist",
+      "tailorStaples": ["montors_washer_ring", "montors_mums_fur_coat"],
+      "tailorPremium": "montors_fever_stone",
       "merchantGreeting": "I fix things. Montor breaks them. Circle of life.",
       "encounterPools": {
         "1": { "types": ["slug", "bat"], "tiers": ["slate"], "count": [2, 3] },
@@ -212,6 +222,8 @@
       "enemyTypes": ["mimic", "shade", "hound"], "enemyTiers": ["iron", "crimson"],
       "bossType": "shade", "bossTier": "crimson", "bossName": "Montor's Mum's Ghost",
       "merchantName": "The Maid", "merchantRole": "Montor's housekeeper. Still tidying.",
+      "tailorStaples": ["montors_slippers", "montors_duffel_coat"],
+      "tailorPremium": "montors_blood_bead",
       "merchantGreeting": "He never makes his bed. Here, take something useful.",
       "encounterPools": {
         "1": { "types": ["mimic", "hound"], "tiers": ["iron"], "count": [1, 1] },
@@ -243,6 +255,8 @@
       "enemyTypes": ["shade", "wraith", "mimic"], "enemyTiers": ["iron", "crimson"],
       "bossType": "wraith", "bossTier": "crimson", "bossName": "The Librarian",
       "merchantName": "The Tutor", "merchantRole": "Taught young Montor. Regrets it.",
+      "tailorStaples": ["montors_bifocals", "montors_dog_tag"],
+      "tailorPremium": "montors_blood_bead",
       "merchantGreeting": "He was a gifted student. Gifted and terrible.",
       "encounterPools": {
         "1": { "types": ["shade", "mimic"], "tiers": ["iron"], "count": [1, 2] },
@@ -274,6 +288,8 @@
       "enemyTypes": ["automaton", "rock", "orc"], "enemyTiers": ["iron", "crimson"],
       "bossType": "automaton", "bossTier": "crimson", "bossName": "The Masterwork",
       "merchantName": "The Blacksmith", "merchantRole": "Built things for Montor. Still does.",
+      "tailorStaples": ["montors_cricket_helmet", "chainmail_common"],
+      "tailorPremium": "montors_barbed_wire_twist",
       "merchantGreeting": "I forge. He hoards. Take something before he locks it away.",
       "encounterPools": {
         "1": { "types": ["orc", "rock"], "tiers": ["iron"], "count": [1, 2] },
@@ -305,6 +321,8 @@
       "enemyTypes": ["automaton", "mimic", "rock"], "enemyTiers": ["iron", "crimson"],
       "bossType": "automaton", "bossTier": "void", "bossName": "Montor's Masterpiece",
       "merchantName": "The Apprentice", "merchantRole": "Learning. Slowly. Montor's not patient.",
+      "tailorStaples": ["montors_key_ring", "montors_mums_heels"],
+      "tailorPremium": "montors_barbed_wire_twist",
       "merchantGreeting": "He threw this at me. You can have it.",
       "encounterPools": {
         "1": { "types": ["automaton", "mimic"], "tiers": ["iron"], "count": [1, 2] },
@@ -336,6 +354,8 @@
       "enemyTypes": ["bat", "rock", "wraith", "spider"], "enemyTiers": ["crimson", "void"],
       "bossType": "rock", "bossTier": "void", "bossName": "The Ancient One",
       "merchantName": "The Hermit", "merchantRole": "Lived here before Montor. Doesn't talk much.",
+      "tailorStaples": ["montors_mums_crucifix", "montors_dancing_shoes"],
+      "tailorPremium": "montors_executioners_coin",
       "merchantGreeting": "...",
       "encounterPools": {
         "1": { "types": ["bat", "spider"], "tiers": ["crimson"], "count": [2, 3] },
@@ -367,6 +387,8 @@
       "enemyTypes": ["wraith", "shade", "bat"], "enemyTiers": ["crimson", "void"],
       "bossType": "shade", "bossTier": "void", "bossName": "The Abyss Watcher",
       "merchantName": "The Prospector", "merchantRole": "Came looking for gold. Found worse.",
+      "tailorStaples": ["montors_pipe_ring", "montors_knight_helm"],
+      "tailorPremium": "montors_executioners_coin",
       "merchantGreeting": "Turn back. You won't. None of you do. Fine. Buy something.",
       "encounterPools": {
         "1": { "types": ["wraith", "bat"], "tiers": ["crimson"], "count": [1, 2] },
@@ -398,6 +420,8 @@
       "enemyTypes": ["shade", "automaton", "hound"], "enemyTiers": ["void"],
       "bossType": "shade", "bossTier": "void", "bossName": "Montor",
       "merchantName": null, "merchantRole": null,
+      "tailorStaples": [],
+      "tailorPremium": "montors_lodestone",
       "merchantGreeting": null,
       "encounterPools": {
         "1": { "types": ["hound", "shade"], "tiers": ["void"], "count": [1, 1] },
