@@ -2754,7 +2754,6 @@ function Game({ character, user, onEndRun }) {
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
                         {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
-                        {bonus === 0 && <span className="text-ink-dim text-[8px]">mod {mod(effective)}</span>}
                       </div>
                     )
                   })}
@@ -4266,7 +4265,6 @@ function Game({ character, user, onEndRun }) {
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
                         {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
-                        {bonus === 0 && <span className="text-ink-dim text-[8px]">mod {mod(effective)}</span>}
                       </div>
                     )
                   })}
@@ -4463,7 +4461,6 @@ function Game({ character, user, onEndRun }) {
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
                         {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
-                        {bonus === 0 && <span className="text-ink-dim text-[8px]">mod {mod(effective)}</span>}
                       </div>
                     )
                   })}

@@ -9,6 +9,7 @@ var startConfig = classData.startingKnight
 
 function Preparation({ character, onReady }) {
   var [phase, setPhase] = useState('stats') // stats | shop | ready
+  var [showGuide, setShowGuide] = useState(false)
   var [godInvincible, setGodInvincible] = useState(false)
   var [godOneShot, setGodOneShot] = useState(false)
   var [freePoints, setFreePoints] = useState(startConfig.freeStatPoints || 10)
@@ -151,14 +152,118 @@ function Preparation({ character, onReady }) {
     onReady(character)
   }
 
+  // --- How It Works guide overlay ---
+  if (showGuide) {
+    var pixelBorder = {
+      borderImage: 'repeating-conic-gradient(#2a1a30 0% 25%, transparent 0% 50%) 4 / 4px / 0 round',
+      borderWidth: '4px',
+      borderStyle: 'solid',
+    }
+    return (
+      <div className="h-full flex flex-col bg-raised overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border" style={pixelBorder}>
+          <span className="font-display text-lg text-gold">How It Works</span>
+          <button onClick={function() { setShowGuide(false) }}
+            className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+            Close
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="max-w-sm mx-auto flex flex-col gap-4 text-sm font-sans">
+
+            <div className="border border-border rounded-lg p-3" style={pixelBorder}>
+              <p className="text-gold font-display text-base mb-2">Combat</p>
+              <p className="text-ink leading-relaxed">Every attack rolls a <span className="text-blue">d20</span> + your STR modifier. The result determines the hit tier:</p>
+              <div className="mt-2 flex flex-col gap-1 text-xs">
+                <p><span className="text-crimson font-semibold">Critical</span> — nat 20 (or lower with LCK). 2x damage.</p>
+                <p><span className="text-amber-500 font-semibold">Hit</span> — solid connection. Full damage.</p>
+                <p><span className="text-yellow-400 font-semibold">Glancing</span> — scrapes through. Half damage.</p>
+                <p><span className="text-ink-faint font-semibold">Miss</span> — whiff. No damage.</p>
+              </div>
+              <p className="text-ink-dim text-xs mt-2 italic">Damage = weapon die + STR, reduced by enemy DEF.</p>
+            </div>
+
+            <div className="border border-border rounded-lg p-3" style={pixelBorder}>
+              <p className="text-gold font-display text-base mb-2">Stats</p>
+              <div className="flex flex-col gap-1.5 text-xs">
+                <p><span className="text-green-400">STR</span> — attack rolls + damage. The hitting stat.</p>
+                <p><span className="text-green-400">DEF</span> — reduces incoming damage. Shield block scales with DEF.</p>
+                <p><span className="text-green-400">AGI</span> — go first, dodge attacks (+2%/point), dagger double strike (+5%/point), flee success.</p>
+                <p><span className="text-green-400">VIT</span> — max HP. Each point = +5 HP.</p>
+                <p><span className="text-green-400">INT</span> — enchanted weapon bonus damage + condition application chance.</p>
+                <p><span className="text-green-400">LCK</span> — crit threshold (each point = crit on lower d20) + better loot drops.</p>
+                <p><span className="text-green-400">PER</span> — junk pile search quality. Higher = better finds, spot traps.</p>
+                <p><span className="text-green-400">END</span> — HP regen per new room. Base 1 + END modifier.</p>
+                <p><span className="text-green-400">WIS</span> — Montor's Gift power. Stronger boons at safe rooms.</p>
+                <p><span className="text-green-400">CHA</span> — buy/sell prices. CHA 12+ unlocks premium items at tailors.</p>
+              </div>
+              <p className="text-ink-dim text-xs mt-2 italic">How modifiers work: (stat - 10) / 2 rounded down. So 12 = +1, 14 = +2, 8 = -1.</p>
+            </div>
+
+            <div className="border border-border rounded-lg p-3" style={pixelBorder}>
+              <p className="text-gold font-display text-base mb-2">Weapons</p>
+              <div className="flex flex-col gap-1.5 text-xs">
+                <p><span className="text-amber-400">Dagger</span> (d4, light) — fast. Double strike chance. Dual wield two daggers for Twin Fangs bleed.</p>
+                <p><span className="text-amber-400">Sword</span> (d6, light) — accurate (+1/+2 acc). Can dual wield with offhand dagger.</p>
+                <p><span className="text-amber-400">Spear</span> (d6, light) — reach. Best initiative bonus.</p>
+                <p><span className="text-amber-400">Mace</span> (d6, heavy) — crushes armour (ignores 25%+ DEF). Stagger chance = DAZE.</p>
+                <p><span className="text-amber-400">Axe</span> (d10, heavy) — massive damage. Slow, inaccurate, but devastating crits.</p>
+              </div>
+              <p className="text-ink-dim text-xs mt-2 italic">Heavy weapons can't use shields but deal more damage.</p>
+            </div>
+
+            <div className="border border-border rounded-lg p-3" style={pixelBorder}>
+              <p className="text-gold font-display text-base mb-2">Conditions</p>
+              <div className="flex flex-col gap-1.5 text-xs">
+                <p><span className="text-red-400">BLEED</span> — stacks up to 5. +1 dmg/turn per stack. At 4+ stacks: triggers FEAR.</p>
+                <p><span className="text-green-500">POISON</span> — 2 dmg/turn + drains STR/AGI/DEF cyclically. Re-poisoning keeps the drain.</p>
+                <p><span className="text-orange-400">BURN</span> — burst damage + AoE to adjacent enemies. 30% skip turn.</p>
+                <p><span className="text-cyan-400">FROST</span> — frozen targets take 1.5x damage (brittle). Setup for big hits.</p>
+                <p><span className="text-purple-400">FEAR</span> — -2 all rolls. Below 50% HP: 50% paralysed (skip) or 50% adrenaline (+6 STR).</p>
+                <p><span className="text-yellow-300">DAZE</span> — stunned. Guaranteed skip turn. The stagger payoff.</p>
+              </div>
+              <p className="text-ink-dim text-xs mt-2 italic">Body slot (BLEED/POISON/BURN/FROST) and mind slot (FEAR/DAZE) — one of each at a time.</p>
+            </div>
+
+            <div className="border border-border rounded-lg p-3" style={pixelBorder}>
+              <p className="text-gold font-display text-base mb-2">The Dungeon</p>
+              <div className="flex flex-col gap-1 text-xs text-ink">
+                <p>7 floors, each with 1-2 zones of 16 chambers.</p>
+                <p>Find the <span className="text-purple-400">terminal</span> (hidden in junk piles) to unlock the stairwell.</p>
+                <p>Defeat the <span className="text-red-400">boss</span> guarding the stairs to descend.</p>
+                <p>Search junk piles for gold, items, and XP — but searching disturbs Montor.</p>
+                <p>Visit <span className="text-gold">tailors</span> for equipment and <span className="text-emerald-400">peddlers</span> for potions.</p>
+              </div>
+            </div>
+
+            <div className="border border-border rounded-lg p-3" style={pixelBorder}>
+              <p className="text-gold font-display text-base mb-2">Montor's Gifts</p>
+              <div className="flex flex-col gap-1 text-xs text-ink">
+                <p>Hidden treasures in junk piles — tacky family heirlooms with power inside.</p>
+                <p>Bring them to the <span className="text-purple-400">safe room</span> between floors.</p>
+                <p>Smash the treasure to apply a permanent gift to body, mind, weapon, or shield slot.</p>
+                <p>Each gift changes how you fight for the rest of the run.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // --- Stats phase ---
   if (phase === 'stats') {
     return (
       <div className="h-full flex flex-col items-center justify-center px-4 bg-raised">
         <h2 className="font-display text-2xl text-gold mb-2">Prepare Your Knight</h2>
-        <p className="text-ink-dim text-sm mb-4 text-center max-w-xs">
+        <p className="text-ink-dim text-sm mb-3 text-center max-w-xs">
           Distribute {startConfig.freeStatPoints} points across your stats. Tap a stat to see what it does.
         </p>
+        <button onClick={function() { setShowGuide(true) }}
+          className="text-ink-faint text-[10px] border border-border px-3 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors mb-3">
+          How It Works
+        </button>
         <StatPicker
           stats={character.stats}
           onPick={handleStatPick}
@@ -201,7 +306,14 @@ function Preparation({ character, onReady }) {
 
     return (
       <div className="h-full flex flex-col px-4 py-4 bg-raised overflow-y-auto">
-        <h2 className="font-display text-2xl text-gold mb-1 text-center">Starter Kit</h2>
+        <div className="flex items-center justify-between mb-1">
+          <div />
+          <h2 className="font-display text-2xl text-gold text-center">Starter Kit</h2>
+          <button onClick={function() { setShowGuide(true) }}
+            className="text-ink-faint text-[10px] border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
+            Guide
+          </button>
+        </div>
         <p className="text-ink-dim text-sm mb-3 text-center">
           Spend your gold wisely. This is all you start with.
         </p>
