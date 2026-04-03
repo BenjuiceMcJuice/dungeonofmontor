@@ -1472,6 +1472,26 @@ function Game({ character, user, onEndRun }) {
     if (r.attackRoll && r.attackRoll.tierName === 'crit') trackStat('critsReceived', 1)
 
     var endResult = checkBattleEnd(updatedBattle)
+    if (endResult === 'victory') {
+      // Enemy killed by reflect/counter/gift during their own attack
+      var xpGainedReflect = calculateXp(updatedBattle)
+      var newXpReflect = totalXp + xpGainedReflect
+      setTotalXp(newXpReflect)
+      setLastXpGained(xpGainedReflect)
+      checkLevelUp(newXpReflect)
+      setBattle(updatedBattle)
+      setEnemyAttackInfo(null)
+      guardedSetCombatPhase('victory')
+      var reflectZone = Object.assign({}, zone, {
+        chambers: zone.chambers.map(function(ch) {
+          if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
+          return ch
+        })
+      })
+      setZone(reflectZone)
+      setChambersCleared(chambersCleared + 1)
+      return
+    }
     if (endResult === 'defeat') {
       // Track death context
       var killerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
