@@ -2688,79 +2688,24 @@ function Game({ character, user, onEndRun }) {
     borderStyle: 'solid',
   }
 
-  // === GIFT PICKER OVERLAY ===
+  // === GIFT PICKER OVERLAY — single-screen table layout ===
   if (showGiftPicker && unlockedGifts.length > 0) {
     var giftColors = { petal: 'green-400', stone: 'blue-400', bile: 'yellow-400', blood: 'red-400', ember: 'orange-400', void: 'purple-400' }
     var giftLabels = { petal: 'Petal', stone: 'Stone', bile: 'Bile', blood: 'Blood', ember: 'Ember', void: 'Void' }
     var slotNames = ['body', 'mind', 'weapon', 'shield']
 
-    // If a gift is selected for a slot, show the power options
-    if (giftPickerSlot && giftPickerGift) {
-      var pickerGiftDef = getGiftDef(giftPickerGift)
-      var pickerOptions = []
-      if (giftPickerSlot === 'weapon' && pickerGiftDef) {
-        if (Array.isArray(pickerGiftDef.weapon)) {
-          pickerOptions = pickerGiftDef.weapon
-        } else {
-          var pwt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
-          var pwe = pickerGiftDef.weapon[pwt]
-          if (pwe) pickerOptions = [pwe]
-        }
-      } else if (pickerGiftDef && pickerGiftDef[giftPickerSlot]) {
-        pickerOptions = pickerGiftDef[giftPickerSlot]
+    function getOptionsForSlotGift(slot, giftId) {
+      if (!giftId) return []
+      var def = getGiftDef(giftId)
+      if (!def) return []
+      if (slot === 'weapon') {
+        if (Array.isArray(def.weapon)) return def.weapon
+        var wt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+        return def.weapon[wt] ? [def.weapon[wt]] : []
       }
-      return (
-        <div className="h-full flex flex-col bg-bg overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <span className="font-display text-lg text-gold">{giftLabels[giftPickerGift]} — {giftPickerSlot.charAt(0).toUpperCase() + giftPickerSlot.slice(1)}</span>
-            <button onClick={function() { setGiftPickerGift(null) }}
-              className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">Back</button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-            <p className="text-ink-dim text-sm italic text-center">Choose a power:</p>
-            {pickerOptions.map(function(opt) {
-              return (
-                <button key={opt.id} onClick={function() { handleGiftPickerApply(opt) }}
-                  className="p-4 rounded-lg border-2 border-border-hl bg-surface text-left hover:border-gold transition-colors cursor-pointer">
-                  <span className="font-display text-lg text-ink">{opt.name}</span>
-                  <p className="text-ink-dim text-sm font-sans mt-1">{opt.description}</p>
-                </button>
-              )
-            })}
-            {pickerOptions.length === 0 && (
-              <p className="text-ink-faint text-sm text-center italic">No options available for this combination.</p>
-            )}
-          </div>
-        </div>
-      )
+      return def[slot] || []
     }
 
-    // If a slot is selected, show available gifts for it
-    if (giftPickerSlot) {
-      return (
-        <div className="h-full flex flex-col bg-bg overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <span className="font-display text-lg text-gold">{giftPickerSlot.charAt(0).toUpperCase() + giftPickerSlot.slice(1)} — Choose a Gift</span>
-            <button onClick={function() { setGiftPickerSlot(null) }}
-              className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">Back</button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-            {unlockedGifts.map(function(gId) {
-              var gc = giftColors[gId] || 'ink'
-              return (
-                <button key={gId} onClick={function() { handleGiftPickerSelectGift(gId) }}
-                  className={'p-4 rounded-lg border-2 text-left transition-colors cursor-pointer border-' + gc + '/50 hover:border-' + gc + ' bg-' + gc + '/5'}>
-                  <span className={'font-display text-lg text-' + gc}>{giftLabels[gId]}</span>
-                  <p className="text-ink-dim text-sm font-sans">{getGiftDef(gId) ? getGiftDef(gId).theme : ''}</p>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )
-    }
-
-    // Default: show slots with current assignments
     return (
       <div className="h-full flex flex-col bg-bg overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -2770,7 +2715,7 @@ function Game({ character, user, onEndRun }) {
         </div>
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
           {/* Unlocked gifts row */}
-          <div className="flex justify-center gap-2 mb-2">
+          <div className="flex justify-center gap-2 mb-1">
             {['petal', 'stone', 'bile', 'blood', 'ember', 'void'].map(function(gId) {
               var isUnlocked = unlockedGifts.indexOf(gId) !== -1
               var gc = giftColors[gId] || 'ink'
@@ -2781,23 +2726,66 @@ function Game({ character, user, onEndRun }) {
               )
             })}
           </div>
-          <p className="text-ink-dim text-sm italic text-center mb-2">Tap a slot to assign a gift:</p>
-          {/* Slots */}
+
+          {/* Slot rows — each with gift select + power select */}
           {slotNames.map(function(slot) {
             var current = giftSlots[slot]
             var slotLabel = slot.charAt(0).toUpperCase() + slot.slice(1)
+            var selectedGiftForSlot = giftPickerSlot === slot ? giftPickerGift : (current ? current.giftId : '')
+            var powerOptions = getOptionsForSlotGift(slot, selectedGiftForSlot)
+
             return (
-              <button key={slot} onClick={function() { handleGiftPickerSelectSlot(slot) }}
-                className="p-4 rounded-lg border-2 border-border-hl bg-surface text-left hover:border-gold transition-colors cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <span className="font-display text-lg text-gold">{slotLabel}</span>
-                  {current ? (
-                    <span className={'text-xs font-sans text-' + (giftColors[current.giftId] || 'ink')}>{current.name} ({giftLabels[current.giftId] || current.giftId})</span>
-                  ) : (
-                    <span className="text-ink-faint text-xs">Empty</span>
-                  )}
+              <div key={slot} className="p-3 rounded-lg border border-border-hl bg-surface">
+                <span className="font-display text-base text-gold">{slotLabel}</span>
+
+                {/* Gift select */}
+                <div className="mt-2">
+                  <select
+                    value={selectedGiftForSlot || ''}
+                    onChange={function(e) {
+                      setGiftPickerSlot(slot)
+                      setGiftPickerGift(e.target.value || null)
+                    }}
+                    className="w-full bg-bg border border-border rounded px-3 py-2 text-ink text-sm font-sans focus:border-gold focus:outline-none"
+                  >
+                    <option value="">— No gift —</option>
+                    {unlockedGifts.map(function(gId) {
+                      return <option key={gId} value={gId}>{giftLabels[gId]}</option>
+                    })}
+                  </select>
                 </div>
-              </button>
+
+                {/* Power options */}
+                {selectedGiftForSlot && powerOptions.length > 0 && (
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {powerOptions.map(function(opt) {
+                      var isActive = current && current.id === opt.id && current.giftId === selectedGiftForSlot
+                      return (
+                        <button key={opt.id}
+                          onClick={function() {
+                            setGiftPickerSlot(slot)
+                            setGiftPickerGift(selectedGiftForSlot)
+                            handleGiftPickerApply(opt)
+                          }}
+                          className={'p-2.5 rounded border text-left text-sm font-sans transition-colors ' +
+                            (isActive ? 'border-gold bg-gold/10 text-gold' : 'border-border hover:border-gold/50 text-ink cursor-pointer')}>
+                          <span className="font-semibold">{opt.name}</span>
+                          {isActive && <span className="text-[9px] text-gold ml-2">ACTIVE</span>}
+                          <p className="text-ink-dim text-xs mt-0.5">{opt.description}</p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {selectedGiftForSlot && powerOptions.length === 0 && (
+                  <p className="text-ink-faint text-xs italic mt-2">No powers for this weapon type.</p>
+                )}
+
+                {!selectedGiftForSlot && current && (
+                  <p className="text-ink-faint text-xs mt-2">Assigned: {current.name}</p>
+                )}
+              </div>
             )
           })}
         </div>
