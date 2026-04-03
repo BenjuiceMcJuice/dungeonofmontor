@@ -75,38 +75,44 @@ var RISK_HINTS = {
 var CLEAN_CONFIG = {
   1: {
     label: 'Careful Clean',
-    description: 'One layer. Slow and steady.',
+    description: 'One layer. Quiet. Safe.',
     layersCost: 1,
     goldMul: 0.4,
-    itemChance: 0.15,
+    itemChance: 0.12,
     lootTable: 'standard',
-    enemyMul: 0.2,
-    conditionMul: 0.3,
+    enemyMul: 0.15,
+    enemyLevel: 1,
+    enemyMaxCount: 1,
+    conditionMul: 0.2,
     xpMul: 0.4,
     terminalReveal: false,
   },
   2: {
     label: 'Thorough Search',
-    description: 'Two layers at once. Some noise.',
+    description: 'Two layers. Noise attracts attention.',
     layersCost: 2,
-    goldMul: 2.5,
+    goldMul: 3.0,
     itemChance: 0.45,
     lootTable: 'elite',
-    enemyMul: 1.5,
+    enemyMul: 2.0,
+    enemyLevel: 2,
+    enemyMaxCount: 2,
     conditionMul: 1.5,
-    xpMul: 2.5,
+    xpMul: 3.0,
     terminalReveal: false,
   },
   3: {
     label: 'Deep Clean',
-    description: 'Everything. All at once.',
+    description: 'Rip everything apart. Whatever\'s in there will find you.',
     layersCost: 3,
-    goldMul: 6.0,
-    itemChance: 0.65,
+    goldMul: 8.0,
+    itemChance: 0.80,
     lootTable: 'chest',
-    enemyMul: 4.0,
-    conditionMul: 3.0,
-    xpMul: 6.0,
+    enemyMul: 5.0,
+    enemyLevel: 3,
+    enemyMaxCount: 3,
+    conditionMul: 3.5,
+    xpMul: 8.0,
     terminalReveal: true,
   },
 }
@@ -419,6 +425,8 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
   if (enemyChance > 0 && Math.random() < enemyChance) {
     result.dangerTriggered = true
     result.dangerType = 'enemy'
+    result.enemyLevel = config.enemyLevel || 1
+    result.enemyMaxCount = config.enemyMaxCount || 2
 
     // PER save — can you spot it before it gets you?
     var perSave = rollWithMod(20, perMod)
