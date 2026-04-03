@@ -832,10 +832,11 @@ function Game({ character, user, onEndRun }) {
       if (destIdx === currentIdx) return
     }
 
-    // Mark both zones' doors as unlocked
+    // Save current zone state back to floor before switching
+    // (zone has live updates — visited, cleared, corpses — that floor.zones doesn't)
     var updatedZones = floor.zones.map(function(z, i) {
       if (i === currentIdx) {
-        return Object.assign({}, z, { zoneDoorUnlocked: true })
+        return Object.assign({}, zone, { zoneDoorUnlocked: true })
       }
       if (i === destIdx) {
         return Object.assign({}, z, { zoneDoorUnlocked: true, cameFromZoneIndex: currentIdx })
