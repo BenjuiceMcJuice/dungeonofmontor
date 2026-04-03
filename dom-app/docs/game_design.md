@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-Dungeon of Montor is a browser-based RPG PWA -- mobile or desktop, solo or multiplayer -- combining D&D-style tactical mechanics with AI-driven live narrative. The dungeon belongs to Montor, an eccentric, possessive old man who filled his home with household items repurposed as weapons. Players descend 7 floors through his house, fighting with his kitchen knives and pruning shears, stealing his powers, and (eventually) confronting him at the bottom.
+Dungeon of Montor is a browser-based RPG PWA -- mobile or desktop, solo or multiplayer -- combining D&D-style tactical mechanics with AI-driven live narrative. The dungeon belongs to Montor — an eccentric, possessive enigma who filled his home with household items repurposed as weapons. Nobody knows what Montor is. He is never seen, never explained. Players descend 7 floors through his house, fighting with his kitchen knives and pruning shears, stealing his powers, and (eventually) confronting him at the bottom.
 
 The game's visual identity is BBC Micro-style flat pixel art -- solid colour fills, black outlines, no gradients. All sprites are drawn as canvas grid arrays in code. No image files exist. Enemy power tier is communicated by colour alone (Dust/Slate/Iron/Crimson/Void).
 
