@@ -412,7 +412,8 @@ function Game({ character, user, onEndRun }) {
 
     // Passive regen on entering NEW chambers — baseline 1 HP + relic bonuses
     if (!chamber.cleared && !chamber.corpses) {
-      var regenAmount = 1 + getPassiveTotal(character.equipped, 'regen_per_chamber')
+      var endMod = Math.max(0, getModifier(character.stats.end || 10))
+      var regenAmount = 1 + endMod + getPassiveTotal(character.equipped, 'regen_per_chamber')
       // Bloom gift: extra HP per chamber
       var bodyGift = giftSlots.body
       if (bodyGift && bodyGift.effect === 'chamber_heal') regenAmount += bodyGift.value
@@ -2647,7 +2648,7 @@ function Game({ character, user, onEndRun }) {
             { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
             { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
             { id: 'per', label: 'PER', hint: 'Searching' },
-            { id: 'end', label: 'END', hint: 'Carry capacity' },
+            { id: 'end', label: 'END', hint: 'HP regen per room' },
             { id: 'wis', label: 'WIS', hint: 'Gift power' },
             { id: 'cha', label: 'CHA', hint: 'Prices' },
           ]
@@ -4181,7 +4182,7 @@ function Game({ character, user, onEndRun }) {
             { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
             { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
             { id: 'per', label: 'PER', hint: 'Searching' },
-            { id: 'end', label: 'END', hint: 'Carry capacity' },
+            { id: 'end', label: 'END', hint: 'HP regen per room' },
             { id: 'wis', label: 'WIS', hint: 'Gift power' },
             { id: 'cha', label: 'CHA', hint: 'Prices' },
           ]
