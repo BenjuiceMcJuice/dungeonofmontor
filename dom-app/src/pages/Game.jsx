@@ -114,19 +114,20 @@ function checkConditionResist(equipped, conditionId) {
     if (r.passiveEffect === 'condition_immunity' && r.passiveCondition === conditionId) {
       return { blocked: true, type: 'immune' }
     }
-    // Single condition resist
+    // Single condition resist — stacks additively
     if (r.passiveEffect === 'condition_resist' && r.passiveCondition === conditionId) {
-      resistChance = Math.max(resistChance, r.passiveValue || 0)
+      resistChance += (r.passiveValue || 0)
     }
     // Multi condition resist
     if (r.passiveEffect === 'condition_resist_multi' && r.passiveConditions && r.passiveConditions.indexOf(conditionId) !== -1) {
-      resistChance = Math.max(resistChance, r.passiveValue || 0)
+      resistChance += (r.passiveValue || 0)
     }
     // All condition resist
     if (r.passiveEffect === 'condition_resist_all') {
-      resistChance = Math.max(resistChance, r.passiveValue || 0)
+      resistChance += (r.passiveValue || 0)
     }
   }
+  resistChance = Math.min(resistChance, 1.0) // cap at 100%
   if (resistChance > 0 && Math.random() < resistChance) {
     return { blocked: true, type: 'resisted' }
   }
@@ -2630,21 +2631,49 @@ function Game({ character, user, onEndRun }) {
           var w = character.equipped && character.equipped.weapon
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
-          var totalDef = (character.stats.def || 10) + (a ? a.defBonus || 0 : 0) + (o ? o.defBonus || 0 : 0)
+          var h = character.equipped && character.equipped.helmet
+          var bt = character.equipped && character.equipped.boots
+          var am = character.equipped && character.equipped.amulet
 
-          // Compute effective stats from equipment
+          // Compute effective stats from ALL equipment
           var equipBonuses = {}
+          // DEF bonuses from armour, shield, helmet, boots
           if (a && a.defBonus) equipBonuses.def = (equipBonuses.def || 0) + a.defBonus
           if (o && o.defBonus) equipBonuses.def = (equipBonuses.def || 0) + o.defBonus
+          if (h && h.defBonus) equipBonuses.def = (equipBonuses.def || 0) + h.defBonus
+          if (bt && bt.defBonus) equipBonuses.def = (equipBonuses.def || 0) + bt.defBonus
+          // AGI penalties/bonuses from weapon, armour, offhand, helmet, boots
           if (w && w.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + w.agiPenalty
           if (a && a.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + a.agiPenalty
           if (o && o.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + o.agiPenalty
-
+          if (h && h.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + h.agiPenalty
+          if (bt && bt.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + bt.agiPenalty
+          if (bt && bt.agiBonus) equipBonuses.agi = (equipBonuses.agi || 0) + bt.agiBonus
+          // Passive stat bonuses from relics, rings, amulets (str_bonus, def_bonus, lck_bonus, per_bonus)
+          var passiveItems = getAllPassiveItems(character.equipped)
+          for (var pi2 = 0; pi2 < passiveItems.length; pi2++) {
+            var pe = passiveItems[pi2].passiveEffect
+            var pv = passiveItems[pi2].passiveValue || 0
+            if (pe === 'str_bonus') equipBonuses.str = (equipBonuses.str || 0) + pv
+            if (pe === 'def_bonus') equipBonuses.def = (equipBonuses.def || 0) + pv
+            if (pe === 'lck_bonus') equipBonuses.lck = (equipBonuses.lck || 0) + pv
+            if (pe === 'per_bonus') equipBonuses.per = (equipBonuses.per || 0) + pv
+          }
+          // Set bonuses
+          var setBonusEffects = getSetBonuses(character.equipped)
+          for (var sbi = 0; sbi < setBonusEffects.length; sbi++) {
+            var sbe = setBonusEffects[sbi]
+            if (sbe.passiveEffect === 'str_bonus') equipBonuses.str = (equipBonuses.str || 0) + (sbe.passiveValue || 0)
+            if (sbe.passiveEffect === 'def_bonus') equipBonuses.def = (equipBonuses.def || 0) + (sbe.passiveValue || 0)
+            if (sbe.secondEffect === 'crit_bonus') equipBonuses.lck = (equipBonuses.lck || 0) + (sbe.secondValue || 0)
+          }
           // Active buff bonuses
           for (var bi = 0; bi < activeBuffs.length; bi++) {
             var b = activeBuffs[bi]
             if (b.stat && b.value) equipBonuses[b.stat] = (equipBonuses[b.stat] || 0) + b.value
           }
+
+          var totalDef = (character.stats.def || 10) + (equipBonuses.def || 0)
 
           return (
             <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
@@ -2737,8 +2766,8 @@ function Game({ character, user, onEndRun }) {
         {/* Inventory panel — full screen overlay */}
         {showInventoryPanel && (function() {
           var tabs = [
-            { id: 'weapons',     label: 'Arms',    types: ['weapon'] },
-            { id: 'wearables',   label: 'Wear',    types: ['armour', 'ring', 'amulet'] },
+            { id: 'weapons',     label: 'Arms',    types: ['weapon', 'armour'], filterSlots: ['weapon', 'offhand'] },
+            { id: 'wearables',   label: 'Wear',    types: ['armour', 'ring', 'amulet'], excludeSlots: ['offhand'] },
             { id: 'relics',      label: 'Relics',  types: ['relic'] },
             { id: 'consumables', label: 'Use',     types: ['consumable'] },
             { id: 'junk',        label: 'Junk',    types: ['junk'] },
@@ -2746,9 +2775,12 @@ function Game({ character, user, onEndRun }) {
           var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
           var filteredRaw = []
           for (var fi = 0; fi < playerInventory.length; fi++) {
-            if (activeTab.types.indexOf(playerInventory[fi].type) !== -1) {
-              filteredRaw.push({ item: playerInventory[fi], idx: fi })
-            }
+            var invItem = playerInventory[fi]
+            if (activeTab.types.indexOf(invItem.type) === -1) continue
+            // Slot-based filtering: Arms tab gets offhand/shields, Wear excludes them
+            if (activeTab.filterSlots && activeTab.filterSlots.indexOf(invItem.slot || invItem.type) === -1) continue
+            if (activeTab.excludeSlots && activeTab.excludeSlots.indexOf(invItem.slot) !== -1) continue
+            filteredRaw.push({ item: invItem, idx: fi })
           }
           // Stack identical items by ID
           var filteredItems = []
@@ -2778,7 +2810,11 @@ function Game({ character, user, onEndRun }) {
               tabCounts[tabId] += playerJunkBag.filter(function(j) { return j.consumable }).reduce(function(s, j) { return s + j.count }, 0)
             } else {
               for (var pi = 0; pi < playerInventory.length; pi++) {
-                if (tabs[ci].types.indexOf(playerInventory[pi].type) !== -1) tabCounts[tabId]++
+                var countItem = playerInventory[pi]
+                if (tabs[ci].types.indexOf(countItem.type) === -1) continue
+                if (tabs[ci].filterSlots && tabs[ci].filterSlots.indexOf(countItem.slot || countItem.type) === -1) continue
+                if (tabs[ci].excludeSlots && tabs[ci].excludeSlots.indexOf(countItem.slot) !== -1) continue
+                tabCounts[tabId]++
               }
             }
           }
@@ -2838,13 +2874,19 @@ function Game({ character, user, onEndRun }) {
                       )}
                     </div>
                   </div>
-                  {character.equipped.offhand && character.equipped.offhand.type === 'weapon' && (
-                    <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-sm font-sans">
+                  {character.equipped.offhand && (
+                    <div className={'p-2 rounded text-sm font-sans ' + (character.equipped.offhand.type === 'weapon' ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-blue-500/10 border border-blue-500/20')}>
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                          <span className="text-[10px] text-emerald-400 uppercase tracking-wide">Off Hand (Dual Wield)</span>
+                          <span className={'text-[10px] uppercase tracking-wide ' + (character.equipped.offhand.type === 'weapon' ? 'text-emerald-400' : 'text-blue-400')}>
+                            {character.equipped.offhand.type === 'weapon' ? 'Off Hand (Dual Wield)' : 'Shield'}
+                          </span>
                           <span className="text-ink">{character.equipped.offhand.name}</span>
-                          <span className="text-ink-faint text-[10px]">d{character.equipped.offhand.damageDie || character.equipped.offhand.die} dmg, -2 accuracy, no crits</span>
+                          <span className="text-ink-faint text-[10px]">
+                            {character.equipped.offhand.type === 'weapon'
+                              ? 'd' + (character.equipped.offhand.damageDie || character.equipped.offhand.die) + ' dmg, -2 accuracy, no crits'
+                              : '+' + character.equipped.offhand.defBonus + ' DEF, ' + Math.round((character.equipped.offhand.passiveValue || 0) * 100) + '% block'}
+                          </span>
                         </div>
                         {canEquipNow && (
                           <button onClick={handleUnequipOffhand}
@@ -2863,29 +2905,12 @@ function Game({ character, user, onEndRun }) {
                     <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                          <span className="text-[10px] text-gold uppercase tracking-wide">Equipped Armour</span>
+                          <span className="text-[10px] text-gold uppercase tracking-wide">Armour</span>
                           <span className="text-ink">{character.equipped.armour.name}</span>
-                          <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus} DEF</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus || 0} DEF{character.equipped.armour.agiPenalty ? ', ' + character.equipped.armour.agiPenalty + ' AGI' : ''}{character.equipped.armour.setId ? ' [SET]' : ''}</span>
                         </div>
                         {canEquipNow && (
                           <button onClick={handleUnequipArmour}
-                            className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
-                            Unequip
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {character.equipped && character.equipped.offhand && (
-                    <div className="p-2 rounded bg-blue-500/10 border border-blue-500/20 text-sm font-sans">
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-blue-400 uppercase tracking-wide">Offhand</span>
-                          <span className="text-ink">{character.equipped.offhand.name}</span>
-                          <span className="text-ink-faint text-[10px]">+{character.equipped.offhand.defBonus} DEF, {Math.round((character.equipped.offhand.passiveValue || 0) * 100)}% block</span>
-                        </div>
-                        {canEquipNow && (
-                          <button onClick={handleUnequipOffhand}
                             className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors">
                             Unequip
                           </button>
@@ -2969,27 +2994,61 @@ function Game({ character, user, onEndRun }) {
               )}
               {activeTab.id === 'relics' && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
-                  {character.equipped && character.equipped.relics && character.equipped.relics.length > 0 && (
-                    <div className="p-2 rounded bg-purple-500/10 border border-purple-500/20 text-sm font-sans">
-                      <span className="text-[10px] text-purple-400 uppercase tracking-wide">Relics ({character.equipped.relics.filter(function(r) { return r.passiveEffect === 'condition_resist' || r.passiveEffect === 'condition_immunity' || r.passiveEffect === 'condition_resist_multi' || r.passiveEffect === 'condition_resist_all' }).length}/3 resist slots)</span>
-                      {character.equipped.relics.map(function(relic, ri) {
-                        return (
-                          <div key={ri} className="flex items-center justify-between mt-1">
-                            <div className="flex flex-col">
-                              <span className="text-ink text-xs">{relic.name}</span>
-                              <span className="text-ink-faint text-[10px]">{relic.description}</span>
-                            </div>
-                            {canEquipNow && (
-                              <button onClick={function() { handleUnequipRelic(ri) }}
-                                className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
-                                Unequip
-                              </button>
-                            )}
+                  {character.equipped && character.equipped.relics && (function() {
+                    var isResist = function(r) { return r.passiveEffect === 'condition_resist' || r.passiveEffect === 'condition_immunity' || r.passiveEffect === 'condition_resist_multi' || r.passiveEffect === 'condition_resist_all' }
+                    var resistRelics = []
+                    var utilityRelics = []
+                    character.equipped.relics.forEach(function(r, i) {
+                      if (isResist(r)) resistRelics.push({ relic: r, idx: i })
+                      else utilityRelics.push({ relic: r, idx: i })
+                    })
+                    return (
+                      <>
+                        {resistRelics.length > 0 && (
+                          <div className="p-2 rounded bg-purple-500/10 border border-purple-500/20 text-sm font-sans">
+                            <span className="text-[10px] text-purple-400 uppercase tracking-wide">Wards ({resistRelics.length}/3)</span>
+                            {resistRelics.map(function(entry) {
+                              return (
+                                <div key={entry.idx} className="flex items-center justify-between mt-1">
+                                  <div className="flex flex-col">
+                                    <span className="text-ink text-xs">{entry.relic.name}</span>
+                                    <span className="text-ink-faint text-[10px]">{entry.relic.description}</span>
+                                  </div>
+                                  {canEquipNow && (
+                                    <button onClick={function() { handleUnequipRelic(entry.idx) }}
+                                      className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
+                                      Unequip
+                                    </button>
+                                  )}
+                                </div>
+                              )
+                            })}
                           </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                        )}
+                        {utilityRelics.length > 0 && (
+                          <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
+                            <span className="text-[10px] text-gold uppercase tracking-wide">Relics</span>
+                            {utilityRelics.map(function(entry) {
+                              return (
+                                <div key={entry.idx} className="flex items-center justify-between mt-1">
+                                  <div className="flex flex-col">
+                                    <span className="text-ink text-xs">{entry.relic.name}</span>
+                                    <span className="text-ink-faint text-[10px]">{entry.relic.description}</span>
+                                  </div>
+                                  {canEquipNow && (
+                                    <button onClick={function() { handleUnequipRelic(entry.idx) }}
+                                      className="text-[10px] text-ink-dim border border-border px-2 py-1 rounded hover:text-ink hover:border-ink-dim transition-colors shrink-0 ml-2">
+                                      Unequip
+                                    </button>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
                 </div>
               )}
 
@@ -3002,7 +3061,7 @@ function Game({ character, user, onEndRun }) {
                 {/* Item detail panel */}
                 {selectedItemIdx !== null && playerInventory[selectedItemIdx] && (function() {
                   var detailItem = playerInventory[selectedItemIdx]
-                  var isEquippable = detailItem.type === 'weapon' || detailItem.type === 'armour' || detailItem.type === 'relic'
+                  var isEquippable = detailItem.type === 'weapon' || detailItem.type === 'armour' || detailItem.type === 'relic' || detailItem.type === 'ring' || detailItem.type === 'amulet'
                   var isConsumable = detailItem.type === 'consumable'
                   return (
                     <div className="mb-2 p-4 rounded-lg bg-surface border-2 border-gold/40">
@@ -3016,7 +3075,10 @@ function Game({ character, user, onEndRun }) {
                         {detailItem.type === 'weapon' && detailItem.defIgnore > 0 && <span>Ignores {Math.round(detailItem.defIgnore * 100)}% of enemy DEF</span>}
                         {detailItem.type === 'weapon' && detailItem.doubleStrikeBase > 0 && <span>{Math.round(detailItem.doubleStrikeBase * 100)}% double strike chance (scales with AGI)</span>}
                         {detailItem.conditionOnHit && <span>Applies {detailItem.conditionOnHit} on hit</span>}
-                        {detailItem.type === 'armour' && <span>DEF: +{detailItem.defBonus}{detailItem.agiPenalty ? ' | AGI: ' + detailItem.agiPenalty : ''}</span>}
+                        {detailItem.type === 'armour' && <span>{detailItem.slot === 'helmet' ? 'Helmet' : detailItem.slot === 'boots' ? 'Boots' : detailItem.slot === 'offhand' ? 'Shield' : 'Armour'}{detailItem.defBonus ? ' | DEF: +' + detailItem.defBonus : ''}{detailItem.agiBonus ? ' | AGI: +' + detailItem.agiBonus : ''}{detailItem.agiPenalty ? ' | AGI: ' + detailItem.agiPenalty : ''}{detailItem.initBonus ? ' | Init: +' + detailItem.initBonus : ''}</span>}
+                        {detailItem.type === 'ring' && <span>Ring{detailItem.passiveEffect ? '' : ' | ' + detailItem.description}</span>}
+                        {detailItem.type === 'amulet' && <span>Amulet{detailItem.twinFangsGrant ? ' | Grants Twin Fangs' : ''}</span>}
+                        {detailItem.setId && <span>Set: {detailItem.setId === 'sunday_best' ? "Montor's Sunday Best" : detailItem.setId === 'peaky' ? "Montor's Peaky Set" : detailItem.setId}</span>}
                         {detailItem.passiveEffect && <span>Passive: {detailItem.passiveEffect}{detailItem.passiveValue ? ' (' + detailItem.passiveValue + ')' : ''}{detailItem.passiveCondition ? ' — ' + detailItem.passiveCondition : ''}</span>}
                         {detailItem.giftPower && <span>Gift: {Array.isArray(detailItem.giftPower) ? detailItem.giftPower.join(' + ') : detailItem.giftPower}</span>}
                         {detailItem.effect === 'heal' && <span>Heals {detailItem.effectValue} HP</span>}
@@ -3063,7 +3125,11 @@ function Game({ character, user, onEndRun }) {
                             <span className="text-ink-dim text-xs">
                               {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
                                item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
-                               item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                               item.type === 'armour' && item.slot === 'helmet' ? 'helmet' + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') :
+                               item.type === 'armour' && item.slot === 'boots' ? 'boots' + (item.agiBonus ? ', +' + item.agiBonus + ' AGI' : '') + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') :
+                               item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
+                               item.type === 'ring' ? 'ring' :
+                               item.type === 'amulet' ? 'amulet' :
                                item.type === 'relic' ? (item.passiveEffect || '').replace(/_/g, ' ') :
                                item.effect === 'heal' ? 'Heal ' + item.effectValue :
                                item.effect === 'random_effect' ? '???' :
@@ -4098,17 +4164,40 @@ function Game({ character, user, onEndRun }) {
           var w = character.equipped && character.equipped.weapon
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
+          var h3 = character.equipped && character.equipped.helmet
+          var bt3 = character.equipped && character.equipped.boots
           var equipBonuses = {}
           if (a && a.defBonus) equipBonuses.def = (equipBonuses.def || 0) + a.defBonus
           if (o && o.defBonus) equipBonuses.def = (equipBonuses.def || 0) + o.defBonus
+          if (h3 && h3.defBonus) equipBonuses.def = (equipBonuses.def || 0) + h3.defBonus
+          if (bt3 && bt3.defBonus) equipBonuses.def = (equipBonuses.def || 0) + bt3.defBonus
           if (w && w.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + w.agiPenalty
           if (a && a.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + a.agiPenalty
           if (o && o.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + o.agiPenalty
+          if (h3 && h3.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + h3.agiPenalty
+          if (bt3 && bt3.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + bt3.agiPenalty
+          if (bt3 && bt3.agiBonus) equipBonuses.agi = (equipBonuses.agi || 0) + bt3.agiBonus
+          var passiveItems3 = getAllPassiveItems(character.equipped)
+          for (var pi4 = 0; pi4 < passiveItems3.length; pi4++) {
+            var pe3 = passiveItems3[pi4].passiveEffect
+            var pv3 = passiveItems3[pi4].passiveValue || 0
+            if (pe3 === 'str_bonus') equipBonuses.str = (equipBonuses.str || 0) + pv3
+            if (pe3 === 'def_bonus') equipBonuses.def = (equipBonuses.def || 0) + pv3
+            if (pe3 === 'lck_bonus') equipBonuses.lck = (equipBonuses.lck || 0) + pv3
+            if (pe3 === 'per_bonus') equipBonuses.per = (equipBonuses.per || 0) + pv3
+          }
+          var setBonusEffects3 = getSetBonuses(character.equipped)
+          for (var sbi3 = 0; sbi3 < setBonusEffects3.length; sbi3++) {
+            var sbe3 = setBonusEffects3[sbi3]
+            if (sbe3.passiveEffect === 'str_bonus') equipBonuses.str = (equipBonuses.str || 0) + (sbe3.passiveValue || 0)
+            if (sbe3.passiveEffect === 'def_bonus') equipBonuses.def = (equipBonuses.def || 0) + (sbe3.passiveValue || 0)
+            if (sbe3.secondEffect === 'crit_bonus') equipBonuses.lck = (equipBonuses.lck || 0) + (sbe3.secondValue || 0)
+          }
           for (var bi = 0; bi < activeBuffs.length; bi++) {
             var b = activeBuffs[bi]
             if (b.stat && b.value) equipBonuses[b.stat] = (equipBonuses[b.stat] || 0) + b.value
           }
-          var totalDef = (character.stats.def || 10) + (a ? a.defBonus || 0 : 0) + (o ? o.defBonus || 0 : 0)
+          var totalDef = (character.stats.def || 10) + (equipBonuses.def || 0)
           return (
             <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -4254,12 +4343,35 @@ function Game({ character, user, onEndRun }) {
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
 
+          var h2 = character.equipped && character.equipped.helmet
+          var bt2 = character.equipped && character.equipped.boots
           var equipBonuses = {}
           if (a && a.defBonus) equipBonuses.def = (equipBonuses.def || 0) + a.defBonus
           if (o && o.defBonus) equipBonuses.def = (equipBonuses.def || 0) + o.defBonus
+          if (h2 && h2.defBonus) equipBonuses.def = (equipBonuses.def || 0) + h2.defBonus
+          if (bt2 && bt2.defBonus) equipBonuses.def = (equipBonuses.def || 0) + bt2.defBonus
           if (w && w.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + w.agiPenalty
           if (a && a.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + a.agiPenalty
           if (o && o.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + o.agiPenalty
+          if (h2 && h2.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + h2.agiPenalty
+          if (bt2 && bt2.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + bt2.agiPenalty
+          if (bt2 && bt2.agiBonus) equipBonuses.agi = (equipBonuses.agi || 0) + bt2.agiBonus
+          var passiveItems2 = getAllPassiveItems(character.equipped)
+          for (var pi3 = 0; pi3 < passiveItems2.length; pi3++) {
+            var pe2 = passiveItems2[pi3].passiveEffect
+            var pv2 = passiveItems2[pi3].passiveValue || 0
+            if (pe2 === 'str_bonus') equipBonuses.str = (equipBonuses.str || 0) + pv2
+            if (pe2 === 'def_bonus') equipBonuses.def = (equipBonuses.def || 0) + pv2
+            if (pe2 === 'lck_bonus') equipBonuses.lck = (equipBonuses.lck || 0) + pv2
+            if (pe2 === 'per_bonus') equipBonuses.per = (equipBonuses.per || 0) + pv2
+          }
+          var setBonusEffects2 = getSetBonuses(character.equipped)
+          for (var sbi2 = 0; sbi2 < setBonusEffects2.length; sbi2++) {
+            var sbe2 = setBonusEffects2[sbi2]
+            if (sbe2.passiveEffect === 'str_bonus') equipBonuses.str = (equipBonuses.str || 0) + (sbe2.passiveValue || 0)
+            if (sbe2.passiveEffect === 'def_bonus') equipBonuses.def = (equipBonuses.def || 0) + (sbe2.passiveValue || 0)
+            if (sbe2.secondEffect === 'crit_bonus') equipBonuses.lck = (equipBonuses.lck || 0) + (sbe2.secondValue || 0)
+          }
           for (var bi = 0; bi < activeBuffs.length; bi++) {
             var b = activeBuffs[bi]
             if (b.stat && b.value) equipBonuses[b.stat] = (equipBonuses[b.stat] || 0) + b.value

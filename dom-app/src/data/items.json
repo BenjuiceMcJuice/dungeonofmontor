@@ -1094,6 +1094,12 @@
 
   "___COMMENT_HELMETS": "=== HELMETS ===",
 
+  "helmet_base": {
+    "id": "helmet_base", "name": "Leather Cap", "type": "armour", "slot": "helmet",
+    "rarity": "common", "defBonus": 1,
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "+1 DEF. Hardened leather. Better than nothing."
+  },
   "montors_colander": {
     "id": "montors_colander", "name": "Montor's Colander", "type": "armour", "slot": "helmet",
     "rarity": "common", "defBonus": 1,
@@ -1138,6 +1144,12 @@
 
   "___COMMENT_BOOTS": "=== BOOTS ===",
 
+  "boots_base": {
+    "id": "boots_base", "name": "Worn Boots", "type": "armour", "slot": "boots",
+    "rarity": "common", "agiBonus": 1,
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "+1 AGI. Scuffed. Broken in. At least they fit."
+  },
   "montors_wellies": {
     "id": "montors_wellies", "name": "Montor's Wellies", "type": "armour", "slot": "boots",
     "rarity": "common", "agiBonus": 1,
