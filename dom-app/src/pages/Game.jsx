@@ -3198,15 +3198,30 @@ function Game({ character, user, onEndRun }) {
                     </div>
                   )
                 })()}
+                {/* HP bar */}
+                {(function() {
+                  var hpPercent = playerHp / character.maxHp
+                  var hpColor = hpPercent > 0.6 ? 'bg-green-500' : hpPercent > 0.3 ? 'bg-yellow-400' : 'bg-red-500'
+                  var hpTextColor = hpPercent > 0.6 ? 'text-green-400' : hpPercent > 0.3 ? 'text-yellow-400' : 'text-red-400'
+                  return (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={hpTextColor + ' font-display text-base'}>{playerHp} / {character.maxHp} HP</span>
+                        <span className="text-ink-dim text-xs font-sans">Regen {1 + Math.max(0, getModifier(character.stats.end || 10)) + getPassiveTotal(character.equipped, 'regen_per_chamber')}/room</span>
+                      </div>
+                      <div className="w-full bg-bg rounded-full h-2 border border-border">
+                        <div className={hpColor + ' rounded-full h-full transition-all duration-300'} style={{ width: Math.round(hpPercent * 100) + '%' }} />
+                      </div>
+                    </div>
+                  )
+                })()}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
-                  <div className="text-xs font-sans"><span className="text-ink-dim">HP:</span> <span className="text-ink">{playerHp}/{character.maxHp}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Gold:</span> <span className="text-gold">{playerGold}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">DEF total:</span> <span className="text-ink">{totalDef} (reduces {Math.floor(totalDef / 2)})</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Dodge:</span> <span className="text-ink">{Math.round(Math.max(0, getModifier(character.stats.agi || 10) * 0.02 + getPassiveTotal(character.equipped, 'dodge_chance')) * 100)}%</span></div>
+                  <div className="text-xs font-sans"><span className="text-ink-dim">Crit:</span> <span className="text-ink">{critThreshold}+ (nat d20)</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Weapon:</span> <span className="text-ink">{w ? w.name : 'None'}</span></div>
                   <div className="text-xs font-sans"><span className="text-ink-dim">Armour:</span> <span className="text-ink">{a ? a.name : 'None'}</span></div>
-                  <div className="text-xs font-sans"><span className="text-ink-dim">Crit:</span> <span className="text-ink">{critThreshold}+ (nat d20)</span></div>
-                  <div className="text-xs font-sans"><span className="text-ink-dim">Regen:</span> <span className="text-ink">{1 + Math.max(0, getModifier(character.stats.end || 10)) + getPassiveTotal(character.equipped, 'regen_per_chamber')} HP/room</span></div>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {statRows.map(function(s) {
