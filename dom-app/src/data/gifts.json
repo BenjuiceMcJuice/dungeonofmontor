@@ -126,22 +126,21 @@
         "stacks": true
       },
       "sword": {
-        "id": "vine_parry",
-        "name": "Vine Parry",
-        "description": "15% chance when hit: attacker SLUGGISH 1 turn.",
-        "effect": "reflect_condition",
-        "chance": 0.15,
-        "condition": "SLUGGISH",
-        "conditionTurns": 1
+        "id": "vine_bind",
+        "name": "Vine Bind",
+        "description": "20% chance on hit: enemy skips next turn (entangled).",
+        "effect": "hit_skip_chance",
+        "chance": 0.20
       },
       "spear": {
         "id": "thorn_reach",
         "name": "Thorn Reach",
-        "description": "+1 damage. First hit each combat applies SLUGGISH 2 turns.",
+        "description": "+2 damage. First hit each combat applies 2 BLEED stacks.",
         "effect": "bonus_damage_and_first_hit_condition",
-        "bonusDamage": 1,
-        "condition": "SLUGGISH",
-        "conditionTurns": 2
+        "bonusDamage": 2,
+        "condition": "BLEED",
+        "conditionTurns": null,
+        "conditionStacks": 2
       },
       "mace": {
         "id": "root_shatter",
@@ -152,20 +151,22 @@
         "conditionTurns": 1
       },
       "axe": {
-        "id": "wild_growth",
-        "name": "Wild Growth",
-        "description": "On kill, heal 3 HP.",
-        "effect": "kill_heal",
-        "value": 3
+        "id": "harvest",
+        "name": "Harvest",
+        "description": "On kill, heal 5 HP + next hit deals +3 damage.",
+        "effect": "kill_heal_and_buff",
+        "healValue": 5,
+        "buffDamage": 3
       },
       "fists": {
-        "id": "spore_fist",
-        "name": "Spore Fist",
-        "description": "25% chance per hit: BLIND 1 turn.",
-        "effect": "hit_condition",
-        "chance": 0.25,
+        "id": "pollen_fist",
+        "name": "Pollen Fist",
+        "description": "30% chance per hit: BLIND 1 turn + 2 damage.",
+        "effect": "hit_condition_and_damage",
+        "chance": 0.30,
         "condition": "BLIND",
-        "conditionTurns": 1
+        "conditionTurns": 1,
+        "bonusDamage": 2
       }
     },
     "shield": [
@@ -182,6 +183,559 @@
         "description": "20% chance to fully block an attack (0 damage).",
         "effect": "block_chance",
         "chance": 0.2
+      }
+    ]
+  },
+
+  "stone": {
+    "id": "stone",
+    "name": "Stone",
+    "theme": "Earth, weight, endurance",
+    "smashText": "You tip the gravy boat. The gravy pours out and never stops. The ceramic cracks and cold blue light floods out.",
+    "montorSmash": "That was grandmother's. She'll haunt YOU now.",
+    "body": [
+      {
+        "id": "ironhide",
+        "name": "Ironhide",
+        "type": "defence",
+        "description": "Reduce all incoming damage by 2 (flat).",
+        "effect": "flat_damage_reduction",
+        "value": 2
+      },
+      {
+        "id": "stone_skin",
+        "name": "Stone Skin",
+        "type": "defence",
+        "description": "+3 DEF permanently.",
+        "effect": "stat_boost",
+        "stats": { "def": 3 }
+      },
+      {
+        "id": "bedrock",
+        "name": "Bedrock",
+        "type": "defence",
+        "description": "Below 15% HP, next 3 hits deal only 1 damage. Once per combat.",
+        "effect": "bedrock",
+        "hpThreshold": 0.15,
+        "charges": 3
+      }
+    ],
+    "mind": [
+      {
+        "id": "unshakeable",
+        "name": "Unshakeable",
+        "type": "defence",
+        "description": "Immune to DAZE.",
+        "effect": "condition_immunity",
+        "condition": "DAZE"
+      },
+      {
+        "id": "mountain_mind",
+        "name": "Mountain Mind",
+        "type": "defence",
+        "description": "50% resist all mind conditions (FEAR/DAZE/CHARM).",
+        "effect": "mind_condition_resist",
+        "value": 0.5
+      },
+      {
+        "id": "tremor_sense",
+        "name": "Tremor Sense",
+        "type": "other",
+        "description": "+3 PER, immune to trap damage/conditions from searches.",
+        "effect": "search_trap_immunity",
+        "stats": { "per": 3 }
+      }
+    ],
+    "weapon": [
+      {
+        "id": "crushing_blow",
+        "name": "Crushing Blow",
+        "description": "+25% stagger chance on all weapons.",
+        "effect": "stagger_bonus",
+        "value": 0.25
+      },
+      {
+        "id": "earthshatter",
+        "name": "Earthshatter",
+        "description": "Hits ignore 20% enemy DEF.",
+        "effect": "def_ignore_bonus",
+        "value": 0.20
+      },
+      {
+        "id": "avalanche",
+        "name": "Avalanche",
+        "description": "Crits deal 2.5x instead of 2x damage.",
+        "effect": "crit_multiplier",
+        "value": 2.5
+      }
+    ],
+    "shield": [
+      {
+        "id": "granite_guard",
+        "name": "Granite Guard",
+        "description": "+10% block chance.",
+        "effect": "block_chance",
+        "chance": 0.10
+      },
+      {
+        "id": "polished_granite",
+        "name": "Polished Granite",
+        "description": "Reflect 3 damage when hit.",
+        "effect": "reflect_damage",
+        "value": 3
+      },
+      {
+        "id": "glacial_wall",
+        "name": "Glacial Wall",
+        "description": "Blocking has 25% chance to apply FROST.",
+        "effect": "block_condition",
+        "chance": 0.25,
+        "condition": "FROST",
+        "conditionTurns": 1
+      }
+    ]
+  },
+
+  "bile": {
+    "id": "bile",
+    "name": "Bile",
+    "theme": "Decay, disease, weakening",
+    "smashText": "You slam the toilet lid. It cracks clean in half. Sickly yellow vapour hisses from below.",
+    "montorSmash": "Do you have ANY idea how hard it is to get a plumber down here?",
+    "body": [
+      {
+        "id": "toxic_presence",
+        "name": "Toxic Presence",
+        "type": "defence",
+        "description": "Enemies that hit you have 30% chance to get POISON.",
+        "effect": "reflect_condition",
+        "chance": 0.30,
+        "condition": "POISON",
+        "conditionTurns": 3
+      },
+      {
+        "id": "bile_blood",
+        "name": "Bile Blood",
+        "type": "defence",
+        "description": "When poisoned yourself, heal 2 HP/turn instead of taking damage.",
+        "effect": "poison_heal",
+        "value": 2
+      },
+      {
+        "id": "rot_resistance",
+        "name": "Rot Resistance",
+        "type": "defence",
+        "description": "Immune to POISON and NAUSEA.",
+        "effect": "condition_immunity_multi",
+        "conditions": ["POISON", "NAUSEA"]
+      }
+    ],
+    "mind": [
+      {
+        "id": "virulent_mind",
+        "name": "Virulent Mind",
+        "type": "attack",
+        "description": "Your conditions last 1 extra turn on enemies.",
+        "effect": "condition_duration_bonus",
+        "value": 1
+      },
+      {
+        "id": "hyperspreader",
+        "name": "Hyperspreader",
+        "type": "attack",
+        "description": "When a poisoned enemy dies, all other enemies get POISON.",
+        "effect": "poison_spread_on_kill"
+      },
+      {
+        "id": "noxious_aura",
+        "name": "Noxious Aura",
+        "type": "attack",
+        "description": "Enemies start combat with -1 STR.",
+        "effect": "enemy_stat_penalty",
+        "stat": "str",
+        "value": -1
+      }
+    ],
+    "weapon": [
+      {
+        "id": "acid_edge",
+        "name": "Acid Edge",
+        "description": "All hits reduce enemy DEF by 2 (stacks, persists in combat).",
+        "effect": "def_shred",
+        "value": 2
+      },
+      {
+        "id": "toilet_hands",
+        "name": "Toilet Hands",
+        "description": "All hits have 40% chance to apply NAUSEA.",
+        "effect": "hit_condition",
+        "chance": 0.40,
+        "condition": "NAUSEA",
+        "conditionTurns": 2
+      },
+      {
+        "id": "corrosive_strike",
+        "name": "Corrosive Strike",
+        "description": "Weapon condition application chance +25%.",
+        "effect": "condition_chance_bonus",
+        "value": 0.25
+      }
+    ],
+    "shield": [
+      {
+        "id": "bile_splash",
+        "name": "Bile Splash",
+        "description": "Blocking applies NAUSEA to attacker.",
+        "effect": "block_condition",
+        "chance": 1.0,
+        "condition": "NAUSEA",
+        "conditionTurns": 2
+      },
+      {
+        "id": "toxic_shield",
+        "name": "Toxic Shield",
+        "description": "+5% block, blocked attacks apply POISON.",
+        "effect": "block_chance_and_condition",
+        "chance": 0.05,
+        "condition": "POISON",
+        "conditionTurns": 3
+      },
+      {
+        "id": "decay_aura",
+        "name": "Decay Aura",
+        "description": "Enemies lose 1 HP at start of their turn (passive).",
+        "effect": "enemy_dot",
+        "value": 1
+      }
+    ]
+  },
+
+  "blood": {
+    "id": "blood",
+    "name": "Blood",
+    "theme": "Flesh, life, hunger",
+    "smashText": "You wind the music box backwards. The melody inverts. Something red seeps from the mechanism.",
+    "montorSmash": "That was the only thing that helped me sleep.",
+    "body": [
+      {
+        "id": "lick_wounds",
+        "name": "Lick Wounds",
+        "type": "defence",
+        "description": "Your BLEED heals 1 HP/turn and gives +1 STR per stack instead of damaging.",
+        "effect": "bleed_heal_and_buff",
+        "healPerStack": 1,
+        "strPerStack": 1
+      },
+      {
+        "id": "crimson_vitality",
+        "name": "Crimson Vitality",
+        "type": "defence",
+        "description": "+20 max HP.",
+        "effect": "hp_bonus",
+        "value": 20
+      },
+      {
+        "id": "bloodpact",
+        "name": "Bloodpact",
+        "type": "attack",
+        "description": "Lifesteal 10% on all damage dealt.",
+        "effect": "lifesteal",
+        "value": 0.10
+      }
+    ],
+    "mind": [
+      {
+        "id": "bloodrage",
+        "name": "Bloodrage",
+        "type": "attack",
+        "description": "+2 STR when HP below 50%.",
+        "effect": "low_hp_stat_bonus",
+        "stat": "str",
+        "value": 2,
+        "hpThreshold": 0.5
+      },
+      {
+        "id": "scent_of_blood",
+        "name": "Scent of Blood",
+        "type": "attack",
+        "description": "+1 damage for each enemy already killed this combat.",
+        "effect": "kill_damage_bonus",
+        "value": 1
+      },
+      {
+        "id": "predators_focus",
+        "name": "Predator's Focus",
+        "type": "attack",
+        "description": "Immune to FEAR, +1 accuracy.",
+        "effect": "fear_immunity_and_accuracy",
+        "accuracyBonus": 1
+      }
+    ],
+    "weapon": [
+      {
+        "id": "savage_strikes",
+        "name": "Savage Strikes",
+        "description": "Hits deal +1 damage per BLEED stack on target.",
+        "effect": "bleed_damage_bonus",
+        "value": 1
+      },
+      {
+        "id": "bloodletter",
+        "name": "Bloodletter",
+        "description": "All weapons gain 15% BLEED chance.",
+        "effect": "hit_condition",
+        "chance": 0.15,
+        "condition": "BLEED",
+        "conditionTurns": null
+      },
+      {
+        "id": "haemorrhage",
+        "name": "Haemorrhage",
+        "description": "Crits apply 2 BLEED stacks.",
+        "effect": "crit_bleed",
+        "stacks": 2
+      }
+    ],
+    "shield": [
+      {
+        "id": "blood_absorb",
+        "name": "Blood Absorb",
+        "description": "Blocking heals 3 HP.",
+        "effect": "block_heal",
+        "value": 3
+      },
+      {
+        "id": "crimson_counter",
+        "name": "Crimson Counter",
+        "description": "When hit, 20% chance for free counter-attack.",
+        "effect": "counter_attack",
+        "chance": 0.20
+      },
+      {
+        "id": "iron_will",
+        "name": "Iron Will",
+        "description": "Survive one lethal hit per combat (stay at 1 HP).",
+        "effect": "last_stand",
+        "oncePerCombat": true
+      }
+    ]
+  },
+
+  "ember": {
+    "id": "ember",
+    "name": "Ember",
+    "theme": "Fire, metal, destruction",
+    "smashText": "You bend the tongs. They snap. Orange sparks cascade and the heat rushes through your arms.",
+    "montorSmash": "Those were CALIBRATED. Centuries of calibration. Gone.",
+    "body": [
+      {
+        "id": "forge_body",
+        "name": "Forge Body",
+        "type": "defence",
+        "description": "Immune to BURN, +2 DEF.",
+        "effect": "burn_immunity_and_def",
+        "defBonus": 2
+      },
+      {
+        "id": "heat_aura",
+        "name": "Heat Aura",
+        "type": "attack",
+        "description": "Enemies that hit you take 2 fire damage.",
+        "effect": "reflect_damage",
+        "value": 2
+      },
+      {
+        "id": "tempered",
+        "name": "Tempered",
+        "type": "defence",
+        "description": "+10 max HP, -1 damage taken from all sources.",
+        "effect": "hp_and_damage_reduction",
+        "hpBonus": 10,
+        "damageReduction": 1
+      }
+    ],
+    "mind": [
+      {
+        "id": "chain_lightning",
+        "name": "Chain Lightning",
+        "type": "attack",
+        "description": "Crits deal 3 damage to ALL enemies.",
+        "effect": "crit_aoe_damage",
+        "value": 3
+      },
+      {
+        "id": "napalm",
+        "name": "Napalm",
+        "type": "attack",
+        "description": "BURN you apply lingers 1 extra turn, dealing 2 dmg + AoE.",
+        "effect": "burn_linger",
+        "lingerTurns": 1,
+        "lingerDamage": 2,
+        "lingerAoe": true
+      },
+      {
+        "id": "pyromaniac",
+        "name": "Pyromaniac",
+        "type": "attack",
+        "description": "BURN you apply deals double burst damage.",
+        "effect": "burn_double_burst"
+      }
+    ],
+    "weapon": [
+      {
+        "id": "ignite",
+        "name": "Ignite",
+        "description": "All weapons gain 20% BURN chance.",
+        "effect": "hit_condition",
+        "chance": 0.20,
+        "condition": "BURN",
+        "conditionTurns": 1
+      },
+      {
+        "id": "molten_edge",
+        "name": "Molten Edge",
+        "description": "+3 flat damage on all hits.",
+        "effect": "flat_damage_bonus",
+        "value": 3
+      },
+      {
+        "id": "firestorm",
+        "name": "Firestorm",
+        "description": "Double strike hits also deal 2 AoE to other enemies.",
+        "effect": "double_strike_aoe",
+        "value": 2
+      }
+    ],
+    "shield": [
+      {
+        "id": "flame_shield",
+        "name": "Flame Shield",
+        "description": "Attackers take 3 burn damage on hit.",
+        "effect": "reflect_damage",
+        "value": 3
+      },
+      {
+        "id": "smelt",
+        "name": "Smelt",
+        "description": "Blocking converts 50% of blocked damage into gold.",
+        "effect": "block_gold",
+        "value": 0.5
+      },
+      {
+        "id": "eruption",
+        "name": "Eruption",
+        "description": "When hit below 25% HP, deal 8 damage to all enemies. Once per combat.",
+        "effect": "threshold_aoe_damage",
+        "hpThreshold": 0.25,
+        "value": 8,
+        "oncePerCombat": true
+      }
+    ]
+  },
+
+  "void": {
+    "id": "void",
+    "name": "Void",
+    "theme": "Chaos, shadow, entropy",
+    "smashText": "You blow out the night light. The darkness rushes in and curls around your fingers. It doesn't let go.",
+    "montorSmash": "...",
+    "body": [
+      {
+        "id": "phase_shift",
+        "name": "Phase Shift",
+        "type": "defence",
+        "description": "+15% dodge chance.",
+        "effect": "dodge_bonus",
+        "value": 0.15
+      },
+      {
+        "id": "shadow_step",
+        "name": "Shadow Step",
+        "type": "defence",
+        "description": "First attack each combat auto-misses you.",
+        "effect": "first_hit_dodge",
+        "oncePerCombat": true
+      },
+      {
+        "id": "void_skin",
+        "name": "Void Skin",
+        "type": "defence",
+        "description": "25% chance conditions applied to you hit the attacker instead.",
+        "effect": "condition_reflect",
+        "chance": 0.25
+      }
+    ],
+    "mind": [
+      {
+        "id": "dice_corruption",
+        "name": "Dice Corruption",
+        "type": "attack",
+        "description": "Enemy even d20 rolls are halved. No enemy crits possible.",
+        "effect": "enemy_even_roll_halved"
+      },
+      {
+        "id": "chaos_reroll",
+        "name": "Chaos Reroll",
+        "type": "attack",
+        "description": "Once per combat, force an enemy to reroll their attack.",
+        "effect": "force_reroll",
+        "oncePerCombat": true
+      },
+      {
+        "id": "null_field",
+        "name": "Null Field",
+        "type": "attack",
+        "description": "Enemies have -2 to all rolls.",
+        "effect": "enemy_roll_penalty",
+        "value": -2
+      }
+    ],
+    "weapon": [
+      {
+        "id": "void_strike",
+        "name": "Void Strike",
+        "description": "10% of hits ignore ALL enemy DEF.",
+        "effect": "full_def_ignore_chance",
+        "chance": 0.10
+      },
+      {
+        "id": "shadow_blade",
+        "name": "Shadow Blade",
+        "description": "Misses have 30% chance to deal half damage anyway.",
+        "effect": "miss_damage_chance",
+        "chance": 0.30,
+        "damageMultiplier": 0.5
+      },
+      {
+        "id": "entropy_edge",
+        "name": "Entropy Edge",
+        "description": "Weapon damage randomly +50% or -25% per hit.",
+        "effect": "chaos_damage",
+        "highMultiplier": 1.5,
+        "lowMultiplier": 0.75,
+        "highChance": 0.5
+      }
+    ],
+    "shield": [
+      {
+        "id": "null_block",
+        "name": "Null Block",
+        "description": "15% chance to completely negate any attack (separate from dodge/block).",
+        "effect": "negate_chance",
+        "chance": 0.15
+      },
+      {
+        "id": "mirror_shield",
+        "name": "Mirror Shield",
+        "description": "25% of damage you take is also dealt to the attacker.",
+        "effect": "damage_mirror",
+        "value": 0.25
+      },
+      {
+        "id": "void_anchor",
+        "name": "Void Anchor",
+        "description": "Immune to turn skip conditions (DAZE/CHARM/NAUSEA).",
+        "effect": "skip_immunity"
       }
     ]
   }
