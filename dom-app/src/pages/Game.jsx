@@ -391,6 +391,10 @@ function Game({ character, user, onEndRun }) {
 
   // --- Navigation: pick a door ---
   function handlePickDoor(targetId) {
+    if (targetId < 0 || targetId >= 16 || !zone.chambers[targetId]) {
+      setGamePhase('doors') // defensive: invalid door target
+      return
+    }
     setPreviousPosition(zone.playerPosition)
     setLootingCorpseId(null)
     setLootingChestId(null)
@@ -2905,6 +2909,7 @@ function Game({ character, user, onEndRun }) {
       if (!door) return <div className="invisible" />
 
       var targetChamber = zone.chambers[door.targetId]
+      if (!targetChamber) return <div className="invisible" />
       var isVisited = targetChamber.visited
       var isCleared = targetChamber.cleared
 
