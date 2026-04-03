@@ -2827,8 +2827,9 @@ function Game({ character, user, onEndRun }) {
                     </div>
                   )}
                 </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       </div>
     )
