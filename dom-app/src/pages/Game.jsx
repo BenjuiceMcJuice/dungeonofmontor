@@ -1059,6 +1059,7 @@ function Game({ character, user, onEndRun }) {
     var bs = createBattleState(players, enemies)
     bs.players[user.uid].currentHp = playerHp
     bs.players[user.uid].maxHp = character.maxHp
+    bs.players[user.uid]._firstHitAvailable = true // Executioner's Coin
     setBattle(bs)
     setSelectedTarget(null)
     setCombatLog([])
@@ -1371,7 +1372,16 @@ function Game({ character, user, onEndRun }) {
 
   // Crit threshold: base 20, lowered by LCK modifier and crit_bonus relics
   var lckMod = getModifier(character.stats.lck || 10)
-  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus') - lckMod
+  var unarmedCritBonus = 0
+  if (!character.equipped || !character.equipped.weapon) {
+    var allPassiveForCrit = getAllPassiveItems(character.equipped)
+    for (var ucbi = 0; ucbi < allPassiveForCrit.length; ucbi++) {
+      if (allPassiveForCrit[ucbi].unarmedBonus && allPassiveForCrit[ucbi].unarmedCritBonus) {
+        unarmedCritBonus += allPassiveForCrit[ucbi].unarmedCritBonus
+      }
+    }
+  }
+  var critThreshold = 20 - getPassiveTotal(character.equipped, 'crit_bonus') - lckMod - unarmedCritBonus
 
   // Can equip: between rooms OR during combat when all enemies stunned
   var allEnemiesStunned = battle && battle.enemies.every(function(e) {
@@ -1439,6 +1449,12 @@ function Game({ character, user, onEndRun }) {
     }
     if (r.doubleStrike) {
       addLog({ type: 'player', text: 'Double strike! ' + r.doubleStrikeDamage + ' bonus damage!', tier: 'crit' })
+    }
+    if (r.lowHpBonus) {
+      addLog({ type: 'player', text: 'Blood Bead pulses! 1.5x damage!', tier: 'crit' })
+    }
+    if (r.firstHitCrit) {
+      addLog({ type: 'player', text: 'Executioner\'s Coin! 2x damage!', tier: 'crit' })
     }
     if (r.lifestealHeal) {
       addLog({ type: 'player', text: 'Lifesteal: healed ' + r.lifestealHeal + ' HP.', tier: 'hit' })
@@ -2649,6 +2665,7 @@ function Game({ character, user, onEndRun }) {
           if (h && h.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + h.agiPenalty
           if (bt && bt.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + bt.agiPenalty
           if (bt && bt.agiBonus) equipBonuses.agi = (equipBonuses.agi || 0) + bt.agiBonus
+          if (bt && bt.strBonus) equipBonuses.str = (equipBonuses.str || 0) + bt.strBonus
           // Passive stat bonuses from relics, rings, amulets (str_bonus, def_bonus, lck_bonus, per_bonus)
           var passiveItems = getAllPassiveItems(character.equipped)
           for (var pi2 = 0; pi2 < passiveItems.length; pi2++) {
@@ -4177,6 +4194,7 @@ function Game({ character, user, onEndRun }) {
           if (h3 && h3.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + h3.agiPenalty
           if (bt3 && bt3.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + bt3.agiPenalty
           if (bt3 && bt3.agiBonus) equipBonuses.agi = (equipBonuses.agi || 0) + bt3.agiBonus
+          if (bt3 && bt3.strBonus) equipBonuses.str = (equipBonuses.str || 0) + bt3.strBonus
           var passiveItems3 = getAllPassiveItems(character.equipped)
           for (var pi4 = 0; pi4 < passiveItems3.length; pi4++) {
             var pe3 = passiveItems3[pi4].passiveEffect
@@ -4356,6 +4374,7 @@ function Game({ character, user, onEndRun }) {
           if (h2 && h2.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + h2.agiPenalty
           if (bt2 && bt2.agiPenalty) equipBonuses.agi = (equipBonuses.agi || 0) + bt2.agiPenalty
           if (bt2 && bt2.agiBonus) equipBonuses.agi = (equipBonuses.agi || 0) + bt2.agiBonus
+          if (bt2 && bt2.strBonus) equipBonuses.str = (equipBonuses.str || 0) + bt2.strBonus
           var passiveItems2 = getAllPassiveItems(character.equipped)
           for (var pi3 = 0; pi3 < passiveItems2.length; pi3++) {
             var pe2 = passiveItems2[pi3].passiveEffect
