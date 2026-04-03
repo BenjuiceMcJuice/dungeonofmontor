@@ -845,6 +845,7 @@ function Game({ character, user, onEndRun }) {
     setLootingCorpseId(null)
     setLootingChestId(null)
     setLootingNpcId(null)
+    setGamePhase('doors')
   }
 
   // --- Stairwell descent --- triggers floor transition
@@ -1364,7 +1365,7 @@ function Game({ character, user, onEndRun }) {
   var strMod = playerState ? getModifier(playerState.combatStats.str) : 0
   var accuracyBonus = (character.equipped && character.equipped.weapon && character.equipped.weapon.accuracyBonus) || 0
   var currentTurnId = battle ? getCurrentTurnId(battle) : null
-  var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn'
+  var isPlayerTurn = currentTurnId === user.uid && combatPhase === 'playerTurn' && playerConditionTicked
   var activeEnemyId = enemyAttackInfo ? enemyAttackInfo.attackOut.result.attackerId : null
 
   // Crit threshold: base 20, lowered by LCK modifier and crit_bonus relics
@@ -4740,7 +4741,16 @@ function Game({ character, user, onEndRun }) {
     )
   }
 
-  return null
+  // Fallback: if no phase matched, force back to doors (prevents black screen)
+  return (
+    <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
+      <p className="text-ink-dim text-sm">Something went wrong (phase: {gamePhase})</p>
+      <button onClick={function() { setGamePhase('doors') }}
+        className="py-2 px-6 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-sm">
+        Return to Doors
+      </button>
+    </div>
+  )
 
   // ============================================================
   // Shared party bar
