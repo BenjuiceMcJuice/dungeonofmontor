@@ -199,6 +199,10 @@ function Game({ character, user, onEndRun }) {
 
   // Gift system — Montor's sacrificed treasures, one per slot
   var [giftSlots, setGiftSlots] = useState({ body: null, mind: null, weapon: null, shield: null })
+  var [unlockedGifts, setUnlockedGifts] = useState(character.godAllGifts ? ['petal', 'stone', 'bile', 'blood', 'ember', 'void'] : [])
+  var [showGiftPicker, setShowGiftPicker] = useState(false)
+  var [giftPickerSlot, setGiftPickerSlot] = useState(null) // which slot is being configured
+  var [giftPickerGift, setGiftPickerGift] = useState(null) // which gift is selected for slot
   var [safeRoomStep, setSafeRoomStep] = useState('arrival') // arrival | offering | pick_slot | pick_option | smashed | done
   var [safeRoomGift, setSafeRoomGift] = useState(null) // the treasure being offered
   var [safeRoomSlotChoice, setSafeRoomSlotChoice] = useState(null) // body | mind | weapon | shield
@@ -963,23 +967,40 @@ function Game({ character, user, onEndRun }) {
 
   function handleSmashGift() {
     if (!safeRoomGift) return
-    setSafeRoomStep('pick_slot')
-  }
-
-  function handlePickGiftSlot(slotName) {
-    setSafeRoomSlotChoice(slotName)
-    setSafeRoomStep('pick_option')
-  }
-
-  function handleApplyGiftOption(option) {
-    if (!safeRoomGift || !safeRoomSlotChoice) return
+    // Unlock the gift permanently
     var giftId = safeRoomGift.gift
+    if (unlockedGifts.indexOf(giftId) === -1) {
+      setUnlockedGifts(function(prev) { return prev.concat([giftId]) })
+    }
+    // Remove treasure from junk bag
+    setPlayerJunkBag(function(bag) {
+      return bag.filter(function(j) { return j.id !== safeRoomGift.id })
+    })
+    // Open the gift picker to choose slot + power
+    setSafeRoomStep('gift_picker')
+    setShowGiftPicker(true)
+    setGiftPickerSlot(null)
+    setGiftPickerGift(null)
+  }
+
+  // --- Gift Picker: apply a gift to a slot (used at terminal + after smash) ---
+  function handleGiftPickerSelectSlot(slotName) {
+    setGiftPickerSlot(slotName)
+    setGiftPickerGift(null)
+  }
+
+  function handleGiftPickerSelectGift(giftId) {
+    setGiftPickerGift(giftId)
+  }
+
+  function handleGiftPickerApply(option) {
+    if (!giftPickerSlot || !giftPickerGift) return
 
     // Build the slot data
-    var slotData = Object.assign({}, option, { giftId: giftId, giftName: safeRoomGift.name })
+    var slotData = Object.assign({}, option, { giftId: giftPickerGift, giftName: giftPickerGift })
 
-    // For weapon, tag with the current weapon type
-    if (safeRoomSlotChoice === 'weapon') {
+    // For weapon, tag with the current weapon type (for class-specific gifts like Petal)
+    if (giftPickerSlot === 'weapon') {
       var wt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
       slotData.appliedWeaponType = wt
     }
@@ -994,16 +1015,28 @@ function Game({ character, user, onEndRun }) {
     // Set the slot
     setGiftSlots(function(prev) {
       var updated = Object.assign({}, prev)
-      updated[safeRoomSlotChoice] = slotData
+      updated[giftPickerSlot] = slotData
       return updated
     })
 
-    // Remove treasure from junk bag
-    setPlayerJunkBag(function(bag) {
-      return bag.filter(function(j) { return j.id !== safeRoomGift.id })
-    })
+    // Close picker
+    setShowGiftPicker(false)
+    setGiftPickerSlot(null)
+    setGiftPickerGift(null)
 
-    setSafeRoomStep('smashed')
+    // If we came from safe room smash, advance to smashed state
+    if (safeRoomStep === 'gift_picker') {
+      setSafeRoomStep('smashed')
+    }
+  }
+
+  function handleGiftPickerClose() {
+    setShowGiftPicker(false)
+    setGiftPickerSlot(null)
+    setGiftPickerGift(null)
+    if (safeRoomStep === 'gift_picker') {
+      setSafeRoomStep('smashed')
+    }
   }
 
   // --- Chamber interaction actions ---
@@ -2655,6 +2688,123 @@ function Game({ character, user, onEndRun }) {
     borderStyle: 'solid',
   }
 
+  // === GIFT PICKER OVERLAY ===
+  if (showGiftPicker && unlockedGifts.length > 0) {
+    var giftColors = { petal: 'green-400', stone: 'blue-400', bile: 'yellow-400', blood: 'red-400', ember: 'orange-400', void: 'purple-400' }
+    var giftLabels = { petal: 'Petal', stone: 'Stone', bile: 'Bile', blood: 'Blood', ember: 'Ember', void: 'Void' }
+    var slotNames = ['body', 'mind', 'weapon', 'shield']
+
+    // If a gift is selected for a slot, show the power options
+    if (giftPickerSlot && giftPickerGift) {
+      var pickerGiftDef = getGiftDef(giftPickerGift)
+      var pickerOptions = []
+      if (giftPickerSlot === 'weapon' && pickerGiftDef) {
+        if (Array.isArray(pickerGiftDef.weapon)) {
+          pickerOptions = pickerGiftDef.weapon
+        } else {
+          var pwt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+          var pwe = pickerGiftDef.weapon[pwt]
+          if (pwe) pickerOptions = [pwe]
+        }
+      } else if (pickerGiftDef && pickerGiftDef[giftPickerSlot]) {
+        pickerOptions = pickerGiftDef[giftPickerSlot]
+      }
+      return (
+        <div className="h-full flex flex-col bg-bg overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <span className="font-display text-lg text-gold">{giftLabels[giftPickerGift]} — {giftPickerSlot.charAt(0).toUpperCase() + giftPickerSlot.slice(1)}</span>
+            <button onClick={function() { setGiftPickerGift(null) }}
+              className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">Back</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            <p className="text-ink-dim text-sm italic text-center">Choose a power:</p>
+            {pickerOptions.map(function(opt) {
+              return (
+                <button key={opt.id} onClick={function() { handleGiftPickerApply(opt) }}
+                  className="p-4 rounded-lg border-2 border-border-hl bg-surface text-left hover:border-gold transition-colors cursor-pointer">
+                  <span className="font-display text-lg text-ink">{opt.name}</span>
+                  <p className="text-ink-dim text-sm font-sans mt-1">{opt.description}</p>
+                </button>
+              )
+            })}
+            {pickerOptions.length === 0 && (
+              <p className="text-ink-faint text-sm text-center italic">No options available for this combination.</p>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    // If a slot is selected, show available gifts for it
+    if (giftPickerSlot) {
+      return (
+        <div className="h-full flex flex-col bg-bg overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <span className="font-display text-lg text-gold">{giftPickerSlot.charAt(0).toUpperCase() + giftPickerSlot.slice(1)} — Choose a Gift</span>
+            <button onClick={function() { setGiftPickerSlot(null) }}
+              className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">Back</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+            {unlockedGifts.map(function(gId) {
+              var gc = giftColors[gId] || 'ink'
+              return (
+                <button key={gId} onClick={function() { handleGiftPickerSelectGift(gId) }}
+                  className={'p-4 rounded-lg border-2 text-left transition-colors cursor-pointer border-' + gc + '/50 hover:border-' + gc + ' bg-' + gc + '/5'}>
+                  <span className={'font-display text-lg text-' + gc}>{giftLabels[gId]}</span>
+                  <p className="text-ink-dim text-sm font-sans">{getGiftDef(gId) ? getGiftDef(gId).theme : ''}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+
+    // Default: show slots with current assignments
+    return (
+      <div className="h-full flex flex-col bg-bg overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <span className="font-display text-lg text-gold">Montor's Gifts</span>
+          <button onClick={handleGiftPickerClose}
+            className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">Done</button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+          {/* Unlocked gifts row */}
+          <div className="flex justify-center gap-2 mb-2">
+            {['petal', 'stone', 'bile', 'blood', 'ember', 'void'].map(function(gId) {
+              var isUnlocked = unlockedGifts.indexOf(gId) !== -1
+              var gc = giftColors[gId] || 'ink'
+              return (
+                <div key={gId} className={'flex flex-col items-center px-2 py-1 rounded ' + (isUnlocked ? 'bg-' + gc + '/10 border border-' + gc + '/30' : 'bg-surface border border-border opacity-30')}>
+                  <span className={'text-[10px] font-display ' + (isUnlocked ? 'text-' + gc : 'text-ink-faint')}>{giftLabels[gId]}</span>
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-ink-dim text-sm italic text-center mb-2">Tap a slot to assign a gift:</p>
+          {/* Slots */}
+          {slotNames.map(function(slot) {
+            var current = giftSlots[slot]
+            var slotLabel = slot.charAt(0).toUpperCase() + slot.slice(1)
+            return (
+              <button key={slot} onClick={function() { handleGiftPickerSelectSlot(slot) }}
+                className="p-4 rounded-lg border-2 border-border-hl bg-surface text-left hover:border-gold transition-colors cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-lg text-gold">{slotLabel}</span>
+                  {current ? (
+                    <span className={'text-xs font-sans text-' + (giftColors[current.giftId] || 'ink')}>{current.name} ({giftLabels[current.giftId] || current.giftId})</span>
+                  ) : (
+                    <span className="text-ink-faint text-xs">Empty</span>
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   if (!zone) {
     return (
       <div className="h-full flex items-center justify-center bg-raised">
@@ -3800,6 +3950,12 @@ function Game({ character, user, onEndRun }) {
                   <ChamberIcon iconKey="shrine" theme={zone.doorTheme || 'garden'} scale={4} />
                   <p className="text-purple-400 text-sm font-display">Terminal Active</p>
                   <p className="text-purple-300 text-xs italic">The stairwell is unlocked.</p>
+                  {unlockedGifts.length > 0 && (
+                    <button onClick={function() { setShowGiftPicker(true); setGiftPickerSlot(null); setGiftPickerGift(null) }}
+                      className="mt-2 py-2 px-6 rounded-lg bg-purple-500/20 border border-purple-400/40 text-purple-300 font-sans text-sm hover:border-purple-400 transition-colors">
+                      Manage Gifts
+                    </button>
+                  )}
                 </div>
               )}
 
