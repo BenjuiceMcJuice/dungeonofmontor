@@ -721,22 +721,21 @@ function Game({ character, user, onEndRun }) {
       if (resistResult.blocked) {
         result.trapImmune = true
         result.trapResistType = resistResult.type // 'immune' or 'resisted'
-        result.condition = null // negated
-      } else {
-        var trapBaseDamage = { POISON: 6, NAUSEA: 3, BLIND: 2, DAZE: 2, SLUGGISH: 4, FEAR: 3, CHARM: 2, BURN: 10, FROST: 5, BLEED: 5, FRENZY: 4, BORED: 1, SAD: 2 }
-        var baseDmg = trapBaseDamage[result.condition] || 3
-        // DEF reduces physical trap damage (BLEED, BURN, FROST, POISON = physical; FEAR, CHARM, DAZE = mental, no DEF)
+        result.condition = null // negated — but trap damage still applies
+      }
+      // Apply trap damage from search config (harsh flat damage)
+      if (result.trapDamage && result.trapDamage > 0) {
         var physicalTraps = ['POISON', 'BLEED', 'BURN', 'FROST', 'SLUGGISH', 'NAUSEA']
         var defReduction = 0
-        if (physicalTraps.indexOf(result.condition) !== -1) {
-          var totalDef = (character.stats.def || 10)
-          if (character.equipped && character.equipped.armour) totalDef += character.equipped.armour.defBonus || 0
-          if (character.equipped && character.equipped.offhand) totalDef += character.equipped.offhand.defBonus || 0
-          if (character.equipped && character.equipped.helmet) totalDef += character.equipped.helmet.defBonus || 0
-          if (character.equipped && character.equipped.boots) totalDef += character.equipped.boots.defBonus || 0
-          defReduction = Math.floor(getModifier(totalDef))
+        if (result.condition && physicalTraps.indexOf(result.condition) !== -1) {
+          var totalDef2 = (character.stats.def || 10)
+          if (character.equipped && character.equipped.armour) totalDef2 += character.equipped.armour.defBonus || 0
+          if (character.equipped && character.equipped.offhand) totalDef2 += character.equipped.offhand.defBonus || 0
+          if (character.equipped && character.equipped.helmet) totalDef2 += character.equipped.helmet.defBonus || 0
+          if (character.equipped && character.equipped.boots) totalDef2 += character.equipped.boots.defBonus || 0
+          defReduction = Math.floor(getModifier(totalDef2))
         }
-        var finalDmg = Math.max(1, baseDmg - defReduction)
+        var finalDmg = Math.max(1, result.trapDamage - defReduction)
         setPlayerHp(function(hp) { return Math.max(1, hp - finalDmg) })
         result.trapDamage = finalDmg
       }
@@ -905,24 +904,7 @@ function Game({ character, user, onEndRun }) {
   function handleFloorTransitionContinue() {
     if (isGuarded()) return
 
-    // Check if there's another zone on the same floor (via zone door, optional)
-    var nextZoneIdx = (floor.currentZoneIndex || 0) + 1
-    if (nextZoneIdx < floor.zones.length) {
-      // More zones on this floor — advance to next zone
-      var nextZone = floor.zones[nextZoneIdx]
-      setFloor(Object.assign({}, floor, { currentZoneIndex: nextZoneIdx }))
-      setZone(nextZone)
-      setHasZoneKey(false)
-      setPreviousPosition(null)
-      setLootingCorpseId(null)
-      setLootingChestId(null)
-      setLootingNpcId(null)
-      initSafeRoom()
-      guardedSetPhase('safe_room')
-      return
-    }
-
-    // All zones on this floor done — move to next floor
+    // Sibling zones are optional (accessed via zone door) — always descend to next floor
     var currentFloorDef = FLOORS[floor.floorId]
     var nextFloorId = currentFloorDef ? currentFloorDef.nextFloor : null
 
@@ -1005,7 +987,15 @@ function Game({ character, user, onEndRun }) {
       slotData.appliedWeaponType = wt
     }
 
-    // Apply stat boosts immediately (permanent for the run)
+    // Reverse old gift's stat boosts before applying new ones
+    var oldGift = giftSlots[giftPickerSlot]
+    if (oldGift && oldGift.stats) {
+      Object.keys(oldGift.stats).forEach(function(stat) {
+        character.stats[stat] = (character.stats[stat] || 10) - oldGift.stats[stat]
+      })
+    }
+
+    // Apply new stat boosts (permanent for the run)
     if (option.stats) {
       Object.keys(option.stats).forEach(function(stat) {
         character.stats[stat] = (character.stats[stat] || 10) + option.stats[stat]
@@ -4651,7 +4641,7 @@ function Game({ character, user, onEndRun }) {
                         <p className="text-red-400 font-display text-xl">
                           {searchResult.agiSaved ? 'Trap Dodged!' : searchResult.condition + '!'}
                         </p>
-                        {searchResult.trapDamage > 0 && !searchResult.agiSaved && (
+                        {searchResult.trapDamage > 0 && (
                           <p className="text-red-300 font-display text-lg">-{searchResult.trapDamage} HP</p>
                         )}
                       </div>

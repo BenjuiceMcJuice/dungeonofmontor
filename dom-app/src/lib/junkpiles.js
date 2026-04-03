@@ -80,38 +80,41 @@ var CLEAN_CONFIG = {
     goldMul: 0.4,
     itemChance: 0.12,
     lootTable: 'standard',
-    enemyMul: 0.15,
+    enemyMul: 0.05,
     enemyLevel: 1,
     enemyMaxCount: 1,
-    conditionMul: 0.2,
+    conditionMul: 0.4,
+    trapDamage: 5,
     xpMul: 0.4,
     terminalReveal: false,
   },
   2: {
     label: 'Thorough Search',
-    description: 'Two layers. Noise attracts attention.',
+    description: 'Two layers. Watch for traps.',
     layersCost: 2,
     goldMul: 3.0,
     itemChance: 0.45,
     lootTable: 'elite',
-    enemyMul: 2.0,
+    enemyMul: 0.3,
     enemyLevel: 2,
-    enemyMaxCount: 2,
-    conditionMul: 1.5,
+    enemyMaxCount: 1,
+    conditionMul: 2.5,
+    trapDamage: 12,
     xpMul: 3.0,
     terminalReveal: false,
   },
   3: {
     label: 'Deep Clean',
-    description: 'Rip everything apart. Whatever\'s in there will find you.',
+    description: 'Rip everything apart. Traps hit hard down here.',
     layersCost: 3,
     goldMul: 8.0,
     itemChance: 0.80,
     lootTable: 'chest',
-    enemyMul: 5.0,
+    enemyMul: 0.8,
     enemyLevel: 3,
-    enemyMaxCount: 3,
-    conditionMul: 3.5,
+    enemyMaxCount: 2,
+    conditionMul: 4.0,
+    trapDamage: 25,
     xpMul: 8.0,
     terminalReveal: true,
   },
@@ -462,14 +465,26 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
     var agiSave = rollWithMod(20, agiMod)
     result.agiSaveRoll = agiSave.total
 
+    var trapDmg = config.trapDamage || 0
     if (agiSave.total >= 13) {
-      // Dodged it
+      // Dodged it — half trap damage
       result.agiSaved = true
-      result.narrative.push('Trap! But you dodge it — ' + condId + ' avoided!')
+      var halfTrap = Math.floor(trapDmg / 2)
+      if (halfTrap > 0) {
+        result.trapDamage = halfTrap
+        result.narrative.push('Trap! You dodge the worst — ' + condId + ' avoided but take ' + halfTrap + ' damage!')
+      } else {
+        result.narrative.push('Trap! But you dodge it — ' + condId + ' avoided!')
+      }
     } else {
-      // Hit by it
+      // Hit by it — full trap damage + condition
       result.condition = condId
-      result.narrative.push('TRAP! ' + condId + '!')
+      result.trapDamage = trapDmg
+      if (trapDmg > 0) {
+        result.narrative.push('TRAP! ' + condId + ' + ' + trapDmg + ' damage!')
+      } else {
+        result.narrative.push('TRAP! ' + condId + '!')
+      }
     }
   }
 
