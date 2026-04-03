@@ -2732,8 +2732,8 @@ function Game({ character, user, onEndRun }) {
                       <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
-                        <span className="text-ink-dim text-[9px]">{mod(effective)}</span>
-                        {bonus !== 0 && <span className="text-ink-faint text-[8px]">base {base}</span>}
+                        {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
+                        {bonus === 0 && <span className="text-ink-dim text-[8px]">mod {mod(effective)}</span>}
                       </div>
                     )
                   })}
@@ -4249,8 +4249,8 @@ function Game({ character, user, onEndRun }) {
                       <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
-                        <span className="text-ink-dim text-[9px]">{mod(effective)}</span>
-                        {bonus !== 0 && <span className="text-ink-faint text-[8px]">base {base}</span>}
+                        {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
+                        {bonus === 0 && <span className="text-ink-dim text-[8px]">mod {mod(effective)}</span>}
                       </div>
                     )
                   })}
@@ -4429,8 +4429,8 @@ function Game({ character, user, onEndRun }) {
                       <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
                         <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
-                        <span className="text-ink-dim text-[9px]">{mod(effective)}</span>
-                        {bonus !== 0 && <span className="text-ink-faint text-[8px]">base {base}</span>}
+                        {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
+                        {bonus === 0 && <span className="text-ink-dim text-[8px]">mod {mod(effective)}</span>}
                       </div>
                     )
                   })}
