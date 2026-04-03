@@ -4099,7 +4099,7 @@ function Game({ character, user, onEndRun }) {
                         <span className="text-ink text-base">{item.name}</span>
                         <span className="text-ink-faint text-xs">
                           {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                           item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                           item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
                            item.description || item.type}
                         </span>
                       </div>
@@ -4162,7 +4162,7 @@ function Game({ character, user, onEndRun }) {
                         <span className="text-ink text-base">{item.name}</span>
                         <span className="text-ink-faint text-xs">
                           {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
-                           item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                           item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
                            item.description || item.type}
                         </span>
                       </div>
@@ -4858,7 +4858,7 @@ function Game({ character, user, onEndRun }) {
                               <span className="text-ink">{item.name}</span>
                               <span className="text-ink-faint text-[10px]">
                                 {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
-                                 item.type === 'armour' ? '+' + item.defBonus + ' DEF' :
+                                 item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
                                  item.description || ''}
                               </span>
                             </div>
