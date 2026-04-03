@@ -2758,21 +2758,26 @@ function Game({ character, user, onEndRun }) {
               <div key={slot} className="p-3 rounded-lg border border-border-hl bg-surface">
                 <span className="font-display text-base text-gold">{slotLabel}</span>
 
-                {/* Gift select */}
-                <div className="mt-2">
-                  <select
-                    value={selectedGiftForSlot || ''}
-                    onChange={function(e) {
-                      setGiftPickerSlot(slot)
-                      setGiftPickerGift(e.target.value || null)
-                    }}
-                    className="w-full bg-bg border border-border rounded px-3 py-2 text-ink text-sm font-sans focus:border-gold focus:outline-none"
-                  >
-                    <option value="">— No gift —</option>
-                    {unlockedGifts.map(function(gId) {
-                      return <option key={gId} value={gId}>{giftLabels[gId]}</option>
-                    })}
-                  </select>
+                {/* Gift select — themed buttons */}
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <button
+                    onClick={function() { setGiftPickerSlot(slot); setGiftPickerGift(null) }}
+                    className={'px-2.5 py-1 rounded text-[10px] font-sans border transition-colors ' +
+                      (!selectedGiftForSlot ? 'border-ink-faint text-ink bg-bg' : 'border-border text-ink-faint hover:text-ink cursor-pointer')}>
+                    None
+                  </button>
+                  {unlockedGifts.map(function(gId) {
+                    var gc = giftColors[gId] || 'ink'
+                    var isSelected = selectedGiftForSlot === gId
+                    return (
+                      <button key={gId}
+                        onClick={function() { setGiftPickerSlot(slot); setGiftPickerGift(gId) }}
+                        className={'px-2.5 py-1 rounded text-[10px] font-display border transition-colors cursor-pointer ' +
+                          (isSelected ? 'border-' + gc + ' text-' + gc + ' bg-' + gc + '/15' : 'border-border text-ink-faint hover:text-' + gc + ' hover:border-' + gc + '/50')}>
+                        {giftLabels[gId]}
+                      </button>
+                    )
+                  })}
                 </div>
 
                 {/* Power options */}
