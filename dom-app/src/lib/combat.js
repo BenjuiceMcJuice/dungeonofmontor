@@ -319,6 +319,14 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     adrenalineCrit: isForcedCrit,
   }
 
+  // Gift: Shadow Blade (void weapon) — misses have 30% chance to deal half damage
+  var gifts = player._gifts || {}
+  if (attackResult.tier === 4 && gifts.weapon && gifts.weapon.effect === 'miss_damage_chance' && Math.random() < gifts.weapon.chance) {
+    // Treat as glancing blow for damage calc
+    attackResult = Object.assign({}, attackResult, { tier: 3, tierName: 'glancing' })
+    result.shadowBlade = true
+  }
+
   // Calculate damage based on tier
   var isUnarmed = !player.equipped || !player.equipped.weapon
   if (attackResult.tier <= 3) {
@@ -363,14 +371,50 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       intDmgBonus = Math.max(0, intMod)
     }
 
+    // Gift: Bloodrage (blood mind) — +2 STR when HP below 50%
+    var gifts = player._gifts || {}
+    var giftStrBonus = 0
+    if (gifts.mind && gifts.mind.effect === 'low_hp_stat_bonus' && gifts.mind.stat === 'str' && player.currentHp < player.maxHp * gifts.mind.hpThreshold) {
+      giftStrBonus = gifts.mind.value
+    }
+
     // DEF ignore — maces bypass a % of enemy DEF
     var defWithConditions = enemy.stats.def + getConditionStatMod(enemy.statusEffects || [], 'def')
     var effectiveDef = Math.max(0, defWithConditions)
     if (weapon && weapon.defIgnore) {
       effectiveDef = Math.max(0, Math.round(effectiveDef * (1 - weapon.defIgnore)))
     }
+    // Gift: Earthshatter (stone weapon) — extra DEF ignore
+    if (gifts.weapon && gifts.weapon.effect === 'def_ignore_bonus') {
+      effectiveDef = Math.max(0, Math.round(effectiveDef * (1 - gifts.weapon.value)))
+    }
+    // Gift: Void Strike — 10% chance to ignore ALL DEF
+    if (gifts.weapon && gifts.weapon.effect === 'full_def_ignore_chance' && Math.random() < gifts.weapon.chance) {
+      effectiveDef = 0
+      result.voidStrike = true
+    }
 
-    var breakdown = calculateTierDamage(dmgResult.roll, strMod + intDmgBonus, attackResult.tier, effectiveDef, 2.0)
+    // Gift: Avalanche (stone weapon) — crit multiplier override
+    var critMul = 2.0
+    if (gifts.weapon && gifts.weapon.effect === 'crit_multiplier') critMul = gifts.weapon.value
+
+    var breakdown = calculateTierDamage(dmgResult.roll, strMod + intDmgBonus + giftStrBonus, attackResult.tier, effectiveDef, critMul)
+
+    // Gift: Molten Edge (ember weapon) — flat damage bonus
+    if (gifts.weapon && gifts.weapon.effect === 'flat_damage_bonus') {
+      breakdown.final += gifts.weapon.value
+    }
+
+    // Gift: Entropy Edge (void weapon) — random +50% or -25% damage
+    if (gifts.weapon && gifts.weapon.effect === 'chaos_damage') {
+      if (Math.random() < gifts.weapon.highChance) {
+        breakdown.final = Math.round(breakdown.final * gifts.weapon.highMultiplier)
+        result.entropyHigh = true
+      } else {
+        breakdown.final = Math.round(breakdown.final * gifts.weapon.lowMultiplier)
+        result.entropyLow = true
+      }
+    }
 
     // Brittle — FROST increases damage taken
     var enemyBrittleMul = getDamageTakenMultiplier(enemy.statusEffects || [])
@@ -408,9 +452,16 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     // Try to apply weapon condition on hit
     if (weapon && weapon.conditionOnHit) {
       var intStat = player.combatStats.int || 10
-      if (rollConditionApplication(attackResult.tier, intStat, weapon.conditionChance || 1.0)) {
+      // Gift: Corrosive Strike (bile weapon) — +25% condition chance
+      var condChanceBonus = (gifts.weapon && gifts.weapon.effect === 'condition_chance_bonus') ? gifts.weapon.value : 0
+      if (rollConditionApplication(attackResult.tier, intStat, Math.min(1.0, (weapon.conditionChance || 1.0) + condChanceBonus))) {
         enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon')
         result.conditionApplied = weapon.conditionOnHit
+        // Gift: Virulent Mind (bile mind) — conditions last 1 extra turn
+        if (gifts.mind && gifts.mind.effect === 'condition_duration_bonus') {
+          var appliedCond = enemy.statusEffects.find(function(c) { return c.id === weapon.conditionOnHit })
+          if (appliedCond && appliedCond.turnsRemaining) appliedCond.turnsRemaining += gifts.mind.value
+        }
         // Magnifying Glass — conditions apply twice
         if (hasPassiveEffect(player, 'double_condition')) {
           enemy.statusEffects = applyCondition(enemy.statusEffects, weapon.conditionOnHit, 'weapon')
@@ -422,8 +473,11 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     }
 
     // Stagger — heavy weapons can DAZE enemies on hit
-    if (weapon && weapon.staggerChance && breakdown.final > 0 && !enemy.isDown) {
-      if (Math.random() < weapon.staggerChance) {
+    // Gift: Crushing Blow (stone weapon) adds +25% stagger to ALL weapons
+    var staggerChance = (weapon && weapon.staggerChance) || 0
+    if (gifts.weapon && gifts.weapon.effect === 'stagger_bonus') staggerChance += gifts.weapon.value
+    if (staggerChance > 0 && breakdown.final > 0 && !enemy.isDown) {
+      if (Math.random() < staggerChance) {
         enemy.statusEffects = applyCondition(enemy.statusEffects || [], 'DAZE', 'stagger')
         result.staggerApplied = true
       }
@@ -598,7 +652,32 @@ function resolveEnemyAttack(battleState, enemyId) {
     else if (packCount >= 2) packBonus = 1
   }
 
-  var attackResult = d20Attack(strMod + rollsMod + packBonus, 20)
+  // Gift modifiers on enemy attacks
+  var targetGifts = target._gifts || {}
+
+  // Gift: Null Field (void mind) — enemies have -2 to all rolls
+  var giftRollPenalty = 0
+  if (targetGifts.mind && targetGifts.mind.effect === 'enemy_roll_penalty') giftRollPenalty = targetGifts.mind.value
+
+  // Gift: Noxious Aura (bile mind) — enemies have -1 STR (applied at combat start concept, but simpler as roll penalty)
+  if (targetGifts.mind && targetGifts.mind.effect === 'enemy_stat_penalty') giftRollPenalty += targetGifts.mind.value
+
+  // Gift: Predator's Focus (blood mind) — +1 accuracy (enemy penalty equivalent: -1 enemy roll)
+  // Already handled via player accuracy bonus
+
+  var attackResult = d20Attack(strMod + rollsMod + packBonus + giftRollPenalty, 20)
+
+  // Gift: Dice Corruption (void mind) — enemy even d20 rolls are halved
+  if (targetGifts.mind && targetGifts.mind.effect === 'enemy_even_roll_halved' && attackResult.roll % 2 === 0) {
+    var corruptedRoll = Math.floor(attackResult.roll / 2)
+    attackResult = d20Attack(strMod + rollsMod + packBonus + giftRollPenalty, 20)
+    attackResult = Object.assign({}, attackResult, { roll: corruptedRoll, total: corruptedRoll + strMod + rollsMod + packBonus + giftRollPenalty })
+    // Recalculate tier from corrupted total
+    if (attackResult.total >= 20) attackResult = Object.assign({}, attackResult, { tier: 1, tierName: 'crit' })
+    else if (attackResult.total >= 11) attackResult = Object.assign({}, attackResult, { tier: 2, tierName: 'hit' })
+    else if (attackResult.total >= 6) attackResult = Object.assign({}, attackResult, { tier: 3, tierName: 'glancing' })
+    else attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
+  }
 
   // Adrenaline — enemies can crit too (triggered by FEAR fight-or-flight)
   var enemyForceCrit = hasForceCrit(enemy.statusEffects || [])
