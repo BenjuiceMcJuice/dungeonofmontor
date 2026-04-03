@@ -5,8 +5,8 @@
       "turns": null,
       "damagePerTurn": 1,
       "stackable": true, "maxStacks": 5,
-      "triggerFear": 3,
-      "description": "Bleeding. Stacks — +1 damage/turn per stack. At 3+ stacks: triggers FEAR."
+      "triggerFear": 4,
+      "description": "Bleeding. Stacks — +1 damage/turn per stack. At 4+ stacks: triggers FEAR."
     },
     "POISON": {
       "id": "POISON", "slot": "body", "name": "Poisoned",

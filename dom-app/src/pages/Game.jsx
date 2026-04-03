@@ -1450,6 +1450,9 @@ function Game({ character, user, onEndRun }) {
     if (r.doubleStrike) {
       addLog({ type: 'player', text: 'Double strike! ' + r.doubleStrikeDamage + ' bonus damage!', tier: 'crit' })
     }
+    if (r.doubleStrikeCondition) {
+      addLog({ type: 'condition', text: 'Double strike applies ' + condName(r.doubleStrikeCondition) + '!', tier: 'hit' })
+    }
     if (r.lowHpBonus) {
       addLog({ type: 'player', text: 'Blood Bead pulses! 1.5x damage!', tier: 'crit' })
     }

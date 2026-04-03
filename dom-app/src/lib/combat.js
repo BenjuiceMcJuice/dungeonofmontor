@@ -492,6 +492,15 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.isDown = true
           result.enemyDefeated = true
         }
+        // Double strike can also apply weapon condition (rolled normally)
+        if (!enemy.isDown && weapon.conditionOnHit) {
+          var dsIntStat = player.combatStats.int || 10
+          if (rollConditionApplication(2, dsIntStat, weapon.conditionChance || 1.0)) {
+            enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon')
+            result.doubleStrikeCondition = weapon.conditionOnHit
+            enhanceAppliedCondition(enemy.statusEffects, weapon.conditionOnHit, player)
+          }
+        }
       }
     }
 
