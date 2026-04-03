@@ -1251,7 +1251,7 @@ function Game({ character, user, onEndRun }) {
     if (pState && r.damage > 0) {
       var bodyG = giftSlots.body
       var mindG = giftSlots.mind
-      var shieldG = giftSlots.shield
+      var shieldG = (character.equipped && character.equipped.offhand) ? giftSlots.shield : null // shield gifts only work with offhand equipped
       var weaponGDef = giftSlots.weapon
       var attackerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
 
