@@ -7,9 +7,9 @@
 
 ## 1. Who Is Montor?
 
-Montor is an eccentric old man who built this dungeon as his home. The word is invented -- a portmanteau of Monster, carrying the weight of something paternal and ancient. A Daddy Monster.
+Montor is an enigma who built this dungeon as his home. The word is invented -- a portmanteau of Monster, carrying the weight of something paternal and ancient. A Daddy Monster.
 
-He is never mechanically defined. He is possessive, sarcastic, and weirdly domestic. His dungeon is full of his stuff -- kitchen implements, garden tools, his mum's wedding ring, his gran's lottery ticket, a favourite garden gnome called Gerald. Every weapon in the game is something from his house. Every piece of armour is his clothing. The dungeon descends through his garden, his reception rooms, his sewers, his private quarters, his forge, his caves, and finally his throne room.
+He is never seen, never explained, never mechanically defined. He is possessive, sarcastic, and weirdly domestic. His dungeon is full of his stuff -- kitchen implements, garden tools, his mum's wedding ring, his gran's lottery ticket, a favourite garden gnome called Gerald. Every weapon in the game is something from his house. Every piece of armour is his clothing. The dungeon descends through his garden, his reception rooms, his sewers, his private quarters, his forge, his caves, and finally his throne room.
 
 Players are always the intruders. You're in his house. You're going through his things. He has opinions about that.
 
@@ -40,7 +40,7 @@ By **smashing** the item, you separate the magic from the object. You get the po
 
 By **giving** the empty husk back to Montor, you return what matters to him. He doesn't care that the magic is gone. He cares that Gerald is back, even in pieces.
 
-**This is the entire game.** The dungeon, the combat, the builds — they're the vehicle. The story is about a lonely old man and his things.
+**This is the entire game.** The dungeon, the combat, the builds — they're the vehicle. The story is about Montor and his things.
 
 ### The Rules
 
@@ -60,7 +60,7 @@ By **giving** the empty husk back to Montor, you return what matters to him. He 
 |---|---|---|
 | Early runs | Smash everything — you need power to survive | Devastated. Hostile whispers. "You broke Gerald." |
 | Mid runs | Smash new gifts, give back ones you've already drained | Conflicted. Some warmth. "...you got it out. It's just a gnome again." |
-| Final run | Give everything back — you're powerful enough | Overwhelmed. Quiet. Home. The credits show Montor in a plain room, surrounded by his things. |
+| Final run | Give everything back — you're powerful enough | Overwhelmed. Quiet. Home. The credits show Montor in a plain room, surrounded by his things. Who is Montor? You still don't know. |
 
 ---
 
