@@ -4211,7 +4211,7 @@ function Game({ character, user, onEndRun }) {
                   Leave it
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
                 <p className="text-ink-dim text-sm italic text-center mb-1">{pile.inspectHint || pile.description}</p>
                 <p className="text-ink-faint text-xs mb-6">{pile.layersRemaining} {pile.layersRemaining === 1 ? 'layer' : 'layers'} remaining</p>
                 <div className="flex flex-col gap-3 w-full max-w-sm">
