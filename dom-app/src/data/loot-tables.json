@@ -179,6 +179,21 @@
           "itemId": "montors_dog_tag",
           "weight": 3,
           "minRarity": "common"
+        },
+        {
+          "itemId": "montors_tooth_necklace",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_mums_costume_ring",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_lego_brick",
+          "weight": 3,
+          "minRarity": "common"
         }
       ]
     },
@@ -365,6 +380,26 @@
         },
         {
           "itemId": "montors_sunday_shirt",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_claw_pendant",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_fever_stone",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_mums_sovereign_amulet",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_knuckleduster_ring",
           "weight": 2,
           "minRarity": "uncommon"
         }
@@ -2449,6 +2484,36 @@
         },
         {
           "itemId": "montors_lodestone",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_blood_bead",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_rusty_nail_chain",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_barbed_wire_twist",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_mums_hairpin",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_boxing_boots",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_executioners_coin",
           "weight": 1,
           "minRarity": "epic"
         }

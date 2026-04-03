@@ -1310,6 +1310,94 @@
     "description": "+2 to all d20 rolls. Heavy. Pulls north. And pulls luck toward you."
   },
 
+  "___COMMENT_AMULETS_DAMAGE": "=== AMULETS — Damage ===",
+
+  "montors_tooth_necklace": {
+    "id": "montors_tooth_necklace", "name": "Montor's Tooth Necklace", "type": "amulet", "slot": "amulet",
+    "rarity": "common", "passiveEffect": "flat_damage_bonus", "passiveValue": 1,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "+1 damage on all hits. Milk teeth on fishing line. Fell out naturally. Mostly."
+  },
+  "montors_claw_pendant": {
+    "id": "montors_claw_pendant", "name": "Montor's Claw Pendant", "type": "amulet", "slot": "amulet",
+    "rarity": "uncommon", "passiveEffect": "damage_multiplier", "passiveValue": 1.25,
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "1.25x weapon damage. Cat's claw in resin. The cat's fine. Probably."
+  },
+  "montors_blood_bead": {
+    "id": "montors_blood_bead", "name": "Montor's Blood Bead", "type": "amulet", "slot": "amulet",
+    "rarity": "rare", "passiveEffect": "damage_multiplier_low_hp", "passiveValue": 1.5,
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "1.5x damage when HP below 50%. Pulses when you're hurt. Feeds on desperation."
+  },
+  "montors_executioners_coin": {
+    "id": "montors_executioners_coin", "name": "Montor's Executioner's Coin", "type": "amulet", "slot": "amulet",
+    "rarity": "epic", "passiveEffect": "first_hit_multiplier", "passiveValue": 2.0,
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "First hit each combat = 2x damage. Flip it. Heads they lose. It's always heads."
+  },
+
+  "___COMMENT_AMULETS_CONDITION": "=== AMULETS — Condition Enhancement ===",
+
+  "montors_fever_stone": {
+    "id": "montors_fever_stone", "name": "Montor's Fever Stone", "type": "amulet", "slot": "amulet",
+    "rarity": "uncommon", "passiveEffect": "condition_dot_multiplier", "passiveValue": 1.5,
+    "buyPrice": 28, "sellPrice": 11,
+    "description": "Condition DoT damage +50%. A hot pebble from the garden path. Infections love it."
+  },
+  "montors_rusty_nail_chain": {
+    "id": "montors_rusty_nail_chain", "name": "Montor's Rusty Nail Chain", "type": "amulet", "slot": "amulet",
+    "rarity": "rare", "passiveEffect": "poison_enhanced_drain", "passiveValue": 2,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Poison drains -2/tick instead of -1. Tetanus on a string. His mum told him to pick them up."
+  },
+  "montors_barbed_wire_twist": {
+    "id": "montors_barbed_wire_twist", "name": "Montor's Barbed Wire Twist", "type": "amulet", "slot": "amulet",
+    "rarity": "rare", "passiveEffect": "bleed_enhanced_damage", "passiveValue": 1,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Bleed +1 damage per stack. From the garden fence. Twisted into a loop."
+  },
+
+  "___COMMENT_UNARMED": "=== UNARMED GEAR ===",
+
+  "montors_mums_costume_ring": {
+    "id": "montors_mums_costume_ring", "name": "Montor's Mum's Costume Ring", "type": "ring", "slot": "ring",
+    "rarity": "common", "unarmedBonus": true, "unarmedDamageBonus": 1, "unarmedCondition": "BLEED", "unarmedConditionChance": 0.3,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "Unarmed: +1 damage, 30% BLEED. Fake gold. The gem fell out. The prong draws blood."
+  },
+  "montors_knuckleduster_ring": {
+    "id": "montors_knuckleduster_ring", "name": "Montor's Knuckleduster Ring", "type": "ring", "slot": "ring",
+    "rarity": "uncommon", "unarmedBonus": true, "unarmedDamageBonus": 2, "unarmedCritBonus": 1,
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Unarmed: +2 damage, crit 19+. Brass curtain fitting. Makes a fist feel like a mace."
+  },
+  "montors_mums_sovereign_amulet": {
+    "id": "montors_mums_sovereign_amulet", "name": "Montor's Mum's Sovereign", "type": "amulet", "slot": "amulet",
+    "rarity": "uncommon", "unarmedBonus": true, "unarmedDieUpgrade": 6,
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "Unarmed damage d4 to d6. She wore it on a chain. Swung it once at a burglar."
+  },
+  "montors_mums_hairpin": {
+    "id": "montors_mums_hairpin", "name": "Montor's Mum's Hairpin", "type": "amulet", "slot": "amulet",
+    "rarity": "rare", "unarmedBonus": true, "unarmedDoubleStrike": 0.25,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Unarmed: 25% double strike. She'd jab you with it. Quick. Precise. Twice."
+  },
+  "montors_boxing_boots": {
+    "id": "montors_boxing_boots", "name": "Montor's Boxing Boots", "type": "armour", "slot": "boots",
+    "rarity": "rare", "agiBonus": 2, "strBonus": 2,
+    "unarmedBonus": true,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "Unarmed: +2 STR, +2 AGI. Laced high. Smell of old leather. County champion."
+  },
+  "montors_lego_brick": {
+    "id": "montors_lego_brick", "name": "Montor's Lego Brick", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "damage_reflect", "passiveValue": 3,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "Enemies take 3 damage when they hit you. Single red 2x2. Impossible to see in the dark. Agony."
+  },
+
   "___COMMENT_SET_SUNDAY": "=== SET: Montor's Sunday Best ===",
 
   "montors_sunday_shirt": {

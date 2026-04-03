@@ -38,6 +38,33 @@ function getPassiveTotalCombat(player, effectName) {
   return total
 }
 
+// Stamp condition enhancements from player equipment onto applied condition
+function enhanceAppliedCondition(statusEffects, conditionId, player) {
+  var cond = statusEffects.find(function(c) { return c.id === conditionId })
+  if (!cond) return
+
+  // Fever Stone — condition DoT multiplier (+50%)
+  var dotMul = getPassiveTotalCombat(player, 'condition_dot_multiplier')
+  if (dotMul > 0 && cond.damagePerTurn > 0) {
+    cond.damagePerTurn = Math.round(cond.damagePerTurn * dotMul)
+  }
+  if (dotMul > 0 && cond.burstDamage > 0) {
+    cond.burstDamage = Math.round(cond.burstDamage * dotMul)
+  }
+
+  // Rusty Nail Chain — poison enhanced drain
+  var poisonDrain = getPassiveTotalCombat(player, 'poison_enhanced_drain')
+  if (poisonDrain > 0 && cond.statDrain) {
+    cond.statDrainValue = -(poisonDrain) // override to -2 (or whatever passiveValue is)
+  }
+
+  // Barbed Wire Twist — bleed enhanced damage (+1 per stack)
+  var bleedBonus = getPassiveTotalCombat(player, 'bleed_enhanced_damage')
+  if (bleedBonus > 0 && cond.id === 'BLEED') {
+    cond.damagePerTurn += bleedBonus * (cond.stacks || 1)
+  }
+}
+
 // Deep-clone battle state for immutable updates
 function cloneBattle(bs) {
   return {
@@ -83,6 +110,13 @@ function createBattleState(players, enemies) {
       if (b && b.agiPenalty) combatStats.agi = Math.max(1, combatStats.agi + b.agiPenalty)
       // AGI bonuses from boots
       if (b && b.agiBonus) combatStats.agi += b.agiBonus
+      // STR bonuses from boots (boxing boots)
+      if (b && b.strBonus) combatStats.str += b.strBonus
+      // Passive stat bonuses from relics/rings/amulets
+      var cItems = getPlayerPassiveItems({ equipped: char.equipped })
+      for (var csi = 0; csi < cItems.length; csi++) {
+        if (cItems[csi].passiveEffect === 'str_bonus') combatStats.str += (cItems[csi].passiveValue || 0)
+      }
     }
 
     var agiMod = getModifier(combatStats.agi)
@@ -286,14 +320,25 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   }
 
   // Calculate damage based on tier
+  var isUnarmed = !player.equipped || !player.equipped.weapon
   if (attackResult.tier <= 3) {
     var weaponDie = 4 // unarmed: d4
     var unarmedStrBonus = 0
-    if (player.equipped && player.equipped.weapon) {
+    if (!isUnarmed) {
       weaponDie = player.equipped.weapon.damageDie || player.equipped.weapon.die || 6
     } else {
       // Unarmed — STR mod counts double for damage
       unarmedStrBonus = Math.max(0, strMod)
+      // Unarmed die upgrade from gear (e.g. Sovereign amulet d4→d6)
+      var allItems = getPlayerPassiveItems(player)
+      for (var udi = 0; udi < allItems.length; udi++) {
+        if (allItems[udi].unarmedBonus && allItems[udi].unarmedDieUpgrade) {
+          weaponDie = Math.max(weaponDie, allItems[udi].unarmedDieUpgrade)
+        }
+        if (allItems[udi].unarmedBonus && allItems[udi].unarmedDamageBonus) {
+          unarmedStrBonus += allItems[udi].unarmedDamageBonus
+        }
+      }
     }
 
     var dmgResult = rollDamage(weaponDie, strMod + unarmedStrBonus)
@@ -331,6 +376,30 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     var enemyBrittleMul = getDamageTakenMultiplier(enemy.statusEffects || [])
     if (enemyBrittleMul > 1) breakdown.final = Math.round(breakdown.final * enemyBrittleMul)
 
+    // Amulet damage modifiers
+    var flatDmgBonus = getPassiveTotalCombat(player, 'flat_damage_bonus')
+    if (flatDmgBonus > 0) breakdown.final += flatDmgBonus
+
+    var dmgMul = getPassiveTotalCombat(player, 'damage_multiplier')
+    if (dmgMul > 0) breakdown.final = Math.round(breakdown.final * dmgMul)
+
+    // Blood Bead — 1.5x when HP below 50%
+    var lowHpMul = getPassiveTotalCombat(player, 'damage_multiplier_low_hp')
+    if (lowHpMul > 0 && player.currentHp < player.maxHp * 0.5) {
+      breakdown.final = Math.round(breakdown.final * lowHpMul)
+      result.lowHpBonus = true
+    }
+
+    // Executioner's Coin — first hit multiplier (flag managed by caller)
+    var firstHitMul = getPassiveTotalCombat(player, 'first_hit_multiplier')
+    if (firstHitMul > 0 && player._firstHitAvailable) {
+      breakdown.final = Math.round(breakdown.final * firstHitMul)
+      player._firstHitAvailable = false
+      result.firstHitCrit = true
+    }
+
+    breakdown.final = Math.max(1, breakdown.final) // minimum 1 damage
+
     enemy.currentHp = Math.max(0, enemy.currentHp - breakdown.final)
     result.damage = breakdown.final
     result.damageBreakdown = breakdown
@@ -347,6 +416,8 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.statusEffects = applyCondition(enemy.statusEffects, weapon.conditionOnHit, 'weapon')
           result.doubleCondition = true
         }
+        // Stamp condition enhancements from amulet
+        enhanceAppliedCondition(enemy.statusEffects, weapon.conditionOnHit, player)
       }
     }
 
@@ -393,6 +464,19 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       }
     }
 
+    // Unarmed condition (e.g. Costume Ring: 30% BLEED)
+    if (isUnarmed && !enemy.isDown && breakdown.final > 0) {
+      var unarmedItems = getPlayerPassiveItems(player)
+      for (var uci = 0; uci < unarmedItems.length; uci++) {
+        if (unarmedItems[uci].unarmedBonus && unarmedItems[uci].unarmedCondition && unarmedItems[uci].unarmedConditionChance) {
+          if (Math.random() < unarmedItems[uci].unarmedConditionChance) {
+            enemy.statusEffects = applyCondition(enemy.statusEffects || [], unarmedItems[uci].unarmedCondition, 'unarmed_gear')
+            result.conditionApplied = unarmedItems[uci].unarmedCondition
+          }
+        }
+      }
+    }
+
     // Double strike — daggers get a chance for a bonus attack (scales with AGI)
     if (!enemy.isDown && weapon && weapon.doubleStrikeBase > 0) {
       var agiMod = getModifier(player.combatStats.agi || 10)
@@ -408,6 +492,26 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.isDown = true
           result.enemyDefeated = true
         }
+      }
+    }
+
+    // Unarmed double strike (e.g. Hairpin amulet: 25%)
+    if (!enemy.isDown && isUnarmed) {
+      var unarmedDS = 0
+      var uItems2 = getPlayerPassiveItems(player)
+      for (var udsi = 0; udsi < uItems2.length; udsi++) {
+        if (uItems2[udsi].unarmedBonus && uItems2[udsi].unarmedDoubleStrike) {
+          unarmedDS = Math.max(unarmedDS, uItems2[udsi].unarmedDoubleStrike)
+        }
+      }
+      if (unarmedDS > 0 && Math.random() < Math.min(unarmedDS, 0.6)) {
+        var uBonusRoll = rollDamage(weaponDie, strMod + unarmedStrBonus)
+        var uBonusBreakdown = calculateTierDamage(uBonusRoll.roll, strMod, 2, effectiveDef, 1.0)
+        enemy.currentHp = Math.max(0, enemy.currentHp - uBonusBreakdown.final)
+        result.damage += uBonusBreakdown.final
+        result.doubleStrike = true
+        result.doubleStrikeDamage = uBonusBreakdown.final
+        if (enemy.currentHp <= 0) { enemy.isDown = true; result.enemyDefeated = true }
       }
     }
 
