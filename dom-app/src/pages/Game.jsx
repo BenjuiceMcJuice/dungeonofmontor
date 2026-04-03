@@ -1207,7 +1207,7 @@ function Game({ character, user, onEndRun }) {
           setSporeCloudUsed(true)
           updatedBattle.enemies.forEach(function(e) {
             if (!e.isDown) {
-              e.statusEffects = (e.statusEffects || []).concat([{ id: bodyG.condition, name: bodyG.condition, slot: 'mind', turnsRemaining: bodyG.conditionTurns }])
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], bodyG.condition, 'gift')
             }
           })
           addLog({ type: 'condition', text: 'Spore Cloud! All enemies DAZED!', tier: 'crit' })
@@ -1216,20 +1216,20 @@ function Game({ character, user, onEndRun }) {
 
       // Toxic Spores (body): chance to poison attacker
       if (bodyG && bodyG.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(bodyG.chance)) {
-        attackerEnemy.statusEffects = (attackerEnemy.statusEffects || []).concat([{ id: bodyG.condition, name: bodyG.condition, slot: 'body', turnsRemaining: bodyG.conditionTurns }])
+        attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], bodyG.condition, 'gift')
         addLog({ type: 'condition', text: 'Toxic Spores! ' + attackerEnemy.name + ' poisoned!', tier: 'hit' })
       }
 
       // Vine Parry (sword weapon gift): chance to SLUGGISH attacker when hit
       var weaponGDef = giftSlots.weapon
       if (weaponGDef && weaponGDef.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(weaponGDef.chance)) {
-        attackerEnemy.statusEffects = (attackerEnemy.statusEffects || []).concat([{ id: weaponGDef.condition, name: weaponGDef.condition, slot: 'body', turnsRemaining: weaponGDef.conditionTurns }])
+        attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], weaponGDef.condition, 'gift')
         addLog({ type: 'condition', text: 'Vine Parry! ' + attackerEnemy.name + ' SLUGGISH!', tier: 'hit' })
       }
 
       // Fungal Confusion (mind): chance to CHARM attacker
       if (mindG && mindG.effect === 'reflect_condition' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(mindG.chance)) {
-        attackerEnemy.statusEffects = (attackerEnemy.statusEffects || []).concat([{ id: mindG.condition, name: mindG.condition, slot: 'mind', turnsRemaining: mindG.conditionTurns }])
+        attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], mindG.condition, 'gift')
         addLog({ type: 'condition', text: 'Fungal Confusion! ' + attackerEnemy.name + ' turns on allies!', tier: 'crit' })
       }
 
@@ -1505,31 +1505,23 @@ function Game({ character, user, onEndRun }) {
       if (weaponG && weaponG.appliedWeaponType === wt3) {
         // Briar Flurry (dagger): double strikes apply stacking bleed
         if (weaponG.effect === 'double_strike_bleed' && r.doubleStrike) {
-          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
-            { id: 'BLEED', name: 'Bleed', slot: 'body', turnsRemaining: weaponG.bleedTurns, damagePerTurn: weaponG.bleedDamage, stacks: true }
-          ])
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
           addLog({ type: 'condition', text: 'Briar Flurry! Stacking bleed on ' + hitTarget.name + '!', tier: 'crit' })
         }
         // Thorn Reach (spear): +1 damage + first hit condition (tracked per combat)
         if (weaponG.effect === 'bonus_damage_and_first_hit_condition' && !weaponG._firstHitUsed) {
-          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
-            { id: weaponG.condition, name: weaponG.condition, slot: 'body', turnsRemaining: weaponG.conditionTurns }
-          ])
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
           weaponG._firstHitUsed = true
           addLog({ type: 'condition', text: 'Thorn Reach! ' + hitTarget.name + ' SLUGGISH!', tier: 'hit' })
         }
         // Root Shatter (mace): DEF-ignoring hits apply condition
         if (weaponG.effect === 'def_ignore_condition' && r.damageBreakdown && r.damageBreakdown.defIgnored) {
-          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
-            { id: weaponG.condition, name: weaponG.condition, slot: 'mind', turnsRemaining: weaponG.conditionTurns }
-          ])
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
           addLog({ type: 'condition', text: 'Root Shatter! ' + hitTarget.name + ' DAZED!', tier: 'hit' })
         }
         // Spore Fist (fists): chance per hit
         if (weaponG.effect === 'hit_condition' && rollGiftChance(weaponG.chance)) {
-          hitTarget.statusEffects = (hitTarget.statusEffects || []).concat([
-            { id: weaponG.condition, name: weaponG.condition, slot: 'mind', turnsRemaining: weaponG.conditionTurns }
-          ])
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
           addLog({ type: 'condition', text: 'Spore Fist! ' + hitTarget.name + ' BLIND!', tier: 'hit' })
         }
         // Vine Parry (sword): reflect on being hit — already handled in damage-taken section
@@ -1544,9 +1536,7 @@ function Game({ character, user, onEndRun }) {
       if (mindG2 && mindG2.effect === 'crit_aoe_condition' && r.attackRoll && r.attackRoll.tierName === 'crit') {
         giftBattle.enemies.forEach(function(e) {
           if (!e.isDown) {
-            e.statusEffects = (e.statusEffects || []).concat([
-              { id: mindG2.condition, name: mindG2.condition, slot: 'mind', turnsRemaining: mindG2.conditionTurns }
-            ])
+            e.statusEffects = applyConditionToEffects(e.statusEffects || [], mindG2.condition, 'gift')
           }
         })
         addLog({ type: 'condition', text: 'Pollen Cloud! All enemies BLIND!', tier: 'crit' })
@@ -3162,7 +3152,7 @@ function Game({ character, user, onEndRun }) {
                                         Object.keys(prev.players).forEach(function(uid) {
                                           var p = prev.players[uid]
                                           newPlayers[uid] = Object.assign({}, p, {
-                                            statusEffects: p.statusEffects.concat([{ id: condId, turnsRemaining: 3 }])
+                                            statusEffects: applyConditionToEffects(p.statusEffects || [], condId, 'junk_consumable')
                                           })
                                         })
                                         return Object.assign({}, prev, { players: newPlayers })

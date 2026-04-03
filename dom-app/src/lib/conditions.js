@@ -88,6 +88,13 @@ function applyCondition(statusEffects, conditionId, source) {
   }
 
   // Non-stackable: remove existing condition in same slot, add new one
+  // If re-applying the SAME condition, preserve accumulated state (e.g. poison stat drains)
+  var existing = statusEffects.find(function(c) { return c.id === def.id })
+  if (existing) {
+    // Keep accumulated stat drain progress
+    if (existing.drainedStats) condition.drainedStats = Object.assign({}, existing.drainedStats)
+    if (existing.statDrainIndex) condition.statDrainIndex = existing.statDrainIndex
+  }
   var filtered = statusEffects.filter(function(c) { return c.slot !== def.slot })
   return filtered.concat([condition])
 }
