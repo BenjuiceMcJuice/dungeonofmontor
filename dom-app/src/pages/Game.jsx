@@ -3267,6 +3267,47 @@ function Game({ character, user, onEndRun }) {
                     })}
                   </div>
                 </div>
+
+                {/* Condition resistances */}
+                {(function() {
+                  var condIds = ['BLEED', 'POISON', 'BURN', 'FROST', 'FEAR', 'DAZE']
+                  var condColors = { BLEED: 'text-red-400', POISON: 'text-green-500', BURN: 'text-orange-400', FROST: 'text-cyan-400', FEAR: 'text-purple-400', DAZE: 'text-yellow-300' }
+                  var resistItems = getAllPassiveItems(character.equipped)
+                  var resists = {}
+                  for (var cri = 0; cri < resistItems.length; cri++) {
+                    var ri = resistItems[cri]
+                    if (ri.passiveEffect === 'condition_immunity' && ri.passiveCondition) resists[ri.passiveCondition] = 'IMMUNE'
+                    if (ri.passiveEffect === 'condition_resist' && ri.passiveCondition) resists[ri.passiveCondition] = Math.min(100, Math.round(((resists[ri.passiveCondition] || 0) === 'IMMUNE' ? 100 : (resists[ri.passiveCondition] || 0)) + (ri.passiveValue || 0) * 100))
+                    if (ri.passiveEffect === 'condition_resist_multi' && ri.passiveConditions) {
+                      for (var crmi = 0; crmi < ri.passiveConditions.length; crmi++) {
+                        var cid = ri.passiveConditions[crmi]
+                        if (resists[cid] !== 'IMMUNE') resists[cid] = Math.min(100, (resists[cid] || 0) + Math.round((ri.passiveValue || 0) * 100))
+                      }
+                    }
+                    if (ri.passiveEffect === 'condition_resist_all') {
+                      for (var crai = 0; crai < condIds.length; crai++) {
+                        if (resists[condIds[crai]] !== 'IMMUNE') resists[condIds[crai]] = Math.min(100, (resists[condIds[crai]] || 0) + Math.round((ri.passiveValue || 0) * 100))
+                      }
+                    }
+                  }
+                  var activeResists = condIds.filter(function(c) { return resists[c] })
+                  if (activeResists.length === 0) return null
+                  return (
+                    <div className="mt-3 border-t border-border pt-2">
+                      <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Condition Resist</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {activeResists.map(function(c) {
+                          var val = resists[c]
+                          return (
+                            <span key={c} className={(condColors[c] || 'text-ink') + ' text-[9px] font-sans bg-surface border border-border rounded px-1.5 py-0.5'}>
+                              {c} {val === 'IMMUNE' ? '∞' : val + '%'}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           )
