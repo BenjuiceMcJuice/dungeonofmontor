@@ -240,8 +240,9 @@ function getTailorItems(floorId, zoneDef) {
       if (!item) continue
       // Equipment only: weapons, armour, rings, amulets (not consumables, relics, junk)
       if (item.type !== 'weapon' && item.type !== 'armour' && item.type !== 'ring' && item.type !== 'amulet') continue
-      // Skip items already in staples
-      var isStaple = staples.indexOf(entry.itemId) !== -1
+      // Skip items already in staples or the premium item
+      var premiumId2 = (zoneDef && zoneDef.tailorPremium) || null
+      var isStaple = staples.indexOf(entry.itemId) !== -1 || entry.itemId === premiumId2
       if (isStaple) continue
       var alreadyIn = pool.some(function(p) { return p.itemId === entry.itemId })
       if (!alreadyIn) pool.push({ itemId: entry.itemId, weight: entry.weight })
