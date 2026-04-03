@@ -4740,6 +4740,24 @@ function Game({ character, user, onEndRun }) {
                     )
                   })}
                 </div>
+                {/* Gift slots */}
+                {(giftSlots.body || giftSlots.mind || giftSlots.weapon || giftSlots.shield) && (
+                  <div className="mt-3 border-t border-border pt-2">
+                    <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Montor's Gifts</span>
+                    <div className="grid grid-cols-2 gap-1.5 mt-1">
+                      {['body', 'mind', 'weapon', 'shield'].map(function(slot) {
+                        var g = giftSlots[slot]
+                        if (!g) return null
+                        return (
+                          <div key={slot} className="p-1.5 rounded border border-border bg-raised">
+                            <span className="text-ink-faint text-[8px] uppercase">{slot}</span>
+                            <span className="text-ink text-[10px] font-display block">{g.name}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )
@@ -4945,6 +4963,23 @@ function Game({ character, user, onEndRun }) {
                           <span key={i} className="text-green-400 text-[10px] font-sans bg-green-400/10 border border-green-400/20 rounded px-1.5 py-0.5">
                             +{b.value} {(b.stat || '').toUpperCase()} ({b.turnsRemaining}t)
                           </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+                {(giftSlots.body || giftSlots.mind || giftSlots.weapon || giftSlots.shield) && (
+                  <div className="mt-3 border-t border-border pt-2">
+                    <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Montor's Gifts</span>
+                    <div className="grid grid-cols-2 gap-1.5 mt-1">
+                      {['body', 'mind', 'weapon', 'shield'].map(function(slot) {
+                        var g = giftSlots[slot]
+                        if (!g) return null
+                        return (
+                          <div key={slot} className="p-1.5 rounded border border-border bg-raised">
+                            <span className="text-ink-faint text-[8px] uppercase">{slot}</span>
+                            <span className="text-ink text-[10px] font-display block">{g.name}</span>
+                          </div>
                         )
                       })}
                     </div>
