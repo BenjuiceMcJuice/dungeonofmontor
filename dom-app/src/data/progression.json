@@ -1,13 +1,24 @@
 {
   "xpThresholds": [
-    { "xp": 50,   "hpGain": 5,  "statPick": true },
-    { "xp": 120,  "hpGain": 5,  "statPick": true },
-    { "xp": 220,  "hpGain": 5,  "statPick": true },
-    { "xp": 350,  "hpGain": 8,  "statPick": true },
-    { "xp": 550,  "hpGain": 5,  "statPick": true },
-    { "xp": 800,  "hpGain": 8,  "statPick": true },
-    { "xp": 1200, "hpGain": 5,  "statPick": true },
-    { "xp": 1700, "hpGain": 8,  "statPick": true },
-    { "xp": 2400, "hpGain": 10, "statPick": true }
+    { "xp": 50,    "hpGain": 5,  "statPick": true },
+    { "xp": 120,   "hpGain": 5,  "statPick": true },
+    { "xp": 220,   "hpGain": 5,  "statPick": true },
+    { "xp": 350,   "hpGain": 5,  "statPick": true },
+    { "xp": 520,   "hpGain": 8,  "statPick": true },
+    { "xp": 750,   "hpGain": 5,  "statPick": true },
+    { "xp": 1050,  "hpGain": 5,  "statPick": true },
+    { "xp": 1400,  "hpGain": 8,  "statPick": true },
+    { "xp": 1850,  "hpGain": 5,  "statPick": true },
+    { "xp": 2400,  "hpGain": 5,  "statPick": true },
+    { "xp": 3100,  "hpGain": 8,  "statPick": true },
+    { "xp": 3900,  "hpGain": 5,  "statPick": true },
+    { "xp": 4900,  "hpGain": 5,  "statPick": true },
+    { "xp": 6100,  "hpGain": 8,  "statPick": true },
+    { "xp": 7500,  "hpGain": 5,  "statPick": true },
+    { "xp": 9200,  "hpGain": 5,  "statPick": true },
+    { "xp": 11200, "hpGain": 8,  "statPick": true },
+    { "xp": 13500, "hpGain": 5,  "statPick": true },
+    { "xp": 16500, "hpGain": 10, "statPick": true },
+    { "xp": 20000, "hpGain": 10, "statPick": true }
   ]
 }
