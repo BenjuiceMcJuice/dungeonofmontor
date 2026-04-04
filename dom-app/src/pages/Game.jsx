@@ -3114,10 +3114,11 @@ function Game({ character, user, onEndRun }) {
   var wallHiColor = doorThemeColours.wallHi
   var floorBorderColor = wallColor  // used by interaction overlays
 
-  // Generate stone wall texture as tileable SVG — matches door sprite pillar colours
-  function generateWallTexture(wallCol, wallHiCol) {
-    var colours = [wallCol, wallHiCol, wallCol, wallCol, wallHiCol, wallCol, wallCol]
-    var gridW = 4, gridH = 4, px = 3
+  // Generate stone wall texture — grey brick with moss, tileable SVG, 3px pixels to match doors
+  function generateWallTexture() {
+    // Grey brick with green moss highlights
+    var colours = ['#3a3a3a','#4a4a4a','#3a3a3a','#555','#3a3a3a','#4a4a4a','#4a5a3a','#3a3a3a','#555','#3a3a3a','#5a6a4a','#4a4a4a']
+    var gridW = 8, gridH = 4, px = 3
     var seed = 41
     var rects = ''
     for (var wy = 0; wy < gridH; wy++) {
@@ -3130,7 +3131,7 @@ function Game({ character, user, onEndRun }) {
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + tw + '" height="' + th + '">' + rects + '</svg>'
     return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")'
   }
-  var wallTexture = generateWallTexture(wallColor, wallHiColor)
+  var wallTexture = generateWallTexture()
   var wallStyle = { backgroundImage: wallTexture, backgroundRepeat: 'repeat' }
 
   // === GIFT PICKER OVERLAY — single-screen table layout ===
@@ -3542,7 +3543,9 @@ function Game({ character, user, onEndRun }) {
           onClick={function() { handlePickDoor(door.targetId) }}
           className="flex flex-col items-center gap-0.5 p-1 transition-all cursor-pointer active:scale-95"
         >
-          <DoorSprite theme={zone.doorTheme || 'garden'} scale={3} open={isVisited} />
+          <div style={isVisited ? { background: '#000' } : {}}>
+            <DoorSprite theme={zone.doorTheme || 'garden'} scale={3} open={isVisited} />
+          </div>
           {subtext && <span className={subtextCol + ' text-[9px] font-sans'}>{subtext}</span>}
         </button>
       )
@@ -4340,15 +4343,15 @@ function Game({ character, user, onEndRun }) {
         <div className="flex-1 flex flex-col min-h-0 relative">
           {/* North wall with door gap */}
           <div className="flex items-end">
-            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
-            <div className="shrink-0">{doorMap.N ? renderDoor('N') : <div style={Object.assign({ width: '36px', height: '42px' }, wallStyle)} />}</div>
-            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
+            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
+            <div className="shrink-0">{doorMap.N ? renderDoor('N') : <div style={Object.assign({ width: '18px', height: '18px' }, wallStyle)} />}</div>
+            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
           </div>
 
           {/* Middle area: West wall — Centre — East wall */}
           <div className="flex-1 flex min-h-0">
             {/* West wall with door gap */}
-            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '36px' }, wallStyle)}>
+            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '18px' }, wallStyle)}>
               <div className="flex-1" style={wallStyle} />
               {doorMap.W ? renderDoor('W') : null}
               <div className="flex-1" style={wallStyle} />
@@ -4620,7 +4623,7 @@ function Game({ character, user, onEndRun }) {
             </div>
 
             {/* East wall with door gap */}
-            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '36px' }, wallStyle)}>
+            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '18px' }, wallStyle)}>
               <div className="flex-1" style={wallStyle} />
               {doorMap.E ? renderDoor('E') : null}
               <div className="flex-1" style={wallStyle} />
@@ -4629,9 +4632,9 @@ function Game({ character, user, onEndRun }) {
 
           {/* South wall with door gap */}
           <div className="flex items-start">
-            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
-            <div className="shrink-0">{doorMap.S ? renderDoor('S') : <div style={Object.assign({ width: '36px', height: '42px' }, wallStyle)} />}</div>
-            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
+            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
+            <div className="shrink-0">{doorMap.S ? renderDoor('S') : <div style={Object.assign({ width: '18px', height: '18px' }, wallStyle)} />}</div>
+            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
           </div>
 
           {/* Junk piles — corner-hugging triangles, absolutely positioned */}
@@ -4639,25 +4642,26 @@ function Game({ character, user, onEndRun }) {
           {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
             var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
             if (activePiles.length === 0) return null
-            var FLOOR_JUNK_THEMES = { grounds: 'garden', underground: 'dungeon', underbelly: 'sewer', quarters: 'quarters', works: 'works', deep: 'cave', domain: 'void' }
-            var floorTheme = FLOOR_JUNK_THEMES[zone.floorId] || 'garden'
+            // All floors use garden junk sprites for now (hi-res at scale 3)
+            var floorTheme = 'garden'
             // Corner positions with CSS transform to flip the base sprite
             // Base sprite: right-angle at bottom-left (flat bottom, flat left)
+            // Corners positioned inside the walls (18px wall thickness)
             var corners = [
-              { pos: 'bottom-0 left-0', transform: 'none',           align: 'items-start' },  // bottom-left: as-is
-              { pos: 'bottom-0 right-0', transform: 'scaleX(-1)',    align: 'items-end' },     // bottom-right: mirror horizontal
-              { pos: 'top-0 right-0', transform: 'scale(-1,-1)',     align: 'items-end' },     // top-right: mirror both
+              { style: { bottom: '18px', left: '18px' }, transform: 'none' },           // bottom-left: as-is
+              { style: { bottom: '18px', right: '18px' }, transform: 'scaleX(-1)' },    // bottom-right: mirror horizontal
+              { style: { top: '18px', right: '18px' }, transform: 'scale(-1,-1)' },     // top-right: mirror both
             ]
             return activePiles.map(function(pile, pi) {
               var corner = corners[pi % corners.length]
               var visibleSize = pile.layersRemaining || pile.size
               var spriteKey = 'junk_' + floorTheme + '_' + visibleSize
-              var spriteScale = visibleSize === 3 ? 12 : visibleSize === 2 ? 12 : 10
-              var sizeLabel = visibleSize === 3 ? 'Mound' : visibleSize === 2 ? 'Heap' : 'Scraps'
+              var spriteScale = 3
               return (
                 <button key={pile.id}
                   onClick={function() { handleInspectPile(pile.id) }}
-                  className={'absolute ' + corner.pos + ' z-10 flex flex-col ' + corner.align + ' p-1 cursor-pointer transition-all active:scale-95'}
+                  className="absolute z-10 cursor-pointer transition-all active:scale-95"
+                  style={corner.style}
                 >
                   <div style={{ transform: corner.transform }}>
                     <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
