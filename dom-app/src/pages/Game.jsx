@@ -1310,7 +1310,7 @@ function Game({ character, user, onEndRun }) {
       if (shieldG && (shieldG.effect === 'reflect_damage' || shieldG.effect === 'reflect_damage_and_condition') && attackerEnemy && !attackerEnemy.isDown) {
         attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - shieldG.value)
         addLog({ type: 'player', text: shieldG.name + ' reflects ' + shieldG.value + ' damage!', tier: 'hit' })
-        if (shieldG.reflectCondition) {
+        if (shieldG.reflectCondition && rollGiftChance(0.30)) {
           attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], shieldG.reflectCondition, 'gift')
           addLog({ type: 'condition', text: attackerEnemy.name + ' ' + condName(shieldG.reflectCondition) + ' from the reflection!', tier: 'hit' })
         }
