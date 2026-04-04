@@ -4480,19 +4480,20 @@ function Game({ character, user, onEndRun }) {
               {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
                 var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
                 if (activePiles.length === 0) return null
+                var floorTheme = zone.floorId === 'grounds' ? 'garden' : 'garden'
                 return (
-                  <div className="flex flex-wrap justify-center gap-2 mt-2">
-                    {activePiles.map(function(pile) {
-                      var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
-                      var sizeColour = pile.size === 3 ? 'border-gold/50 bg-gold/10' : pile.size === 2 ? 'border-amber-500/40 bg-amber-500/5' : 'border-border-hl bg-surface'
+                  <div className="flex flex-wrap justify-center gap-3 mt-2">
+                    {activePiles.map(function(pile, pi) {
+                      var variant = pi % 2 === 0 ? 'a' : 'b'
+                      var spriteKey = 'junk_' + floorTheme + '_' + pile.size + variant
+                      var spriteScale = pile.size === 3 ? 4 : pile.size === 2 ? 3 : 3
                       return (
                         <button key={pile.id}
                           onClick={function() { handleInspectPile(pile.id) }}
-                          className={'flex flex-col items-center gap-0.5 p-2.5 rounded-lg border-2 transition-all cursor-pointer hover:border-gold hover:scale-105 ' + sizeColour}
+                          className="flex flex-col items-center gap-0.5 p-1 transition-all cursor-pointer hover:scale-110 active:scale-95"
                         >
-                          <span className="text-ink text-sm font-display">{sizeLabel}</span>
-                          <span className="text-ink-faint text-[9px] font-sans">{pile.layersRemaining} {pile.layersRemaining === 1 ? 'layer' : 'layers'}</span>
-                          {pile.inspected && <span className="text-ink-dim text-[8px] italic">{pile.inspectHint}</span>}
+                          <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
+                          <span className="text-ink-faint text-[8px] font-sans">{pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'}</span>
                         </button>
                       )
                     })}
