@@ -1,6 +1,6 @@
 # Dungeon of Montor -- Documentation Index
 
-> All game documentation in one place. Updated 2026-04-03.
+> All game documentation in one place. Updated 2026-04-04.
 
 ---
 
@@ -20,8 +20,8 @@
 
 | Document | Description |
 |---|---|
-| [Weapon Compendium](reference/weapon_compendium.md) | All ~50 weapons + 8 shields -- classes, tiers, stats, conditions, gift slots |
-| [Item Compendium](reference/item_compendium.md) | All ~150 non-weapon items -- consumables, relics, armour, junk by floor |
+| [Weapon Compendium](reference/weapon_compendium.md) | All 64 weapons + shields -- classes, tiers, stats, conditions, gift slots |
+| [Item Compendium](reference/item_compendium.md) | All ~180 non-weapon items -- consumables, relics, armour, bombs, throwables, junk by floor |
 
 ---
 

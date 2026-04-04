@@ -1,6 +1,6 @@
 # Dungeon of Montor -- Game Design
 
-> Master game design document. Updated 2026-04-03.
+> Master game design document. Updated 2026-04-04.
 
 ---
 
@@ -10,7 +10,7 @@ Dungeon of Montor is a browser-based RPG PWA -- mobile or desktop, solo or multi
 
 The game's visual identity is BBC Micro-style flat pixel art -- solid colour fills, black outlines, no gradients. All sprites are drawn as canvas grid arrays in code. No image files exist. Enemy power tier is communicated by colour alone (Dust/Slate/Iron/Crimson/Void).
 
-**Current state (2026-04-03):** Solo dungeon crawl fully playable. 7 floors, 13 zones, 189 items, 12 enemy archetypes, 14 conditions, full d20 combat, junk pile searching, Montor's Gift system (Petal gift implemented with 16 effects), dual vendor system, in-run levelling.
+**Current state (2026-04-04):** Solo dungeon crawl fully playable. 7 floors, 13 zones, 243 items, 12 enemy archetypes with 7 AI behaviours, 18 conditions with 6 elemental reactions, full d20 combat, throwable/bomb/dice-relic systems, junk pile searching with trap-loot risk/reward, all 6 Montor's Gift types wired with combat effects, dual vendor system, 30-level in-run progression.
 
 ---
 
@@ -63,14 +63,14 @@ Stat modifiers shift results between tiers. The crit threshold can be lowered by
 | Stat | Abbr | What it does | Status |
 |---|---|---|---|
 | Perception | PER | Added to d20 junk search roll; spot hidden rooms/traps | Active for junk search |
-| Endurance | END | Carry capacity = 10 + END mod | Planned |
+| Endurance | END | HP regen per room (END modifier HP restored each room transition) | Active for regen |
 
 ### Relationship Stats (planned)
 
 | Stat | Abbr | What it does | Status |
 |---|---|---|---|
 | Wisdom | WIS | Gift boon power on activation; UI hints about Montor's mood | Planned (Stage 4) |
-| Charisma | CHA | Reduces buy prices by mod x 5% (cap -20%); increases sell prices by mod x 10% (cap +40%) | Active for merchants |
+| Charisma | CHA | Reduces buy prices by mod x 5% (cap -20%); increases sell prices by mod x 10% (cap +40%); CHA 12+ unlocks premium items at Tailors | Active for merchants + premium access |
 
 ### Inactive Stats (Stage 2+)
 
@@ -141,17 +141,37 @@ Two daggers can be dual-wielded. The offhand dagger gets a bonus attack at -2 ac
 
 ## 5. Conditions
 
-14 conditions are implemented, each affecting a body slot, mind slot, or both:
+18 conditions are implemented. Multiple conditions coexist on a target (no slot replacement -- POISON + BLEED + BURN can all stack simultaneously).
 
-**Body conditions:** BLEED (stacking damage per turn), POISON (damage + stat drain), BURN (burst damage after countdown), FROST (skip turn + 50% extra damage taken -- brittle), NAUSEA (reduced accuracy).
+**Body conditions:** BLEED (stacking damage per turn), POISON (damage + stat drain), BURN (burst damage after countdown), FROST (skip turn + 50% extra damage taken -- brittle), NAUSEA (reduced accuracy), SLUGGISH (reduced AGI/initiative).
 
-**Mind conditions:** FEAR (50/50 fight-or-flight: skip turn OR adrenaline crit), DAZE (guaranteed skip turn -- proper stun), BLIND (reduced accuracy, can't search), BLOODLUST (can't flee, +damage).
+**Mind conditions:** FEAR (50/50 fight-or-flight: skip turn OR adrenaline crit), DAZE (guaranteed skip turn -- proper stun), BLIND (reduced accuracy, can't search), BLOODLUST (can't flee, +damage), FRENZY (berserk -- boosted damage, reduced accuracy), CHARM (attacks allies), BORED (reduced engagement), SAD (stat penalties).
 
-**Special conditions:** ADRENALINE (force crit on next attack, then CRASH), CRASH (50% skip, -3 STR), REGEN (heal per turn).
+**Catalyst conditions:** WET (no direct effect -- enables elemental reactions), CHARGED (no direct effect -- enables elemental reactions).
 
-**BLEED stacking:** BLEED damage increases with each stack. Multiple BLEED sources (weapon + shield + relic) create a viable "death by a thousand cuts" build.
+**Special conditions:** ADRENALINE (force crit on next attack, then CRASH), ADRENALINE_CRASH (50% skip, -3 STR).
 
-**Condition builds:** The game supports deliberate build identities: BLEED (lifesteal + stacking), BURN (AoE + burst), FROST (control + brittle), POISON (stat drain + inevitability), FEAR (psychological warfare).
+**Condition tick priority:** BLEED -> POISON -> BURN -> FROST -> ... -> FEAR -> DAZE. Tap-gated flow gives the player full control over pacing.
+
+### Condition Reactions
+
+When two conditions combine on a target, they trigger a powerful reaction:
+
+| Combo | Reaction | Effect |
+|---|---|---|
+| WET + FROST | **INSTANT FREEZE** | Immediate stun, massive brittle damage |
+| WET + CHARGED | **STEAM** | AoE damage burst |
+| WET + BURN | **STEAM** | AoE damage burst |
+| POISON + BLEED | **SEPSIS** | 30% per-tick roll for bonus damage (not guaranteed -- still dangerous but fair) |
+| FEAR + BLOODLUST | **FRENZY** | Berserk state -- boosted damage, reduced accuracy |
+| DAZE + FEAR | **CATATONIC** | Extended stun |
+| FROST + BURN | **SHATTER** | Burst damage from thermal shock |
+
+Reactions create a tactical combo layer -- throw water then electrify, freeze a wet enemy instantly, or let bleed + poison fester into sepsis.
+
+**BLEED stacking:** BLEED damage increases with each stack. Multiple BLEED sources (weapon + shield + relic) create a viable "death by a thousand cuts" build. BLEED at 4+ stacks triggers FEAR.
+
+**Condition builds:** The game supports deliberate build identities: BLEED (lifesteal + stacking), BURN (AoE + burst), FROST (control + brittle), POISON (stat drain + inevitability), FEAR (psychological warfare), WET/CHARGED (elemental combo catalyst).
 
 ---
 
@@ -178,37 +198,68 @@ Generic items have disdainful names (Dodgy Red Liquid, Clanky Armour, Tatty Leat
 
 ### Relics
 
-Relics provide passive effects while equipped. Currently 16+ utility relics wired with effects including: regen per chamber, HP bonus, LCK bonus, crit threshold reduction, condition immunity, lifesteal, damage reflection, dodge chance, die reroll, double condition application, and more.
+55 relics total. Utility relics provide passive effects while equipped: regen per chamber, HP bonus, LCK bonus, crit threshold reduction, condition immunity, lifesteal, damage reflection, dodge chance, die reroll, double condition application, and more.
+
+**Dice-triggered relics (9):** Relics that activate on specific dice outcomes, adding a roguelike gambling layer:
+- Metronome (every 4th turn = guaranteed crit), Gremlin Bell (nat 1 redirect), Pressure Cooker (nat 1 counter -> detonate), Coin Flip (+/- damage modifier), Double or Nothing (crit gamble), Egg Timer (+50% damage after no kill), Big Red Button (dice match = instakill), Magic 8-Ball (nat 20 -> d6 random effect), Nuke (catastrophic AoE)
 
 **Condition resistance relics:** 20 single-condition resist relics + 6 combo resistance relics provide tiered protection (25%, 50%, 75%, full immunity) against specific conditions.
 
 ---
 
-## 7. Vendor System
+## 7. Throwables, Bombs & Variety Weapons
+
+### Throwable System
+
+Consumable items usable in combat with three delivery types:
+- **Single-target** -- thrown at one enemy (e.g. Rubber Duck, Cat)
+- **Multi-hit** -- hits multiple enemies (e.g. Nail Bomb shrapnel)
+- **AoE** -- affects all enemies (e.g. Gas Canister, Whoopee Cushion)
+
+### Timed Bombs (5)
+
+Bombs with a fuse that ticks per player turn, detonating on expiry:
+Cherry Bomb, Nail Bomb, Gas Canister, Slow Cooker, Ticking Parcel. Adds urgency and planning -- throw early or wait for the perfect moment.
+
+### Variety Weapons (14 new)
+
+Household weapons with distinct personalities: Butter Knife, Corkscrew, Frying Pan, Cheese Grater, Mop (applies WET), Cattle Prod (applies CHARGED), and more. Condition-applying weapons enable the elemental reaction system.
+
+### Chaos Weapons (3)
+
+Rule-breaking weapons with unpredictable effects: Chaos Blade (d20 determines which condition applies), Loaded Weapon, Boomerang.
+
+### Whacky Consumables
+
+Banana Peel (trip), Rubber Duck (distraction), Cat (scratch attack), Mirror (reflects next attack), Whoopee Cushion (AoE embarrassment), and more. Junk consumables found in piles are usable in combat only (blocked outside combat) as last-resort items.
+
+---
+
+## 8. Vendor System
 
 Two vendor types appear in the dungeon:
 
 ### Tailor (Merchant rooms)
 - Named as Montor's staff (zone-specific merchant names)
 - Sells **equipment**: helmets, boots, armour, rings, amulets
-- Has zone-specific staple stock + one premium item
-- Premium items require high CHA to access
+- Zone-themed staple stock + CHA-gated premium items
+- Premium pool randomised per run (3 candidates per zone, CHA 12+ required to access)
 - Player can both buy and sell (TRADE)
 
 ### Peddler (NPC rooms)
 - Roaming vendor
-- Sells **consumables and weapons**: potions, throwables, weapons, shields
+- Sells **consumables and cheap throwables**: potions, bombs, throwables, weapons, shields
 - Stock drawn from zone loot tables
 - Buy only (no selling to peddlers)
 
 ### CHA Pricing
 - Buy prices reduced by CHA modifier x 5% (cap -20%)
 - Sell prices increased by CHA modifier x 10% (cap +40%)
-- Premium items at Tailors gated behind CHA check
+- CHA 12+ unlocks premium items at Tailors
 
 ---
 
-## 8. Junk Piles and Searching
+## 9. Junk Piles and Searching
 
 Montor is a hoarder. Most chambers have 1-3 junk piles that can be searched. Searching is the primary exploration mechanic and the only way to find Montor's hidden treasures (which unlock Gifts) and terminals (which unlock stairwells).
 
@@ -228,15 +279,26 @@ Montor is a hoarder. Most chambers have 1-3 junk piles that can be searched. Sea
 
 ### Search Intensity
 
-| Level | Name | Roll Bonus | Ambush Range | Best for |
+| Level | Name | Roll Bonus | Trap Damage | Best for |
 |---|---|---|---|---|
-| Light | Quick Rummage | +0 | Nat 1 only | Low HP, safe rooms |
-| Medium | Thorough Search | +2 | 1-3 | Standard exploration |
-| Deep | Deep Clean | +5 | 1-5 | Treasure hunting, high PER builds |
+| Careful | Quick Rummage | +0 | 5 HP | Low HP, safe rooms |
+| Thorough | Thorough Search | +2 | 12 HP | Standard exploration |
+| Deep | Deep Clean | +5 | 25 HP | Treasure hunting, high PER builds |
+
+Traps are the primary danger (not ambushes). Dodging a trap = no damage. Flat trap damage replaces the old ambush-heavy system for faster runs.
+
+### Trap-Loot Link
+
+Triggering a trap guards valuable loot. When a trap fires:
+- +25% item chance on the search roll
+- Gold found x1.5
+- Loot table upgrade (better rarity band)
+
+This creates a genuine risk/reward decision -- getting hit by a trap is a consolation prize, not just punishment.
 
 ### Consumable Junk
 
-Some junk items found in piles are consumable (eat/drink). Each has a risk/reward profile -- the item might heal, buff, poison, or do nothing. PER helps inspect items before consuming. LCK affects quality.
+Some junk items found in piles are consumable (eat/drink). Each has a risk/reward profile -- the item might heal, buff, poison, or do nothing. PER helps inspect items before consuming. LCK affects quality. Junk consumables are usable in combat only (blocked outside combat) as last-resort items.
 
 ### Terminal Discovery
 
@@ -244,7 +306,25 @@ One terminal is hidden per zone, always inside a medium or large junk pile. Find
 
 ---
 
-## 9. Dungeon Structure
+## 10. Enemy AI
+
+Enemies have 7 AI behaviours beyond basic attacks, making each archetype feel distinct:
+
+| Behaviour | Description | Used by |
+|---|---|---|
+| **Flee** | Enemy retreats, drops "Dropped Bag" with half gold (keeps items) | Rats, Moths |
+| **Howl** | Buff/debuff shout -- buffs allies or debuffs player | Hounds, Orcs |
+| **Heal Ally** | Heals another living enemy | Shades, Wraiths |
+| **Eat Corpse** | Consumes a dead enemy for HP/buff | Rats, Hounds |
+| **Sacrifice** | Self-destructs for AoE damage or ally buff | Moths, Automatons |
+| **Slime Coat** | Slug-specific -- heals + DEF buff, still targetable (replaces hide) | Slugs |
+| **Spawn** | Creates new enemies mid-combat | Spiders, Rats |
+
+AI behaviours are archetype-specific and tier-appropriate. Higher-tier enemies use their abilities more aggressively.
+
+---
+
+## 11. Dungeon Structure
 
 ### 7 Floors
 
@@ -307,18 +387,20 @@ Enemies are tier-coloured at spawn. A Crimson Orc is visually identical to a Dus
 
 ---
 
-## 10. In-Run Levelling
+## 12. In-Run Levelling
 
-Characters gain XP from combat and junk searching. Up to 9 level-ups per run.
+Characters gain XP from combat and junk searching. Up to 30 levels per run (front-loaded: first 10 levels come fast, late levels require significant XP).
 
 On level up:
 - Max HP increases (5-10 HP, class-dependent)
 - Choose one stat to increase from 9 available combat/exploration stats
 - StatPicker UI with tap-to-inspect info hints
 
+XP curve: Level 1 at 50 XP, level 10 at 2000 XP, level 30 at 37000 XP. Expect ~3-5 levels per floor.
+
 ---
 
-## 11. Loot System
+## 13. Loot System
 
 Post-combat loot uses: `d100 + LCK modifier` vs rarity bands.
 
@@ -335,7 +417,7 @@ Loot tables are zone-specific. Each zone has weighted item pools appropriate to 
 
 ---
 
-## 12. Flee System
+## 14. Flee System
 
 Flee uses the 4-tier system with AGI modifier:
 
@@ -350,4 +432,4 @@ BLOODLUST condition prevents fleeing entirely.
 
 ---
 
-*Game Design -- v1.0 -- April 2026*
+*Game Design -- v1.1 -- April 2026*

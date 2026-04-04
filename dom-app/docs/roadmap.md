@@ -1,7 +1,7 @@
 # Development Roadmap
 
 > 5-stage plan from solo crawl to full multiplayer RPG with AI narrative.
-> Updated 2026-04-03.
+> Updated 2026-04-04.
 
 ---
 
@@ -23,28 +23,37 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 
 **Goal:** A working solo dungeon loop you can actually play.
 
-### What's built (as of 2026-04-03)
+### What's built (as of 2026-04-04)
 
 - Full d20 combat system with 4-tier resolution
-- 5 weapon classes (dagger, sword, spear, mace, battle axe) + unarmed + shields
-- 4-tier weapon system (base, gifted, hardened, unique) with ~50 weapons and ~8 shields
+- 5 weapon classes (dagger, sword, spear, mace, battle axe) + unarmed + shields + dual wield
+- 4-tier weapon system (base, gifted, hardened, unique) with 64 weapons
 - 8 equipment slots: weapon, offhand, armour, helmet, boots, ring, amulet, relic
-- 189 total items across all categories
-- 14 conditions with dual body+mind slots, BLEED stacking, FEAR fight-or-flight, DAZE stun
-- 12 enemy archetypes across 5 power tiers
+- **243 total items** across all categories (64 weapons, 36 armour, 62 consumables, 55 relics, 15 amulets, 11 rings)
+- **18 conditions** with multiple coexistence, BLEED stacking, FEAR fight-or-flight, DAZE stun, WET/CHARGED catalysts
+- **6 condition reactions** -- SHATTER, INSTANT FREEZE, STEAM, SEPSIS, FRENZY, CATATONIC
+- 12 enemy archetypes across 5 power tiers with **7 AI behaviours** (flee, howl, heal ally, eat corpse, sacrifice, slime coat, spawn)
 - 7 dungeon floors with 13 zones, each a 4x4 grid of 16 chambers (208 chambers total)
-- Junk pile searching: PER-based rolls, 3 search intensities, consumable junk, ambushes
+- Junk pile searching: PER-based rolls, 3 search intensities, trap-loot link (trap = +25% item chance, gold x1.5), consumable junk usable in combat
 - Terminals hidden in junk piles to unlock stairwells
-- Montor's Gift system: Petal gift fully implemented with 16 effects across 4 slots
+- **All 6 Montor's Gift types fully wired** with combat effects across body/mind/weapon/shield (Petal, Stone, Bile, Blood, Ember, Void)
+- Card-based gift picker at terminals ("Manage Gifts") with slot limits = gifts unlocked
+- Gift stat boosts reversed on switch (no stacking exploit)
 - Montor's treasures hidden as regular junk (one per floor)
-- Dual vendor system: Tailors (equipment) + Peddlers (consumables/weapons)
-- CHA-gated merchant pricing and premium items
-- In-run levelling: 9 level-ups, stat pick per level
+- Dual vendor system: Tailors (zone-themed equipment + CHA-gated randomised premiums) + Peddlers (consumables/throwables)
+- **Throwable system** -- single-target, multi-hit, AoE delivery types
+- **5 timed bombs** with per-turn fuse countdown
+- **9 dice-triggered relics** (Metronome, Gremlin Bell, Pressure Cooker, Big Red Button, Magic 8-Ball, Nuke, etc.)
+- **14 variety weapons** (Mop/WET, Cattle Prod/CHARGED, Frying Pan, Cheese Grater, etc.) + 3 chaos weapons
+- **Whacky consumables** (Banana Peel, Rubber Duck, Cat, Mirror, etc.)
+- In-run levelling: **30 levels**, front-loaded XP curve (~3-5 levels per floor)
 - Pre-run stat allocation (10 points) + starting merchant (50g)
-- BBC Micro-style pixel sprites for all enemies, player, conditions, doors, terminals
+- END stat = HP regen per room, CHA 12+ = premium vendor access
+- BBC Micro-style pixel sprites for all enemies, player, conditions, doors, terminals, junk piles
 - Floor-themed pixelated borders
-- Full-screen stats panel, inventory, combat log
+- Full-screen stats panel with HP bar (green/yellow/red), active gifts display, condition resistance summary
 - Safe rooms between floors with Gift activation
+- ErrorBoundary component for crash diagnosis (iOS WebKit)
 - Firebase Auth (email + Google sign-in)
 - GitHub Pages deployment with auto-deploy from main
 
@@ -53,13 +62,15 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 | Task | Status |
 |---|---|
 | Wire remaining relic passives (reflect_conditions, last_stand, see_enemy_hp) | Backlog |
-| Inventory weight -- END governs capacity, encumbrance penalties | Backlog |
+| Inventory UI redesign -- better layout, weight system, END governs capacity | Backlog |
 | Room events -- pollen, rain, grease fires, day/night (Garden) | Backlog |
-| 5 more gift types -- stone, bile, blood, ember, void | Backlog |
 | Montor's Mood system -- tidiness tracking, safe room tonics, between-room whispers | Backlog |
 | WIS stat wired for gift activation rolls | Backlog |
-| Sprite polish -- remaining corpse sprites, player class variants | Backlog |
+| Sprite polish -- junk pile sprites for all floors (Garden done), corpse sprites, player class variants | Backlog |
 | Dungeon map UI improvements -- fog of war, PER-based reveal | Backlog |
+| Firebase persistence -- save/load run state to Firestore | Backlog |
+| Soul slot synergies -- 21 pairings for endgame depth | Backlog |
+| Combat balance pass -- dual dagger bleed still OP, other builds need parity | Backlog |
 
 ---
 
@@ -186,4 +197,4 @@ Stage 3 (multiplayer) is the most technically risky. Stage 4 (AI) is the most un
 
 ---
 
-*Roadmap -- v1.0 -- April 2026*
+*Roadmap -- v1.1 -- April 2026*
