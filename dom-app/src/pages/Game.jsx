@@ -4109,7 +4109,7 @@ function Game({ character, user, onEndRun }) {
                           {isExpanded && (
                             <div className="px-3 pb-3 flex flex-col gap-2">
                               <p className="text-ink-faint text-[10px]">Sell: {junk.sellPrice}g</p>
-                              {canEquipNow && (
+                              {canEquipNow && gamePhase === 'combat' && (
                                 <button onClick={function() {
                                   var consumeTarget = junk
                                   // Green Patience (mind gift): reduce consume risk
@@ -5654,7 +5654,7 @@ function Game({ character, user, onEndRun }) {
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
                   var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies' || item.effect === 'timed_bomb' || item.effect === 'reflect_next_attack' || item.effect === 'wet_all_and_heal' || item.effect === 'risky_throw' || item.effect === 'damage_and_condition_one' || item.effect === 'debuff_all_enemies' || item.effect === 'summon_ally'
-                  if (isThrowable) return null // throwables go in the other list
+                  if (isThrowable) return null
                   return (
                     <button key={idx}
                       onClick={function() { setCombatItemPhase(null); handleUseItem(idx) }}
@@ -5667,6 +5667,54 @@ function Game({ character, user, onEndRun }) {
                     </button>
                   )
                 })}
+                {/* Junk consumables — last resort gamble */}
+                {playerJunkBag.filter(function(j) { return j.consumable && j.count > 0 }).length > 0 && (
+                  <div className="border-t border-border pt-2 mt-1">
+                    <p className="text-ink-faint text-[10px] uppercase tracking-wide mb-1">Junk (risky)</p>
+                    {playerJunkBag.map(function(junk, ji) {
+                      if (!junk.consumable || junk.count <= 0) return null
+                      return (
+                        <button key={'junk-' + ji}
+                          onClick={function() {
+                            setCombatItemPhase(null)
+                            var result = consumeJunk(junk, character.stats.lck || 10)
+                            if (result) {
+                              addLog({ type: result.success ? 'player' : 'enemy', text: junk.name + ': ' + result.narrative, tier: result.success ? 'hit' : 'miss' })
+                              if (result.effect) {
+                                if (result.effect.effect === 'heal' && result.effect.value) {
+                                  setPlayerHp(function(hp) { return Math.min(hp + result.effect.value, character.maxHp) })
+                                }
+                                if (result.effect.effect === 'condition' && result.effect.condition && battle) {
+                                  var junkPlayers = {}
+                                  Object.keys(battle.players).forEach(function(uid) {
+                                    var p = battle.players[uid]
+                                    junkPlayers[uid] = Object.assign({}, p, { statusEffects: applyConditionToEffects(p.statusEffects || [], result.effect.condition, 'junk') })
+                                  })
+                                  setBattle(Object.assign({}, battle, { players: junkPlayers }))
+                                }
+                                if (result.effect.effect === 'stat_buff' && result.effect.stat) {
+                                  setActiveBuffs(function(prev) { return prev.concat([{ stat: result.effect.stat, value: result.effect.value, turnsRemaining: result.effect.duration || 3 }]) })
+                                }
+                              }
+                              setPlayerJunkBag(function(bag) {
+                                return bag.map(function(j) {
+                                  if (j.id === junk.id) return Object.assign({}, j, { count: j.count - 1 })
+                                  return j
+                                }).filter(function(j) { return j.count > 0 })
+                              })
+                            }
+                          }}
+                          className="flex items-center justify-between p-2 rounded-lg border border-amber-500/20 bg-amber-500/5 text-sm font-sans text-ink hover:border-amber-400 cursor-pointer transition-colors w-full mb-1"
+                        >
+                          <div className="flex flex-col items-start">
+                            <span className="text-amber-400 text-xs">{junk.name} x{junk.count}</span>
+                            <span className="text-ink-faint text-[10px]">Risky — tap to consume</span>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
