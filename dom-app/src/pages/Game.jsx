@@ -4599,7 +4599,7 @@ function Game({ character, user, onEndRun }) {
               <p className="text-ink-dim text-xs italic text-center max-w-xs">
                 {currentChamber.id === 0
                   ? 'The entrance to the garden. Overgrown walls rise on all sides.'
-                  : (currentChamber.hasTerminal ? 'Something hums faintly beneath the debris. ' : 'The chamber is still. ') + doors.length + (doors.length === 1 ? ' door leads onward.' : ' doors lead onward.')}
+                  : (currentChamber.hasTerminal && (character.stats.per || 10) >= 12 ? 'Something hums faintly beneath the debris. ' : 'The chamber is still. ') + doors.length + (doors.length === 1 ? ' door leads onward.' : ' doors lead onward.')}
               </p>
 
               {/* Junk piles rendered as corner overlays (see below) */}
