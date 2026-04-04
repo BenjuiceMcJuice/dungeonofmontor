@@ -822,7 +822,7 @@ function resolveEnemyAttack(battleState, enemyId) {
 
   // FLEE — cowardly enemies run at low HP
   if (beh.fleeThreshold && hpPercent <= beh.fleeThreshold && Math.random() < 0.6) {
-    enemy.isDown = true // fled = removed from battle
+    enemy.isDown = true; enemy.fled = true // fled = removed from battle, drops bag
     return { newBattle: bs, result: {
       attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
       attackRoll: null, damage: 0, fled: true,
