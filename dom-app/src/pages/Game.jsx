@@ -12,6 +12,7 @@ import { getGiftDef, getGiftEffect, getWeaponGiftEffect, rollGiftChance } from '
 import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects, checkConditionReactions } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
+import themeData from '../data/themes.json'
 import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
@@ -3106,26 +3107,12 @@ function Game({ character, user, onEndRun }) {
   )
   var roomBgStyle = { backgroundImage: mottledBg, backgroundRepeat: 'repeat' }
 
-  // Floor-themed pixelated border
-  var FLOOR_BORDER_COLORS = {
-    grounds:     '#4a7c59', // mossy green
-    underground: '#7c6b4a', // earthy brown
-    underbelly:  '#4a6a7c', // sewer teal
-    quarters:    '#7c4a6b', // faded plum
-    works:       '#b85c2f', // forge orange
-    deep:        '#3d3d5c', // void indigo
-  }
-  var floorBorderColor = zone ? (FLOOR_BORDER_COLORS[zone.floorId] || FLOOR_BORDER_COLORS.grounds) : FLOOR_BORDER_COLORS.grounds
-  var pixelBorderStyle = {
-    boxShadow:
-      'inset 0 0 0 2px ' + floorBorderColor +
-      ', inset 0 0 0 4px ' + floorBorderColor + '40' +
-      ', inset 4px 4px 0 0px ' + floorBorderColor + '20' +
-      ', inset -4px -4px 0 0px ' + floorBorderColor + '20',
-    borderImage: 'repeating-linear-gradient(90deg, ' + floorBorderColor + ' 0px, ' + floorBorderColor + ' 4px, transparent 4px, transparent 8px) 4',
-    borderWidth: '4px',
-    borderStyle: 'solid',
-  }
+  // Wall colours from door theme — used for room border
+  var doorThemeId = zone ? (zone.doorTheme || 'garden') : 'garden'
+  var doorThemeColours = themeData.doorThemes[doorThemeId] || themeData.doorThemes.garden
+  var wallColor = doorThemeColours.wall
+  var wallHiColor = doorThemeColours.wallHi
+  var floorBorderColor = wallColor  // used by interaction overlays
 
   // === GIFT PICKER OVERLAY — single-screen table layout ===
   if (showGiftPicker && unlockedGifts.length > 0) {
@@ -3543,7 +3530,7 @@ function Game({ character, user, onEndRun }) {
     }
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={Object.assign({}, pixelBorderStyle, roomBgStyle)}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={roomBgStyle}>
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
@@ -4330,18 +4317,20 @@ function Game({ character, user, onEndRun }) {
           )
         })()}
 
-        {/* Room layout — doors on edges, content in centre */}
-        <div className="flex-1 flex flex-col min-h-0 relative">
-          {/* North door — pinned to top */}
-          <div className="flex justify-center py-1">
-            {doorMap.N ? renderDoor('N') : <div className="h-12" />}
+        {/* Room layout — doors on edges, walls connecting them */}
+        <div className="flex-1 flex flex-col min-h-0 relative" style={{ border: '6px solid ' + wallColor, boxShadow: 'inset 0 0 0 2px ' + wallHiColor + '40' }}>
+          {/* North wall with door gap */}
+          <div className="flex items-end" style={{ background: wallColor, minHeight: '8px' }}>
+            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
+            <div className="shrink-0 py-1">{doorMap.N ? renderDoor('N') : <div className="h-10" />}</div>
+            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
           </div>
 
-          {/* Middle area: West — Centre — East */}
-          <div className="flex-1 flex items-center min-h-0">
-            {/* West door — pinned left */}
-            <div className="w-16 flex justify-center shrink-0">
-              {doorMap.W ? renderDoor('W') : <div />}
+          {/* Middle area: West wall — Centre — East wall */}
+          <div className="flex-1 flex min-h-0">
+            {/* West wall with door gap */}
+            <div className="flex flex-col items-center justify-center shrink-0" style={{ background: doorMap.W ? 'transparent' : wallColor, width: doorMap.W ? 'auto' : '16px' }}>
+              {doorMap.W ? renderDoor('W') : null}
             </div>
 
             {/* Centre content — large area */}
@@ -4609,15 +4598,17 @@ function Game({ character, user, onEndRun }) {
               {/* Search overlay rendered below as fixed overlay */}
             </div>
 
-            {/* East door — pinned right */}
-            <div className="w-16 flex justify-center shrink-0">
-              {doorMap.E ? renderDoor('E') : <div />}
+            {/* East wall with door gap */}
+            <div className="flex flex-col items-center justify-center shrink-0" style={{ background: doorMap.E ? 'transparent' : wallColor, width: doorMap.E ? 'auto' : '16px' }}>
+              {doorMap.E ? renderDoor('E') : null}
             </div>
           </div>
 
-          {/* South door — pinned to bottom */}
-          <div className="flex justify-center py-1">
-            {doorMap.S ? renderDoor('S') : <div className="h-12" />}
+          {/* South wall with door gap */}
+          <div className="flex items-start" style={{ background: wallColor, minHeight: '8px' }}>
+            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
+            <div className="shrink-0 py-1">{doorMap.S ? renderDoor('S') : <div className="h-10" />}</div>
+            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
           </div>
 
           {/* Junk piles — corner-hugging triangles, absolutely positioned */}
@@ -5161,7 +5152,7 @@ function Game({ character, user, onEndRun }) {
   if (gamePhase === 'chamber') {
     var chamberNow = zone.chambers[zone.playerPosition]
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={Object.assign({}, pixelBorderStyle, roomBgStyle)}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={roomBgStyle}>
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{chamberNow.label}</span>
@@ -5399,7 +5390,7 @@ function Game({ character, user, onEndRun }) {
     var combatChamber = zone.chambers[zone.playerPosition]
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={Object.assign({}, pixelBorderStyle, roomBgStyle)}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={roomBgStyle}>
         {/* Stats overlay (read-only during combat) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
