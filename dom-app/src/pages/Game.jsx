@@ -1291,9 +1291,13 @@ function Game({ character, user, onEndRun }) {
       }
 
       // Reflect damage (Thornhide, Polished Granite, Flame Shield)
-      if (shieldG && shieldG.effect === 'reflect_damage' && attackerEnemy && !attackerEnemy.isDown) {
+      if (shieldG && (shieldG.effect === 'reflect_damage' || shieldG.effect === 'reflect_damage_and_condition') && attackerEnemy && !attackerEnemy.isDown) {
         attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - shieldG.value)
         addLog({ type: 'player', text: shieldG.name + ' reflects ' + shieldG.value + ' damage!', tier: 'hit' })
+        if (shieldG.reflectCondition) {
+          attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], shieldG.reflectCondition, 'gift')
+          addLog({ type: 'condition', text: attackerEnemy.name + ' ' + condName(shieldG.reflectCondition) + ' from the reflection!', tier: 'hit' })
+        }
         if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled!', tier: 'crit' }) }
       }
 
