@@ -3,7 +3,7 @@
     "rat":      { "hp": 10, "str": 8,  "agi": 14, "def": 6,  "int": 6,  "weaponDie": 4,  "xp": 10,
                   "behaviour": { "fleeThreshold": 0.3, "canSpawn": true, "spawnAfterTurns": 4, "spawnChance": 0.2 } },
     "slug":     { "hp": 16, "str": 8,  "agi": 6,  "def": 4,  "int": 6,  "weaponDie": 4,  "xp": 15,
-                  "behaviour": { "canHide": true, "hideThreshold": 0.3, "hideHeal": 5 } },
+                  "behaviour": { "canHide": true, "hideThreshold": 0.3, "hideHeal": 5, "hideDefBonus": 6 } },
     "orc":      { "hp": 35, "str": 16, "agi": 8,  "def": 14, "int": 8,  "weaponDie": 8,  "xp": 30,
                   "behaviour": { "canHowl": true, "howlBonus": 2, "howlCooldown": 3, "canEatCorpse": true } },
     "rock":     { "hp": 50, "str": 14, "agi": 6,  "def": 18, "int": 6,  "weaponDie": 10, "xp": 40,

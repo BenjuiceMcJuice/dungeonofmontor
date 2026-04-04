@@ -1205,6 +1205,7 @@ function Game({ character, user, onEndRun }) {
           if (eResult.healedAlly) addLog({ type: 'enemy', text: eResult.attacker + ' heals ' + eResult.healedAllyName + ' for ' + eResult.healAmount + ' HP!', tier: 'hit' })
           if (eResult.ateCorpse) addLog({ type: 'enemy', text: eResult.attacker + ' devours ' + eResult.ateCorpseName + '! +4 STR, +10 HP!', tier: 'crit' })
           if (eResult.sacrificed) addLog({ type: 'enemy', text: eResult.attacker + ' sacrifices itself! All allies +' + eResult.sacrificeBonus + ' STR, +2 DEF!', tier: 'crit' })
+          if (eResult.slimeCoated) addLog({ type: 'enemy', text: eResult.attacker + ' coats itself in slime! +' + eResult.slimeHeal + ' HP, +' + eResult.slimeDef + ' DEF!', tier: 'hit' })
           if (eResult.hid) addLog({ type: 'enemy', text: eResult.attacker + ' burrows away and heals ' + eResult.hideHeal + ' HP!', tier: 'hit' })
           if (eResult.spawned) addLog({ type: 'enemy', text: eResult.attacker + ' spawns ' + eResult.spawnedName + '!', tier: 'crit' })
 
