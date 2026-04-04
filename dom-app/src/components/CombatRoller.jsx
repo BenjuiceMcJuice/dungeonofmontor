@@ -169,7 +169,7 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
   var [continueReady, setContinueReady] = useState(false)
   useEffect(function() {
     if (showContinueCheck && !continueReady) {
-      var gateTimeout = setTimeout(function() { setContinueReady(true) }, 800)
+      var gateTimeout = setTimeout(function() { setContinueReady(true) }, 300)
       return function() { clearTimeout(gateTimeout) }
     }
     if (!showContinueCheck) setContinueReady(false)
