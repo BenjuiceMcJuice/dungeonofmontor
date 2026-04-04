@@ -467,15 +467,9 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
 
     var trapDmg = config.trapDamage || 0
     if (agiSave.total >= 13) {
-      // Dodged it — half trap damage
+      // Dodged it — clean dodge, no damage
       result.agiSaved = true
-      var halfTrap = Math.floor(trapDmg / 2)
-      if (halfTrap > 0) {
-        result.trapDamage = halfTrap
-        result.narrative.push('Trap! You dodge the worst — ' + condId + ' avoided but take ' + halfTrap + ' damage!')
-      } else {
-        result.narrative.push('Trap! But you dodge it — ' + condId + ' avoided!')
-      }
+      result.narrative.push('Trap dodged! ' + condId + ' avoided.')
     } else {
       // Hit by it — full trap damage + condition
       result.condition = condId
