@@ -4339,26 +4339,22 @@ function Game({ character, user, onEndRun }) {
           )
         })()}
 
-        {/* Room layout — doors on edges, walls connecting them */}
-        <div className="flex-1 flex flex-col min-h-0 relative">
-          {/* North wall with door gap */}
-          <div className="flex items-end">
-            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
-            <div className="shrink-0">{doorMap.N ? renderDoor('N') : <div style={Object.assign({ width: '18px', height: '18px' }, wallStyle)} />}</div>
-            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
-          </div>
+        {/* Room layout — walls as border strips, doors overlaid on walls */}
+        <div className="flex-1 min-h-0 relative" style={{ padding: '12px' }}>
+          {/* Four wall strips — absolutely positioned, consistent thickness */}
+          <div style={Object.assign({ position: 'absolute', top: 0, left: 0, right: 0, height: '12px' }, wallStyle)} />
+          <div style={Object.assign({ position: 'absolute', bottom: 0, left: 0, right: 0, height: '12px' }, wallStyle)} />
+          <div style={Object.assign({ position: 'absolute', top: 0, bottom: 0, left: 0, width: '12px' }, wallStyle)} />
+          <div style={Object.assign({ position: 'absolute', top: 0, bottom: 0, right: 0, width: '12px' }, wallStyle)} />
 
-          {/* Middle area: West wall — Centre — East wall */}
-          <div className="flex-1 flex min-h-0">
-            {/* West wall with door gap */}
-            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '18px' }, wallStyle)}>
-              <div className="flex-1" style={wallStyle} />
-              {doorMap.W ? renderDoor('W') : null}
-              <div className="flex-1" style={wallStyle} />
-            </div>
+          {/* Doors — centred on each wall edge */}
+          {doorMap.N && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }}>{renderDoor('N')}</div>}
+          {doorMap.S && <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }}>{renderDoor('S')}</div>}
+          {doorMap.W && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 5 }}>{renderDoor('W')}</div>}
+          {doorMap.E && <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 5 }}>{renderDoor('E')}</div>}
 
-            {/* Centre content — large area */}
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 px-2">
+          {/* Centre content */}
+            <div className="h-full flex flex-col items-center justify-center gap-3 px-2 relative" style={{ zIndex: 1 }}>
               {/* Montor whisper */}
               {montorWhisper && (
                 <p className="text-ink-faint text-xs italic text-center max-w-xs mb-2 animate-pulse"
@@ -4622,21 +4618,6 @@ function Game({ character, user, onEndRun }) {
               {/* Search overlay rendered below as fixed overlay */}
             </div>
 
-            {/* East wall with door gap */}
-            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '18px' }, wallStyle)}>
-              <div className="flex-1" style={wallStyle} />
-              {doorMap.E ? renderDoor('E') : null}
-              <div className="flex-1" style={wallStyle} />
-            </div>
-          </div>
-
-          {/* South wall with door gap */}
-          <div className="flex items-start">
-            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
-            <div className="shrink-0">{doorMap.S ? renderDoor('S') : <div style={Object.assign({ width: '18px', height: '18px' }, wallStyle)} />}</div>
-            <div className="flex-1" style={Object.assign({ minHeight: '18px' }, wallStyle)} />
-          </div>
-
           {/* Junk piles — corner-hugging triangles, absolutely positioned */}
           {/* Base sprite is bottom-left orientation (flat bottom + flat left). CSS transform flips for other corners. */}
           {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
@@ -4646,17 +4627,17 @@ function Game({ character, user, onEndRun }) {
             var floorTheme = 'garden'
             // Corner positions with CSS transform to flip the base sprite
             // Base sprite: right-angle at bottom-left (flat bottom, flat left)
-            // Corners positioned inside the walls (18px wall thickness)
+            // Corners positioned flush against the walls (12px wall thickness)
             var corners = [
-              { style: { bottom: '18px', left: '18px' }, transform: 'none' },           // bottom-left: as-is
-              { style: { bottom: '18px', right: '18px' }, transform: 'scaleX(-1)' },    // bottom-right: mirror horizontal
-              { style: { top: '18px', right: '18px' }, transform: 'scale(-1,-1)' },     // top-right: mirror both
+              { style: { bottom: '12px', left: '12px' }, transform: 'none' },           // bottom-left: as-is
+              { style: { bottom: '12px', right: '12px' }, transform: 'scaleX(-1)' },    // bottom-right: mirror horizontal
+              { style: { top: '12px', right: '12px' }, transform: 'scale(-1,-1)' },     // top-right: mirror both
             ]
             return activePiles.map(function(pile, pi) {
               var corner = corners[pi % corners.length]
               var visibleSize = pile.layersRemaining || pile.size
               var spriteKey = 'junk_' + floorTheme + '_' + visibleSize
-              var spriteScale = 3
+              var spriteScale = 4
               return (
                 <button key={pile.id}
                   onClick={function() { handleInspectPile(pile.id) }}
