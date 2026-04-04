@@ -229,6 +229,76 @@
           "itemId": "montors_handful_of_gravel",
           "weight": 3,
           "minRarity": "common"
+        },
+        {
+          "itemId": "montors_butter_knife",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_corkscrew",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_carving_knife",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_knitting_needle",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_hammer",
+          "weight": 2,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_broken_bottle",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_feather_duster",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_garden_hose",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_whoopee_cushion",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_banana_peel",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_expired_yoghurt",
+          "weight": 2,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_cherry_bomb",
+          "weight": 2,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_rubber_gloves",
+          "weight": 2,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_egg_timer",
+          "weight": 2,
+          "minRarity": "common"
         }
       ]
     },
@@ -462,6 +532,81 @@
           "itemId": "montors_glitter_bomb",
           "weight": 1,
           "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_mums_frying_pan",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_mop",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_cattle_prod",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_cheese_grater",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_hot_poker",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_soup_ladle",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_boomerang",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_rubber_duck",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_mirror_throw",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_party_popper",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_metronome",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_coin_flip_relic",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_tin_foil_hat",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_nail_bomb",
+          "weight": 1,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_gas_canister",
+          "weight": 1,
+          "minRarity": "uncommon"
         }
       ]
     },
@@ -2576,6 +2721,61 @@
           "itemId": "montors_executioners_coin",
           "weight": 1,
           "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_loaded_weapon",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_pressure_cooker",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_double_or_nothing",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_gremlin_bell",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_mums_perfume_throw",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_cat",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_slow_cooker",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_ticking_parcel",
+          "weight": 1,
+          "minRarity": "rare"
+        },
+        {
+          "itemId": "montors_countdown_timer",
+          "weight": 1,
+          "minRarity": "epic"
+        },
+        {
+          "itemId": "montors_chaos_blade",
+          "weight": 1,
+          "minRarity": "legendary"
+        },
+        {
+          "itemId": "montors_big_red_button",
+          "weight": 1,
+          "minRarity": "legendary"
         }
       ]
     },

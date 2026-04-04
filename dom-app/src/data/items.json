@@ -1170,6 +1170,315 @@
     "description": "35% resist to ALL conditions. Sealed. Uncomfortable. Extremely effective."
   },
 
+  "___COMMENT_WEAPONS_VARIETY": "=== WEAPONS — Variety Pack ===",
+
+  "montors_butter_knife": {
+    "id": "montors_butter_knife", "name": "Montor's Butter Knife", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 2, "initBonus": 1,
+    "rarity": "common", "damageDie": 4, "attackStat": "str",
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "Surprisingly sharp for breakfast cutlery. +2 accuracy."
+  },
+  "montors_corkscrew": {
+    "id": "montors_corkscrew", "name": "Montor's Corkscrew", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.15, "defIgnore": 0, "initBonus": 1,
+    "rarity": "common", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 0.15,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "Twist on impact. Pop. 15% BLEED."
+  },
+  "montors_carving_knife": {
+    "id": "montors_carving_knife", "name": "Montor's Carving Knife", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "common", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 0.2,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "Sunday roast ready. 20% BLEED."
+  },
+  "montors_knitting_needle": {
+    "id": "montors_knitting_needle", "name": "Montor's Mum's Knitting Needle", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "common", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 0.25,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "She made jumpers. And puncture wounds. 25% BLEED."
+  },
+  "montors_hammer": {
+    "id": "montors_hammer", "name": "Montor's Hammer", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.2, "agiPenalty": -1,
+    "staggerChance": 0.25,
+    "rarity": "common", "damageDie": 6, "attackStat": "str",
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Just a hammer. Hit things with it. 25% stagger."
+  },
+  "montors_mums_frying_pan": {
+    "id": "montors_mums_frying_pan", "name": "Montor's Mum's Frying Pan", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.15, "agiPenalty": -1,
+    "staggerChance": 0.30,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "DAZE", "conditionChance": 0.3,
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Cast iron. Indestructible. 30% DAZE. Ask his dad."
+  },
+  "montors_broken_bottle": {
+    "id": "montors_broken_bottle", "name": "Montor's Broken Bottle", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.2, "defIgnore": 0, "accuracyBonus": -1, "initBonus": 1,
+    "rarity": "common", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 0.4,
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "Messy. Effective. Anti-social. 40% BLEED, -1 accuracy."
+  },
+  "montors_feather_duster": {
+    "id": "montors_feather_duster", "name": "Montor's Feather Duster", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "common", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "BLIND", "conditionChance": 0.3,
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "Gets in the eyes. Gets everywhere. 30% BLIND."
+  },
+  "montors_mop": {
+    "id": "montors_mop", "name": "Montor's Mop", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 2,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "WET", "conditionChance": 1.0,
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "Soaking. Dripping. 100% WET on hit. Combo catalyst."
+  },
+  "montors_cattle_prod": {
+    "id": "montors_cattle_prod", "name": "Montor's Cattle Prod", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "CHARGED", "conditionChance": 0.25,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "For the cows. He doesn't have cows. 25% CHARGED."
+  },
+  "montors_cheese_grater": {
+    "id": "montors_cheese_grater", "name": "Montor's Cheese Grater", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0.15, "initBonus": 1,
+    "rarity": "uncommon", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "BLEED", "conditionChance": 0.3,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Shreds armour. And cheese. And skin. 30% BLEED, ignores 15% DEF."
+  },
+  "montors_hot_poker": {
+    "id": "montors_hot_poker", "name": "Montor's Hot Poker", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 1,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 0.3,
+    "buyPrice": 22, "sellPrice": 9,
+    "description": "Pulled from the fireplace. Still glowing. 30% BURN."
+  },
+  "montors_soup_ladle": {
+    "id": "montors_soup_ladle", "name": "Montor's Mum's Soup Ladle", "type": "weapon", "slot": "weapon",
+    "weaponType": "mace", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0.2, "agiPenalty": -1,
+    "staggerChance": 0.15,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "conditionOnHit": "BURN", "conditionChance": 0.2,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Flings hot liquid on follow-through. 20% BURN, 15% stagger."
+  },
+  "montors_garden_hose": {
+    "id": "montors_garden_hose", "name": "Montor's Garden Hose", "type": "weapon", "slot": "weapon",
+    "weaponType": "spear", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "initBonus": 1,
+    "rarity": "common", "damageDie": 4, "attackStat": "str",
+    "conditionOnHit": "WET", "conditionChance": 1.0,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "Turn it on. Point. Run. 100% WET. Low damage but sets up combos."
+  },
+
+  "___COMMENT_CHAOS_WEAPONS": "=== CHAOS WEAPONS ===",
+
+  "montors_chaos_blade": {
+    "id": "montors_chaos_blade", "name": "Montor's Chaos Blade", "type": "weapon", "slot": "weapon",
+    "weaponType": "sword", "hand": "light", "doubleStrikeBase": 0, "defIgnore": 0, "accuracyBonus": 0,
+    "rarity": "legendary", "damageDie": 8, "attackStat": "str",
+    "chaosCondition": true,
+    "buyPrice": 150, "sellPrice": 60,
+    "description": "d8 damage. Condition based on d20 roll. The dice choose. You just swing."
+  },
+  "montors_loaded_weapon": {
+    "id": "montors_loaded_weapon", "name": "Montor's Loaded Weapon", "type": "weapon", "slot": "weapon",
+    "weaponType": "dagger", "hand": "light", "doubleStrikeBase": 0.25, "defIgnore": 0, "initBonus": 1,
+    "rarity": "rare", "damageDie": 4, "attackStat": "str",
+    "loadedDice": true,
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Weapon die determines bonus. 1=miss, 2=normal, 3=+3 dmg, 4=tier upgrade. Every stab is a gamble."
+  },
+  "montors_boomerang": {
+    "id": "montors_boomerang", "name": "Montor's Boomerang", "type": "weapon", "slot": "weapon",
+    "weaponType": "axe", "hand": "heavy", "doubleStrikeBase": 0, "defIgnore": 0, "agiPenalty": -1, "accuracyBonus": -1,
+    "staggerChance": 0,
+    "rarity": "uncommon", "damageDie": 6, "attackStat": "str",
+    "boomerang": true,
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "On miss: 50% comes back for d4. On hit: 30% bounces to second enemy. Throw it. It comes back. Usually."
+  },
+
+  "___COMMENT_NUKE_AND_BOMBS": "=== NUKE + TIMED BOMBS ===",
+
+  "montors_big_red_button": {
+    "id": "montors_big_red_button", "name": "Montor's Big Red Button", "type": "relic", "slot": "relic",
+    "rarity": "legendary", "passiveEffect": "nuke", "passiveValue": 0,
+    "buyPrice": 200, "sellPrice": 1,
+    "description": "If d20 AND weapon die show same number: EVERYTHING dies. Item consumed. Don't press it."
+  },
+  "montors_cherry_bomb": {
+    "id": "montors_cherry_bomb", "name": "Montor's Cherry Bomb", "type": "consumable",
+    "rarity": "common", "effect": "timed_bomb", "fuseTurns": 2, "explosionDamage": 8, "explosionAoe": true,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "2-turn fuse. 8 AoE damage. Light it. Drop it. Walk away slowly."
+  },
+  "montors_nail_bomb": {
+    "id": "montors_nail_bomb", "name": "Montor's Nail Bomb", "type": "consumable",
+    "rarity": "uncommon", "effect": "timed_bomb", "fuseTurns": 3, "explosionCondition": "BLEED", "explosionStacks": 3, "explosionAoe": true,
+    "buyPrice": 18, "sellPrice": 7,
+    "description": "3-turn fuse. 3 BLEED stacks to all enemies. Nails everywhere. In everything."
+  },
+  "montors_gas_canister": {
+    "id": "montors_gas_canister", "name": "Montor's Gas Canister", "type": "consumable",
+    "rarity": "uncommon", "effect": "timed_bomb", "fuseTurns": 2, "explosionCondition": "POISON", "explosionCondition2": "NAUSEA", "explosionAoe": true,
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "2-turn fuse. POISON + NAUSEA all enemies. Hissing. Getting louder."
+  },
+  "montors_slow_cooker": {
+    "id": "montors_slow_cooker", "name": "Montor's Mum's Slow Cooker", "type": "consumable",
+    "rarity": "rare", "effect": "timed_bomb", "fuseTurns": 4, "explosionDamage": 20, "explosionCondition": "BURN", "explosionAoe": true,
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "4-turn fuse. 20 AoE + BURN all. Low and slow. Then everything boils over."
+  },
+  "montors_ticking_parcel": {
+    "id": "montors_ticking_parcel", "name": "Montor's Ticking Parcel", "type": "consumable",
+    "rarity": "rare", "effect": "timed_bomb", "fuseTurns": 3, "explosionDamage": 15, "explosionRandomCondition": true, "explosionAoe": true,
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "3-turn fuse. 15 AoE + random condition each enemy. It's wrapped nicely. That makes it worse."
+  },
+
+  "___COMMENT_WHACKY_CONSUMABLES": "=== WHACKY CONSUMABLES ===",
+
+  "montors_whoopee_cushion": {
+    "id": "montors_whoopee_cushion", "name": "Montor's Whoopee Cushion", "type": "consumable",
+    "rarity": "common", "effect": "debuff_all_enemies", "effectStat": "accuracy", "effectValue": -2, "effectDuration": 2,
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "All enemies -2 accuracy 2 turns. Strategic deployment. Under the orc."
+  },
+  "montors_banana_peel": {
+    "id": "montors_banana_peel", "name": "Montor's Banana Peel", "type": "consumable",
+    "rarity": "common", "effect": "condition_one_enemy", "effectCondition": "DAZE",
+    "buyPrice": 5, "sellPrice": 2,
+    "description": "Target enemy skips next turn. Classic. Timeless. Devastating."
+  },
+  "montors_rubber_duck": {
+    "id": "montors_rubber_duck", "name": "Montor's Rubber Duck", "type": "consumable",
+    "rarity": "uncommon", "effect": "wet_all_and_heal", "effectCondition": "WET", "effectHeal": 5,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "WET all enemies + heal 5 HP. Bath time. Everyone gets wet."
+  },
+  "montors_mirror_throw": {
+    "id": "montors_mirror_throw", "name": "Montor's Mirror", "type": "consumable",
+    "rarity": "uncommon", "effect": "reflect_next_attack",
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Next enemy attack hits themselves instead. Hold it up. They see themselves. They swing."
+  },
+  "montors_party_popper": {
+    "id": "montors_party_popper", "name": "Montor's Party Popper", "type": "consumable",
+    "rarity": "uncommon", "effect": "damage_and_condition_one", "effectValue": 5, "effectCondition": "DAZE", "effectCondition2": "FEAR",
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "5 dmg + DAZE + FEAR one enemy. SURPRISE! Nobody expected this."
+  },
+  "montors_expired_yoghurt": {
+    "id": "montors_expired_yoghurt", "name": "Montor's Expired Yoghurt", "type": "consumable",
+    "rarity": "common", "effect": "risky_throw", "goodEffect": "POISON", "badEffect": "heal_enemy", "badValue": 3,
+    "buyPrice": 3, "sellPrice": 1,
+    "description": "Throw: 50% POISON enemy, 50% heals them 3 HP. Might be probiotic."
+  },
+  "montors_mums_perfume_throw": {
+    "id": "montors_mums_perfume_throw", "name": "Montor's Mum's Perfume", "type": "consumable",
+    "rarity": "rare", "effect": "condition_all_enemies", "effectCondition": "CHARM",
+    "buyPrice": 30, "sellPrice": 12,
+    "description": "CHARM all enemies 1 turn. One spritz. They forget why they're fighting."
+  },
+  "montors_cat": {
+    "id": "montors_cat", "name": "Montor's Cat", "type": "consumable",
+    "rarity": "rare", "effect": "summon_ally", "summonTurns": 3, "summonDamage": 6, "summonCondition": "BLEED", "summonChance": 0.3,
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "Summons a cat for 3 turns. d6 dmg, 30% BLEED. It was sleeping. It's angry now."
+  },
+
+  "___COMMENT_DICE_RELICS": "=== DICE-TRIGGERED RELICS ===",
+
+  "montors_pressure_cooker": {
+    "id": "montors_pressure_cooker", "name": "Montor's Gran's Pressure Cooker", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "pressure_cooker", "passiveValue": 5,
+    "persistent": true,
+    "buyPrice": 55, "sellPrice": 22,
+    "description": "Counts nat 1s across fights. At 5: DETONATE — 15 AoE + BURN + DAZE all. Then resets."
+  },
+  "montors_metronome": {
+    "id": "montors_metronome", "name": "Montor's Metronome", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "metronome", "passiveValue": 4,
+    "buyPrice": 35, "sellPrice": 14,
+    "description": "Every 4th turn: guaranteed crit. Visible counter. Tick. Tick. Tick. BOOM."
+  },
+  "montors_magic_8_ball": {
+    "id": "montors_magic_8_ball", "name": "Montor's Magic 8-Ball", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "magic_8_ball", "passiveValue": 0,
+    "buyPrice": 40, "sellPrice": 16,
+    "description": "On nat 20: roll d6. 1=instakill, 2=full heal, 3=double gold, 4=FEAR self, 5=DAZE all enemies, 6=nothing."
+  },
+  "montors_egg_timer": {
+    "id": "montors_egg_timer", "name": "Montor's Mum's Egg Timer", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "egg_timer", "passiveValue": 3,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "After 3 turns without a kill: next attack +50% damage. She timed everything."
+  },
+  "montors_coin_flip_relic": {
+    "id": "montors_coin_flip_relic", "name": "Montor's Coin Flip", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "coin_flip", "passiveValue": 0,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "Every attack: 50% chance +3 dmg, 50% chance -2 dmg. Heads you win big."
+  },
+  "montors_double_or_nothing": {
+    "id": "montors_double_or_nothing", "name": "Montor's Double or Nothing", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "double_or_nothing", "passiveValue": 0,
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "On crit: 50% double the damage. 50% crit becomes miss. Everything or nothing."
+  },
+  "montors_gremlin_bell": {
+    "id": "montors_gremlin_bell", "name": "Montor's Gremlin Bell", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "gremlin_bell", "passiveValue": 0,
+    "buyPrice": 45, "sellPrice": 18,
+    "description": "On nat 1: instead of fumble, apply random condition to enemy. Bad luck becomes their problem."
+  },
+  "montors_countdown_timer": {
+    "id": "montors_countdown_timer", "name": "Montor's Countdown Timer", "type": "relic", "slot": "relic",
+    "rarity": "epic", "passiveEffect": "countdown", "passiveValue": 10,
+    "persistent": true,
+    "buyPrice": 80, "sellPrice": 32,
+    "description": "10-turn counter. At 0: 20 AoE damage all enemies. You take 5 dmg/turn while counting. Resets."
+  },
+
+  "___COMMENT_UTILITY_ITEMS": "=== UTILITY ITEMS ===",
+
+  "montors_alarm_clock": {
+    "id": "montors_alarm_clock", "name": "Montor's Alarm Clock", "type": "relic", "slot": "relic",
+    "rarity": "uncommon", "passiveEffect": "init_bonus", "passiveValue": 2,
+    "buyPrice": 20, "sellPrice": 8,
+    "description": "+2 initiative. Enemies can't ambush you. Rings before they strike."
+  },
+  "montors_rubber_gloves": {
+    "id": "montors_rubber_gloves", "name": "Montor's Rubber Gloves", "type": "relic", "slot": "relic",
+    "rarity": "common", "passiveEffect": "condition_resist_all", "passiveValue": 0.10,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "10% resist ALL conditions. Insulating. Practical. Unfashionable."
+  },
+  "montors_tin_foil_hat": {
+    "id": "montors_tin_foil_hat", "name": "Montor's Tin Foil Hat", "type": "armour", "slot": "helmet",
+    "rarity": "uncommon", "defBonus": -1,
+    "passiveEffect": "condition_resist_multi", "passiveConditions": ["CHARM", "FEAR"], "passiveValue": 1.0,
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "Immune to CHARM + FEAR. -1 DEF. He wore it unironically. It works."
+  },
+
   "___COMMENT_HELMETS": "=== HELMETS ===",
 
   "helmet_base": {
