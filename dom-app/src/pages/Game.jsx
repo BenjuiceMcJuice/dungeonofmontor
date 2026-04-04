@@ -216,6 +216,8 @@ function Game({ character, user, onEndRun }) {
   var [killsThisCombat, setKillsThisCombat] = useState(0) // Scent of Blood: kill counter
   var [activeBombs, setActiveBombs] = useState([]) // Timed bombs: { name, fuseLeft, explosionDamage, explosionCondition, explosionCondition2, explosionStacks, explosionRandomCondition, explosionAoe }
   var [reflectNextAttack, setReflectNextAttack] = useState(false) // Mirror: reflect next enemy attack
+  var [hitsTakenThisCombat, setHitsTakenThisCombat] = useState(0) // Stoneskin Mend: count hits for end-of-combat heal
+  var [phoenixSparkUsed, setPhoenixSparkUsed] = useState(false) // Phoenix Spark: once per combat threshold heal
 
   var XP_THRESHOLDS = progressionData.xpThresholds
 
@@ -919,8 +921,7 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
-    // Generate next floor
-    setFloorsCompleted(function(prev) { return prev.concat([floor.floorId]) })
+    // Generate next floor (floorsCompleted already updated in handleDescendStairwell)
     var nextFloor = generateFloor(nextFloorId, collectedTreasures)
     setFloor(nextFloor)
     setZone(nextFloor.zones[0])
@@ -1133,6 +1134,8 @@ function Game({ character, user, onEndRun }) {
     setKillsThisCombat(0)
     setActiveBombs([])
     setReflectNextAttack(false)
+    setHitsTakenThisCombat(0)
+    setPhoenixSparkUsed(false)
     setGamePhase('combat')
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
@@ -1256,6 +1259,15 @@ function Game({ character, user, onEndRun }) {
       addLog({ type: 'player', text: 'Shield block! Attack negated!', tier: 'crit' })
     } else if (r.dodged) {
       addLog({ type: 'player', text: 'Dodged! Attack evaded!', tier: 'crit' })
+      // Siphon (void body): heal on dodge
+      var siphonBody = giftSlots.body
+      if (siphonBody && siphonBody.effect === 'dodge_heal') {
+        var pSiphon = attackOut.newBattle.players[user.uid]
+        if (pSiphon) {
+          pSiphon.currentHp = Math.min(pSiphon.currentHp + siphonBody.value, pSiphon.maxHp)
+          addLog({ type: 'player', text: 'Siphon! Healed ' + siphonBody.value + ' HP from dodge!', tier: 'hit' })
+        }
+      }
     } else {
       addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
     }
@@ -1281,6 +1293,9 @@ function Game({ character, user, onEndRun }) {
       var shieldG = (character.equipped && character.equipped.offhand) ? giftSlots.shield : null // shield gifts only work with offhand equipped
       var weaponGDef = giftSlots.weapon
       var attackerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
+
+      // Track hits taken for Stoneskin Mend
+      setHitsTakenThisCombat(function(h) { return h + 1 })
 
       // --- SHIELD GIFTS (reactive) ---
 
@@ -1320,6 +1335,12 @@ function Game({ character, user, onEndRun }) {
       if (shieldG && shieldG.effect === 'block_heal' && r.blocked) {
         pState.currentHp = Math.min(pState.currentHp + shieldG.value, pState.maxHp)
         addLog({ type: 'player', text: shieldG.name + ': healed ' + shieldG.value + ' HP!', tier: 'hit' })
+      }
+
+      // Quartz Resonance (stone mind): blocking heals 2 HP — stacks with Blood Absorb since it's mind slot
+      if (mindG && mindG.effect === 'block_heal_mind' && r.blocked) {
+        pState.currentHp = Math.min(pState.currentHp + mindG.value, pState.maxHp)
+        addLog({ type: 'player', text: mindG.name + ': healed ' + mindG.value + ' HP!', tier: 'hit' })
       }
 
       // Damage mirror (Mirror Shield — 25% of damage back)
@@ -1411,6 +1432,21 @@ function Game({ character, user, onEndRun }) {
             }
           })
           addLog({ type: 'condition', text: 'Spore Cloud! All enemies ' + condName(bodyG.condition) + '!', tier: 'crit' })
+        }
+      }
+
+      // Phoenix Spark (ember mind): below 20% HP, heal 5 + AoE BURN. Once per combat.
+      if (mindG && mindG.effect === 'threshold_heal_and_aoe_condition' && !phoenixSparkUsed) {
+        var phoenixPercent = pState.currentHp / pState.maxHp
+        if (phoenixPercent < mindG.hpThreshold && pState.currentHp > 0) {
+          setPhoenixSparkUsed(true)
+          pState.currentHp = Math.min(pState.currentHp + mindG.healValue, pState.maxHp)
+          updatedBattle.enemies.forEach(function(e) {
+            if (!e.isDown) {
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], mindG.condition, 'gift')
+            }
+          })
+          addLog({ type: 'player', text: 'PHOENIX SPARK! Healed ' + mindG.healValue + ' HP! All enemies BURN!', tier: 'crit' })
         }
       }
 
@@ -2022,10 +2058,15 @@ function Game({ character, user, onEndRun }) {
           addLog({ type: 'condition', text: 'Acid Edge! ' + hitTarget.name + ' DEF -' + weaponG.value + ' (' + hitTarget.stats.def + ' remaining)!', tier: 'hit' })
         }
 
-        // Hit condition (Toilet Hands/NAUSEA, Bloodletter/BLEED, Ignite/BURN)
-        if (weaponG.effect === 'hit_condition' && rollGiftChance(weaponG.chance)) {
-          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
-          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
+        // Hit condition (Toilet Hands/NAUSEA, Bloodletter/BLEED, Ignite/BURN, Seismic Strike/DAZE, Dread Touch/FEAR)
+        // If weapon already applies a condition, gift proc chance is quartered
+        if (weaponG.effect === 'hit_condition') {
+          var equipWeapon = character.equipped && character.equipped.weapon
+          var giftProcChance = (equipWeapon && equipWeapon.conditionOnHit) ? weaponG.chance * 0.25 : weaponG.chance
+          if (rollGiftChance(giftProcChance)) {
+            hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+            addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
+          }
         }
 
         // Condition chance bonus (Corrosive Strike): +25% weapon condition chance — handled in combat.js
@@ -2072,6 +2113,17 @@ function Game({ character, user, onEndRun }) {
       // Track kills for Scent of Blood
       if (r.enemyDefeated) {
         setKillsThisCombat(function(k) { return k + 1 })
+      }
+
+      // Cauterise (ember body): kill a burning enemy → heal 4 HP
+      var bodyG2Pre = giftSlots.body
+      if (bodyG2Pre && bodyG2Pre.effect === 'burn_kill_heal' && r.enemyDefeated) {
+        var deadTarget = giftBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
+        var wasBurning = deadTarget && deadTarget.statusEffects && deadTarget.statusEffects.some(function(c) { return c.id === 'BURN' })
+        if (wasBurning) {
+          setPlayerHp(function(hp) { return Math.min(hp + bodyG2Pre.value, character.maxHp) })
+          addLog({ type: 'player', text: 'Cauterise! Healed ' + bodyG2Pre.value + ' HP from burning kill!', tier: 'crit' })
+        }
       }
 
       // --- MIND GIFTS (offensive) ---
@@ -2768,6 +2820,12 @@ function Game({ character, user, onEndRun }) {
     var bodyGiftV = giftSlots.body
     if (bodyGiftV && bodyGiftV.effect === 'post_combat_heal') {
       setPlayerHp(function(hp) { return Math.min(hp + bodyGiftV.value, character.maxHp) })
+    }
+
+    // Stoneskin Mend (stone body): heal 1 HP per hit taken this combat
+    if (bodyGiftV && bodyGiftV.effect === 'hits_taken_heal' && hitsTakenThisCombat > 0) {
+      var mendHeal = hitsTakenThisCombat * bodyGiftV.healPerHit
+      setPlayerHp(function(hp) { return Math.min(hp + mendHeal, character.maxHp) })
     }
 
     // Reset weapon per-combat flags

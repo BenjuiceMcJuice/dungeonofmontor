@@ -219,9 +219,25 @@
         "effect": "bedrock",
         "hpThreshold": 0.15,
         "charges": 3
+      },
+      {
+        "id": "stoneskin_mend",
+        "name": "Stoneskin Mend",
+        "type": "other",
+        "description": "Heal 1 HP per hit taken this combat (triggers at end of combat).",
+        "effect": "hits_taken_heal",
+        "healPerHit": 1
       }
     ],
     "mind": [
+      {
+        "id": "quartz_resonance",
+        "name": "Quartz Resonance",
+        "type": "defence",
+        "description": "Blocking heals 2 HP.",
+        "effect": "block_heal_mind",
+        "value": 2
+      },
       {
         "id": "unshakeable",
         "name": "Unshakeable",
@@ -268,6 +284,15 @@
         "description": "Crits deal 2.5x instead of 2x damage.",
         "effect": "crit_multiplier",
         "value": 2.5
+      },
+      {
+        "id": "seismic_strike",
+        "name": "Seismic Strike",
+        "description": "All weapons gain 20% DAZE chance.",
+        "effect": "hit_condition",
+        "chance": 0.20,
+        "condition": "DAZE",
+        "conditionTurns": 1
       }
     ],
     "shield": [
@@ -553,9 +578,29 @@
         "effect": "hp_and_damage_reduction",
         "hpBonus": 10,
         "damageReduction": 1
+      },
+      {
+        "id": "cauterise",
+        "name": "Cauterise",
+        "type": "other",
+        "description": "Kill a burning enemy to heal 4 HP.",
+        "effect": "burn_kill_heal",
+        "value": 4
       }
     ],
     "mind": [
+      {
+        "id": "phoenix_spark",
+        "name": "Phoenix Spark",
+        "type": "other",
+        "description": "Below 20% HP, heal 5 HP and all enemies get BURN. Once per combat.",
+        "effect": "threshold_heal_and_aoe_condition",
+        "hpThreshold": 0.20,
+        "healValue": 5,
+        "condition": "BURN",
+        "conditionTurns": 1,
+        "oncePerCombat": true
+      },
       {
         "id": "chain_lightning",
         "name": "Chain Lightning",
@@ -659,6 +704,14 @@
         "oncePerCombat": true
       },
       {
+        "id": "siphon",
+        "name": "Siphon",
+        "type": "other",
+        "description": "When you dodge, heal 2 HP.",
+        "effect": "dodge_heal",
+        "value": 2
+      },
+      {
         "id": "void_skin",
         "name": "Void Skin",
         "type": "defence",
@@ -716,6 +769,15 @@
         "highMultiplier": 1.5,
         "lowMultiplier": 0.75,
         "highChance": 0.5
+      },
+      {
+        "id": "dread_touch",
+        "name": "Dread Touch",
+        "description": "All weapons gain 15% FEAR chance.",
+        "effect": "hit_condition",
+        "chance": 0.15,
+        "condition": "FEAR",
+        "conditionTurns": 2
       }
     ],
     "shield": [

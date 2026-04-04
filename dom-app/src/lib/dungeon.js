@@ -121,10 +121,14 @@ function generateZone(zoneId, options) {
   if (descent && boss) {
     chambers[14] = boss
     chambers[15] = descent
+  } else if (boss) {
+    // No stairwell (e.g. final floor) — boss at 14, fill 15 from rest
+    chambers[14] = boss
+    chambers[15] = rest.pop() || { type: 'empty', label: 'Dead End', safe: true, icon: '◇' }
   } else {
     // Fill 14 and 15 from rest
-    chambers[14] = rest.pop() || chambers[0]
-    chambers[15] = rest.pop() || chambers[0]
+    chambers[14] = rest.pop() || { type: 'empty', label: 'Dead End', safe: true, icon: '◇' }
+    chambers[15] = rest.pop() || { type: 'empty', label: 'Dead End', safe: true, icon: '◇' }
   }
 
   // Fill remaining slots
@@ -133,6 +137,13 @@ function generateZone(zoneId, options) {
     while (slot < 16 && chambers[slot] !== undefined) slot++
     if (slot < 16) chambers[slot] = rest[j]
     slot++
+  }
+
+  // Safety: fill any remaining undefined slots with empty chambers
+  for (var s = 0; s < 16; s++) {
+    if (!chambers[s]) {
+      chambers[s] = { type: 'empty', label: 'Passage', safe: true, icon: '◇' }
+    }
   }
 
   // Generate maze doors
