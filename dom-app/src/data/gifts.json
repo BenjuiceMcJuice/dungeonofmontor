@@ -34,14 +34,14 @@
         "oncePerCombat": true
       },
       {
-        "id": "toxic_spores",
-        "name": "Toxic Spores",
+        "id": "thorn_bark",
+        "name": "Thorn Bark",
         "type": "attack",
-        "description": "15% chance when hit: attacker gets POISON 2 turns.",
+        "description": "20% chance when hit: attacker gets BLEED.",
         "effect": "reflect_condition",
-        "chance": 0.15,
-        "condition": "POISON",
-        "conditionTurns": 2
+        "chance": 0.20,
+        "condition": "BLEED",
+        "conditionTurns": null
       },
       {
         "id": "regrowth",
@@ -91,12 +91,12 @@
         "conditionTurns": 1
       },
       {
-        "id": "pollensense",
-        "name": "Pollensense",
+        "id": "natures_whisper",
+        "name": "Nature's Whisper",
         "type": "other",
-        "description": "+3 PER permanently.",
+        "description": "+2 PER, +1 LCK. The garden tells you where things are.",
         "effect": "stat_boost",
-        "stats": { "per": 3 }
+        "stats": { "per": 2, "lck": 1 }
       },
       {
         "id": "green_patience",
@@ -173,9 +173,10 @@
       {
         "id": "thornhide",
         "name": "Thornhide",
-        "description": "Attackers take 3 reflected damage when they hit you.",
-        "effect": "reflect_damage",
-        "value": 3
+        "description": "Attackers take 2 damage + BLEED when they hit you.",
+        "effect": "reflect_damage_and_condition",
+        "value": 2,
+        "reflectCondition": "BLEED"
       },
       {
         "id": "root_guard",
@@ -610,9 +611,10 @@
       {
         "id": "flame_shield",
         "name": "Flame Shield",
-        "description": "Attackers take 3 burn damage on hit.",
-        "effect": "reflect_damage",
-        "value": 3
+        "description": "Attackers take 2 damage + BURN on hit.",
+        "effect": "reflect_damage_and_condition",
+        "value": 2,
+        "reflectCondition": "BURN"
       },
       {
         "id": "smelt",
