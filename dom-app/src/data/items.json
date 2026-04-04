@@ -519,7 +519,7 @@
     "passiveEffect": "damage_reflect", "passiveValue": 2,
     "giftPower": "ember",
     "buyPrice": 60, "sellPrice": 24,
-    "description": "Wipe your feet. Or bleed on them."
+    "description": "+5 DEF, -2 AGI. Reflects 2 damage to attackers. Wipe your feet. Or bleed on them."
   },
   "montors_dressing_gown": {
     "id": "montors_dressing_gown", "name": "Montor's Dressing Gown", "type": "armour", "slot": "armour",

@@ -4010,6 +4010,36 @@ function Game({ character, user, onEndRun }) {
                         {detailItem.type === 'ring' && <span>Ring</span>}
                         {detailItem.type === 'amulet' && <span>Amulet{detailItem.twinFangsGrant ? ' | Grants Twin Fangs' : ''}</span>}
                         {detailItem.setId && <span>Set: {detailItem.setId === 'sunday_best' ? "Montor's Sunday Best" : detailItem.setId === 'peaky' ? "Montor's Peaky Set" : detailItem.setId}</span>}
+                        {detailItem.passiveEffect && (function() {
+                          var peLabels = {
+                            hp_bonus: '+' + detailItem.passiveValue + ' max HP',
+                            regen_per_chamber: 'Heal ' + detailItem.passiveValue + ' HP per room',
+                            lck_bonus: '+' + detailItem.passiveValue + ' LCK',
+                            str_bonus: '+' + detailItem.passiveValue + ' STR',
+                            def_bonus: '+' + detailItem.passiveValue + ' DEF',
+                            per_bonus: '+' + detailItem.passiveValue + ' PER',
+                            init_bonus: '+' + detailItem.passiveValue + ' initiative',
+                            crit_bonus: 'Crit threshold -' + detailItem.passiveValue,
+                            lifesteal: Math.round(detailItem.passiveValue * 100) + '% lifesteal',
+                            dodge_chance: Math.round(detailItem.passiveValue * 100) + '% dodge chance',
+                            damage_reflect: 'Reflects ' + detailItem.passiveValue + ' damage to attackers',
+                            block_chance: Math.round((detailItem.passiveValue || 0) * 100) + '% block chance',
+                            d20_nudge: '+' + detailItem.passiveValue + ' to all d20 rolls',
+                            reroll_ones: 'Reroll 1s on damage dice',
+                            see_enemy_hp_exact: 'See exact enemy HP',
+                            condition_resist: detailItem.passiveCondition + ' resist ' + Math.round(detailItem.passiveValue * 100) + '%',
+                            condition_immunity: detailItem.passiveCondition + ' immune',
+                            condition_resist_all: 'All conditions resist ' + Math.round(detailItem.passiveValue * 100) + '%',
+                            condition_resist_multi: (detailItem.passiveConditions || []).join('+') + ' resist ' + Math.round(detailItem.passiveValue * 100) + '%',
+                            gold_bonus: '+' + Math.round(detailItem.passiveValue * 100) + '% gold',
+                            search_bonus: '+' + detailItem.passiveValue + ' search rolls',
+                            flat_damage_bonus: '+' + detailItem.passiveValue + ' damage on all hits',
+                            damage_multiplier: detailItem.passiveValue + 'x weapon damage',
+                          }
+                          var label = peLabels[detailItem.passiveEffect]
+                          if (!label) return null
+                          return <span className="text-emerald-400">{label}</span>
+                        })()}
                         {detailItem.buyPrice && <span>Value: {detailItem.sellPrice || Math.round(detailItem.buyPrice * 0.4)}g</span>}
                       </div>
                       <div className="flex gap-2">
