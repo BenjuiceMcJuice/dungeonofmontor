@@ -214,6 +214,8 @@ function Game({ character, user, onEndRun }) {
   var [ironWillUsed, setIronWillUsed] = useState(false) // Iron Will: survive lethal once
   var [harvestBuff, setHarvestBuff] = useState(0) // Harvest: bonus damage from kills
   var [killsThisCombat, setKillsThisCombat] = useState(0) // Scent of Blood: kill counter
+  var [activeBombs, setActiveBombs] = useState([]) // Timed bombs: { name, fuseLeft, explosionDamage, explosionCondition, explosionCondition2, explosionStacks, explosionRandomCondition, explosionAoe }
+  var [reflectNextAttack, setReflectNextAttack] = useState(false) // Mirror: reflect next enemy attack
 
   var XP_THRESHOLDS = progressionData.xpThresholds
 
@@ -1127,6 +1129,8 @@ function Game({ character, user, onEndRun }) {
     setIronWillUsed(false)
     setHarvestBuff(0)
     setKillsThisCombat(0)
+    setActiveBombs([])
+    setReflectNextAttack(false)
     setGamePhase('combat')
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
@@ -1432,6 +1436,15 @@ function Game({ character, user, onEndRun }) {
         }
       }
 
+      // Mirror: reflect next enemy attack back at them
+      if (reflectNextAttack && attackerEnemy && !attackerEnemy.isDown && r.damage > 0) {
+        pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp) // undo damage to player
+        attackerEnemy.currentHp = Math.max(0, attackerEnemy.currentHp - r.damage) // deal to attacker
+        setReflectNextAttack(false)
+        addLog({ type: 'player', text: 'MIRROR! ' + attackerEnemy.name + ' attacks their own reflection for ' + r.damage + ' damage!', tier: 'crit' })
+        if (attackerEnemy.currentHp <= 0) { attackerEnemy.isDown = true; addLog({ type: 'player', text: attackerEnemy.name + ' felled by their own attack!', tier: 'crit' }) }
+      }
+
       // Shadow Step (void body): first attack auto-miss
       if (bodyG && bodyG.effect === 'first_hit_dodge' && !shadowStepUsed) {
         pState.currentHp = Math.min(pState.currentHp + r.damage, pState.maxHp)
@@ -1557,9 +1570,47 @@ function Game({ character, user, onEndRun }) {
     return function() { clearTimeout(announceTimeout) }
   }, [combatPhase, battle, playerTurnAnnounced])
 
-  // Step 2: After announced, tick conditions
+  // Step 2: After announced, tick bombs + conditions
   useEffect(function() {
     if (combatPhase !== 'playerTurn' || !battle || !playerTurnAnnounced || playerConditionTicked) return
+
+    // Tick active bombs
+    if (activeBombs.length > 0) {
+      var updatedBombs = []
+      var bombBattle = Object.assign({}, battle, { enemies: battle.enemies.map(function(e) { return Object.assign({}, e) }) })
+      for (var bi = 0; bi < activeBombs.length; bi++) {
+        var bomb = Object.assign({}, activeBombs[bi], { fuseLeft: activeBombs[bi].fuseLeft - 1 })
+        if (bomb.fuseLeft <= 0) {
+          // EXPLODE
+          addLog({ type: 'player', text: bomb.name + ' EXPLODES!', tier: 'crit' })
+          bombBattle.enemies.forEach(function(e) {
+            if (e.isDown) return
+            if (bomb.explosionDamage) {
+              e.currentHp = Math.max(0, e.currentHp - bomb.explosionDamage)
+              if (e.currentHp <= 0) e.isDown = true
+            }
+            if (bomb.explosionCondition) {
+              for (var bsi = 0; bsi < (bomb.explosionStacks || 1); bsi++) {
+                e.statusEffects = applyConditionToEffects(e.statusEffects || [], bomb.explosionCondition, 'bomb')
+              }
+            }
+            if (bomb.explosionCondition2) {
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], bomb.explosionCondition2, 'bomb')
+            }
+            if (bomb.explosionRandomCondition) {
+              var randConds = ['BLEED', 'POISON', 'BURN', 'FROST', 'DAZE', 'FEAR', 'BLIND', 'NAUSEA']
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], randConds[Math.floor(Math.random() * randConds.length)], 'bomb')
+            }
+          })
+        } else {
+          addLog({ type: 'player', text: bomb.name + ' ticking... ' + bomb.fuseLeft + ' turns left.', tier: 'glancing' })
+          updatedBombs.push(bomb)
+        }
+      }
+      setActiveBombs(updatedBombs)
+      setBattle(bombBattle)
+    }
+
     var playerUid = user.uid
     var player = battle.players[playerUid]
     if (!player || !player.statusEffects || player.statusEffects.length === 0) {
@@ -1784,6 +1835,26 @@ function Game({ character, user, onEndRun }) {
     }
     if (r.chaosDevastation) {
       addLog({ type: 'condition', text: 'CHAOS BLADE: DEVASTATION! ALL conditions applied!', tier: 'crit' })
+    }
+    if (r.magic8Ball) {
+      var m8texts = {
+        instakill: 'MAGIC 8-BALL: "It is certain." INSTAKILL!',
+        full_heal: 'MAGIC 8-BALL: "Outlook good." Full heal!',
+        double_gold: 'MAGIC 8-BALL: "Signs point to yes." Double gold from this fight!',
+        fear_self: 'MAGIC 8-BALL: "Don\'t count on it." FEAR applied to you!',
+        daze_all: 'MAGIC 8-BALL: "Without a doubt." All enemies DAZED!',
+        nothing: 'MAGIC 8-BALL: "Reply hazy." Nothing happens.',
+      }
+      addLog({ type: 'player', text: m8texts[r.magic8BallEffect] || 'Magic 8-Ball activates!', tier: r.magic8BallEffect === 'instakill' ? 'crit' : r.magic8BallEffect === 'fear_self' ? 'miss' : 'hit' })
+      if (r.magic8BallEffect === 'full_heal') setPlayerHp(character.maxHp)
+      if (r.magic8BallEffect === 'fear_self' && battle) {
+        var fearPlayers = {}
+        Object.keys(attackOut.newBattle.players).forEach(function(uid) {
+          var p = attackOut.newBattle.players[uid]
+          fearPlayers[uid] = Object.assign({}, p, { statusEffects: applyConditionToEffects(p.statusEffects || [], 'FEAR', 'magic_8_ball') })
+        })
+        attackOut.newBattle = Object.assign({}, attackOut.newBattle, { players: fearPlayers })
+      }
     }
     if (r.nukeTriggered) {
       addLog({ type: 'player', text: 'BIG RED BUTTON! Dice matched — EVERYTHING DIES!', tier: 'crit' })
@@ -2393,6 +2464,47 @@ function Game({ character, user, onEndRun }) {
       })
       updatedBattleForItem = Object.assign({}, updatedBattleForItem, { players: curePlayers })
       addLog({ type: 'player', text: 'All conditions cleared!', tier: 'hit' })
+    }
+    // Timed bomb — add to active bombs list
+    if (result.stateChanges.timedBomb) {
+      setActiveBombs(function(prev) { return prev.concat([result.stateChanges.timedBomb]) })
+      addLog({ type: 'player', text: result.stateChanges.timedBomb.name + ' fuse lit! ' + result.stateChanges.timedBomb.fuseLeft + ' turns!', tier: 'crit' })
+    }
+    // Mirror — reflect next attack
+    if (result.stateChanges.reflectNextAttack) {
+      setReflectNextAttack(true)
+      addLog({ type: 'player', text: 'Mirror raised! Next attack will be reflected!', tier: 'hit' })
+    }
+    // Heal enemy (Expired Yoghurt backfire)
+    if (result.stateChanges.healEnemy && battle && selectedTarget) {
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
+        enemies: updatedBattleForItem.enemies.map(function(e) {
+          if (e.id !== selectedTarget || e.isDown) return e
+          return Object.assign({}, e, { currentHp: Math.min(e.maxHp, e.currentHp + result.stateChanges.healEnemy) })
+        })
+      })
+      addLog({ type: 'enemy', text: 'Backfire! Enemy heals ' + result.stateChanges.healEnemy + ' HP!', tier: 'miss' })
+    }
+    // Second condition on single target (Party Popper)
+    if (result.stateChanges.conditionOneEnemy2 && battle && selectedTarget) {
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
+        enemies: updatedBattleForItem.enemies.map(function(e) {
+          if (e.id !== selectedTarget || e.isDown) return e
+          return Object.assign({}, e, { statusEffects: applyConditionToEffects(e.statusEffects || [], result.stateChanges.conditionOneEnemy2, 'throwable') })
+        })
+      })
+    }
+    // Debuff all enemies (Whoopee Cushion)
+    if (result.stateChanges.debuffAllEnemies && battle) {
+      var debuff = result.stateChanges.debuffAllEnemies
+      addLog({ type: 'player', text: 'All enemies ' + debuff.value + ' ' + (debuff.stat || '').toUpperCase() + ' for ' + debuff.duration + ' turns!', tier: 'hit' })
+      // Applied as a temporary condition-like effect via roll penalty on enemies
+      updatedBattleForItem.enemies.forEach(function(e) {
+        if (!e.isDown) {
+          e.stats = Object.assign({}, e.stats)
+          if (debuff.stat === 'accuracy') e._accuracyDebuff = (e._accuracyDebuff || 0) + debuff.value
+        }
+      })
     }
     if (result.stateChanges.guaranteedFlee) {
       // Remove item, then auto-flee successfully
@@ -5539,7 +5651,7 @@ function Game({ character, user, onEndRun }) {
               <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
-                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies'
+                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies' || item.effect === 'timed_bomb' || item.effect === 'reflect_next_attack' || item.effect === 'wet_all_and_heal' || item.effect === 'risky_throw' || item.effect === 'damage_and_condition_one' || item.effect === 'debuff_all_enemies' || item.effect === 'summon_ally'
                   if (isThrowable) return null // throwables go in the other list
                   return (
                     <button key={idx}
@@ -5570,7 +5682,7 @@ function Game({ character, user, onEndRun }) {
               <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
-                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies'
+                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies' || item.effect === 'timed_bomb' || item.effect === 'reflect_next_attack' || item.effect === 'wet_all_and_heal' || item.effect === 'risky_throw' || item.effect === 'damage_and_condition_one' || item.effect === 'debuff_all_enemies' || item.effect === 'summon_ally'
                   if (!isThrowable) return null
                   return (
                     <button key={idx}
@@ -5648,7 +5760,7 @@ function Game({ character, user, onEndRun }) {
             var itemsBlocked = areItemsBlocked(playerEffects)
             var hasUsables = playerInventory.some(function(it) {
               if (it.type !== 'consumable') return false
-              var isThrow = it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all' || it.effect === 'condition_one_enemy' || it.effect === 'condition_multi_enemies' || it.effect === 'damage_multi_enemies'
+              var isThrow = it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all' || it.effect === 'condition_one_enemy' || it.effect === 'condition_multi_enemies' || it.effect === 'damage_multi_enemies' || it.effect === 'timed_bomb' || it.effect === 'reflect_next_attack' || it.effect === 'wet_all_and_heal' || it.effect === 'risky_throw' || it.effect === 'damage_and_condition_one' || it.effect === 'debuff_all_enemies' || it.effect === 'summon_ally'
               return !isThrow
             })
             var hasThrowables = playerInventory.some(function(it) {
