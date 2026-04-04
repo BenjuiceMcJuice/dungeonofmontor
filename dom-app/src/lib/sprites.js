@@ -656,9 +656,9 @@ var CHAMBER_ICONS = {
     ],
   },
 
-  // --- Size 2: Heap — tall spiky, fork handle + plank jutting up (14x24 at scale 3 = 42x72px) ---
+  // --- Size 2: Heap — tall spiky, fork handle + plank jutting up (14x23 at scale 3) ---
   junk_garden_2: {
-    cols: 14, rows: 24, grid: [
+    cols: 14, rows: 23, grid: [
       [_,_,'#8b4513',_,_,_,_,_,_,_,_,_,_,_],
       [_,_,'#8b4513',_,_,_,_,_,_,_,_,_,_,_],
       [_,_,'#8b4513',_,_,_,_,_,'#9b7653',_,_,_,_,_],
@@ -682,13 +682,12 @@ var CHAMBER_ICONS = {
       [K,'#3d2b1a','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a',K,_],
       [K,'#3d2b1a','#3d2b1a','#3d2b1a','#3d2b1a','#3d2b1a','#5a3a1e','#3d2b1a','#3d2b1a','#3d2b1a','#5a3a1e','#3d2b1a',K],
       [K,K,K,K,K,K,K,K,K,K,K,K,K],
-      [_,_,_,_,_,_,_,_,_,_,_,_,_,_],
     ],
   },
 
-  // --- Size 3: Mound — big dome, wheelbarrow, pots, weeds (22x22 at scale 3 = 66x66px) ---
+  // --- Size 3: Mound — big dome, wheelbarrow, pots, weeds (22x18 at scale 3) ---
   junk_garden_3: {
-    cols: 22, rows: 22, grid: [
+    cols: 22, rows: 18, grid: [
       [K,K,K,_,_,_,_,_,_,_,_,_,_,_,_,'#4a6a2a','#7a9a4a',_,_,_,_,_],
       [K,'#5a7a3a','#4a6a2a',K,K,_,_,_,_,_,_,_,_,'#4a6a2a','#7a9a4a','#5a7a3a','#4a6a2a',_,_,_,_,_],
       [K,'#7a9a4a','#5a7a3a','#c47a3a','#aa6633',K,K,_,_,_,_,_,K,'#888',K,'#7a9a4a','#5a7a3a',K,_,_,_,_],
@@ -707,10 +706,6 @@ var CHAMBER_ICONS = {
       [K,'#3d2b1a','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#6b4e2e','#3d2b1a','#5a3a1e','#6b4e2e','#5a3a1e','#6b4e2e','#5a3a1e',K,_,_,_,_,_,_,_,_],
       [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#6b4e2e','#5a3a1e','#3d2b1a','#5a3a1e',K,_,_,_,_,_,_,_],
       [K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
     ],
   },
 
