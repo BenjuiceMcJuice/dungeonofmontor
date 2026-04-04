@@ -2794,13 +2794,17 @@ function Game({ character, user, onEndRun }) {
           if (forcedLoot.item) items.push(forcedLoot.item)
         }
       }
+      var corpseGold = Math.max(1, loot.gold + Math.round(e.xp * (e.isBoss ? 0.5 : 0.2)))
+      // Fled enemies drop a bag with reduced gold but keep items
+      if (e.fled) corpseGold = Math.max(1, Math.round(corpseGold * 0.5))
       return {
-        id: e.id, name: e.name, archetypeKey: e.archetypeKey, tierKey: e.tierKey,
-        gold: Math.max(1, loot.gold + Math.round(e.xp * (e.isBoss ? 0.5 : 0.2))),
+        id: e.id, name: e.fled ? 'Dropped Bag' : e.name, archetypeKey: e.archetypeKey, tierKey: e.tierKey,
+        gold: corpseGold,
         items: items,
         goldTaken: false,
-        itemsTaken: [],    // indices of items already taken
-        opened: false,     // has the player looked inside?
+        itemsTaken: [],
+        opened: false,
+        fled: e.fled || false,
       }
     })
 
