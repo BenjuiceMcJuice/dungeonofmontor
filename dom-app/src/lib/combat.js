@@ -290,6 +290,60 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     attackResult = d20Attack(strMod + rollsMod + accBonus + nudgeBonus + chaosShift, 20)
     if (nudgeBonus > 0) attackResult.nudge = nudgeBonus
     if (chaosShift !== 0) attackResult.chaosShift = chaosShift
+
+    // --- DICE-TRIGGERED RELIC EFFECTS ---
+
+    // Metronome: every Nth turn, force crit
+    for (var mi = 0; mi < passiveItems.length; mi++) {
+      if (passiveItems[mi].passiveEffect === 'metronome') {
+        passiveItems[mi]._metronomeCount = (passiveItems[mi]._metronomeCount || 0) + 1
+        if (passiveItems[mi]._metronomeCount >= passiveItems[mi].passiveValue) {
+          attackResult = Object.assign({}, attackResult, { tier: 1, tierName: 'crit' })
+          passiveItems[mi]._metronomeCount = 0
+          result.metronomeCrit = true
+        }
+      }
+    }
+
+    // Gremlin Bell: nat 1 → apply random condition to enemy instead of fumble
+    if (attackResult.roll === 1) {
+      for (var gi = 0; gi < passiveItems.length; gi++) {
+        if (passiveItems[gi].passiveEffect === 'gremlin_bell') {
+          var gremlinConditions = ['BLEED', 'POISON', 'BURN', 'FROST', 'DAZE', 'FEAR', 'BLIND', 'NAUSEA']
+          var gremlinPick = gremlinConditions[Math.floor(Math.random() * gremlinConditions.length)]
+          enemy.statusEffects = applyCondition(enemy.statusEffects || [], gremlinPick, 'gremlin')
+          attackResult = Object.assign({}, attackResult, { tier: 3, tierName: 'glancing' }) // upgrade from miss
+          result.gremlinBell = true
+          result.gremlinCondition = gremlinPick
+          break
+        }
+      }
+    }
+
+    // Pressure Cooker: count nat 1s (persistent)
+    if (attackResult.roll === 1) {
+      for (var pci = 0; pci < passiveItems.length; pci++) {
+        if (passiveItems[pci].passiveEffect === 'pressure_cooker') {
+          passiveItems[pci]._pressureCount = (passiveItems[pci]._pressureCount || 0) + 1
+          if (passiveItems[pci]._pressureCount >= passiveItems[pci].passiveValue) {
+            // DETONATE — 15 AoE + BURN + DAZE all
+            bs.enemies.forEach(function(e2) {
+              if (!e2.isDown) {
+                e2.currentHp = Math.max(0, e2.currentHp - 15)
+                e2.statusEffects = applyCondition(e2.statusEffects || [], 'BURN', 'pressure_cooker')
+                e2.statusEffects = applyCondition(e2.statusEffects, 'DAZE', 'pressure_cooker')
+                if (e2.currentHp <= 0) e2.isDown = true
+              }
+            })
+            passiveItems[pci]._pressureCount = 0
+            result.pressureCookerDetonated = true
+          } else {
+            result.pressureCookerCount = passiveItems[pci]._pressureCount
+          }
+          break
+        }
+      }
+    }
   }
 
   // Apply forced tier
@@ -443,7 +497,69 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       result.firstHitCrit = true
     }
 
-    breakdown.final = Math.max(1, breakdown.final) // minimum 1 damage
+    // Coin Flip: 50% +3 dmg, 50% -2 dmg
+    if (hasPassiveEffect(player, 'coin_flip')) {
+      if (Math.random() < 0.5) { breakdown.final += 3; result.coinFlipWin = true }
+      else { breakdown.final = Math.max(1, breakdown.final - 2); result.coinFlipLose = true }
+    }
+
+    // Double or Nothing: on crit, 50% double or becomes miss
+    if (hasPassiveEffect(player, 'double_or_nothing') && attackResult.tierName === 'crit') {
+      if (Math.random() < 0.5) { breakdown.final = breakdown.final * 2; result.doubleOrNothingWin = true }
+      else { breakdown.final = 0; result.doubleOrNothingLose = true }
+    }
+
+    // Egg Timer: +50% damage after 3 turns without a kill
+    if (hasPassiveEffect(player, 'egg_timer') && player._turnsWithoutKill >= 3) {
+      breakdown.final = Math.round(breakdown.final * 1.5)
+      result.eggTimerBonus = true
+    }
+
+    // Chaos Blade: d20 roll determines condition applied
+    var weapon2 = player.equipped && player.equipped.weapon
+    if (weapon2 && weapon2.chaosCondition && attackResult.tier <= 3) {
+      var chaosRoll = attackResult.roll
+      var chaosCond = null
+      if (chaosRoll === 1) { result.chaosBackfire = true; /* self-damage handled by caller */ }
+      else if (chaosRoll <= 5) chaosCond = 'NAUSEA'
+      else if (chaosRoll <= 8) chaosCond = 'DAZE'
+      else if (chaosRoll <= 11) chaosCond = 'FEAR'
+      else if (chaosRoll <= 14) chaosCond = 'BLEED'
+      else if (chaosRoll <= 16) chaosCond = 'POISON'
+      else if (chaosRoll <= 18) chaosCond = 'FROST'
+      else if (chaosRoll === 19) chaosCond = 'BURN'
+      else if (chaosRoll >= 20) {
+        // DEVASTATION — all conditions
+        var devConds = ['BLEED', 'POISON', 'BURN', 'FROST', 'FEAR', 'DAZE']
+        for (var dci = 0; dci < devConds.length; dci++) {
+          enemy.statusEffects = applyCondition(enemy.statusEffects || [], devConds[dci], 'chaos_blade')
+        }
+        result.chaosDevastation = true
+        chaosCond = null // already applied
+      }
+      if (chaosCond) {
+        enemy.statusEffects = applyCondition(enemy.statusEffects || [], chaosCond, 'chaos_blade')
+        result.chaosCondition = chaosCond
+      }
+    }
+
+    // Nuke: Big Red Button — d20 and weapon die match = instakill all
+    if (hasPassiveEffect(player, 'nuke') && attackResult.roll > 0) {
+      var wepDie = (weapon2 && weapon2.damageDie) || 4
+      var wepRoll = dmgResult ? dmgResult.roll : 0
+      if (attackResult.roll === wepRoll && attackResult.roll <= wepDie) {
+        // NUKE — everything dies
+        bs.enemies.forEach(function(e3) {
+          if (!e3.isDown) { e3.currentHp = 0; e3.isDown = true }
+        })
+        result.nukeTriggered = true
+        result.enemyDefeated = true
+        // Mark nuke relic for removal by caller
+        result.nukeConsumed = true
+      }
+    }
+
+    breakdown.final = Math.max(breakdown.final >= 0 ? breakdown.final : 0, attackResult.tier <= 3 ? 1 : 0) // minimum 1 damage on hit
 
     enemy.currentHp = Math.max(0, enemy.currentHp - breakdown.final)
     result.damage = breakdown.final
