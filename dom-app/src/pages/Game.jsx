@@ -4635,7 +4635,7 @@ function Game({ character, user, onEndRun }) {
           {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
             var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
             if (activePiles.length === 0) return null
-            // All floors use garden junk sprites for now (hi-res at scale 3)
+            // TODO: add hi-res themed junk sprites per floor — for now all use garden shape
             var floorTheme = 'garden'
             // Corner positions with CSS transform to flip the base sprite
             // Base sprite: right-angle at bottom-left (flat bottom, flat left)
