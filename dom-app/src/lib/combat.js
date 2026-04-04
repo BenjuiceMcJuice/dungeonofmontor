@@ -619,6 +619,16 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
             }
           }
         }
+        // Check for condition reactions after offhand condition
+        var offReaction = checkConditionReactions(enemy.statusEffects)
+        if (offReaction) {
+          enemy.statusEffects = offReaction.newEffects
+          if (offReaction.damage > 0) {
+            enemy.currentHp = Math.max(0, enemy.currentHp - offReaction.damage)
+            result.damage += offReaction.damage
+          }
+          if (!result.conditionReaction) result.conditionReaction = offReaction
+        }
         if (enemy.currentHp <= 0) {
           enemy.isDown = true
           result.enemyDefeated = true
@@ -629,6 +639,13 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
         if (!enemy.isDown && result.tier <= 3 && hasTwinFangs) {
           enemy.statusEffects = applyCondition(enemy.statusEffects || [], 'BLEED', 'twin_fangs')
           result.twinFangs = true
+          // Check reactions after Twin Fangs too
+          var tfReaction = checkConditionReactions(enemy.statusEffects)
+          if (tfReaction) {
+            enemy.statusEffects = tfReaction.newEffects
+            if (tfReaction.damage > 0) { enemy.currentHp = Math.max(0, enemy.currentHp - tfReaction.damage); result.damage += tfReaction.damage }
+            if (!result.conditionReaction) result.conditionReaction = tfReaction
+          }
         }
       } else {
         result.offhandMiss = true
