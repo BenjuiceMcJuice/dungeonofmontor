@@ -612,100 +612,49 @@ var CHAMBER_ICONS = {
   },
 
   // === JUNK PILE SPRITES — Garden theme ===
-  // Corner-hugging right-triangle wedges. 'a' = left corner, 'b' = right corner (mirrored)
-  // Size 1 (Scraps): small wedge. Size 2 (Heap): medium. Size 3 (Mound): large.
-  // Colours: brown, moss green, dark brown, terracotta, rust
+  // Single base orientation per size: flat bottom + flat left (bottom-left corner).
+  // CSS transform flips for other corners.
+  // Colours: brown, moss, dark brown, terracotta, rust
 
-  // --- Size 1: Scraps — left corner (right-angle at bottom-left) ---
-  junk_garden_1a: {
+  // --- Size 1: Scraps (bottom-left orientation) ---
+  junk_garden_1: {
+    cols: 6, rows: 6, grid: [
+      [K,_,_,_,_,_],
+      [K,K,_,_,_,_],
+      [K,'#5a7a3a',K,_,_,_],
+      [K,'#8b6639','#6b4e2e',K,_,_],
+      [K,'#6b4e2e','#8b6639','#5a3a1e',K,_],
+      [K,'#5a3a1e','#6b4e2e','#8b6639','#5a7a3a',K],
+    ],
+  },
+
+  // --- Size 2: Heap (bottom-left orientation) ---
+  junk_garden_2: {
     cols: 8, rows: 8, grid: [
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_],
       [K,_,_,_,_,_,_,_],
       [K,K,_,_,_,_,_,_],
-      [K,'#8b6639',K,_,_,_,_,_],
-      [K,'#6b4e2e','#5a7a3a',K,_,_,_,_],
-    ],
-  },
-  // --- Size 1: Scraps — right corner (right-angle at bottom-right) ---
-  junk_garden_1b: {
-    cols: 8, rows: 8, grid: [
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,K],
-      [_,_,_,_,_,_,K,K],
-      [_,_,_,_,_,K,'#8b6639',K],
-      [_,_,_,_,K,'#5a7a3a','#6b4e2e',K],
+      [K,'#5a7a3a',K,_,_,_,_,_],
+      [K,'#aa6633','#8b6639',K,_,_,_,_],
+      [K,'#8b6639','#6b4e2e','#5a7a3a',K,_,_,_],
+      [K,'#6b4e2e','#aa6633','#8b6639','#6b4e2e',K,_,_],
+      [K,'#5a3a1e','#8b6639','#6b4e2e','#5a3a1e','#8b6639',K,_],
+      [K,'#6b4e2e','#5a3a1e','#8b6639','#6b4e2e','#5a3a1e','#5a7a3a',K],
     ],
   },
 
-  // --- Size 2: Heap — left corner ---
-  junk_garden_2a: {
+  // --- Size 3: Mound (bottom-left orientation) ---
+  junk_garden_3: {
     cols: 10, rows: 10, grid: [
-      [_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_],
       [K,_,_,_,_,_,_,_,_,_],
       [K,K,_,_,_,_,_,_,_,_],
       [K,'#5a7a3a',K,_,_,_,_,_,_,_],
-      [K,'#8b6639','#aa6633',K,_,_,_,_,_,_],
-      [K,'#6b4e2e','#8b6639','#5a7a3a',K,_,_,_,_,_],
-      [K,'#5a3a1e','#6b4e2e','#8b6639','#6b4e2e',K,_,_,_,_],
-      [K,K,'#5a3a1e','#6b4e2e','#5a3a1e',K,_,_,_,_],
-    ],
-  },
-  // --- Size 2: Heap — right corner ---
-  junk_garden_2b: {
-    cols: 10, rows: 10, grid: [
-      [_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,K],
-      [_,_,_,_,_,_,_,_,K,K],
-      [_,_,_,_,_,_,_,K,'#5a7a3a',K],
-      [_,_,_,_,_,_,K,'#aa6633','#8b6639',K],
-      [_,_,_,_,_,K,'#5a7a3a','#8b6639','#6b4e2e',K],
-      [_,_,_,_,K,'#6b4e2e','#8b6639','#6b4e2e','#5a3a1e',K],
-      [_,_,_,_,K,'#5a3a1e','#6b4e2e','#5a3a1e',K,K],
-    ],
-  },
-
-  // --- Size 3: Mound — left corner ---
-  junk_garden_3a: {
-    cols: 12, rows: 12, grid: [
-      [_,_,_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,_],
-      [K,_,_,_,_,_,_,_,_,_,_,_],
-      [K,K,_,_,_,_,_,_,_,_,_,_],
-      [K,'#5a7a3a',K,_,_,_,_,_,_,_,_,_],
-      [K,'#aa6633','#8b6639',K,_,_,_,_,_,_,_,_],
-      [K,'#8b6639','#6b4e2e','#5a7a3a',K,_,_,_,_,_,_,_],
-      [K,'#5a7a3a','#aa6633','#8b6639','#6b4e2e',K,_,_,_,_,_,_],
-      [K,'#6b4e2e','#8b6639','#5a3a1e','#8b6639','#5a7a3a',K,_,_,_,_,_],
-      [K,'#5a3a1e','#6b4e2e','#8b6639','#6b4e2e','#aa6633','#8b6639',K,_,_,_,_],
-      [K,K,'#5a3a1e','#5a3a1e','#8b6639','#6b4e2e','#5a3a1e',K,_,_,_,_],
-      [_,K,K,K,K,K,K,K,_,_,_,_],
-    ],
-  },
-  // --- Size 3: Mound — right corner ---
-  junk_garden_3b: {
-    cols: 12, rows: 12, grid: [
-      [_,_,_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,_],
-      [_,_,_,_,_,_,_,_,_,_,_,K],
-      [_,_,_,_,_,_,_,_,_,_,K,K],
-      [_,_,_,_,_,_,_,_,_,K,'#5a7a3a',K],
-      [_,_,_,_,_,_,_,_,K,'#8b6639','#aa6633',K],
-      [_,_,_,_,_,_,_,K,'#5a7a3a','#6b4e2e','#8b6639',K],
-      [_,_,_,_,_,_,K,'#6b4e2e','#8b6639','#aa6633','#5a7a3a',K],
-      [_,_,_,_,_,K,'#5a7a3a','#8b6639','#5a3a1e','#8b6639','#6b4e2e',K],
-      [_,_,_,_,K,'#8b6639','#aa6633','#6b4e2e','#8b6639','#6b4e2e','#5a3a1e',K],
-      [_,_,_,_,K,'#5a3a1e','#6b4e2e','#8b6639','#5a3a1e','#5a3a1e',K,K],
-      [_,_,_,_,K,K,K,K,K,K,K,_],
+      [K,'#aa6633','#8b6639',K,_,_,_,_,_,_],
+      [K,'#8b6639','#6b4e2e','#5a7a3a',K,_,_,_,_,_],
+      [K,'#6b4e2e','#aa6633','#8b6639','#6b4e2e',K,_,_,_,_],
+      [K,'#5a7a3a','#8b6639','#5a3a1e','#aa6633','#8b6639',K,_,_,_],
+      [K,'#5a3a1e','#6b4e2e','#8b6639','#6b4e2e','#5a7a3a','#6b4e2e',K,_,_],
+      [K,'#6b4e2e','#5a3a1e','#6b4e2e','#8b6639','#5a3a1e','#8b6639','#5a3a1e',K,_],
+      [K,'#8b6639','#6b4e2e','#5a3a1e','#6b4e2e','#8b6639','#6b4e2e','#5a3a1e','#5a7a3a',K],
     ],
   },
 }
