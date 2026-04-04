@@ -86,7 +86,7 @@
     },
     "great_hall": {
       "id": "great_hall", "name": "The Great Hall", "floorId": "underground",
-      "doorTheme": "dungeon",
+      "doorTheme": "underground",
       "enemyTypes": ["rat", "orc", "hound"], "enemyTiers": ["dust", "slate"],
       "bossType": "orc", "bossTier": "slate", "bossName": "Ironjaw",
       "merchantName": "The Butler", "merchantRole": "Montor's head of household",
@@ -119,7 +119,7 @@
     },
     "kitchen": {
       "id": "kitchen", "name": "The Kitchen", "floorId": "underground",
-      "doorTheme": "dungeon",
+      "doorTheme": "underground",
       "enemyTypes": ["rat", "orc", "slug"], "enemyTiers": ["dust", "slate"],
       "bossType": "orc", "bossTier": "iron", "bossName": "The Kitchen Brute",
       "merchantName": "The Cook", "merchantRole": "Montor's kitchen staff",
@@ -152,7 +152,7 @@
     },
     "sewers": {
       "id": "sewers", "name": "The Sewers", "floorId": "underbelly",
-      "doorTheme": "dungeon",
+      "doorTheme": "underbelly",
       "enemyTypes": ["rat", "slug", "spider"], "enemyTiers": ["slate", "iron"],
       "bossType": "spider", "bossTier": "iron", "bossName": "The Broodmother",
       "merchantName": "The Ratcatcher", "merchantRole": "Lives down here by choice. Apparently.",
@@ -185,7 +185,7 @@
     },
     "cistern": {
       "id": "cistern", "name": "The Cistern", "floorId": "underbelly",
-      "doorTheme": "dungeon",
+      "doorTheme": "underbelly",
       "enemyTypes": ["slug", "spider", "bat"], "enemyTiers": ["slate", "iron"],
       "bossType": "slug", "bossTier": "crimson", "bossName": "The Bile King",
       "merchantName": "The Plumber", "merchantRole": "Montor's pipe specialist",
@@ -218,7 +218,7 @@
     },
     "bedroom": {
       "id": "bedroom", "name": "The Bedroom", "floorId": "quarters",
-      "doorTheme": "dungeon",
+      "doorTheme": "quarters",
       "enemyTypes": ["mimic", "shade", "hound"], "enemyTiers": ["iron", "crimson"],
       "bossType": "shade", "bossTier": "crimson", "bossName": "Montor's Mum's Ghost",
       "merchantName": "The Maid", "merchantRole": "Montor's housekeeper. Still tidying.",
@@ -251,7 +251,7 @@
     },
     "study": {
       "id": "study", "name": "The Study", "floorId": "quarters",
-      "doorTheme": "dungeon",
+      "doorTheme": "quarters",
       "enemyTypes": ["shade", "wraith", "mimic"], "enemyTiers": ["iron", "crimson"],
       "bossType": "wraith", "bossTier": "crimson", "bossName": "The Librarian",
       "merchantName": "The Tutor", "merchantRole": "Taught young Montor. Regrets it.",
@@ -284,7 +284,7 @@
     },
     "forge": {
       "id": "forge", "name": "The Forge", "floorId": "works",
-      "doorTheme": "dungeon",
+      "doorTheme": "works",
       "enemyTypes": ["automaton", "rock", "orc"], "enemyTiers": ["iron", "crimson"],
       "bossType": "automaton", "bossTier": "crimson", "bossName": "The Masterwork",
       "merchantName": "The Blacksmith", "merchantRole": "Built things for Montor. Still does.",
@@ -317,7 +317,7 @@
     },
     "workshop": {
       "id": "workshop", "name": "The Workshop", "floorId": "works",
-      "doorTheme": "dungeon",
+      "doorTheme": "works",
       "enemyTypes": ["automaton", "mimic", "rock"], "enemyTiers": ["iron", "crimson"],
       "bossType": "automaton", "bossTier": "void", "bossName": "Montor's Masterpiece",
       "merchantName": "The Apprentice", "merchantRole": "Learning. Slowly. Montor's not patient.",
@@ -350,7 +350,7 @@
     },
     "caverns": {
       "id": "caverns", "name": "The Caverns", "floorId": "deep",
-      "doorTheme": "dungeon",
+      "doorTheme": "deep",
       "enemyTypes": ["bat", "rock", "wraith", "spider"], "enemyTiers": ["crimson", "void"],
       "bossType": "rock", "bossTier": "void", "bossName": "The Ancient One",
       "merchantName": "The Hermit", "merchantRole": "Lived here before Montor. Doesn't talk much.",
@@ -383,7 +383,7 @@
     },
     "chasm": {
       "id": "chasm", "name": "The Chasm", "floorId": "deep",
-      "doorTheme": "dungeon",
+      "doorTheme": "deep",
       "enemyTypes": ["wraith", "shade", "bat"], "enemyTiers": ["crimson", "void"],
       "bossType": "shade", "bossTier": "void", "bossName": "The Abyss Watcher",
       "merchantName": "The Prospector", "merchantRole": "Came looking for gold. Found worse.",
@@ -416,7 +416,7 @@
     },
     "throne_room": {
       "id": "throne_room", "name": "Montor's Throne Room", "floorId": "domain",
-      "doorTheme": "dungeon",
+      "doorTheme": "domain",
       "enemyTypes": ["shade", "automaton", "hound"], "enemyTiers": ["void"],
       "bossType": "shade", "bossTier": "void", "bossName": "Montor",
       "merchantName": null, "merchantRole": null,

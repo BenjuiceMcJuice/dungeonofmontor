@@ -4625,7 +4625,8 @@ function Game({ character, user, onEndRun }) {
           {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
             var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
             if (activePiles.length === 0) return null
-            var floorTheme = zone.floorId === 'grounds' ? 'garden' : 'garden'
+            var FLOOR_JUNK_THEMES = { grounds: 'garden', underground: 'dungeon', underbelly: 'sewer', quarters: 'quarters', works: 'works', deep: 'cave', domain: 'void' }
+            var floorTheme = FLOOR_JUNK_THEMES[zone.floorId] || 'garden'
             // Corner positions with CSS transform to flip the base sprite
             // Base sprite: right-angle at bottom-left (flat bottom, flat left)
             var corners = [
