@@ -46,6 +46,10 @@ function generateEnemy(archetypeKey, tierKey, difficulty) {
     xp: Math.round(base.xp * tierMul),
     isDown: false,
     phase: 1,
+    behaviour: base.behaviour || {},
+    turnCount: 0,
+    howlCooldownLeft: 0,
+    hasHidden: false,
   }
 }
 
