@@ -1600,20 +1600,21 @@ function Game({ character, user, onEndRun }) {
     var tickResult = tickTurnStart(battle, playerUid)
     var messages = []
 
+    // Only show important condition messages (skips, adrenaline) — routine damage is visible via HP bar
     if (tickResult.narrative) {
       var parts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
       for (var ni = 0; ni < parts.length; ni++) {
         var part = parts[ni].replace(/\.+$/, '')
-        var tier = 'glancing'
-        if (part.indexOf('turn lost') !== -1 || part.indexOf('paralysed') !== -1 || part.indexOf('skip') !== -1) tier = 'miss'
-        else if (part.indexOf('ADRENALINE') !== -1) tier = 'crit'
-        messages.push({ text: part, tier: tier })
+        if (part.indexOf('turn lost') !== -1 || part.indexOf('paralysed') !== -1 || part.indexOf('skip') !== -1) {
+          messages.push({ text: part, tier: 'miss' })
+        } else if (part.indexOf('ADRENALINE') !== -1) {
+          messages.push({ text: part, tier: 'crit' })
+        }
+        // Skip routine damage narratives (Bleeding: X, Poison drains, etc.)
       }
     }
 
-    if (tickResult.damage > 0) {
-      messages.unshift({ text: 'Conditions deal ' + tickResult.damage + ' damage!', tier: 'hit' })
-    }
+    // Damage is visible via HP bar — no need for a separate message
 
     setBattle(tickResult.newBattle)
     setPlayerHp(tickResult.newBattle.players[playerUid].currentHp)
