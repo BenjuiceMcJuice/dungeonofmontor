@@ -370,7 +370,7 @@ var REACTIONS = [
   { a: 'FROST', b: 'BURN',   name: 'SHATTER',        damage: 10, removeBoth: true,  applyEffect: { defPenalty: true, defPenaltyValue: -99, turns: 2 }, narrative: 'SHATTER! Frozen enemy cracks from the heat — DEF destroyed!' },
   { a: 'WET',   b: 'FROST',  name: 'INSTANT FREEZE',  damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'INSTANT FREEZE! Soaked enemy freezes solid!' },
   { a: 'WET',   b: 'BURN',   name: 'STEAM',           damage: 0,  removeBoth: true,  applyConditionAll: 'BLIND', narrative: 'STEAM! Fire meets water — blinding cloud fills the chamber!' },
-  { a: 'POISON', b: 'BLEED', name: 'SEPSIS',          damage: 0,  removeBoth: false, doubleDot: true, narrative: 'SEPSIS! Poison enters the bloodstream — damage doubles!' },
+  { a: 'POISON', b: 'BLEED', name: 'SEPSIS',          damage: 0,  removeBoth: false, doubleDot: true, procChance: 0.30, narrative: 'SEPSIS! Poison enters the bloodstream — damage doubles!' },
   { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!' },
   { a: 'DAZE',  b: 'FEAR',   name: 'CATATONIC',       damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'CATATONIC! Mind shuts down completely!' },
 ]
@@ -383,6 +383,9 @@ function checkConditionReactions(statusEffects) {
     var hasA = statusEffects.some(function(c) { return c.id === r.a })
     var hasB = statusEffects.some(function(c) { return c.id === r.b })
     if (hasA && hasB) {
+      // Proc chance — some reactions only trigger X% of the time
+      if (r.procChance && Math.random() > r.procChance) continue
+
       var result = { reaction: r.name, narrative: r.narrative, damage: r.damage || 0, aoeCondition: null }
 
       // Remove source conditions if specified
