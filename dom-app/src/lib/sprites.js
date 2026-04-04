@@ -363,45 +363,46 @@ var D = 'D'
 var W = 'W'
 var H = 'H'
 
+// G = gate iron (uses door colour), V = vine/leaf accent (uses wallHi)
+var G = 'G'
+var V = 'V'
+
+// Garden gate — iron bars between stone pillars, vine on top
 var DOOR_SPRITE = {
-  cols: 12, rows: 16, grid: [
-    [_,_,K,K,K,K,K,K,K,K,_,_],  // arch top
-    [_,K,W,W,W,W,W,W,W,W,K,_],
-    [K,W,W,H,_,_,_,_,H,W,W,K],  // arch opening
-    [K,W,_,_,_,_,_,_,_,_,W,K],
-    [K,W,_,_,K,K,K,K,_,_,W,K],  // door top
-    [K,W,_,K,D,D,D,D,K,_,W,K],
-    [K,W,_,K,D,D,D,D,K,_,W,K],
-    [K,W,_,K,D,H,D,D,K,_,W,K],  // door handle
-    [K,W,_,K,D,D,D,D,K,_,W,K],
-    [K,W,_,K,D,D,D,D,K,_,W,K],
-    [K,W,_,K,D,D,D,D,K,_,W,K],
-    [K,W,_,K,D,D,D,D,K,_,W,K],
-    [K,W,_,K,K,K,K,K,K,_,W,K],  // door frame bottom
-    [K,W,W,W,W,W,W,W,W,W,W,K],
-    [K,W,W,W,W,W,W,W,W,W,W,K],  // floor stones
+  cols: 12, rows: 14, grid: [
+    [_,_,_,V,_,V,V,_,V,_,_,_],  // vine tendrils above
+    [_,K,K,K,K,K,K,K,K,K,K,_],  // crossbar top
+    [K,W,W,K,G,K,G,K,G,W,W,K],  // pillars + bars
+    [K,W,_,K,G,K,G,K,G,_,W,K],
+    [K,W,_,K,G,K,G,K,G,_,W,K],
+    [K,W,_,K,G,H,G,K,G,_,W,K],  // latch/handle
+    [K,W,_,K,G,K,G,K,G,_,W,K],
+    [K,W,_,K,G,K,G,K,G,_,W,K],
+    [K,W,_,K,G,K,G,K,G,_,W,K],
+    [K,W,_,K,G,K,G,K,G,_,W,K],
+    [K,W,_,K,K,K,K,K,K,_,W,K],  // crossbar bottom
+    [K,W,W,W,W,W,W,W,W,W,W,K],  // stone base
+    [K,W,H,W,W,W,W,W,H,W,W,K],
     [K,K,K,K,K,K,K,K,K,K,K,K],
   ],
 }
 
-// Open door — swung ajar, dark opening visible
+// Open gate — swung inward, bars visible on edge, passage open
 var DOOR_SPRITE_OPEN = {
-  cols: 12, rows: 16, grid: [
-    [_,_,K,K,K,K,K,K,K,K,_,_],  // arch top
-    [_,K,W,W,W,W,W,W,W,W,K,_],
-    [K,W,W,H,_,_,_,_,H,W,W,K],  // arch opening
-    [K,W,_,_,_,_,_,_,_,_,W,K],
-    [K,W,_,_,_,_,_,_,_,_,W,K],  // open — dark passage
-    [K,W,_,_,_,_,_,_,K,D,W,K],  // door swung right
-    [K,W,_,_,_,_,_,_,K,D,W,K],
-    [K,W,_,_,_,_,_,_,K,H,W,K],  // handle visible on edge
-    [K,W,_,_,_,_,_,_,K,D,W,K],
-    [K,W,_,_,_,_,_,_,K,D,W,K],
-    [K,W,_,_,_,_,_,_,K,D,W,K],
-    [K,W,_,_,_,_,_,_,K,D,W,K],
-    [K,W,_,_,_,_,_,_,K,K,W,K],  // door frame bottom
-    [K,W,W,W,W,W,W,W,W,W,W,K],
-    [K,W,W,W,W,W,W,W,W,W,W,K],  // floor stones
+  cols: 12, rows: 14, grid: [
+    [_,_,_,V,_,_,_,_,V,_,_,_],  // vine tendrils
+    [_,K,K,K,K,K,K,K,K,K,K,_],  // crossbar top
+    [K,W,W,_,_,_,_,_,K,G,W,K],  // open — gate swung right
+    [K,W,_,_,_,_,_,_,K,G,W,K],
+    [K,W,_,_,_,_,_,_,K,G,W,K],
+    [K,W,_,_,_,_,_,_,K,H,W,K],  // latch on edge
+    [K,W,_,_,_,_,_,_,K,G,W,K],
+    [K,W,_,_,_,_,_,_,K,G,W,K],
+    [K,W,_,_,_,_,_,_,K,G,W,K],
+    [K,W,_,_,_,_,_,_,K,G,W,K],
+    [K,W,_,_,_,_,_,_,K,K,W,K],  // crossbar bottom
+    [K,W,W,W,W,W,W,W,W,W,W,K],  // stone base
+    [K,W,H,W,W,W,W,W,H,W,W,K],
     [K,K,K,K,K,K,K,K,K,K,K,K],
   ],
 }
@@ -428,6 +429,8 @@ function drawDoorSprite(canvas, theme, scale, open) {
       else if (v === W) ctx.fillStyle = colours.wall
       else if (v === H) ctx.fillStyle = colours.wallHi
       else if (v === D) ctx.fillStyle = colours.door
+      else if (v === G) ctx.fillStyle = colours.door
+      else if (v === V) ctx.fillStyle = colours.wallHi
       else ctx.fillStyle = v
       ctx.fillRect(c * px, r * px, px, px)
     }
