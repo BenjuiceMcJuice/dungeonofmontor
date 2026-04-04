@@ -5733,17 +5733,11 @@ function Game({ character, user, onEndRun }) {
           {combatPhase === 'playerTurn' && playerTurnAnnounced && !playerConditionTicked && playerConditionMessages.length > 0 && (
             <div onClick={handleConditionTap} className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center cursor-pointer">
               {playerConditionIndex < 0 ? (
-                <>
-                  <p className="text-gold text-lg font-display">Your Turn</p>
-                  <p className="text-ink-dim text-xs">Tap to resolve conditions</p>
-                </>
+                <p className="text-gold text-lg font-display">Your Turn</p>
               ) : (
-                <>
-                  <p className={'text-base font-display ' + (playerConditionMessages[playerConditionIndex].tier === 'crit' ? 'text-crimson' : playerConditionMessages[playerConditionIndex].tier === 'miss' ? 'text-red-400' : playerConditionMessages[playerConditionIndex].tier === 'hit' ? 'text-amber-500' : 'text-yellow-400')}>
-                    {playerConditionMessages[playerConditionIndex].text}
-                  </p>
-                  <p className="text-ink-faint text-[10px] mt-1">Tap to continue ({playerConditionIndex + 1}/{playerConditionMessages.length})</p>
-                </>
+                <p className={'text-base font-display ' + (playerConditionMessages[playerConditionIndex].tier === 'crit' ? 'text-crimson' : playerConditionMessages[playerConditionIndex].tier === 'miss' ? 'text-red-400' : playerConditionMessages[playerConditionIndex].tier === 'hit' ? 'text-amber-500' : 'text-yellow-400')}>
+                  {playerConditionMessages[playerConditionIndex].text}
+                </p>
               )}
             </div>
           )}
@@ -5826,7 +5820,7 @@ function Game({ character, user, onEndRun }) {
           })()}
 
           {/* Fallback: if no action rendered (stuck state), let player recover */}
-          {!isPlayerTurn && combatPhase !== 'enemyWindup' && combatPhase !== 'enemyRolling' && combatPhase !== 'playerSkipped' && (
+          {!isPlayerTurn && combatPhase !== 'enemyWindup' && combatPhase !== 'enemyRolling' && combatPhase !== 'playerSkipped' && !(combatPhase === 'playerTurn' && playerConditionMessages.length > 0 && !playerConditionTicked) && (
             <div className="p-4 border-2 border-border rounded-lg bg-surface text-center">
               <p className="text-ink-dim text-sm">Waiting...</p>
               <button onClick={function() {
