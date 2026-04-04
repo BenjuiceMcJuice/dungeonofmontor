@@ -4630,8 +4630,10 @@ function Game({ character, user, onEndRun }) {
               { style: { bottom: '12px', right: '12px' }, transform: 'scaleX(-1)' },    // bottom-right: mirror horizontal
               { style: { top: '12px', right: '12px' }, transform: 'scale(-1,-1)' },     // top-right: mirror both
             ]
-            return activePiles.map(function(pile, pi) {
-              var corner = corners[pi % corners.length]
+            var allPiles = currentChamber.junkPiles
+            return activePiles.map(function(pile) {
+              var originalIndex = allPiles.indexOf(pile)
+              var corner = corners[originalIndex % corners.length]
               var visibleSize = pile.layersRemaining || pile.size
               var spriteKey = 'junk_' + floorTheme + '_' + visibleSize
               var spriteScale = 5
