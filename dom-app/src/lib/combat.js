@@ -887,13 +887,18 @@ function resolveEnemyAttack(battleState, enemyId) {
   }
 
   // HIDE — slugs and spiders burrow for a turn (untargetable, heal)
+  // SLIME COAT — slugs/spiders coat themselves in defensive mucus (costs their attack turn)
   if (beh.canHide && !enemy.hasHidden && hpPercent <= (beh.hideThreshold || 0.3)) {
     if (Math.random() < 0.5) {
-      enemy.currentHp = Math.min(enemy.maxHp, enemy.currentHp + (beh.hideHeal || 5))
+      var slimeHeal = beh.hideHeal || 5
+      var slimeDef = beh.hideDefBonus || 6
+      enemy.currentHp = Math.min(enemy.maxHp, enemy.currentHp + slimeHeal)
+      enemy.stats = Object.assign({}, enemy.stats, { def: enemy.stats.def + slimeDef })
       enemy.hasHidden = true
+      enemy.slimeCoated = true
       return { newBattle: bs, result: {
         attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
-        attackRoll: null, damage: 0, hid: true, hideHeal: beh.hideHeal || 5,
+        attackRoll: null, damage: 0, slimeCoated: true, slimeHeal: slimeHeal, slimeDef: slimeDef,
       }}
     }
   }
