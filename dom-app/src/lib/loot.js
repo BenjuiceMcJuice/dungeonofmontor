@@ -243,8 +243,9 @@ function getTailorItems(floorId, zoneDef) {
       // Equipment only: weapons, armour, rings, amulets (not consumables, relics, junk)
       if (item.type !== 'weapon' && item.type !== 'armour' && item.type !== 'ring' && item.type !== 'amulet') continue
       // Skip items already in staples or the premium item
-      var premiumId2 = (zoneDef && zoneDef.tailorPremium) || null
-      var isStaple = staples.indexOf(entry.itemId) !== -1 || entry.itemId === premiumId2
+      var premiumPool2 = (zoneDef && zoneDef.tailorPremium) || []
+      var isPremium = Array.isArray(premiumPool2) ? premiumPool2.indexOf(entry.itemId) !== -1 : entry.itemId === premiumPool2
+      var isStaple = staples.indexOf(entry.itemId) !== -1 || isPremium
       if (isStaple) continue
       var alreadyIn = pool.some(function(p) { return p.itemId === entry.itemId })
       if (!alreadyIn) pool.push({ itemId: entry.itemId, weight: entry.weight })
@@ -269,12 +270,15 @@ function getTailorItems(floorId, zoneDef) {
   }
 
   // Premium item (CHA-gated) — marked so UI knows to gate it
-  var premiumId = zoneDef && zoneDef.tailorPremium
-  if (premiumId) {
+  // Premium item — pick random from pool (array) or use single ID (string)
+  var premiumPool = zoneDef && zoneDef.tailorPremium
+  if (premiumPool) {
+    var premiumId = Array.isArray(premiumPool)
+      ? premiumPool[Math.floor(Math.random() * premiumPool.length)]
+      : premiumPool
     var premiumItem = getItem(premiumId)
     if (premiumItem) {
       premiumItem.premium = true
-      // Premium items have inflated prices
       premiumItem.buyPrice = Math.round((premiumItem.buyPrice || 50) * 2.5)
       stock.push(premiumItem)
     }
