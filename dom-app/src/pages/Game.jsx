@@ -1748,6 +1748,50 @@ function Game({ character, user, onEndRun }) {
     if (r.entropyLow) {
       addLog({ type: 'player', text: 'Entropy Edge falters... -25% damage.', tier: 'miss' })
     }
+    if (r.metronomeCrit) {
+      addLog({ type: 'player', text: 'Metronome! Tick tick tick... BOOM! Forced crit!', tier: 'crit' })
+    }
+    if (r.gremlinBell) {
+      addLog({ type: 'player', text: 'Gremlin Bell! Nat 1 reversed — ' + condName(r.gremlinCondition) + ' applied to enemy!', tier: 'crit' })
+    }
+    if (r.pressureCookerDetonated) {
+      addLog({ type: 'player', text: 'PRESSURE COOKER DETONATES! 15 AoE + BURN + DAZE all enemies!', tier: 'crit' })
+    }
+    if (r.pressureCookerCount) {
+      addLog({ type: 'player', text: 'Pressure builds... (' + r.pressureCookerCount + '/5)', tier: 'miss' })
+    }
+    if (r.coinFlipWin) {
+      addLog({ type: 'player', text: 'Coin Flip: Heads! +3 damage!', tier: 'hit' })
+    }
+    if (r.coinFlipLose) {
+      addLog({ type: 'player', text: 'Coin Flip: Tails. -2 damage.', tier: 'miss' })
+    }
+    if (r.doubleOrNothingWin) {
+      addLog({ type: 'player', text: 'DOUBLE OR NOTHING: DOUBLE! Crit damage doubled!', tier: 'crit' })
+    }
+    if (r.doubleOrNothingLose) {
+      addLog({ type: 'player', text: 'DOUBLE OR NOTHING: Nothing. Crit becomes a whiff.', tier: 'miss' })
+    }
+    if (r.eggTimerBonus) {
+      addLog({ type: 'player', text: 'Egg Timer dings! +50% damage from impatience!', tier: 'hit' })
+    }
+    if (r.chaosBackfire) {
+      addLog({ type: 'player', text: 'Chaos Blade backfires! You take 3 damage!', tier: 'miss' })
+      setPlayerHp(function(hp) { return Math.max(1, hp - 3) })
+    }
+    if (r.chaosCondition) {
+      addLog({ type: 'condition', text: 'Chaos Blade: the dice choose ' + condName(r.chaosCondition) + '!', tier: 'hit' })
+    }
+    if (r.chaosDevastation) {
+      addLog({ type: 'condition', text: 'CHAOS BLADE: DEVASTATION! ALL conditions applied!', tier: 'crit' })
+    }
+    if (r.nukeTriggered) {
+      addLog({ type: 'player', text: 'BIG RED BUTTON! Dice matched — EVERYTHING DIES!', tier: 'crit' })
+      // Remove the nuke relic from inventory
+      if (character.equipped && character.equipped.relics) {
+        character.equipped.relics = character.equipped.relics.filter(function(rel) { return rel.passiveEffect !== 'nuke' })
+      }
+    }
     if (r.lifestealHeal) {
       addLog({ type: 'player', text: 'Lifesteal: healed ' + r.lifestealHeal + ' HP.', tier: 'hit' })
     }
