@@ -3997,18 +3997,9 @@ function Game({ character, user, onEndRun }) {
                         {detailItem.type === 'weapon' && detailItem.doubleStrikeBase > 0 && <span>{Math.round(detailItem.doubleStrikeBase * 100)}% double strike chance (scales with AGI)</span>}
                         {detailItem.conditionOnHit && <span>Applies {detailItem.conditionOnHit} on hit</span>}
                         {detailItem.type === 'armour' && <span>{detailItem.slot === 'helmet' ? 'Helmet' : detailItem.slot === 'boots' ? 'Boots' : detailItem.slot === 'offhand' ? 'Shield' : 'Armour'}{detailItem.defBonus ? ' | DEF: +' + detailItem.defBonus : ''}{detailItem.agiBonus ? ' | AGI: +' + detailItem.agiBonus : ''}{detailItem.agiPenalty ? ' | AGI: ' + detailItem.agiPenalty : ''}{detailItem.initBonus ? ' | Init: +' + detailItem.initBonus : ''}</span>}
-                        {detailItem.type === 'ring' && <span>Ring{detailItem.passiveEffect ? '' : ' | ' + detailItem.description}</span>}
+                        {detailItem.type === 'ring' && <span>Ring</span>}
                         {detailItem.type === 'amulet' && <span>Amulet{detailItem.twinFangsGrant ? ' | Grants Twin Fangs' : ''}</span>}
                         {detailItem.setId && <span>Set: {detailItem.setId === 'sunday_best' ? "Montor's Sunday Best" : detailItem.setId === 'peaky' ? "Montor's Peaky Set" : detailItem.setId}</span>}
-                        {detailItem.passiveEffect && <span>Passive: {detailItem.passiveEffect}{detailItem.passiveValue ? ' (' + detailItem.passiveValue + ')' : ''}{detailItem.passiveCondition ? ' — ' + detailItem.passiveCondition : ''}</span>}
-                        {detailItem.giftPower && <span>Gift: {Array.isArray(detailItem.giftPower) ? detailItem.giftPower.join(' + ') : detailItem.giftPower}</span>}
-                        {detailItem.effect === 'heal' && <span>Heals {detailItem.effectValue} HP</span>}
-                        {detailItem.effect === 'stat_buff' && <span>+{detailItem.effectValue} {(detailItem.effectStat || '').toUpperCase()} for {detailItem.effectDuration} turns</span>}
-                        {detailItem.effect === 'random_effect' && <span>Random effect — could be anything</span>}
-                        {detailItem.effect === 'cure_body' && <span>Cures body conditions (BLEED, POISON, etc.)</span>}
-                        {detailItem.effect === 'cure_mind' && <span>Cures mind conditions (FEAR, DAZE, etc.)</span>}
-                        {detailItem.effect === 'damage_all_enemies' && <span>{detailItem.effectValue} damage to all enemies</span>}
-                        {detailItem.effect === 'flee_guaranteed' && <span>Guaranteed escape from combat</span>}
                         {detailItem.buyPrice && <span>Value: {detailItem.sellPrice || Math.round(detailItem.buyPrice * 0.4)}g</span>}
                       </div>
                       <div className="flex gap-2">
@@ -4018,10 +4009,10 @@ function Game({ character, user, onEndRun }) {
                             Equip
                           </button>
                         )}
-                        {isConsumable && canEquipNow && (
+                        {isConsumable && canEquipNow && !(gamePhase === 'doors' && (detailItem.effect === 'damage_all_enemies' || detailItem.effect === 'condition_all_enemies' || detailItem.effect === 'damage_and_condition_all' || detailItem.effect === 'condition_one_enemy' || detailItem.effect === 'condition_multi_enemies' || detailItem.effect === 'damage_multi_enemies' || detailItem.effect === 'timed_bomb' || detailItem.effect === 'reflect_next_attack' || detailItem.effect === 'wet_all_and_heal' || detailItem.effect === 'risky_throw' || detailItem.effect === 'damage_and_condition_one' || detailItem.effect === 'debuff_all_enemies' || detailItem.effect === 'summon_ally')) && (
                           <button onClick={function() { handleUseItem(selectedItemIdx); setSelectedItemIdx(null) }}
                             className="flex-1 text-xs text-emerald-400 border border-emerald-500/40 py-1 rounded hover:border-emerald-400 transition-colors">
-                            Use
+                            {gamePhase === 'combat' ? 'Use' : 'Consume'}
                           </button>
                         )}
                         <button onClick={function() { setSelectedItemIdx(null) }}
@@ -4584,7 +4575,7 @@ function Game({ character, user, onEndRun }) {
                            item.type === 'amulet' ? 'amulet' :
                            item.description || item.type}
                         </span>
-                        {item.description && <span className="text-ink-faint text-[10px] italic mt-0.5">{item.description}</span>}
+                        {item.description && (item.type === 'weapon' || item.type === 'armour') && <span className="text-ink-faint text-[10px] italic mt-0.5">{item.description}</span>}
                       </div>
                       {chaLocked ? (
                         <span className="text-amber-400/60 text-[10px] font-sans text-right leading-tight">Requires<br/>CHA 12+</span>
