@@ -1,6 +1,6 @@
 # Technical Architecture
 
-> How Dungeon of Montor is built. Updated 2026-04-03.
+> How Dungeon of Montor is built. Updated 2026-04-04.
 
 ---
 
@@ -38,29 +38,30 @@ dom-app/                              The active React app
       Home.jsx                        Landing page
       Tavern.jsx                      Pre-run hub (Stage 2 placeholder)
       Preparation.jsx                 Stat allocation + pre-run merchant
-      Game.jsx                        Main game loop (~4000+ lines)
+      Game.jsx                        Main game loop (~6000 lines)
       Results.jsx                     Run summary
     components/
       Nav.jsx                         Bottom tab nav
       ChamberView.jsx                 Room rendering, junk piles, NPCs
       ChamberIcon.jsx                 Map chamber type icons
-      CombatRoller.jsx                Combat dice animation + result display
+      CombatRoller.jsx                Combat dice animation + result display (tap-gated condition flow)
       DiceRoller.jsx                  Generic dice roller component
+      ErrorBoundary.jsx               React error boundary for crash diagnosis (iOS WebKit)
       DungeonMap.jsx                  4x4 zone grid map
       DoorSprite.jsx                  Door pixel art
       SpriteRenderer.jsx             Sprite canvas renderer
       PlayerSprite.jsx                Player character sprite
-      ConditionIcon.jsx               14 condition pixel sprites
+      ConditionIcon.jsx               18 condition pixel sprites
       LandingScene.jsx                Title screen art
       StatPicker.jsx                  Reusable stat allocation UI
     data/
       classes.json                    Class definitions, starter shop
-      conditions.json                 14 conditions with mechanics
+      conditions.json                 18 conditions + 6 reactions with mechanics
       dialogue.json                   Montor whispers, merchant lines
       encounters.json                 Encounter type definitions
-      enemies.json                    12 archetypes + tier/difficulty multipliers
+      enemies.json                    12 archetypes + tier/difficulty multipliers + 7 AI behaviours
       gifts.json                      Gift definitions, boon effects
-      items.json                      189 items (weapons, armour, relics, consumables)
+      items.json                      243 items (weapons, armour, relics, consumables, bombs, throwables)
       junk.json                       Junk pools per floor, consumable junk, pile descriptions
       loot-tables.json                Zone-specific loot tables
       progression.json                XP thresholds, level-up rules
@@ -71,16 +72,16 @@ dom-app/                              The active React app
     lib/
       firebase.js                     Firebase config
       dice.js                         All dice math (d4-d100), modifiers, crit detection
-      combat.js                       Attack resolution, damage calc, initiative, stagger
-      conditions.js                   Condition application, duration, stacking, damage multipliers
+      combat.js                       Attack resolution, damage calc, initiative, stagger, enemy AI, gift combat integration
+      conditions.js                   Condition application, duration, stacking, reactions, tap-gated tick flow
       loot.js                         Rarity rolls, item generation, loot tables
       dungeon.js                      Zone grid generation, chamber placement
       encounters.js                   Encounter deck, enemy spawning
-      enemies.js                      Enemy stat calculation from archetypes + tiers
+      enemies.js                      Enemy stat calculation from archetypes + tiers, flee/drop bag, AI behaviours
       classes.js                      Class stat generation
       gifts.js                        Gift activation, boon application, sacrifice system
       junkpiles.js                    Pile generation, search rolls, terminal placement
-      sprites.js                      All enemy + player sprite grid data + draw function
+      sprites.js                      All enemy + player + junk pile sprite grid data + draw function
   public/
     manifest.json                     PWA manifest
     sw.js                             Service worker (cache-first for assets)
@@ -104,11 +105,11 @@ All game content lives in JSON data files (`src/data/*.json`). The engine files 
 
 | Data file | Content |
 |---|---|
-| `items.json` | 189 items: weapons, armour, shields, helmets, boots, rings, amulets, relics, consumables |
-| `enemies.json` | 12 enemy archetypes with base stats + tier/difficulty multipliers |
-| `zones.json` | 13 zones with chamber templates, merchant stock, enemy pools, loot table refs |
-| `conditions.json` | 14 conditions with body/mind slots, damage, duration, special mechanics |
-| `gifts.json` | 6 gift types with boon effects per slot (Petal fully populated, others designed) |
+| `items.json` | 243 items: 64 weapons, 36 armour, 62 consumables (incl. bombs, throwables), 55 relics (incl. dice-triggered), 15 amulets, 11 rings |
+| `enemies.json` | 12 enemy archetypes with base stats, tier/difficulty multipliers, and 7 AI behaviours |
+| `zones.json` | 13 zones with chamber templates, merchant stock (Tailor/Peddler), enemy pools, loot table refs |
+| `conditions.json` | 18 conditions (incl. WET, CHARGED catalysts) with body/mind slots, damage, duration, 6 elemental reactions |
+| `gifts.json` | 6 gift types with boon effects per slot (all 6 fully wired with combat effects) |
 | `junk.json` | Per-floor junk pools, consumable junk effects, pile size descriptions |
 | `loot-tables.json` | Zone-specific weighted loot tables |
 | `classes.json` | Class definitions with stat allocations and starter shop inventory |
@@ -145,7 +146,7 @@ function drawSprite(canvas, spriteKey, tierColour, shadowColour) {
 
 **Benefits:** Zero storage, infinitely scalable, colour swaps are a single variable change, entire sprite sheet is a few kilobytes of JS.
 
-**Current sprites:** 12 enemy archetypes + 12 corpse sprites + 1 player sprite + 14 condition icons + door sprites + terminal sprite.
+**Current sprites:** 12 enemy archetypes + 12 corpse sprites + 1 player sprite + 18 condition icons + door sprites + terminal sprite + junk pile sprites (6 Garden variants: 2 per size).
 
 ---
 
@@ -154,7 +155,9 @@ function drawSprite(canvas, spriteKey, tierColour, shadowColour) {
 - **ES5 style** in most files: `var`, `function(){}`, `Object.assign`. Match this in new code.
 - No tests, no linting, no CI pipeline
 - Manual testing on mobile (iOS Safari, Chrome) and desktop
-- `Game.jsx` is the largest file (~4000+ lines) -- it contains the entire game loop, combat, inventory, merchant, junk search, gift activation, and all game UI
+- `Game.jsx` is the largest file (~6000 lines) -- it contains the entire game loop, combat, inventory, merchant, junk search, gift activation, and all game UI
+- `ErrorBoundary.jsx` wraps Game.jsx to catch React render crashes and show error details instead of black screen (added for iOS WebKit crash diagnosis)
+- Bundle size ~985KB and growing
 
 ---
 
@@ -179,4 +182,4 @@ function drawSprite(canvas, spriteKey, tierColour, shadowColour) {
 
 ---
 
-*Technical Architecture -- v1.0 -- April 2026*
+*Technical Architecture -- v1.1 -- April 2026*

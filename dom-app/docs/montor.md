@@ -1,7 +1,7 @@
 # Montor
 
 > Everything about Montor the character, his Gifts, his mood, and his future as an AI personality.
-> Updated 2026-04-03.
+> Updated 2026-04-04.
 
 ---
 
@@ -91,12 +91,13 @@ Gifts are applied at **terminals** — zone-themed interactables found by search
 
 ### Terminal UI Flow
 
-1. Tap terminal in room
-2. "Select Gift" — shows banked gifts with icons
-3. Tap a gift → "Select Slot" — shows available slots (soul locked until body + mind filled)
-4. Each combo previews the power granted
-5. Toggle freely between gifts/slots until satisfied
-6. "Apply Gift" → power active for the rest of the run
+1. Tap terminal in room → "Manage Gifts" button
+2. Card-based table layout: Slot | Gift | Power columns
+3. Tap row to expand — shows themed gift buttons + power options inline
+4. Slot limit enforced: number of slots available = number of gifts unlocked (unlock more gifts to use more slots)
+5. Locked slots show "Locked -- unlock more gifts"
+6. Apply gift → power active for the rest of the run
+7. Also available after safe room smash (immediate application)
 
 ### Zone-Themed Terminals
 
@@ -135,8 +136,15 @@ When two gifts are placed in the Soul slot, their pairing creates a unique syner
 
 ### Current State
 
-- **Petal:** Fully implemented with 16 effects across body/mind/weapon/shield
-- **Stone, Bile, Blood, Ember, Void:** Designed, not yet implemented
+- **All 6 gift types fully wired** with combat effects across body/mind/weapon/shield slots
+  - Petal: regen/heal, perception/calm, lifesteal/slow, block + heal
+  - Stone: heavy DEF, stun resist, stagger/crush, thorns/reflect
+  - Bile: poison aura, debuff enhance, corrosive hits, toxic counter
+  - Blood: lifesteal, frenzy (dmg when hurt), bleed amplify, absorb (block->HP)
+  - Ember: burn aura, AoE splash, ignite/damage boost, fire shield
+  - Void: evasion/phase, meta (rerolls), chaos damage, nullify attacks
+- **429 lines of combat integration** in combat.js: defensive gifts (damage reduction, condition resist, regen, thorns), offensive gifts (bonus damage, condition application, crit mods), enemy modifier gifts (stat debuffs, accuracy penalties)
+- **Gift stat boosts are reversed when switching** -- no infinite stacking exploit
 - **Soul slot:** Designed, not yet implemented
 - **Cross-run persistence:** Requires Firebase (Stage 2)
 - **Give mechanic:** Requires mood system (planned)
@@ -253,4 +261,4 @@ The rarest outcome. If a player has high WIS, responds with genuine empathy duri
 
 ---
 
-*Montor -- v1.0 -- April 2026*
+*Montor -- v1.1 -- April 2026*
