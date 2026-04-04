@@ -395,35 +395,8 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
     result.junk = null
   }
 
-  // === REAL ITEM ===
-  // LCK boosts item find chance: +3% per LCK mod
-  var prefix = getFloorLootPrefix(floorId)
-  var tableId = prefix + '_' + config.lootTable
-  var adjustedItemChance = Math.min(0.85, config.itemChance + lckMod * 0.03)
-  if (Math.random() < adjustedItemChance) {
-    if (quality === 'fumble') {
-      result.narrative.push('Something was here... but you fumbled past it.')
-    } else if (quality === 'poor') {
-      if (Math.random() < 0.3) {
-        result.item = rollDrop(tableId, lckStat || 10)
-        result.narrative.push('Almost missed it — something useful!')
-      } else {
-        result.narrative.push('You sense something buried deeper... but can\'t reach it.')
-      }
-    } else if (quality === 'decent') {
-      if (Math.random() < 0.7) {
-        result.item = rollDrop(tableId, lckStat || 10)
-      } else {
-        result.narrative.push('Something glints but slips away...')
-      }
-    } else {
-      // Good or excellent — always find it
-      result.item = rollDrop(tableId, lckStat || 10)
-      if (quality === 'excellent') result.narrative.push('Your keen eye spots something others would miss.')
-    }
-  }
-
-  // === DANGER: ENEMY ===
+  // === DANGER: ENEMY === (resolved before loot so traps can boost loot)
+  var dangerLootBoost = false
   var enemyChance = getBaseEnemyChance(risk) * config.enemyMul
   if (enemyChance > 0 && Math.random() < enemyChance) {
     result.dangerTriggered = true
@@ -480,6 +453,43 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
         result.narrative.push('TRAP! ' + condId + '!')
       }
     }
+    // Trap guarded something valuable — boost loot
+    dangerLootBoost = true
+  }
+
+  // === REAL ITEM === (after danger — traps boost loot quality)
+  var prefix = getFloorLootPrefix(floorId)
+  var tableId = prefix + '_' + config.lootTable
+  // Trap-boosted: +25% item chance, upgrade to elite table if was standard
+  var adjustedItemChance = Math.min(0.85, config.itemChance + lckMod * 0.03)
+  if (dangerLootBoost) {
+    adjustedItemChance = Math.min(0.90, adjustedItemChance + 0.25)
+    if (tableId.indexOf('_standard') !== -1) tableId = tableId.replace('_standard', '_elite')
+  }
+  if (Math.random() < adjustedItemChance) {
+    if (quality === 'fumble') {
+      result.narrative.push('Something was here... but you fumbled past it.')
+    } else if (quality === 'poor') {
+      if (Math.random() < (dangerLootBoost ? 0.6 : 0.3)) {
+        result.item = rollDrop(tableId, lckStat || 10)
+        result.narrative.push('Almost missed it — something useful!')
+      } else {
+        result.narrative.push('You sense something buried deeper... but can\'t reach it.')
+      }
+    } else if (quality === 'decent') {
+      if (Math.random() < (dangerLootBoost ? 0.9 : 0.7)) {
+        result.item = rollDrop(tableId, lckStat || 10)
+      } else {
+        result.narrative.push('Something glints but slips away...')
+      }
+    } else {
+      result.item = rollDrop(tableId, lckStat || 10)
+      if (quality === 'excellent') result.narrative.push('Your keen eye spots something others would miss.')
+    }
+  }
+  // Trap-boosted gold
+  if (dangerLootBoost) {
+    result.gold = Math.round(result.gold * 1.5)
   }
 
   // === TERMINAL ===
