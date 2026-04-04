@@ -1548,64 +1548,36 @@ function Game({ character, user, onEndRun }) {
   }
 
   // === PLAYER TURN ===
-  // Tick player conditions at turn start
+  // Tap-gated condition resolution — no timers, all player-driven
   var [playerConditionTicked, setPlayerConditionTicked] = useState(false)
   var [playerTurnAnnounced, setPlayerTurnAnnounced] = useState(false)
+  var [playerConditionMessages, setPlayerConditionMessages] = useState([]) // messages to tap through
+  var [playerConditionIndex, setPlayerConditionIndex] = useState(-1) // -1 = show "Your Turn", 0+ = showing messages
+  var [playerTurnSkipped, setPlayerTurnSkipped] = useState(false) // was turn skipped by conditions?
+  var [playerTickBattle, setPlayerTickBattle] = useState(null) // battle state after tick (for advancing on skip)
 
-  // Step 1: Announce "Your Turn" for 500ms before ticking conditions
+  // Tick conditions when playerTurn starts — compute messages but don't auto-advance
   useEffect(function() {
     if (combatPhase !== 'playerTurn' || !battle || playerTurnAnnounced) return
     var playerUid = user.uid
     var player = battle.players[playerUid]
 
-    // No conditions? Skip announcement delay
-    if (!player || !player.statusEffects || player.statusEffects.length === 0) {
-      setPlayerTurnAnnounced(true)
-      setPlayerConditionTicked(true)
-      return
-    }
-
-    // Show "Your Turn" briefly, then tick conditions
-    var announceTimeout = setTimeout(function() {
-      setPlayerTurnAnnounced(true)
-    }, 500)
-    return function() { clearTimeout(announceTimeout) }
-  }, [combatPhase, battle, playerTurnAnnounced])
-
-  // Step 2: After announced, tick bombs + conditions
-  useEffect(function() {
-    if (combatPhase !== 'playerTurn' || !battle || !playerTurnAnnounced || playerConditionTicked) return
-
-    // Tick active bombs
+    // Tick bombs
     if (activeBombs.length > 0) {
       var updatedBombs = []
       var bombBattle = Object.assign({}, battle, { enemies: battle.enemies.map(function(e) { return Object.assign({}, e) }) })
       for (var bi = 0; bi < activeBombs.length; bi++) {
         var bomb = Object.assign({}, activeBombs[bi], { fuseLeft: activeBombs[bi].fuseLeft - 1 })
         if (bomb.fuseLeft <= 0) {
-          // EXPLODE
           addLog({ type: 'player', text: bomb.name + ' EXPLODES!', tier: 'crit' })
           bombBattle.enemies.forEach(function(e) {
             if (e.isDown) return
-            if (bomb.explosionDamage) {
-              e.currentHp = Math.max(0, e.currentHp - bomb.explosionDamage)
-              if (e.currentHp <= 0) e.isDown = true
-            }
-            if (bomb.explosionCondition) {
-              for (var bsi = 0; bsi < (bomb.explosionStacks || 1); bsi++) {
-                e.statusEffects = applyConditionToEffects(e.statusEffects || [], bomb.explosionCondition, 'bomb')
-              }
-            }
-            if (bomb.explosionCondition2) {
-              e.statusEffects = applyConditionToEffects(e.statusEffects || [], bomb.explosionCondition2, 'bomb')
-            }
-            if (bomb.explosionRandomCondition) {
-              var randConds = ['BLEED', 'POISON', 'BURN', 'FROST', 'DAZE', 'FEAR', 'BLIND', 'NAUSEA']
-              e.statusEffects = applyConditionToEffects(e.statusEffects || [], randConds[Math.floor(Math.random() * randConds.length)], 'bomb')
-            }
+            if (bomb.explosionDamage) { e.currentHp = Math.max(0, e.currentHp - bomb.explosionDamage); if (e.currentHp <= 0) e.isDown = true }
+            if (bomb.explosionCondition) { for (var bsi = 0; bsi < (bomb.explosionStacks || 1); bsi++) { e.statusEffects = applyConditionToEffects(e.statusEffects || [], bomb.explosionCondition, 'bomb') } }
+            if (bomb.explosionCondition2) { e.statusEffects = applyConditionToEffects(e.statusEffects || [], bomb.explosionCondition2, 'bomb') }
+            if (bomb.explosionRandomCondition) { var rc = ['BLEED','POISON','BURN','FROST','DAZE','FEAR','BLIND','NAUSEA']; e.statusEffects = applyConditionToEffects(e.statusEffects || [], rc[Math.floor(Math.random()*rc.length)], 'bomb') }
           })
         } else {
-          addLog({ type: 'player', text: bomb.name + ' ticking... ' + bomb.fuseLeft + ' turns left.', tier: 'glancing' })
           updatedBombs.push(bomb)
         }
       }
@@ -1613,28 +1585,38 @@ function Game({ character, user, onEndRun }) {
       setBattle(bombBattle)
     }
 
-    var playerUid = user.uid
-    var player = battle.players[playerUid]
+    // No conditions? Go straight to action
     if (!player || !player.statusEffects || player.statusEffects.length === 0) {
+      setPlayerTurnAnnounced(true)
       setPlayerConditionTicked(true)
+      setPlayerConditionMessages([])
+      setPlayerConditionIndex(-1)
+      setPlayerTurnSkipped(false)
       return
     }
 
+    // Tick conditions and build message queue
     var tickResult = tickTurnStart(battle, playerUid)
+    var messages = []
 
-    // Split narrative into individual lines for readable display
     if (tickResult.narrative) {
       var parts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
       for (var ni = 0; ni < parts.length; ni++) {
         var part = parts[ni].replace(/\.+$/, '')
-        var logTier = 'glancing'
-        if (part.indexOf('turn lost') !== -1 || part.indexOf('paralysed') !== -1 || part.indexOf('skip') !== -1) logTier = 'miss'
-        else if (part.indexOf('ADRENALINE') !== -1) logTier = 'crit'
-        addLog({ type: 'condition', text: part, tier: logTier })
+        var tier = 'glancing'
+        if (part.indexOf('turn lost') !== -1 || part.indexOf('paralysed') !== -1 || part.indexOf('skip') !== -1) tier = 'miss'
+        else if (part.indexOf('ADRENALINE') !== -1) tier = 'crit'
+        messages.push({ text: part, tier: tier })
       }
     }
+
+    if (tickResult.damage > 0) {
+      messages.unshift({ text: 'Conditions deal ' + tickResult.damage + ' damage!', tier: 'hit' })
+    }
+
     setBattle(tickResult.newBattle)
     setPlayerHp(tickResult.newBattle.players[playerUid].currentHp)
+    setPlayerTickBattle(tickResult.newBattle)
 
     if (tickResult.died) {
       setPlayerHp(0)
@@ -1642,32 +1624,56 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
-    var hasConditionEffects = tickResult.damage > 0 || tickResult.narrative
-    var conditionDisplayTime = hasConditionEffects ? 1200 : 0
-
-    if (tickResult.skipped) {
-      // Show condition effects, then skip banner, then advance
-      var skipTimeout1 = setTimeout(function() {
-        guardedSetCombatPhase('playerSkipped')
-      }, conditionDisplayTime)
-      var skipTimeout2 = setTimeout(function() {
-        var nextB = advanceTurn(tickResult.newBattle)
-        setBattle(nextB)
-        var nextA = getActor(nextB, getCurrentTurnId(nextB))
-        guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-        setPlayerConditionTicked(false)
-        setPlayerTurnAnnounced(false)
-      }, conditionDisplayTime + 2000)
-      return function() { clearTimeout(skipTimeout1); clearTimeout(skipTimeout2) }
+    // Set up tap-through sequence
+    setPlayerTurnAnnounced(true)
+    setPlayerTurnSkipped(tickResult.skipped)
+    setPlayerConditionMessages(messages)
+    setPlayerConditionIndex(messages.length > 0 ? -1 : -2) // -1 = show "Your Turn" first, -2 = no messages, skip to action
+    if (messages.length === 0) {
+      setPlayerConditionTicked(true)
     }
-    setPlayerConditionTicked(true)
-  }, [combatPhase, battle, playerTurnAnnounced, playerConditionTicked])
+  }, [combatPhase, battle, playerTurnAnnounced])
+
+  // Handle tapping through condition messages
+  function handleConditionTap() {
+    var nextIdx = playerConditionIndex + 1
+    if (nextIdx < playerConditionMessages.length) {
+      // Show next message
+      addLog({ type: 'condition', text: playerConditionMessages[nextIdx].text, tier: playerConditionMessages[nextIdx].tier })
+      setPlayerConditionIndex(nextIdx)
+    } else if (playerTurnSkipped) {
+      // All messages shown, turn was skipped — show skip banner
+      guardedSetCombatPhase('playerSkipped')
+    } else {
+      // All messages shown, turn proceeds — show action buttons
+      setPlayerConditionTicked(true)
+    }
+  }
+
+  // Handle tap on playerSkipped banner
+  function handleSkippedTap() {
+    if (combatPhase !== 'playerSkipped' || !playerTickBattle) return
+    var nextB = advanceTurn(playerTickBattle)
+    setBattle(nextB)
+    var nextA = getActor(nextB, getCurrentTurnId(nextB))
+    guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+    setPlayerConditionTicked(false)
+    setPlayerTurnAnnounced(false)
+    setPlayerConditionMessages([])
+    setPlayerConditionIndex(-1)
+    setPlayerTurnSkipped(false)
+    setPlayerTickBattle(null)
+  }
 
   // Reset condition tick flags when combat phase changes away from playerTurn
   useEffect(function() {
-    if (combatPhase !== 'playerTurn') {
+    if (combatPhase !== 'playerTurn' && combatPhase !== 'playerSkipped') {
       setPlayerConditionTicked(false)
       setPlayerTurnAnnounced(false)
+      setPlayerConditionMessages([])
+      setPlayerConditionIndex(-1)
+      setPlayerTurnSkipped(false)
+      setPlayerTickBattle(null)
     }
   }, [combatPhase])
 
@@ -5712,21 +5718,33 @@ function Game({ character, user, onEndRun }) {
           )}
 
           {combatPhase === 'playerSkipped' && (
-            <div className="p-4 border-2 border-red-500/40 rounded-lg bg-red-500/10 text-center">
-              <p className="text-red-400 text-xl font-display animate-pulse">Turn Lost!</p>
+            <div onClick={handleSkippedTap} className="p-4 border-2 border-red-500/40 rounded-lg bg-red-500/10 text-center cursor-pointer">
+              <p className="text-red-400 text-xl font-display">Turn Lost!</p>
               <div className="mt-2 space-y-1">
                 {combatLog.slice(-3).map(function(entry, i) {
                   return <p key={i} className="text-ink text-sm">{entry.text}</p>
                 })}
               </div>
+              <p className="text-ink-faint text-[10px] mt-2">Tap to continue</p>
             </div>
           )}
 
-          {/* Your Turn announcement — shows briefly before conditions tick */}
-          {combatPhase === 'playerTurn' && !playerTurnAnnounced && !playerConditionTicked && (
-            <div className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center animate-pulse">
-              <p className="text-gold text-lg font-display">Your Turn</p>
-              <p className="text-ink-dim text-xs">Checking conditions...</p>
+          {/* Your Turn + condition tap-through */}
+          {combatPhase === 'playerTurn' && playerTurnAnnounced && !playerConditionTicked && playerConditionMessages.length > 0 && (
+            <div onClick={handleConditionTap} className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center cursor-pointer">
+              {playerConditionIndex < 0 ? (
+                <>
+                  <p className="text-gold text-lg font-display">Your Turn</p>
+                  <p className="text-ink-dim text-xs">Tap to resolve conditions</p>
+                </>
+              ) : (
+                <>
+                  <p className={'text-base font-display ' + (playerConditionMessages[playerConditionIndex].tier === 'crit' ? 'text-crimson' : playerConditionMessages[playerConditionIndex].tier === 'miss' ? 'text-red-400' : playerConditionMessages[playerConditionIndex].tier === 'hit' ? 'text-amber-500' : 'text-yellow-400')}>
+                    {playerConditionMessages[playerConditionIndex].text}
+                  </p>
+                  <p className="text-ink-faint text-[10px] mt-1">Tap to continue ({playerConditionIndex + 1}/{playerConditionMessages.length})</p>
+                </>
+              )}
             </div>
           )}
 
