@@ -4526,15 +4526,15 @@ function Game({ character, user, onEndRun }) {
                           onClick={function() { if (!isFullyLooted) handleOpenCorpse(corpse.id) }}
                           disabled={isFullyLooted}
                           className={
-                            'flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ' +
+                            'flex flex-col items-center gap-1 p-2 transition-all ' +
                             (isFullyLooted
-                              ? 'border-border opacity-30'
+                              ? 'opacity-30'
                               : corpse.opened
-                                ? 'border-gold/30 bg-surface cursor-pointer hover:border-gold'
-                                : 'border-gold/40 bg-gold-glow cursor-pointer hover:border-gold animate-pulse')
+                                ? 'cursor-pointer'
+                                : 'cursor-pointer animate-pulse')
                           }
                         >
-                          <ChamberIcon iconKey={corpseIcon} theme="garden" scale={3} />
+                          <ChamberIcon iconKey={corpseIcon} theme="garden" scale={5} />
                           {isFullyLooted ? (
                             <span className="text-ink-faint text-[8px] font-sans">looted</span>
                           ) : corpse.opened ? (

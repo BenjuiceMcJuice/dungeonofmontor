@@ -613,48 +613,53 @@ var CHAMBER_ICONS = {
 
   // === JUNK PILE SPRITES — Garden theme ===
   // Single base orientation per size: flat bottom + flat left (bottom-left corner).
-  // CSS transform flips for other corners.
-  // Colours: brown, moss, dark brown, terracotta, rust
+  // CSS transform flips for other corners. Irregular edges — garden debris, not clean triangles.
+  // Palette: '#3d2b1a' earth, '#5a3a1e' dark soil, '#6b4e2e' brown, '#8b6639' tan,
+  //          '#aa6633' terracotta, '#5a7a3a' moss, '#4a6a2a' dark leaf, '#7a9a4a' bright leaf,
+  //          '#8b4513' branch, '#c47a3a' broken pot, '#9b7653' dry wood
 
-  // --- Size 1: Scraps (bottom-left orientation) ---
+  // --- Size 1: Scraps — small pile of garden debris ---
   junk_garden_1: {
-    cols: 6, rows: 6, grid: [
-      [K,_,_,_,_,_],
-      [K,K,_,_,_,_],
-      [K,'#5a7a3a',K,_,_,_],
-      [K,'#8b6639','#6b4e2e',K,_,_],
-      [K,'#6b4e2e','#8b6639','#5a3a1e',K,_],
-      [K,'#5a3a1e','#6b4e2e','#8b6639','#5a7a3a',K],
+    cols: 7, rows: 7, grid: [
+      [_,_,_,_,'#4a6a2a',_,_],
+      [K,_,_,'#8b4513',K,_,_],
+      [K,K,'#5a7a3a','#6b4e2e',K,_,_],
+      [K,'#8b6639','#5a3a1e','#c47a3a',K,_,_],
+      [K,'#6b4e2e','#aa6633','#5a7a3a','#8b6639',K,_],
+      [K,'#5a3a1e','#8b4513','#6b4e2e','#5a3a1e','#4a6a2a',K],
+      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#6b4e2e','#3d2b1a',K],
     ],
   },
 
-  // --- Size 2: Heap (bottom-left orientation) ---
+  // --- Size 2: Heap — medium pile, branches poking out ---
   junk_garden_2: {
-    cols: 8, rows: 8, grid: [
-      [K,_,_,_,_,_,_,_],
-      [K,K,_,_,_,_,_,_],
-      [K,'#5a7a3a',K,_,_,_,_,_],
-      [K,'#aa6633','#8b6639',K,_,_,_,_],
-      [K,'#8b6639','#6b4e2e','#5a7a3a',K,_,_,_],
-      [K,'#6b4e2e','#aa6633','#8b6639','#6b4e2e',K,_,_],
-      [K,'#5a3a1e','#8b6639','#6b4e2e','#5a3a1e','#8b6639',K,_],
-      [K,'#6b4e2e','#5a3a1e','#8b6639','#6b4e2e','#5a3a1e','#5a7a3a',K],
+    cols: 9, rows: 9, grid: [
+      [_,_,'#8b4513',_,_,_,_,_,_],
+      [K,_,K,'#4a6a2a',_,_,_,_,_],
+      [K,'#5a7a3a',K,'#8b4513',K,_,_,_,_],
+      [K,'#6b4e2e','#c47a3a','#5a7a3a','#7a9a4a',K,_,_,_],
+      [K,'#aa6633','#5a3a1e','#8b6639','#6b4e2e',K,_,_,_],
+      [K,'#8b4513','#8b6639','#c47a3a','#5a3a1e','#5a7a3a',K,_,_],
+      [K,'#5a3a1e','#6b4e2e','#aa6633','#8b6639','#6b4e2e','#4a6a2a',K,_],
+      [K,'#3d2b1a','#8b4513','#5a3a1e','#6b4e2e','#8b4513','#5a3a1e','#7a9a4a',K],
+      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#6b4e2e','#3d2b1a',K],
     ],
   },
 
-  // --- Size 3: Mound (bottom-left orientation) ---
+  // --- Size 3: Mound — big pile, broken pots, weeds, compost ---
   junk_garden_3: {
-    cols: 10, rows: 10, grid: [
-      [K,_,_,_,_,_,_,_,_,_],
-      [K,K,_,_,_,_,_,_,_,_],
-      [K,'#5a7a3a',K,_,_,_,_,_,_,_],
-      [K,'#aa6633','#8b6639',K,_,_,_,_,_,_],
-      [K,'#8b6639','#6b4e2e','#5a7a3a',K,_,_,_,_,_],
-      [K,'#6b4e2e','#aa6633','#8b6639','#6b4e2e',K,_,_,_,_],
-      [K,'#5a7a3a','#8b6639','#5a3a1e','#aa6633','#8b6639',K,_,_,_],
-      [K,'#5a3a1e','#6b4e2e','#8b6639','#6b4e2e','#5a7a3a','#6b4e2e',K,_,_],
-      [K,'#6b4e2e','#5a3a1e','#6b4e2e','#8b6639','#5a3a1e','#8b6639','#5a3a1e',K,_],
-      [K,'#8b6639','#6b4e2e','#5a3a1e','#6b4e2e','#8b6639','#6b4e2e','#5a3a1e','#5a7a3a',K],
+    cols: 11, rows: 11, grid: [
+      [_,_,_,'#4a6a2a',_,_,_,'#8b4513',_,_,_],
+      [K,_,'#8b4513','#7a9a4a',K,_,_,K,_,_,_],
+      [K,K,'#5a7a3a','#c47a3a','#5a7a3a',K,_,_,_,_,_],
+      [K,'#8b6639','#6b4e2e','#aa6633','#8b4513',K,_,_,_,_,_],
+      [K,'#c47a3a','#5a3a1e','#8b6639','#5a7a3a','#6b4e2e',K,_,_,_,_],
+      [K,'#6b4e2e','#aa6633','#9b7653','#c47a3a','#8b6639','#4a6a2a',K,_,_,_],
+      [K,'#8b4513','#8b6639','#5a3a1e','#6b4e2e','#aa6633','#5a7a3a','#8b4513',K,_,_],
+      [K,'#5a3a1e','#c47a3a','#8b6639','#9b7653','#5a3a1e','#8b6639','#6b4e2e','#7a9a4a',K,_],
+      [K,'#6b4e2e','#5a3a1e','#aa6633','#6b4e2e','#8b4513','#5a3a1e','#c47a3a','#5a7a3a','#4a6a2a',K],
+      [K,'#3d2b1a','#8b4513','#5a3a1e','#8b6639','#6b4e2e','#aa6633','#5a3a1e','#6b4e2e','#8b4513',K],
+      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a',K],
     ],
   },
 }
