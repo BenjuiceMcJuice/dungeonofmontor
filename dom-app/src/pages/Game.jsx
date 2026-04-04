@@ -645,28 +645,7 @@ function Game({ character, user, onEndRun }) {
         clearInterval(searchDiceRef.current)
         setSearchDiceDisplay(result.natRoll)
         setSearchPhase('landed')
-
-        // If danger: brief pause then auto-run save roll
-        if (result.dangerTriggered) {
-          searchTimeoutRef.current = setTimeout(function() {
-            searchTimeoutRef.current = null
-            setSearchPhase('save_rolling')
-            var saveCount = 0
-            searchDiceRef.current = setInterval(function() {
-              setSearchSaveDiceDisplay(Math.floor(Math.random() * 20) + 1)
-              saveCount++
-              if (saveCount > 10) {
-                clearInterval(searchDiceRef.current)
-                var saveRoll = result.dangerType === 'enemy' ? result.perSaveRoll : result.agiSaveRoll
-                setSearchSaveDiceDisplay(saveRoll || '?')
-                setSearchPhase('save_landed')
-                // Wait for tap — handled by handleSearchTapContinue
-              }
-            }, 80)
-          }, 1500)
-        } else {
-          // Wait for tap — handled by handleSearchTapContinue
-        }
+        // Always wait for user tap — handleSearchTapContinue routes to save roll if danger exists
       }
     }, 80)
   }
@@ -761,10 +740,33 @@ function Game({ character, user, onEndRun }) {
   var searchTapGuardRef = useRef(0)
 
   function handleSearchTapContinue() {
-    if (searchPhase === 'landed' || searchPhase === 'save_landed') {
-      // Kill any pending save-roll timeout so it doesn't fire after we move on
+    if (searchPhase === 'landed') {
+      // Kill any pending auto-advance timeout
       if (searchTimeoutRef.current) { clearTimeout(searchTimeoutRef.current); searchTimeoutRef.current = null }
       searchTapGuardRef.current = Date.now()
+
+      if (searchResult && searchResult.dangerTriggered) {
+        // Route to save roll — don't skip it
+        setSearchPhase('save_rolling')
+        var saveCount = 0
+        searchDiceRef.current = setInterval(function() {
+          setSearchSaveDiceDisplay(Math.floor(Math.random() * 20) + 1)
+          saveCount++
+          if (saveCount > 10) {
+            clearInterval(searchDiceRef.current)
+            var saveRoll = searchResult.dangerType === 'enemy' ? searchResult.perSaveRoll : searchResult.agiSaveRoll
+            setSearchSaveDiceDisplay(saveRoll || '?')
+            setSearchPhase('save_landed')
+          }
+        }, 80)
+      } else {
+        // No danger — go straight to reveal
+        applySearchRewards(searchResult)
+        setSearchPhase('reveal')
+      }
+    } else if (searchPhase === 'save_landed') {
+      searchTapGuardRef.current = Date.now()
+      // Apply damage + conditions NOW, before reveal shows
       applySearchRewards(searchResult)
       setSearchPhase('reveal')
     }
@@ -4920,34 +4922,20 @@ function Game({ character, user, onEndRun }) {
               {/* Screen 2: Loot reveal */}
               {searchPhase === 'reveal' && searchResult && (
                 <div className="flex flex-col items-center gap-4 max-w-sm w-full">
-                  <p className="text-gold text-xl font-display">Discovered</p>
+                  {/* Quality label — prominent */}
+                  {(function() {
+                    var qLabels = { excellent: 'Excellent Find!', good: 'Good Find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
+                    var qColors = { excellent: 'text-gold text-2xl', good: 'text-green-400 text-xl', decent: 'text-ink text-lg', poor: 'text-amber-400 text-lg', fumble: 'text-red-400 text-xl animate-pulse' }
+                    var q = searchResult.quality || 'decent'
+                    return <p className={'font-display ' + (qColors[q] || 'text-ink text-lg')}>{qLabels[q] || 'Searched.'}</p>
+                  })()}
 
                   <div className="flex flex-col gap-3 w-full">
-                    {(searchResult.gold > 0 || searchResult.xp > 0) && (
-                      <div className="flex items-center justify-center gap-6 p-3 rounded-lg border border-gold/20 bg-gold/5">
-                        {searchResult.gold > 0 && <span className="text-gold font-display text-xl">+{searchResult.gold}g</span>}
-                        {searchResult.xp > 0 && <span className="text-blue font-display text-xl">+{searchResult.xp} XP</span>}
-                      </div>
-                    )}
-
-                    {searchResult.junk && (
-                      <div className="p-2 rounded-lg border border-border bg-surface text-center">
-                        <p className="text-ink text-sm font-sans">{searchResult.junk.name}</p>
-                        {searchResult.junk.consumable && <p className="text-amber-400 text-[10px] font-sans">Consumable</p>}
-                      </div>
-                    )}
-
-                    {searchResult.item && (
-                      <div className="p-4 rounded-lg border-2 border-amber-400/50 bg-amber-400/5 text-center">
-                        <p className="text-amber-400 font-display text-xl">{searchResult.item.name}</p>
-                        <p className="text-ink-dim text-xs font-sans mt-1">{searchResult.item.description || ''}</p>
-                      </div>
-                    )}
-
+                    {/* DANGER FIRST — traps and enemies at the top */}
                     {searchResult.trapImmune && (
                       <div className="p-3 rounded-lg border-2 border-green-400/40 bg-green-400/5 text-center">
                         <p className="text-green-400 font-display text-lg">
-                          {searchResult.trapResistType === 'immune' ? 'Immune!' : 'Resisted!'}
+                          {searchResult.trapResistType === 'immune' ? 'Trap Immune!' : 'Trap Resisted!'}
                         </p>
                       </div>
                     )}
@@ -4955,7 +4943,7 @@ function Game({ character, user, onEndRun }) {
                     {searchResult.condition && (
                       <div className="p-3 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-center">
                         <p className="text-red-400 font-display text-xl">
-                          {searchResult.agiSaved ? 'Trap Dodged!' : searchResult.condition + '!'}
+                          {searchResult.agiSaved ? 'Trap Dodged!' : 'TRAP: ' + searchResult.condition + '!'}
                         </p>
                         {searchResult.trapDamage > 0 && (
                           <p className="text-red-300 font-display text-lg">-{searchResult.trapDamage} HP</p>
@@ -4971,11 +4959,34 @@ function Game({ character, user, onEndRun }) {
                         </p>
                         <p className="text-red-300 text-xs font-sans mt-1">
                           {searchResult.perSaved ? 'Your sharp eyes scared it off.' :
-                           searchResult.enemy === 'ambush' ? 'Enemies attack! They strike first.' : 'Prepare to fight!'}
+                           searchResult.enemy === 'ambush' ? 'Enemies strike first after this.' : 'Combat after this.'}
                         </p>
                       </div>
                     )}
 
+                    {/* LOOT — gold, items, junk */}
+                    {(searchResult.gold > 0 || searchResult.xp > 0) && (
+                      <div className="flex items-center justify-center gap-6 p-3 rounded-lg border border-gold/20 bg-gold/5">
+                        {searchResult.gold > 0 && <span className="text-gold font-display text-xl">+{searchResult.gold}g</span>}
+                        {searchResult.xp > 0 && <span className="text-blue font-display text-xl">+{searchResult.xp} XP</span>}
+                      </div>
+                    )}
+
+                    {searchResult.item && (
+                      <div className="p-4 rounded-lg border-2 border-amber-400/50 bg-amber-400/5 text-center">
+                        <p className="text-amber-400 font-display text-xl">{searchResult.item.name}</p>
+                        <p className="text-ink-dim text-xs font-sans mt-1">{searchResult.item.description || ''}</p>
+                      </div>
+                    )}
+
+                    {searchResult.junk && (
+                      <div className="p-2 rounded-lg border border-border bg-surface text-center">
+                        <p className="text-ink text-sm font-sans">{searchResult.junk.name}</p>
+                        {searchResult.junk.consumable && <p className="text-amber-400 text-[10px] font-sans">Consumable</p>}
+                      </div>
+                    )}
+
+                    {/* DISCOVERIES — terminal, treasure */}
                     {searchResult.terminal && (
                       <div className="p-3 rounded-lg border-2 border-purple-400/50 bg-purple-400/5 text-center">
                         <p className="text-purple-400 font-display text-xl">Terminal Found</p>
@@ -4984,9 +4995,9 @@ function Game({ character, user, onEndRun }) {
                     )}
 
                     {searchResult.treasure && (
-                      <div className="p-2 rounded-lg border border-border bg-surface text-center">
-                        <p className="text-ink text-sm font-sans">{searchResult.treasure.name}</p>
-                        <p className="text-ink-dim text-[10px] font-sans mt-1 italic">{searchResult.treasure.description}</p>
+                      <div className="p-3 rounded-lg border-2 border-gold/50 bg-gold/5 text-center">
+                        <p className="text-gold font-display text-xl">{searchResult.treasure.name}</p>
+                        <p className="text-ink-dim text-xs font-sans mt-1 italic">{searchResult.treasure.description}</p>
                       </div>
                     )}
 
