@@ -1164,6 +1164,8 @@ function Game({ character, user, onEndRun }) {
     var enemyCondDelay = hasEnemyConditionEffects ? 1000 : 0
 
     if (tickResult.died) {
+      // Enemy died from conditions — skip windup, go straight to result
+      addLog({ type: 'condition', text: getActor(tickedBattle, currentId) ? getActor(tickedBattle, currentId).data.name + ' dies from conditions!' : 'Enemy dies from conditions!', tier: 'crit' })
       var diedTimeout = setTimeout(function() {
         setBattle(tickedBattle)
         var endCheck = checkBattleEnd(tickedBattle)
@@ -1176,12 +1178,12 @@ function Game({ character, user, onEndRun }) {
           transitionGuardRef.current = Date.now(); guardedSetCombatPhase('victory')
           return
         }
-        // Enemy died from conditions — skip their turn
+        // Other enemies still alive — skip dead enemy's turn
         var nextB = advanceTurn(tickedBattle)
         setBattle(nextB)
         var nextA = getActor(nextB, getCurrentTurnId(nextB))
         guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-      }, enemyCondDelay)
+      }, 300) // Short delay — just enough to see the death log
       return function() { clearTimeout(diedTimeout) }
     }
     if (tickResult.skipped) {
