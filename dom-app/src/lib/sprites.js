@@ -384,12 +384,34 @@ var DOOR_SPRITE = {
   ],
 }
 
+// Open door — swung ajar, dark opening visible
+var DOOR_SPRITE_OPEN = {
+  cols: 12, rows: 16, grid: [
+    [_,_,K,K,K,K,K,K,K,K,_,_],  // arch top
+    [_,K,W,W,W,W,W,W,W,W,K,_],
+    [K,W,W,H,_,_,_,_,H,W,W,K],  // arch opening
+    [K,W,_,_,_,_,_,_,_,_,W,K],
+    [K,W,_,_,_,_,_,_,_,_,W,K],  // open — dark passage
+    [K,W,_,_,_,_,_,_,K,D,W,K],  // door swung right
+    [K,W,_,_,_,_,_,_,K,D,W,K],
+    [K,W,_,_,_,_,_,_,K,H,W,K],  // handle visible on edge
+    [K,W,_,_,_,_,_,_,K,D,W,K],
+    [K,W,_,_,_,_,_,_,K,D,W,K],
+    [K,W,_,_,_,_,_,_,K,D,W,K],
+    [K,W,_,_,_,_,_,_,K,D,W,K],
+    [K,W,_,_,_,_,_,_,K,K,W,K],  // door frame bottom
+    [K,W,W,W,W,W,W,W,W,W,W,K],
+    [K,W,W,W,W,W,W,W,W,W,W,K],  // floor stones
+    [K,K,K,K,K,K,K,K,K,K,K,K],
+  ],
+}
+
 var DOOR_THEMES = themeData.doorThemes
 
-function drawDoorSprite(canvas, theme, scale) {
+function drawDoorSprite(canvas, theme, scale, open) {
   var colours = DOOR_THEMES[theme] || DOOR_THEMES.dungeon
   var px = scale || 3
-  var sprite = DOOR_SPRITE
+  var sprite = open ? DOOR_SPRITE_OPEN : DOOR_SPRITE
 
   canvas.width = sprite.cols * px
   canvas.height = sprite.rows * px
