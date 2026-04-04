@@ -320,6 +320,36 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
       }
     }
 
+    // Magic 8-Ball: nat 20 triggers d6 effect
+    if (attackResult.roll === 20) {
+      for (var m8i = 0; m8i < passiveItems.length; m8i++) {
+        if (passiveItems[m8i].passiveEffect === 'magic_8_ball') {
+          var m8roll = Math.floor(Math.random() * 6) + 1
+          result.magic8Ball = true
+          result.magic8BallRoll = m8roll
+          if (m8roll === 1) {
+            // Instakill
+            enemy.currentHp = 0; enemy.isDown = true; result.enemyDefeated = true
+            result.magic8BallEffect = 'instakill'
+          } else if (m8roll === 2) {
+            result.magic8BallEffect = 'full_heal'
+          } else if (m8roll === 3) {
+            result.magic8BallEffect = 'double_gold'
+          } else if (m8roll === 4) {
+            result.magic8BallEffect = 'fear_self'
+          } else if (m8roll === 5) {
+            bs.enemies.forEach(function(e8) {
+              if (!e8.isDown) e8.statusEffects = applyCondition(e8.statusEffects || [], 'DAZE', 'magic_8_ball')
+            })
+            result.magic8BallEffect = 'daze_all'
+          } else {
+            result.magic8BallEffect = 'nothing'
+          }
+          break
+        }
+      }
+    }
+
     // Pressure Cooker: count nat 1s (persistent)
     if (attackResult.roll === 1) {
       for (var pci = 0; pci < passiveItems.length; pci++) {

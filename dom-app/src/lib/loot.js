@@ -351,6 +351,44 @@ function applyConsumable(item, playerState) {
   } else if (item.effect === 'cure_all_conditions') {
     result.description = 'All conditions cleared!'
     result.stateChanges.cureAll = true
+  } else if (item.effect === 'timed_bomb') {
+    result.description = 'Fuse lit! ' + item.fuseTurns + ' turns until detonation!'
+    result.stateChanges.timedBomb = {
+      name: item.name,
+      fuseLeft: item.fuseTurns,
+      explosionDamage: item.explosionDamage || 0,
+      explosionCondition: item.explosionCondition || null,
+      explosionCondition2: item.explosionCondition2 || null,
+      explosionStacks: item.explosionStacks || 0,
+      explosionRandomCondition: item.explosionRandomCondition || false,
+      explosionAoe: item.explosionAoe || false,
+    }
+  } else if (item.effect === 'reflect_next_attack') {
+    result.description = 'Next enemy attack will be reflected!'
+    result.stateChanges.reflectNextAttack = true
+  } else if (item.effect === 'wet_all_and_heal') {
+    result.description = 'Everyone gets WET! Heal ' + (item.effectHeal || 5) + ' HP!'
+    result.stateChanges.conditionAllEnemies = 'WET'
+    result.stateChanges.hpChange = item.effectHeal || 5
+  } else if (item.effect === 'risky_throw') {
+    if (Math.random() < 0.5) {
+      result.description = item.goodEffect + ' applied to enemy!'
+      result.stateChanges.conditionOneEnemy = item.goodEffect
+    } else {
+      result.description = 'Backfired! Enemy heals ' + item.badValue + ' HP!'
+      result.stateChanges.healEnemy = item.badValue
+    }
+  } else if (item.effect === 'damage_and_condition_one') {
+    result.description = item.effectValue + ' damage + ' + item.effectCondition + '!'
+    result.stateChanges.conditionOneEnemy = item.effectCondition
+    result.stateChanges.throwDamage = item.effectValue
+    if (item.effectCondition2) result.stateChanges.conditionOneEnemy2 = item.effectCondition2
+  } else if (item.effect === 'debuff_all_enemies') {
+    result.description = 'All enemies debuffed! -' + Math.abs(item.effectValue) + ' ' + (item.effectStat || '') + ' for ' + item.effectDuration + ' turns.'
+    result.stateChanges.debuffAllEnemies = { stat: item.effectStat, value: item.effectValue, duration: item.effectDuration }
+  } else if (item.effect === 'summon_ally') {
+    result.description = 'Summoned an ally for ' + item.summonTurns + ' turns!'
+    result.stateChanges.summonAlly = { turns: item.summonTurns, damage: item.summonDamage || 4, condition: item.summonCondition || null, chance: item.summonChance || 0.3, name: item.name }
   } else if (item.effect === 'random_effect') {
     var effects = [
       { desc: 'Healed 20 HP!', changes: { hpChange: 20 } },
