@@ -3,7 +3,7 @@
 // Uses 4-tier attack resolution: Crit / Hit / Glancing Blow / Miss
 import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
-import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance, getDamageTakenMultiplier } from './conditions.js'
+import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance, getDamageTakenMultiplier, checkConditionReactions } from './conditions.js'
 
 // Helper: collect all passive items from player equipment (relics + rings + armour + helmet + boots + amulet)
 function getPlayerPassiveItems(player) {
@@ -469,6 +469,17 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
         }
         // Stamp condition enhancements from amulet
         enhanceAppliedCondition(enemy.statusEffects, weapon.conditionOnHit, player)
+        // Check for condition reactions (FROST+BURN=SHATTER etc.)
+        var reaction = checkConditionReactions(enemy.statusEffects)
+        if (reaction) {
+          enemy.statusEffects = reaction.newEffects
+          if (reaction.damage > 0) {
+            enemy.currentHp = Math.max(0, enemy.currentHp - reaction.damage)
+            result.damage += reaction.damage
+            if (enemy.currentHp <= 0) { enemy.isDown = true; result.enemyDefeated = true }
+          }
+          result.conditionReaction = reaction
+        }
       }
     }
 

@@ -194,6 +194,41 @@
           "itemId": "montors_lego_brick",
           "weight": 3,
           "minRarity": "common"
+        },
+        {
+          "itemId": "montors_watering_can",
+          "weight": 4,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_vinegar_bottle",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_rusty_nail_throw",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_ice_lolly",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_lighter_fluid",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_bag_of_marbles",
+          "weight": 3,
+          "minRarity": "common"
+        },
+        {
+          "itemId": "montors_handful_of_gravel",
+          "weight": 3,
+          "minRarity": "common"
         }
       ]
     },
@@ -402,6 +437,31 @@
           "itemId": "montors_knuckleduster_ring",
           "weight": 2,
           "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_spark_plug",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_chilli_powder",
+          "weight": 3,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_mums_potpourri",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_chain",
+          "weight": 2,
+          "minRarity": "uncommon"
+        },
+        {
+          "itemId": "montors_glitter_bomb",
+          "weight": 1,
+          "minRarity": "rare"
         }
       ]
     },
