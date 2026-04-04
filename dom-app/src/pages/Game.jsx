@@ -3114,6 +3114,25 @@ function Game({ character, user, onEndRun }) {
   var wallHiColor = doorThemeColours.wallHi
   var floorBorderColor = wallColor  // used by interaction overlays
 
+  // Generate stone wall texture as tileable SVG — matches door sprite pillar colours
+  function generateWallTexture(wallCol, wallHiCol) {
+    var colours = [wallCol, wallHiCol, wallCol, wallCol, wallHiCol, wallCol, wallCol]
+    var gridW = 4, gridH = 4, px = 3
+    var seed = 41
+    var rects = ''
+    for (var wy = 0; wy < gridH; wy++) {
+      for (var wx = 0; wx < gridW; wx++) {
+        seed = (seed * 37 + 11) & 0xffff
+        rects += '<rect x="' + (wx * px) + '" y="' + (wy * px) + '" width="' + px + '" height="' + px + '" fill="' + colours[seed % colours.length] + '"/>'
+      }
+    }
+    var tw = gridW * px, th = gridH * px
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + tw + '" height="' + th + '">' + rects + '</svg>'
+    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")'
+  }
+  var wallTexture = generateWallTexture(wallColor, wallHiColor)
+  var wallStyle = { backgroundImage: wallTexture, backgroundRepeat: 'repeat' }
+
   // === GIFT PICKER OVERLAY — single-screen table layout ===
   if (showGiftPicker && unlockedGifts.length > 0) {
     var giftColors = { petal: 'green-400', stone: 'blue-400', bile: 'yellow-400', blood: 'red-400', ember: 'orange-400', void: 'purple-400' }
@@ -4318,19 +4337,21 @@ function Game({ character, user, onEndRun }) {
         })()}
 
         {/* Room layout — doors on edges, walls connecting them */}
-        <div className="flex-1 flex flex-col min-h-0 relative" style={{ border: '6px solid ' + wallColor, boxShadow: 'inset 0 0 0 2px ' + wallHiColor + '40' }}>
+        <div className="flex-1 flex flex-col min-h-0 relative">
           {/* North wall with door gap */}
-          <div className="flex items-end" style={{ background: wallColor, minHeight: '8px' }}>
-            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
-            <div className="shrink-0 py-1">{doorMap.N ? renderDoor('N') : <div className="h-10" />}</div>
-            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
+          <div className="flex items-end">
+            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
+            <div className="shrink-0">{doorMap.N ? renderDoor('N') : <div style={Object.assign({ width: '36px', height: '42px' }, wallStyle)} />}</div>
+            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
           </div>
 
           {/* Middle area: West wall — Centre — East wall */}
           <div className="flex-1 flex min-h-0">
             {/* West wall with door gap */}
-            <div className="flex flex-col items-center justify-center shrink-0" style={{ background: doorMap.W ? 'transparent' : wallColor, width: doorMap.W ? 'auto' : '16px' }}>
+            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '36px' }, wallStyle)}>
+              <div className="flex-1" style={wallStyle} />
               {doorMap.W ? renderDoor('W') : null}
+              <div className="flex-1" style={wallStyle} />
             </div>
 
             {/* Centre content — large area */}
@@ -4599,16 +4620,18 @@ function Game({ character, user, onEndRun }) {
             </div>
 
             {/* East wall with door gap */}
-            <div className="flex flex-col items-center justify-center shrink-0" style={{ background: doorMap.E ? 'transparent' : wallColor, width: doorMap.E ? 'auto' : '16px' }}>
+            <div className="flex flex-col items-center shrink-0" style={Object.assign({ width: '36px' }, wallStyle)}>
+              <div className="flex-1" style={wallStyle} />
               {doorMap.E ? renderDoor('E') : null}
+              <div className="flex-1" style={wallStyle} />
             </div>
           </div>
 
           {/* South wall with door gap */}
-          <div className="flex items-start" style={{ background: wallColor, minHeight: '8px' }}>
-            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
-            <div className="shrink-0 py-1">{doorMap.S ? renderDoor('S') : <div className="h-10" />}</div>
-            <div className="flex-1" style={{ background: wallColor, height: '100%' }} />
+          <div className="flex items-start">
+            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
+            <div className="shrink-0">{doorMap.S ? renderDoor('S') : <div style={Object.assign({ width: '36px', height: '42px' }, wallStyle)} />}</div>
+            <div className="flex-1" style={Object.assign({ minHeight: '42px' }, wallStyle)} />
           </div>
 
           {/* Junk piles — corner-hugging triangles, absolutely positioned */}
