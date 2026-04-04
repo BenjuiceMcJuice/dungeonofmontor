@@ -4822,22 +4822,23 @@ function Game({ character, user, onEndRun }) {
           var ql = { excellent: 'EXCELLENT!', good: 'Good find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
 
           return (
-            <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6 overflow-y-auto py-8">
-              {/* Emergency close — always available */}
+            <div className="fixed inset-0 z-40 bg-bg/95 flex flex-col items-center justify-center px-6 overflow-y-auto py-8"
+              style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(40,35,25,0.4) 0%, transparent 70%)' }}>
+              {/* Emergency close */}
               <button onClick={handleDismissSearch}
                 className="absolute top-3 right-3 text-ink-faint text-xs border border-border px-2 py-1 rounded hover:text-ink z-50">
                 X
               </button>
 
-              {/* Screen 1: Rolling + Landed + Save — all on one screen */}
+              {/* Search screen (rolling → landed → save) */}
               {searchPhase !== 'reveal' && (
-                <div className="flex flex-col items-center gap-4 max-w-sm w-full">
-                  {/* Narrative */}
-                  <p className="text-ink text-base italic text-center font-sans">
+                <div className="flex flex-col items-center gap-5 max-w-sm w-full">
+                  {/* Action narrative */}
+                  <p className="text-ink-dim text-sm text-center font-sans">
                     {character.name} {actionText} {pileDesc}...
                   </p>
 
-                  {/* Main dice */}
+                  {/* Dice — rolling */}
                   {searchPhase === 'rolling' && (
                     <div className="rounded-xl flex items-center justify-center font-display text-4xl border-2 border-gold/50 bg-gold/10 text-gold animate-pulse"
                       style={{ width: '5rem', height: '5rem' }}>
@@ -4845,75 +4846,63 @@ function Game({ character, user, onEndRun }) {
                     </div>
                   )}
 
-                  {/* Landed — show die + quality */}
+                  {/* Dice — landed */}
                   {(searchPhase === 'landed' || searchPhase === 'save_rolling' || searchPhase === 'save_landed') && searchResult && (
                     <>
                       <div className={'rounded-xl flex items-center justify-center font-display text-4xl border-2 ' + qc}
                         style={{ width: '5rem', height: '5rem' }}>
                         {searchResult.natRoll}
                       </div>
-                      <p className={'text-3xl font-display ' + qc.split(' ')[0]}>{ql[searchResult.quality]}</p>
-                      <p className={'text-lg italic font-sans text-center ' + (
-                        searchResult.quality === 'excellent' ? 'text-gold/80' :
-                        searchResult.quality === 'good' ? 'text-green-400/80' :
-                        searchResult.quality === 'decent' ? 'text-ink-dim' :
-                        searchResult.quality === 'poor' ? 'text-ink-faint' : 'text-red-400/80'
-                      )}>
-                        {searchResult.narrative[0]}
-                      </p>
+                      <p className={'font-display text-2xl ' + qc.split(' ')[0]}>{ql[searchResult.quality]}</p>
                     </>
                   )}
 
-                  {/* Danger — save roll */}
+                  {/* Save roll — rolling */}
                   {searchPhase === 'save_rolling' && searchResult && (
-                    <div className="flex flex-col items-center gap-3 mt-4">
-                      <p className="text-red-400 text-lg font-display">
+                    <div className="flex flex-col items-center gap-3 mt-2 p-4 rounded-lg border border-red-400/30 bg-red-400/5 w-full">
+                      <p className="text-red-400 font-display text-lg">
                         {searchResult.dangerType === 'enemy' ? 'Something stirs!' : 'TRAP!'}
                       </p>
                       <div className="rounded-xl flex items-center justify-center font-display text-3xl border-2 border-red-400/50 bg-red-400/10 text-red-400 animate-pulse"
-                        style={{ width: '4.5rem', height: '4.5rem' }}>
+                        style={{ width: '4rem', height: '4rem' }}>
                         {searchSaveDiceDisplay || '?'}
                       </div>
+                      <p className="text-ink-faint text-xs font-sans">
+                        {searchResult.dangerType === 'enemy' ? 'PER save' : 'AGI save'}
+                      </p>
                     </div>
                   )}
 
+                  {/* Save roll — landed */}
                   {searchPhase === 'save_landed' && searchResult && (function() {
                     var saved = searchResult.dangerType === 'enemy' ? searchResult.perSaved : searchResult.agiSaved
-                    var sc = saved ? 'text-green-400 border-green-400 bg-green-400/10' : 'text-red-400 border-red-400 bg-red-400/10'
+                    var sc = saved ? 'border-green-400/30 bg-green-400/5' : 'border-red-400/30 bg-red-400/5'
                     var saveRoll = searchResult.dangerType === 'enemy' ? searchResult.perSaveRoll : searchResult.agiSaveRoll
-                    var saveLabel = searchResult.dangerType === 'enemy' ? 'PER save' : 'AGI save'
                     return (
-                      <div className="flex flex-col items-center gap-3 mt-4">
-                        <p className="text-red-400 text-lg font-display">
-                          {searchResult.dangerType === 'enemy' ? 'Something stirs!' : 'TRAP!'}
+                      <div className={'flex flex-col items-center gap-3 mt-2 p-4 rounded-lg border w-full ' + sc}>
+                        <p className={'font-display text-lg ' + (saved ? 'text-green-400' : 'text-red-400')}>
+                          {saved
+                            ? (searchResult.dangerType === 'enemy' ? 'Spotted — it retreats!' : 'Dodged!')
+                            : (searchResult.dangerType === 'enemy'
+                              ? (searchResult.enemy === 'ambush' ? 'AMBUSH!' : 'Something emerges!')
+                              : 'TRAP: ' + searchResult.condition + '!')}
                         </p>
-                        <p className="text-ink-faint text-xs font-sans">{saveLabel}</p>
-                        <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' + sc}
-                          style={{ width: '4.5rem', height: '4.5rem' }}>
+                        <div className={'rounded-xl flex items-center justify-center font-display text-3xl border-2 ' +
+                          (saved ? 'border-green-400 bg-green-400/10 text-green-400' : 'border-red-400 bg-red-400/10 text-red-400')}
+                          style={{ width: '4rem', height: '4rem' }}>
                           {saveRoll}
                         </div>
-                        <p className={'text-xl font-display ' + sc.split(' ')[0]}>
-                          {saved
-                            ? (searchResult.dangerType === 'enemy' ? 'Spotted! It retreats.' : 'Dodged!')
-                            : (searchResult.dangerType === 'enemy'
-                              ? (searchResult.enemy === 'ambush' ? 'AMBUSH!' : 'Fight!')
-                              : searchResult.condition + '!')}
-                        </p>
-                        <p className="text-ink-dim text-xs font-sans italic text-center">
-                          {saved
-                            ? (searchResult.dangerType === 'enemy' ? 'Your perception scared it off.' : 'Quick reflexes save you.')
-                            : (searchResult.dangerType === 'enemy'
-                              ? (searchResult.enemy === 'ambush' ? 'They strike first!' : 'Prepare yourself.')
-                              : '')}
-                        </p>
+                        {searchResult.trapDamage > 0 && !saved && (
+                          <p className="text-red-400 font-display text-base">-{searchResult.trapDamage} HP</p>
+                        )}
                       </div>
                     )
                   })()}
 
-                  {/* Continue button — only on landed/save_landed */}
+                  {/* Tap to continue */}
                   {(searchPhase === 'landed' || searchPhase === 'save_landed') && (
                     <button onClick={handleSearchTapContinue}
-                      className="mt-6 py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
+                      className="mt-4 py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-sans text-sm hover:border-gold transition-colors">
                       Continue
                     </button>
                   )}
@@ -4923,13 +4912,7 @@ function Game({ character, user, onEndRun }) {
               {/* Screen 2: Loot reveal */}
               {searchPhase === 'reveal' && searchResult && (
                 <div className="flex flex-col items-center gap-4 max-w-sm w-full">
-                  {/* Quality label — prominent */}
-                  {(function() {
-                    var qLabels = { excellent: 'Excellent Find!', good: 'Good Find!', decent: 'Decent.', poor: 'Poor...', fumble: 'FUMBLE!' }
-                    var qColors = { excellent: 'text-gold text-2xl', good: 'text-green-400 text-xl', decent: 'text-ink text-lg', poor: 'text-amber-400 text-lg', fumble: 'text-red-400 text-xl animate-pulse' }
-                    var q = searchResult.quality || 'decent'
-                    return <p className={'font-display ' + (qColors[q] || 'text-ink text-lg')}>{qLabels[q] || 'Searched.'}</p>
-                  })()}
+                  <p className="text-gold text-lg font-display">Discovered</p>
 
                   <div className="flex flex-col gap-3 w-full">
                     {/* DANGER FIRST — traps and enemies at the top */}
