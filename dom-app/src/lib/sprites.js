@@ -839,11 +839,51 @@ var CONDITION_ICONS = {
       [_,_,'#880000',_,_,_],
     ],
   },
+  WET: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#4488cc',_,_,_],
+      [_,'#4488cc','#66aaee','#4488cc',_,_],
+      [_,_,'#4488cc',_,_,_],
+      [_,'#4488cc',_,'#4488cc',_,_],
+      ['#4488cc','#66aaee','#4488cc','#66aaee','#4488cc',_],
+      [_,'#4488cc',_,'#4488cc',_,_],
+    ],
+  },
+  CHARGED: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#ffee44',_,_,_],
+      [_,'#ffee44','#ffff88',_,_,_],
+      [_,'#ffee44','#ffff88','#ffee44',_,_],
+      [_,_,'#ffee44','#ffff88',_,_],
+      [_,_,_,'#ffee44',_,_],
+      [_,_,'#ffee44',_,_,_],
+    ],
+  },
+  ADRENALINE: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#44dd44',_,_,_],
+      [_,'#44dd44','#66ff66',_,_,_],
+      ['#44dd44','#66ff66','#44dd44','#44dd44',_,_],
+      [_,'#44dd44','#66ff66','#44dd44',_,_],
+      [_,_,'#44dd44',_,_,_],
+      [_,_,'#22aa22',_,_,_],
+    ],
+  },
+  ADRENALINE_CRASH: {
+    cols: 6, rows: 6, grid: [
+      [_,_,'#aa4444',_,_,_],
+      [_,'#aa4444','#cc6666',_,_,_],
+      ['#aa4444','#cc6666','#aa4444','#aa4444',_,_],
+      [_,'#aa4444','#cc6666','#aa4444',_,_],
+      [_,_,'#aa4444',_,_,_],
+      [_,_,'#882222',_,_,_],
+    ],
+  },
 }
 
 function drawConditionIcon(canvas, conditionId, scale) {
   var sprite = CONDITION_ICONS[conditionId]
-  if (!sprite) return
+  if (!sprite) { canvas.width = 0; canvas.height = 0; return }
   var px = scale || 3
   canvas.width = sprite.cols * px
   canvas.height = sprite.rows * px
