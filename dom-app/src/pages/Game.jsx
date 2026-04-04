@@ -3071,6 +3071,41 @@ function Game({ character, user, onEndRun }) {
   // RENDER
   // ============================================================
 
+  // Floor-themed mottled pixel background
+  // Each floor has 4-5 very dark colours that get scattered as a tileable pixel grid
+  var FLOOR_BG_PALETTES = {
+    grounds:     ['#121810','#161e14','#131a11','#1a2218','#111610','#181f15','#141c12'],
+    underground: ['#181410','#1c1812','#1a1611','#1e1a14','#161310','#1b1713','#191511'],
+    underbelly:  ['#101418','#12181c','#11161a','#141a1e','#101316','#13171b','#111519'],
+    quarters:    ['#181018','#1c121c','#1a111a','#1e141e','#161016','#1b131b','#191119'],
+    works:       ['#1a1210','#1e1412','#1c1311','#201614','#181110','#1d1513','#1b1211'],
+    deep:        ['#101018','#12121c','#11111a','#14141e','#101016','#13131b','#111119'],
+  }
+
+  function generateMottledBg(floorId, chamberId) {
+    var palette = FLOOR_BG_PALETTES[floorId] || FLOOR_BG_PALETTES.grounds
+    var gridSize = 8  // 8x8 pixel tile
+    var pxSize = 6    // each pixel = 6px on screen
+    var seed = (chamberId || 0) * 7 + 13
+    var rects = ''
+    for (var gy = 0; gy < gridSize; gy++) {
+      for (var gx = 0; gx < gridSize; gx++) {
+        seed = (seed * 31 + 17) & 0xffff
+        var col = palette[seed % palette.length]
+        rects += '<rect x="' + (gx * pxSize) + '" y="' + (gy * pxSize) + '" width="' + pxSize + '" height="' + pxSize + '" fill="' + col + '"/>'
+      }
+    }
+    var totalSize = gridSize * pxSize
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalSize + '" height="' + totalSize + '">' + rects + '</svg>'
+    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")'
+  }
+
+  var mottledBg = generateMottledBg(
+    zone ? zone.floorId : 'grounds',
+    currentChamber ? currentChamber.id : 0
+  )
+  var roomBgStyle = { backgroundImage: mottledBg, backgroundRepeat: 'repeat' }
+
   // Floor-themed pixelated border
   var FLOOR_BORDER_COLORS = {
     grounds:     '#4a7c59', // mossy green
@@ -3508,7 +3543,7 @@ function Game({ character, user, onEndRun }) {
     }
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden" style={pixelBorderStyle}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={Object.assign({}, pixelBorderStyle, roomBgStyle)}>
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
@@ -5125,7 +5160,7 @@ function Game({ character, user, onEndRun }) {
   if (gamePhase === 'chamber') {
     var chamberNow = zone.chambers[zone.playerPosition]
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden" style={pixelBorderStyle}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={Object.assign({}, pixelBorderStyle, roomBgStyle)}>
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-ink-dim text-xs uppercase tracking-widest font-sans">{chamberNow.label}</span>
@@ -5363,7 +5398,7 @@ function Game({ character, user, onEndRun }) {
     var combatChamber = zone.chambers[zone.playerPosition]
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 bg-raised overflow-hidden" style={pixelBorderStyle}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={Object.assign({}, pixelBorderStyle, roomBgStyle)}>
         {/* Stats overlay (read-only during combat) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
