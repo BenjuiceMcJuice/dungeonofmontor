@@ -3,6 +3,7 @@
 // Uses 4-tier attack resolution: Crit / Hit / Glancing Blow / Miss
 import { roll, rollWithMod, d20Attack, rollDamage, applyDefence } from './dice.js'
 import { getModifier } from './classes.js'
+import { generateEnemy } from './enemies.js'
 import { tickConditions, applyCondition, rollConditionApplication, getEnemyCondition, getAllRollsMod, getConditionStatMod, getForcedTier, hasForceCrit, getMissChance, getDamageTakenMultiplier, checkConditionReactions } from './conditions.js'
 
 // Helper: collect all passive items from player equipment (relics + rings + armour + helmet + boots + amulet)
@@ -649,6 +650,107 @@ function resolveEnemyAttack(battleState, enemyId) {
 
   var target = livingPlayers[Math.floor(Math.random() * livingPlayers.length)]
 
+  // --- ENEMY AI BEHAVIOUR ---
+  var beh = enemy.behaviour || {}
+  enemy.turnCount = (enemy.turnCount || 0) + 1
+  if (enemy.howlCooldownLeft > 0) enemy.howlCooldownLeft--
+
+  var hpPercent = enemy.currentHp / enemy.maxHp
+
+  // FLEE — cowardly enemies run at low HP
+  if (beh.fleeThreshold && hpPercent <= beh.fleeThreshold && Math.random() < 0.6) {
+    enemy.isDown = true // fled = removed from battle
+    return { newBattle: bs, result: {
+      attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+      attackRoll: null, damage: 0, fled: true,
+    }}
+  }
+
+  // HOWL — buff all allies (orc warchief)
+  if (beh.canHowl && enemy.howlCooldownLeft <= 0) {
+    var livingAllies = bs.enemies.filter(function(e) { return !e.isDown && e.id !== enemy.id })
+    if (livingAllies.length > 0 && Math.random() < 0.4) {
+      livingAllies.forEach(function(ally) {
+        ally.stats = Object.assign({}, ally.stats, { str: ally.stats.str + beh.howlBonus })
+      })
+      enemy.howlCooldownLeft = beh.howlCooldown || 3
+      return { newBattle: bs, result: {
+        attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+        attackRoll: null, damage: 0, howled: true, howlBonus: beh.howlBonus,
+      }}
+    }
+  }
+
+  // HEAL ALLY — hounds lick wounded packmate
+  if (beh.canHealAlly) {
+    var woundedAlly = bs.enemies.find(function(e) { return !e.isDown && e.id !== enemy.id && e.currentHp < e.maxHp * 0.5 })
+    if (woundedAlly && Math.random() < 0.5) {
+      var healAmt = beh.healAmount || 5
+      woundedAlly.currentHp = Math.min(woundedAlly.maxHp, woundedAlly.currentHp + healAmt)
+      return { newBattle: bs, result: {
+        attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+        attackRoll: null, damage: 0, healedAlly: true, healedAllyName: woundedAlly.name, healAmount: healAmt,
+      }}
+    }
+  }
+
+  // EAT CORPSE — orcs eat dead allies for strength
+  if (beh.canEatCorpse) {
+    var corpse = bs.enemies.find(function(e) { return e.isDown && e.id !== enemy.id })
+    if (corpse && Math.random() < 0.3) {
+      enemy.stats = Object.assign({}, enemy.stats, { str: enemy.stats.str + 4 })
+      enemy.currentHp = Math.min(enemy.maxHp, enemy.currentHp + 10)
+      corpse.eaten = true // mark so it can't be eaten again
+      return { newBattle: bs, result: {
+        attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+        attackRoll: null, damage: 0, ateCorpse: true, ateCorpseName: corpse.name,
+      }}
+    }
+  }
+
+  // SACRIFICE — shades sacrifice themselves to buff allies
+  if (beh.canSacrifice && hpPercent <= 0.2) {
+    var sacrificeAllies = bs.enemies.filter(function(e) { return !e.isDown && e.id !== enemy.id })
+    if (sacrificeAllies.length > 0 && Math.random() < 0.5) {
+      sacrificeAllies.forEach(function(ally) {
+        ally.stats = Object.assign({}, ally.stats, { str: ally.stats.str + beh.sacrificeBonus, def: ally.stats.def + 2 })
+      })
+      enemy.isDown = true // sacrifice = death
+      return { newBattle: bs, result: {
+        attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+        attackRoll: null, damage: 0, sacrificed: true, sacrificeBonus: beh.sacrificeBonus,
+      }}
+    }
+  }
+
+  // HIDE — slugs and spiders burrow for a turn (untargetable, heal)
+  if (beh.canHide && !enemy.hasHidden && hpPercent <= (beh.hideThreshold || 0.3)) {
+    if (Math.random() < 0.5) {
+      enemy.currentHp = Math.min(enemy.maxHp, enemy.currentHp + (beh.hideHeal || 5))
+      enemy.hasHidden = true
+      return { newBattle: bs, result: {
+        attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+        attackRoll: null, damage: 0, hid: true, hideHeal: beh.hideHeal || 5,
+      }}
+    }
+  }
+
+  // SPAWN — rats and moths breed in long fights
+  if (beh.canSpawn && enemy.turnCount >= (beh.spawnAfterTurns || 4) && Math.random() < (beh.spawnChance || 0.2)) {
+    var spawnType = enemy.archetypeKey
+    var spawnEnemy = generateEnemy(spawnType, 'dust', 'novice')
+    spawnEnemy.name = 'Baby ' + spawnEnemy.name
+    spawnEnemy.currentHp = Math.round(spawnEnemy.currentHp * 0.5)
+    spawnEnemy.maxHp = spawnEnemy.currentHp
+    bs.enemies.push(spawnEnemy)
+    bs.turnOrder.push(spawnEnemy.id)
+    return { newBattle: bs, result: {
+      attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+      attackRoll: null, damage: 0, spawned: true, spawnedName: spawnEnemy.name,
+    }}
+  }
+
+  // --- DEFAULT: ATTACK ---
   var condStatMod = getConditionStatMod(enemy.statusEffects || [], 'str')
   var strMod = getModifier(enemy.stats.str) + condStatMod
   var rollsMod = getAllRollsMod(enemy.statusEffects || [])

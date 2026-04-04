@@ -1190,6 +1190,34 @@ function Game({ character, user, onEndRun }) {
 
     var attackOut = resolveEnemyAttack(tickedBattle, currentId)
     if (attackOut) {
+      var eResult = attackOut.result
+      // Non-attack actions (flee, howl, heal, etc.) — log and advance, skip roller
+      if (!eResult.attackRoll) {
+        var behaviourDelay = setTimeout(function() {
+          if (eResult.fled) addLog({ type: 'enemy', text: eResult.attacker + ' flees in terror!', tier: 'miss' })
+          if (eResult.howled) addLog({ type: 'enemy', text: eResult.attacker + ' howls! All allies +' + eResult.howlBonus + ' STR!', tier: 'hit' })
+          if (eResult.healedAlly) addLog({ type: 'enemy', text: eResult.attacker + ' heals ' + eResult.healedAllyName + ' for ' + eResult.healAmount + ' HP!', tier: 'hit' })
+          if (eResult.ateCorpse) addLog({ type: 'enemy', text: eResult.attacker + ' devours ' + eResult.ateCorpseName + '! +4 STR, +10 HP!', tier: 'crit' })
+          if (eResult.sacrificed) addLog({ type: 'enemy', text: eResult.attacker + ' sacrifices itself! All allies +' + eResult.sacrificeBonus + ' STR, +2 DEF!', tier: 'crit' })
+          if (eResult.hid) addLog({ type: 'enemy', text: eResult.attacker + ' burrows away and heals ' + eResult.hideHeal + ' HP!', tier: 'hit' })
+          if (eResult.spawned) addLog({ type: 'enemy', text: eResult.attacker + ' spawns ' + eResult.spawnedName + '!', tier: 'crit' })
+
+          var endCheck2 = checkBattleEnd(attackOut.newBattle)
+          if (endCheck2 === 'victory') {
+            var xpG2 = calculateXp(attackOut.newBattle)
+            setTotalXp(totalXp + xpG2); setLastXpGained(xpG2); checkLevelUp(totalXp + xpG2)
+            setBattle(attackOut.newBattle)
+            guardedSetCombatPhase('victory')
+            return
+          }
+          var nextB4 = advanceTurn(attackOut.newBattle)
+          setBattle(nextB4)
+          var nextA4 = getActor(nextB4, getCurrentTurnId(nextB4))
+          guardedSetCombatPhase(nextA4 && nextA4.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+        }, Math.max(600, enemyCondDelay))
+        return function() { clearTimeout(behaviourDelay) }
+      }
+      // Normal attack — show roller
       setEnemyAttackInfo({ attackOut: attackOut })
       setEnemyRollerKey(function(k) { return k + 1 })
       var timeout = setTimeout(function() { guardedSetCombatPhase('enemyRolling') }, Math.max(800, enemyCondDelay))
