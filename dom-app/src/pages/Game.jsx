@@ -3499,13 +3499,9 @@ function Game({ character, user, onEndRun }) {
       return (
         <button
           onClick={function() { handlePickDoor(door.targetId) }}
-          className={
-            'flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all cursor-pointer ' +
-            'bg-surface hover:bg-raised hover:border-gold ' +
-            (isCleared ? 'border-border' : 'border-border-hl')
-          }
+          className="flex flex-col items-center gap-0.5 p-1 transition-all cursor-pointer active:scale-95"
         >
-          <DoorSprite theme={zone.doorTheme || 'garden'} scale={2} open={isVisited} />
+          <DoorSprite theme={zone.doorTheme || 'garden'} scale={3} open={isVisited} />
           <span className="text-ink font-display text-xs">{DIR_LABELS[dir]}</span>
           {subtext && <span className={subtextCol + ' text-[9px] font-sans'}>{subtext}</span>}
         </button>
