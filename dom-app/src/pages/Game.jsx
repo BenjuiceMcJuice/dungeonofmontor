@@ -4606,7 +4606,7 @@ function Game({ character, user, onEndRun }) {
             return activePiles.map(function(pile, pi) {
               var corner = corners[pi % corners.length]
               var spriteKey = 'junk_' + floorTheme + '_' + pile.size
-              var spriteScale = pile.size === 3 ? 14 : pile.size === 2 ? 12 : 10
+              var spriteScale = pile.size === 3 ? 12 : pile.size === 2 ? 12 : 10
               var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
               return (
                 <button key={pile.id}
