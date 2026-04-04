@@ -612,58 +612,50 @@ var CHAMBER_ICONS = {
   },
 
   // === JUNK PILE SPRITES — Garden theme ===
-  // Single base orientation: flat bottom + flat left (bottom-left corner).
-  // CSS transform flips for other corners. Playful silhouettes with recognizable objects.
-  // Palette: K=outline, '#3d2b1a' earth, '#5a3a1e' soil, '#6b4e2e' brown, '#8b6639' tan,
-  //   '#aa6633' terracotta, '#c47a3a' pot orange, '#d4854a' pot highlight,
-  //   '#5a7a3a' moss, '#4a6a2a' leaf, '#7a9a4a' bright leaf, '#8b4513' wood,
-  //   '#9b7653' plank, '#666' metal, '#888' metal light
+  // Base orientation: flat bottom + flat left (bottom-left corner). CSS flips for others.
+  // Each size has a DIFFERENT silhouette shape (not all triangles!)
 
-  // --- Size 1: Scraps — broken pot + weeds ---
+  // --- Size 1: Scraps — LOW WIDE LUMPY mound, rounded top. Broken pot + leaves ---
   junk_garden_1: {
-    cols: 7, rows: 8, grid: [
-      [_,_,_,_,_,'#4a6a2a',_],
-      [_,_,_,_,'#4a6a2a','#7a9a4a',_],
-      [K,_,_,K,'#c47a3a',K,_],
-      [K,K,K,'#c47a3a','#d4854a',K,_],
-      [K,'#6b4e2e','#aa6633','#c47a3a',K,_,_],
-      [K,'#5a3a1e','#8b6639','#6b4e2e','#5a7a3a',K,_],
-      [K,'#3d2b1a','#5a3a1e','#8b4513','#5a3a1e','#4a6a2a',K],
-      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#6b4e2e','#3d2b1a',K],
+    cols: 8, rows: 5, grid: [
+      [K,_,_,K,K,'#4a6a2a',_,_],
+      [K,K,'#c47a3a','#d4854a',K,'#7a9a4a',K,_],
+      [K,'#6b4e2e','#aa6633','#c47a3a','#8b6639','#5a7a3a','#4a6a2a',K],
+      [K,'#5a3a1e','#8b4513','#6b4e2e','#5a3a1e','#8b6639','#5a3a1e',K],
+      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#6b4e2e','#3d2b1a','#5a3a1e',K],
     ],
   },
 
-  // --- Size 2: Heap — bucket on its side, garden fork handle, leaves ---
+  // --- Size 2: Heap — TALL SPIKY jagged, tools/planks jutting up at angles ---
   junk_garden_2: {
-    cols: 9, rows: 10, grid: [
-      [_,_,_,_,_,_,'#8b4513',_,_],
-      [_,_,_,_,_,_,'#8b4513',_,_],
-      [K,_,_,_,_,'#8b4513',K,_,_],
-      [K,K,'#888','#888','#666',K,_,_,_],
-      [K,'#666','#888','#666','#888',K,_,_,_],
-      [K,'#5a7a3a',K,K,'#6b4e2e','#7a9a4a',K,_,_],
-      [K,'#8b6639','#c47a3a','#aa6633','#5a3a1e','#5a7a3a','#4a6a2a',K,_],
-      [K,'#5a3a1e','#9b7653','#8b6639','#6b4e2e','#8b4513','#5a3a1e','#7a9a4a',K],
-      [K,'#3d2b1a','#6b4e2e','#5a3a1e','#8b6639','#5a3a1e','#6b4e2e','#3d2b1a',K],
-      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a',K],
+    cols: 7, rows: 11, grid: [
+      [_,'#8b4513',_,_,_,_,_],
+      [_,'#8b4513',_,_,'#9b7653',_,_],
+      [_,K,_,_,'#9b7653',_,_],
+      [K,'#5a7a3a',K,'#8b4513','#8b4513',_,_],
+      [K,'#aa6633','#c47a3a',K,K,_,_],
+      [K,'#8b6639','#666','#888','#5a7a3a',K,_],
+      [K,'#6b4e2e','#c47a3a','#8b6639','#6b4e2e',K,_],
+      [K,'#5a3a1e','#8b4513','#aa6633','#5a3a1e','#4a6a2a',K],
+      [K,'#8b6639','#6b4e2e','#5a3a1e','#8b6639','#5a3a1e',K],
+      [K,'#3d2b1a','#5a3a1e','#6b4e2e','#5a3a1e','#3d2b1a',K],
+      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a',K],
     ],
   },
 
-  // --- Size 3: Mound — wheelbarrow wheel, planks, pots, tangled weeds ---
+  // --- Size 3: Mound — BIG BULGING DOME, belly pushes out, rounded edge ---
   junk_garden_3: {
-    cols: 11, rows: 12, grid: [
-      [_,_,_,_,_,_,_,_,'#4a6a2a','#7a9a4a',_],
-      [_,_,_,'#9b7653',_,_,_,'#4a6a2a','#7a9a4a','#4a6a2a',_],
-      [K,_,'#9b7653','#8b4513',_,_,K,'#888',K,_,_],
-      [K,K,'#9b7653',K,_,'#888','#666',K,'#888',K,_],
-      [K,'#c47a3a','#d4854a',K,K,'#666',_,'#888',K,_,_],
-      [K,'#c47a3a','#aa6633','#5a7a3a','#8b4513',K,'#888',K,_,_,_],
-      [K,'#6b4e2e','#9b7653','#8b6639','#c47a3a','#5a7a3a',K,_,_,_,_],
-      [K,'#8b4513','#5a3a1e','#aa6633','#9b7653','#6b4e2e','#4a6a2a',K,_,_,_],
-      [K,'#5a3a1e','#8b6639','#6b4e2e','#8b4513','#5a3a1e','#8b6639','#5a7a3a',K,_,_],
-      [K,'#6b4e2e','#c47a3a','#5a3a1e','#9b7653','#8b6639','#5a3a1e','#6b4e2e','#4a6a2a',K,_],
-      [K,'#3d2b1a','#5a3a1e','#8b4513','#6b4e2e','#5a3a1e','#aa6633','#5a3a1e','#8b4513','#3d2b1a',K],
-      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a',K],
+    cols: 10, rows: 10, grid: [
+      [K,K,_,_,_,_,_,_,_,_],
+      [K,'#5a7a3a',K,K,_,_,_,_,_,_],
+      [K,'#c47a3a','#aa6633','#8b6639',K,K,_,_,_,_],
+      [K,'#8b6639','#d4854a','#c47a3a','#5a7a3a','#6b4e2e',K,_,_,_],
+      [K,'#6b4e2e','#9b7653','#8b6639','#aa6633','#8b6639','#4a6a2a',K,_,_],
+      [K,'#8b4513','#8b6639','#666','#888','#6b4e2e','#5a7a3a',K,K,_],
+      [K,'#5a3a1e','#c47a3a','#8b6639','#9b7653','#5a3a1e','#8b6639','#7a9a4a',K,_],
+      [K,'#6b4e2e','#aa6633','#5a3a1e','#8b4513','#8b6639','#6b4e2e','#5a3a1e',K,_],
+      [K,'#3d2b1a','#5a3a1e','#8b6639','#6b4e2e','#5a3a1e','#aa6633','#5a3a1e','#4a6a2a',K],
+      [K,'#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e','#3d2b1a','#5a3a1e',K],
     ],
   },
 }
