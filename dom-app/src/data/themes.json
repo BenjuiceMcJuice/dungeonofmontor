@@ -11,7 +11,13 @@
     "knight": { "hex": "#9ca3af", "shadow": "#6b7280" }
   },
   "doorThemes": {
-    "garden":  { "wall": "#5a6e4a", "wallHi": "#7a9060", "door": "#6b4e2e", "doorHi": "#c8a050" },
-    "dungeon": { "wall": "#4a4a52", "wallHi": "#6a6a72", "door": "#5a3a1e", "doorHi": "#b89040" }
+    "garden":      { "wall": "#5a6e4a", "wallHi": "#7a9060", "door": "#6b4e2e", "doorHi": "#c8a050" },
+    "dungeon":     { "wall": "#4a4a52", "wallHi": "#6a6a72", "door": "#5a3a1e", "doorHi": "#b89040" },
+    "underground": { "wall": "#5a5040", "wallHi": "#7a7060", "door": "#4a3828", "doorHi": "#a08040" },
+    "underbelly":  { "wall": "#3a4a4a", "wallHi": "#5a6a6a", "door": "#2a3a3a", "doorHi": "#6a8a7a" },
+    "quarters":    { "wall": "#5a4050", "wallHi": "#7a6070", "door": "#6a3a4a", "doorHi": "#b87090" },
+    "works":       { "wall": "#5a4030", "wallHi": "#8a6040", "door": "#4a3020", "doorHi": "#d09040" },
+    "deep":        { "wall": "#3a3a4a", "wallHi": "#5a5a6a", "door": "#2a2a3a", "doorHi": "#7a7a9a" },
+    "domain":      { "wall": "#2a2a2a", "wallHi": "#4a4a4a", "door": "#1a1a1a", "doorHi": "#9a6ab0" }
   }
 }
