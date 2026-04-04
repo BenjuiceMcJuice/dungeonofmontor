@@ -163,7 +163,19 @@ function CombatRoller({ onAttackRoll, onComplete, attackMod, damageDie, damageMo
   }
 
   var waitingForDoubleStrike = phase === 'damageResult' && doubleStrikeRef.current && !showDoubleStrike
-  var showContinue = ((phase === 'attackResult' && !isHit) || phase === 'damageResult') && !waitingForDoubleStrike
+  var showContinueCheck = ((phase === 'attackResult' && !isHit) || phase === 'damageResult') && !waitingForDoubleStrike
+
+  // Gate: minimum 800ms display before tapping is allowed
+  var [continueReady, setContinueReady] = useState(false)
+  useEffect(function() {
+    if (showContinueCheck && !continueReady) {
+      var gateTimeout = setTimeout(function() { setContinueReady(true) }, 800)
+      return function() { clearTimeout(gateTimeout) }
+    }
+    if (!showContinueCheck) setContinueReady(false)
+  }, [showContinueCheck])
+
+  var showContinue = showContinueCheck && continueReady
 
   function getAttackDieClass() {
     if (phase === 'attackRolling') return accentBorder + ' ' + accentBg + ' ' + accentText + ' animate-pulse scale-110'
