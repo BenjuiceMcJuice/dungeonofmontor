@@ -4301,7 +4301,7 @@ function Game({ character, user, onEndRun }) {
         })()}
 
         {/* Room layout — doors on edges, content in centre */}
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col min-h-0 relative">
           {/* North door — pinned to top */}
           <div className="flex justify-center py-1">
             {doorMap.N ? renderDoor('N') : <div className="h-12" />}
@@ -4572,30 +4572,7 @@ function Game({ character, user, onEndRun }) {
                   : (currentChamber.hasTerminal ? 'Something hums faintly beneath the debris. ' : 'The chamber is still. ') + doors.length + (doors.length === 1 ? ' door leads onward.' : ' doors lead onward.')}
               </p>
 
-              {/* Junk piles — shown when not mid-search */}
-              {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
-                var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
-                if (activePiles.length === 0) return null
-                var floorTheme = zone.floorId === 'grounds' ? 'garden' : 'garden'
-                return (
-                  <div className="flex flex-wrap justify-center gap-3 mt-2">
-                    {activePiles.map(function(pile, pi) {
-                      var variant = pi % 2 === 0 ? 'a' : 'b'
-                      var spriteKey = 'junk_' + floorTheme + '_' + pile.size + variant
-                      var spriteScale = pile.size === 3 ? 4 : pile.size === 2 ? 3 : 3
-                      return (
-                        <button key={pile.id}
-                          onClick={function() { handleInspectPile(pile.id) }}
-                          className="flex flex-col items-center gap-0.5 p-1 transition-all cursor-pointer hover:scale-110 active:scale-95"
-                        >
-                          <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
-                          <span className="text-ink-faint text-[8px] font-sans">{pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                )
-              })()}
+              {/* Junk piles rendered as corner overlays (see below) */}
 
               {/* Search choose rendered as overlay below */}
 
@@ -4612,6 +4589,34 @@ function Game({ character, user, onEndRun }) {
           <div className="flex justify-center py-1">
             {doorMap.S ? renderDoor('S') : <div className="h-12" />}
           </div>
+
+          {/* Junk piles — corner-hugging triangles, absolutely positioned */}
+          {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
+            var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
+            if (activePiles.length === 0) return null
+            var floorTheme = zone.floorId === 'grounds' ? 'garden' : 'garden'
+            // Corner positions: bottom-left, bottom-right, top-right (avoid top-left near header)
+            var corners = [
+              { pos: 'bottom-0 left-0', variant: 'a', align: 'items-start' },
+              { pos: 'bottom-0 right-0', variant: 'b', align: 'items-end' },
+              { pos: 'top-0 right-0', variant: 'b', align: 'items-end' },
+            ]
+            return activePiles.map(function(pile, pi) {
+              var corner = corners[pi % corners.length]
+              var spriteKey = 'junk_' + floorTheme + '_' + pile.size + corner.variant
+              var spriteScale = pile.size === 3 ? 4 : pile.size === 2 ? 3 : 3
+              var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
+              return (
+                <button key={pile.id}
+                  onClick={function() { handleInspectPile(pile.id) }}
+                  className={'absolute ' + corner.pos + ' z-10 flex flex-col ' + corner.align + ' p-1 cursor-pointer transition-all hover:scale-110 active:scale-95'}
+                >
+                  <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
+                  <span className="text-ink-faint text-[8px] font-sans">{sizeLabel}</span>
+                </button>
+              )
+            })
+          })()}
         </div>
 
         {/* Interaction overlays — merchant, quest NPC, chest, corpse */}
