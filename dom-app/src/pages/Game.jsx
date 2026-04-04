@@ -3538,7 +3538,8 @@ function Game({ character, user, onEndRun }) {
       return (
         <button
           onClick={function() { handlePickDoor(door.targetId) }}
-          className="transition-all cursor-pointer active:scale-95"
+          className="block transition-all cursor-pointer active:scale-95"
+          style={{ lineHeight: 0 }}
         >
           <div style={isVisited ? { background: '#000' } : {}}>
             <DoorSprite theme={zone.doorTheme || 'garden'} scale={3} open={isVisited} />
@@ -4633,7 +4634,7 @@ function Game({ character, user, onEndRun }) {
               var corner = corners[pi % corners.length]
               var visibleSize = pile.layersRemaining || pile.size
               var spriteKey = 'junk_' + floorTheme + '_' + visibleSize
-              var spriteScale = 4
+              var spriteScale = 5
               return (
                 <button key={pile.id}
                   onClick={function() { handleInspectPile(pile.id) }}
