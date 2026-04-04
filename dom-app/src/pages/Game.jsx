@@ -361,6 +361,7 @@ function Game({ character, user, onEndRun }) {
   var [combatLog, setCombatLog] = useState([])
   var [pendingAttackResult, setPendingAttackResult] = useState(null)
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null)
+  var [enemyBehaviourMsg, setEnemyBehaviourMsg] = useState(null) // { name, text } for non-attack actions
   var [enemyRollerKey, setEnemyRollerKey] = useState(0)
   var [lootableCorpses, setLootableCorpses] = useState([])
   var [lootingCorpseId, setLootingCorpseId] = useState(null)
@@ -1124,6 +1125,7 @@ function Game({ character, user, onEndRun }) {
     setCombatLog([])
     setPendingAttackResult(null)
     setEnemyAttackInfo(null)
+    setEnemyBehaviourMsg(null)
     // Reset per-combat gift flags
     setSporeCloudUsed(false)
     setBedrockCharges(0)
@@ -1203,8 +1205,20 @@ function Game({ character, user, onEndRun }) {
     var attackOut = resolveEnemyAttack(tickedBattle, currentId)
     if (attackOut) {
       var eResult = attackOut.result
-      // Non-attack actions (flee, howl, heal, etc.) — log and advance, skip roller
+      // Non-attack actions (flee, howl, heal, etc.) — show in UI, log and advance, skip roller
       if (!eResult.attackRoll) {
+        // Build behaviour message for the windup UI
+        var behMsg = ''
+        if (eResult.fled) behMsg = eResult.attacker + ' flees in terror!'
+        else if (eResult.howled) behMsg = eResult.attacker + ' howls! All allies +' + eResult.howlBonus + ' STR!'
+        else if (eResult.healedAlly) behMsg = eResult.attacker + ' heals ' + eResult.healedAllyName + '!'
+        else if (eResult.ateCorpse) behMsg = eResult.attacker + ' devours a corpse!'
+        else if (eResult.sacrificed) behMsg = eResult.attacker + ' sacrifices itself!'
+        else if (eResult.slimeCoated) behMsg = eResult.attacker + ' coats itself in slime!'
+        else if (eResult.hid) behMsg = eResult.attacker + ' burrows away!'
+        else if (eResult.spawned) behMsg = eResult.attacker + ' spawns ' + eResult.spawnedName + '!'
+        setEnemyBehaviourMsg({ name: eResult.attacker, text: behMsg })
+
         var behaviourDelay = setTimeout(function() {
           if (eResult.fled) addLog({ type: 'enemy', text: eResult.attacker + ' flees in terror!', tier: 'miss' })
           if (eResult.howled) addLog({ type: 'enemy', text: eResult.attacker + ' howls! All allies +' + eResult.howlBonus + ' STR!', tier: 'hit' })
@@ -1214,6 +1228,7 @@ function Game({ character, user, onEndRun }) {
           if (eResult.slimeCoated) addLog({ type: 'enemy', text: eResult.attacker + ' coats itself in slime! +' + eResult.slimeHeal + ' HP, +' + eResult.slimeDef + ' DEF!', tier: 'hit' })
           if (eResult.hid) addLog({ type: 'enemy', text: eResult.attacker + ' burrows away and heals ' + eResult.hideHeal + ' HP!', tier: 'hit' })
           if (eResult.spawned) addLog({ type: 'enemy', text: eResult.attacker + ' spawns ' + eResult.spawnedName + '!', tier: 'crit' })
+          setEnemyBehaviourMsg(null)
 
           var endCheck2 = checkBattleEnd(attackOut.newBattle)
           if (endCheck2 === 'victory') {
@@ -1227,7 +1242,7 @@ function Game({ character, user, onEndRun }) {
           setBattle(nextB4)
           var nextA4 = getActor(nextB4, getCurrentTurnId(nextB4))
           guardedSetCombatPhase(nextA4 && nextA4.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-        }, Math.max(600, enemyCondDelay))
+        }, Math.max(1500, enemyCondDelay))
         return function() { clearTimeout(behaviourDelay) }
       }
       // Normal attack — show roller
@@ -5745,10 +5760,19 @@ function Game({ character, user, onEndRun }) {
           {combatPhase === 'enemyWindup' && (
             <div className="flex flex-col items-center gap-2 p-3 border-2 border-red-400/30 rounded-lg bg-red-400/5">
               <p className="text-red-400 text-xs font-sans uppercase tracking-wide">Enemy Turn</p>
-              {enemyResult && (
-                <p className="text-red-400 text-lg font-display">{enemyResult.attacker}</p>
+              {enemyBehaviourMsg ? (
+                <>
+                  <p className="text-red-400 text-lg font-display">{enemyBehaviourMsg.name}</p>
+                  <p className="text-ink text-sm italic">{enemyBehaviourMsg.text}</p>
+                </>
+              ) : enemyResult ? (
+                <>
+                  <p className="text-red-400 text-lg font-display">{enemyResult.attacker}</p>
+                  <p className="text-ink text-sm italic">prepares to strike...</p>
+                </>
+              ) : (
+                <p className="text-ink text-sm italic">prepares to strike...</p>
               )}
-              <p className="text-ink text-sm italic">prepares to strike...</p>
             </div>
           )}
 
