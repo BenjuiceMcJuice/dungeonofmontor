@@ -394,7 +394,7 @@ function Preparation({ character, onReady }) {
                 <div className="flex flex-col">
                   <span className="text-[9px] text-ink-faint uppercase">Boots</span>
                   <span className="text-ink text-sm font-sans">{equipped.boots.name}</span>
-                  <span className="text-ink-dim text-[10px]">{equipped.boots.agiBonus ? '+' + equipped.boots.agiBonus + ' AGI' : ''}{equipped.boots.defBonus ? (equipped.boots.agiBonus ? ', ' : '') + '+' + equipped.boots.defBonus + ' DEF' : ''}{equipped.boots.initBonus ? (equipped.boots.agiBonus || equipped.boots.defBonus ? ', ' : '') + '+' + equipped.boots.initBonus + ' init' : ''}</span>
+                  <span className="text-ink-dim text-[10px]">{equipped.boots.agiBonus ? '+' + equipped.boots.agiBonus + ' AGI' : ''}{equipped.boots.defBonus ? (equipped.boots.agiBonus ? ', ' : '') + '+' + equipped.boots.defBonus + ' DEF' : ''}{equipped.boots.initBonus ? (equipped.boots.agiBonus || equipped.boots.defBonus ? ', ' : '') + '+' + equipped.boots.initBonus + ' initiative' : ''}</span>
                 </div>
                 <button onClick={function() { setInventory(function(inv) { return inv.concat([equipped.boots]) }); setEquipped(function(e) { return Object.assign({}, e, { boots: null }) }) }}
                   className="text-[9px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink transition-colors">Unequip</button>
@@ -444,7 +444,7 @@ function Preparation({ character, onReady }) {
                     {item.type === 'weapon' ? item.weaponType + ', d' + item.damageDie + (item.defIgnore ? ', ignores ' + Math.round(item.defIgnore * 100) + '% DEF' : '') + (item.doubleStrikeBase ? ', ' + Math.round(item.doubleStrikeBase * 100) + '% double strike' : '') :
                      item.type === 'armour' && item.slot === 'offhand' ? '+' + (item.defBonus || 0) + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
                      item.type === 'armour' && item.slot === 'helmet' ? 'helmet, +' + (item.defBonus || 0) + ' DEF' + (item.agiPenalty ? ', ' + item.agiPenalty + ' AGI' : '') :
-                     item.type === 'armour' && item.slot === 'boots' ? 'boots' + (item.agiBonus ? ', +' + item.agiBonus + ' AGI' : '') + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') + (item.initBonus ? ', +' + item.initBonus + ' init' : '') :
+                     item.type === 'armour' && item.slot === 'boots' ? 'boots' + (item.agiBonus ? ', +' + item.agiBonus + ' AGI' : '') + (item.defBonus ? ', +' + item.defBonus + ' DEF' : '') + (item.initBonus ? ', +' + item.initBonus + ' initiative' : '') :
                      item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
                      item.description || item.type}
                   </span>

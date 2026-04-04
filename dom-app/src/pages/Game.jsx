@@ -3838,7 +3838,7 @@ function Game({ character, user, onEndRun }) {
                         <div className="flex flex-col">
                           <span className="text-[10px] text-gold uppercase tracking-wide">Armour</span>
                           <span className="text-ink">{character.equipped.armour.name}</span>
-                          <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus || 0} DEF{character.equipped.armour.agiPenalty ? ', ' + character.equipped.armour.agiPenalty + ' AGI' : ''}{character.equipped.armour.setId ? ' [SET]' : ''}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus || 0} DEF{character.equipped.armour.agiPenalty ? ', ' + character.equipped.armour.agiPenalty + ' AGI' : ''}</span>
                         </div>
                         {canEquipNow && (
                           <button onClick={handleUnequipArmour}
@@ -3855,7 +3855,7 @@ function Game({ character, user, onEndRun }) {
                         <div className="flex flex-col">
                           <span className="text-[10px] text-amber-400 uppercase tracking-wide">Helmet</span>
                           <span className="text-ink">{character.equipped.helmet.name}</span>
-                          <span className="text-ink-faint text-[10px]">+{character.equipped.helmet.defBonus || 0} DEF{character.equipped.helmet.agiPenalty ? ', ' + character.equipped.helmet.agiPenalty + ' AGI' : ''}{character.equipped.helmet.setId ? ' [SET]' : ''}</span>
+                          <span className="text-ink-faint text-[10px]">+{character.equipped.helmet.defBonus || 0} DEF{character.equipped.helmet.agiPenalty ? ', ' + character.equipped.helmet.agiPenalty + ' AGI' : ''}</span>
                         </div>
                         {canEquipNow && (
                           <button onClick={handleUnequipHelmet}
@@ -3872,7 +3872,7 @@ function Game({ character, user, onEndRun }) {
                         <div className="flex flex-col">
                           <span className="text-[10px] text-emerald-400 uppercase tracking-wide">Boots</span>
                           <span className="text-ink">{character.equipped.boots.name}</span>
-                          <span className="text-ink-faint text-[10px]">{character.equipped.boots.agiBonus ? '+' + character.equipped.boots.agiBonus + ' AGI' : ''}{character.equipped.boots.defBonus ? (character.equipped.boots.agiBonus ? ', ' : '') + '+' + character.equipped.boots.defBonus + ' DEF' : ''}{character.equipped.boots.initBonus ? ', +' + character.equipped.boots.initBonus + ' init' : ''}{character.equipped.boots.setId ? ' [SET]' : ''}</span>
+                          <span className="text-ink-faint text-[10px]">{character.equipped.boots.agiBonus ? '+' + character.equipped.boots.agiBonus + ' AGI' : ''}{character.equipped.boots.defBonus ? (character.equipped.boots.agiBonus ? ', ' : '') + '+' + character.equipped.boots.defBonus + ' DEF' : ''}{character.equipped.boots.initBonus ? ', +' + character.equipped.boots.initBonus + ' initiative' : ''}</span>
                         </div>
                         {canEquipNow && (
                           <button onClick={handleUnequipBoots}
