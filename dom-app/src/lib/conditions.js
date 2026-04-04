@@ -44,6 +44,8 @@ function applyCondition(statusEffects, conditionId, source) {
             if (c.id === def.id) return Object.assign({}, c, { bleedFearTriggered: true })
             return c
           })
+          // Flag for callers to detect and log
+          newEffects._bleedTriggeredFear = true
         }
       }
       return newEffects
@@ -128,6 +130,9 @@ function getConditionInSlot(statusEffects, slot) {
 
 // Returns { newEffects, damage, skipped, narrative }
 // Returns { newEffects, damage, skipped, narrative, aoeDamage }
+// Condition tick priority — consistent display order
+var TICK_PRIORITY = { BLEED: 1, POISON: 2, BURN: 3, FROST: 4, WET: 5, CHARGED: 6, NAUSEA: 7, SLUGGISH: 8, ADRENALINE: 9, ADRENALINE_CRASH: 10, BLOODLUST: 11, FEAR: 12, DAZE: 13, CHARM: 14, BLIND: 15, FRENZY: 16, BORED: 17, SAD: 18 }
+
 function tickConditions(statusEffects, currentHp, maxHp) {
   var damage = 0
   var skipped = false
@@ -135,7 +140,12 @@ function tickConditions(statusEffects, currentHp, maxHp) {
   var newEffects = []
   var aoeDamage = 0
 
-  for (var i = 0; i < statusEffects.length; i++) {
+  // Sort by priority so conditions always tick in consistent order
+  var sorted = statusEffects.slice().sort(function(a, b) {
+    return (TICK_PRIORITY[a.id] || 50) - (TICK_PRIORITY[b.id] || 50)
+  })
+
+  for (var i = 0; i < sorted.length; i++) {
     var c = Object.assign({}, statusEffects[i])
 
     // BLEED — stacking DoT, lasts until cured

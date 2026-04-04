@@ -1535,8 +1535,31 @@ function Game({ character, user, onEndRun }) {
   // === PLAYER TURN ===
   // Tick player conditions at turn start
   var [playerConditionTicked, setPlayerConditionTicked] = useState(false)
+  var [playerTurnAnnounced, setPlayerTurnAnnounced] = useState(false)
+
+  // Step 1: Announce "Your Turn" for 500ms before ticking conditions
   useEffect(function() {
-    if (combatPhase !== 'playerTurn' || !battle || playerConditionTicked) return
+    if (combatPhase !== 'playerTurn' || !battle || playerTurnAnnounced) return
+    var playerUid = user.uid
+    var player = battle.players[playerUid]
+
+    // No conditions? Skip announcement delay
+    if (!player || !player.statusEffects || player.statusEffects.length === 0) {
+      setPlayerTurnAnnounced(true)
+      setPlayerConditionTicked(true)
+      return
+    }
+
+    // Show "Your Turn" briefly, then tick conditions
+    var announceTimeout = setTimeout(function() {
+      setPlayerTurnAnnounced(true)
+    }, 500)
+    return function() { clearTimeout(announceTimeout) }
+  }, [combatPhase, battle, playerTurnAnnounced])
+
+  // Step 2: After announced, tick conditions
+  useEffect(function() {
+    if (combatPhase !== 'playerTurn' || !battle || !playerTurnAnnounced || playerConditionTicked) return
     var playerUid = user.uid
     var player = battle.players[playerUid]
     if (!player || !player.statusEffects || player.statusEffects.length === 0) {
@@ -1551,7 +1574,6 @@ function Game({ character, user, onEndRun }) {
       var parts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
       for (var ni = 0; ni < parts.length; ni++) {
         var part = parts[ni].replace(/\.+$/, '')
-        // Colour-code: damage = yellow, skip = red, buffs = amber
         var logTier = 'glancing'
         if (part.indexOf('turn lost') !== -1 || part.indexOf('paralysed') !== -1 || part.indexOf('skip') !== -1) logTier = 'miss'
         else if (part.indexOf('ADRENALINE') !== -1) logTier = 'crit'
@@ -1567,30 +1589,33 @@ function Game({ character, user, onEndRun }) {
       return
     }
 
-    // Show condition effects for a beat before acting/skipping
     var hasConditionEffects = tickResult.damage > 0 || tickResult.narrative
     var conditionDisplayTime = hasConditionEffects ? 1200 : 0
 
     if (tickResult.skipped) {
-      // Show condition effects first, then show skip banner
-      setTimeout(function() {
+      // Show condition effects, then skip banner, then advance
+      var skipTimeout1 = setTimeout(function() {
         guardedSetCombatPhase('playerSkipped')
-        setTimeout(function() {
-          var nextB = advanceTurn(tickResult.newBattle)
-          setBattle(nextB)
-          var nextA = getActor(nextB, getCurrentTurnId(nextB))
-          guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
-          setPlayerConditionTicked(false)
-        }, 2000)
       }, conditionDisplayTime)
-      return
+      var skipTimeout2 = setTimeout(function() {
+        var nextB = advanceTurn(tickResult.newBattle)
+        setBattle(nextB)
+        var nextA = getActor(nextB, getCurrentTurnId(nextB))
+        guardedSetCombatPhase(nextA && nextA.type === 'enemy' ? 'enemyWindup' : 'playerTurn')
+        setPlayerConditionTicked(false)
+        setPlayerTurnAnnounced(false)
+      }, conditionDisplayTime + 2000)
+      return function() { clearTimeout(skipTimeout1); clearTimeout(skipTimeout2) }
     }
     setPlayerConditionTicked(true)
-  }, [combatPhase, battle, playerConditionTicked])
+  }, [combatPhase, battle, playerTurnAnnounced, playerConditionTicked])
 
-  // Reset condition tick flag when combat phase changes away from playerTurn
+  // Reset condition tick flags when combat phase changes away from playerTurn
   useEffect(function() {
-    if (combatPhase !== 'playerTurn') setPlayerConditionTicked(false)
+    if (combatPhase !== 'playerTurn') {
+      setPlayerConditionTicked(false)
+      setPlayerTurnAnnounced(false)
+    }
   }, [combatPhase])
 
   // Auto-select target: if only one living enemy, select it automatically
@@ -1749,6 +1774,12 @@ function Game({ character, user, onEndRun }) {
     }
     if (r.conditionApplied) {
       addLog({ type: 'condition', text: r.target + ' is now ' + condName(r.conditionApplied) + '!', tier: 'hit' })
+    }
+    // Check if BLEED stacking triggered FEAR
+    var hitEnemyForFear = attackOut.newBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
+    if (hitEnemyForFear && hitEnemyForFear.statusEffects && hitEnemyForFear.statusEffects._bleedTriggeredFear) {
+      addLog({ type: 'condition', text: 'BLEED reaches critical — ' + r.target + ' consumed by FEAR!', tier: 'crit' })
+      hitEnemyForFear.statusEffects._bleedTriggeredFear = false
     }
     if (r.doubleCondition) {
       addLog({ type: 'condition', text: 'Magnifying Glass: ' + condName(r.conditionApplied) + ' applied twice!', tier: 'crit' })
@@ -5521,6 +5552,14 @@ function Game({ character, user, onEndRun }) {
                   return <p key={i} className="text-ink text-sm">{entry.text}</p>
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Your Turn announcement — shows briefly before conditions tick */}
+          {combatPhase === 'playerTurn' && !playerTurnAnnounced && !playerConditionTicked && (
+            <div className="p-4 border-2 border-gold/40 rounded-lg bg-gold-glow text-center animate-pulse">
+              <p className="text-gold text-lg font-display">Your Turn</p>
+              <p className="text-ink-dim text-xs">Checking conditions...</p>
             </div>
           )}
 
