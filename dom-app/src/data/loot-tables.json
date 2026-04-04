@@ -2743,6 +2743,11 @@
           "minRarity": "rare"
         },
         {
+          "itemId": "montors_petrol_can",
+          "weight": 2,
+          "minRarity": "rare"
+        },
+        {
           "itemId": "montors_mums_perfume_throw",
           "weight": 1,
           "minRarity": "rare"

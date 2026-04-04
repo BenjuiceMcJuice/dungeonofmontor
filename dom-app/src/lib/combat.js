@@ -59,6 +59,16 @@ function enhanceAppliedCondition(statusEffects, conditionId, player) {
     cond.statDrainValue = -(poisonDrain) // override to -2 (or whatever passiveValue is)
   }
 
+  // Petrol Can / Napalm — burn lingers extra turns
+  var burnLinger = getPassiveTotalCombat(player, 'burn_linger')
+  // Also check gift mind slot for napalm effect
+  var gifts2 = player._gifts || {}
+  if (gifts2.mind && gifts2.mind.effect === 'burn_linger') burnLinger += (gifts2.mind.lingerTurns || 1)
+  if (burnLinger > 0 && cond.id === 'BURN') {
+    cond.turnsRemaining = (cond.turnsRemaining || 1) + burnLinger
+    if (!cond.damagePerTurn) cond.damagePerTurn = 2 // linger damage per extra turn
+  }
+
   // Barbed Wire Twist — bleed enhanced damage (+1 per stack)
   var bleedBonus = getPassiveTotalCombat(player, 'bleed_enhanced_damage')
   if (bleedBonus > 0 && cond.id === 'BLEED') {

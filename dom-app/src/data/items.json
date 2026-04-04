@@ -1459,6 +1459,12 @@
 
   "___COMMENT_UTILITY_ITEMS": "=== UTILITY ITEMS ===",
 
+  "montors_petrol_can": {
+    "id": "montors_petrol_can", "name": "Montor's Petrol Can", "type": "relic", "slot": "relic",
+    "rarity": "rare", "passiveEffect": "burn_linger", "passiveValue": 1,
+    "buyPrice": 50, "sellPrice": 20,
+    "description": "BURN you apply lingers 1 extra turn (2 dmg + AoE). Stacks with Napalm gift. Rusted. Sloshing. Never runs dry."
+  },
   "montors_alarm_clock": {
     "id": "montors_alarm_clock", "name": "Montor's Alarm Clock", "type": "relic", "slot": "relic",
     "rarity": "uncommon", "passiveEffect": "init_bonus", "passiveValue": 2,
