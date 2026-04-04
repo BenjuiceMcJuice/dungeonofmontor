@@ -353,6 +353,77 @@ function getEnemyCondition(archetypeKey) {
 // ============================================================
 // EXPORTS
 // ============================================================
+// CONDITION REACTIONS — triggered when two conditions coexist
+// ============================================================
+
+var REACTIONS = [
+  { a: 'FROST', b: 'BURN',   name: 'SHATTER',        damage: 10, removeBoth: true,  applyEffect: { defPenalty: true, defPenaltyValue: -99, turns: 2 }, narrative: 'SHATTER! Frozen enemy cracks from the heat — DEF destroyed!' },
+  { a: 'WET',   b: 'FROST',  name: 'INSTANT FREEZE',  damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'INSTANT FREEZE! Soaked enemy freezes solid!' },
+  { a: 'WET',   b: 'BURN',   name: 'STEAM',           damage: 0,  removeBoth: true,  applyConditionAll: 'BLIND', narrative: 'STEAM! Fire meets water — blinding cloud fills the chamber!' },
+  { a: 'POISON', b: 'BLEED', name: 'SEPSIS',          damage: 0,  removeBoth: false, doubleDot: true, narrative: 'SEPSIS! Poison enters the bloodstream — damage doubles!' },
+  { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!' },
+  { a: 'DAZE',  b: 'FEAR',   name: 'CATATONIC',       damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'CATATONIC! Mind shuts down completely!' },
+]
+
+// Check for reactions after a condition is applied
+// Returns { reaction, narrative, damage, newEffects, aoeCondition } or null
+function checkConditionReactions(statusEffects) {
+  for (var ri = 0; ri < REACTIONS.length; ri++) {
+    var r = REACTIONS[ri]
+    var hasA = statusEffects.some(function(c) { return c.id === r.a })
+    var hasB = statusEffects.some(function(c) { return c.id === r.b })
+    if (hasA && hasB) {
+      var result = { reaction: r.name, narrative: r.narrative, damage: r.damage || 0, aoeCondition: null }
+
+      // Remove source conditions if specified
+      if (r.removeBoth) {
+        statusEffects = statusEffects.filter(function(c) { return c.id !== r.a && c.id !== r.b })
+      }
+
+      // Apply a new condition to this entity
+      if (r.applyCondition) {
+        statusEffects = applyCondition(statusEffects, r.applyCondition, 'reaction')
+        // Override duration if specified
+        if (r.applyTurns) {
+          var applied = statusEffects.find(function(c) { return c.id === r.applyCondition })
+          if (applied) applied.turnsRemaining = r.applyTurns
+        }
+      }
+
+      // Apply DEF penalty
+      if (r.applyEffect && r.applyEffect.defPenalty) {
+        // Store as a temporary condition-like effect
+        statusEffects = applyCondition(statusEffects, 'SLUGGISH', 'reaction')
+        var sluggish = statusEffects.find(function(c) { return c.id === 'SLUGGISH' && c.source === 'reaction' })
+        if (sluggish) {
+          sluggish.turnsRemaining = r.applyEffect.turns
+          sluggish.defPenalty = r.applyEffect.defPenaltyValue
+          sluggish.name = 'Shattered'
+        }
+      }
+
+      // Double DoT (SEPSIS)
+      if (r.doubleDot) {
+        statusEffects.forEach(function(c) {
+          if (c.id === r.a || c.id === r.b) {
+            if (c.damagePerTurn) c.damagePerTurn = c.damagePerTurn * 2
+          }
+        })
+      }
+
+      // AoE condition to apply to ALL enemies (caller must handle)
+      if (r.applyConditionAll) {
+        result.aoeCondition = r.applyConditionAll
+      }
+
+      result.newEffects = statusEffects
+      return result
+    }
+  }
+  return null
+}
+
+// ============================================================
 
 export {
   CONDITIONS,
@@ -375,4 +446,5 @@ export {
   getBloodlustEffect,
   rollConditionApplication,
   getEnemyCondition,
+  checkConditionReactions,
 }

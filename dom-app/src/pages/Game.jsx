@@ -9,7 +9,7 @@ import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspe
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { generateCombatEnemies } from '../lib/enemies.js'
 import { getGiftDef, getGiftEffect, getWeaponGiftEffect, rollGiftChance } from '../lib/gifts.js'
-import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects } from '../lib/conditions.js'
+import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects, checkConditionReactions } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
 import progressionData from '../data/progression.json'
@@ -1728,6 +1728,17 @@ function Game({ character, user, onEndRun }) {
     if (r.staggerApplied) {
       addLog({ type: 'condition', text: 'Stagger! ' + r.target + ' is Dazed!', tier: 'hit' })
     }
+    if (r.conditionReaction) {
+      addLog({ type: 'condition', text: r.conditionReaction.narrative, tier: 'crit' })
+      // Handle AoE reaction (STEAM → BLIND all)
+      if (r.conditionReaction.aoeCondition && attackOut.newBattle) {
+        attackOut.newBattle.enemies.forEach(function(e) {
+          if (!e.isDown) {
+            e.statusEffects = applyConditionToEffects(e.statusEffects || [], r.conditionReaction.aoeCondition, 'reaction')
+          }
+        })
+      }
+    }
     // Lottery ticket — winning roll awards a random rare item
     if (r.lotteryWin) {
       var rareItems = Object.values(ITEMS).filter(function(it) { return it.rarity === 'rare' })
@@ -2189,6 +2200,96 @@ function Game({ character, user, onEndRun }) {
         })
       })
       updatedBattleForItem = Object.assign({}, updatedBattleForItem, { players: condPlayers })
+    }
+    // Condition throwable — apply condition to ALL enemies
+    if (result.stateChanges.conditionAllEnemies && battle) {
+      var condAll = result.stateChanges.conditionAllEnemies
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
+        enemies: updatedBattleForItem.enemies.map(function(e) {
+          if (e.isDown) return e
+          return Object.assign({}, e, { statusEffects: applyConditionToEffects(e.statusEffects || [], condAll, 'throwable') })
+        })
+      })
+      addLog({ type: 'condition', text: condAll + ' applied to all enemies!', tier: 'crit' })
+      // Check for condition reactions on each enemy
+      updatedBattleForItem.enemies.forEach(function(e) {
+        if (e.isDown) return
+        var throwReaction = checkConditionReactions(e.statusEffects)
+        if (throwReaction) {
+          e.statusEffects = throwReaction.newEffects
+          if (throwReaction.damage > 0) {
+            e.currentHp = Math.max(0, e.currentHp - throwReaction.damage)
+            if (e.currentHp <= 0) e.isDown = true
+          }
+          addLog({ type: 'condition', text: throwReaction.narrative, tier: 'crit' })
+        }
+      })
+    }
+    // Condition throwable — apply condition to selected target
+    if (result.stateChanges.conditionOneEnemy && battle && selectedTarget) {
+      var condOne = result.stateChanges.conditionOneEnemy
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
+        enemies: updatedBattleForItem.enemies.map(function(e) {
+          if (e.id !== selectedTarget || e.isDown) return e
+          var newE = Object.assign({}, e, { statusEffects: applyConditionToEffects(e.statusEffects || [], condOne, 'throwable') })
+          if (result.stateChanges.throwDamage) {
+            newE.currentHp = Math.max(0, newE.currentHp - result.stateChanges.throwDamage)
+            if (newE.currentHp <= 0) newE.isDown = true
+          }
+          return newE
+        })
+      })
+      var targetName = updatedBattleForItem.enemies.find(function(e) { return e.id === selectedTarget })
+      addLog({ type: 'condition', text: condOne + ' applied to ' + (targetName ? targetName.name : 'enemy') + '!', tier: 'hit' })
+    }
+    // Multi-target throwable — apply to N random enemies
+    if (result.stateChanges.conditionMultiEnemies && battle) {
+      var condMulti = result.stateChanges.conditionMultiEnemies
+      var multiN = result.stateChanges.multiTargets || 2
+      var livingForMulti = updatedBattleForItem.enemies.filter(function(e) { return !e.isDown })
+      // Shuffle and pick N
+      var shuffled = livingForMulti.slice().sort(function() { return Math.random() - 0.5 })
+      var targets = shuffled.slice(0, multiN)
+      var targetIds = targets.map(function(e) { return e.id })
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
+        enemies: updatedBattleForItem.enemies.map(function(e) {
+          if (e.isDown || targetIds.indexOf(e.id) === -1) return e
+          var newE = Object.assign({}, e, { statusEffects: applyConditionToEffects(e.statusEffects || [], condMulti, 'throwable') })
+          if (result.stateChanges.throwDamage) {
+            newE.currentHp = Math.max(0, newE.currentHp - result.stateChanges.throwDamage)
+            if (newE.currentHp <= 0) newE.isDown = true
+          }
+          return newE
+        })
+      })
+      addLog({ type: 'condition', text: condMulti + ' hits ' + targets.length + ' enemies!', tier: 'crit' })
+    }
+    // Damage multi-target throwable
+    if (result.stateChanges.damageMultiEnemies && battle) {
+      var dmgMulti = result.stateChanges.damageMultiEnemies
+      var multiN2 = result.stateChanges.multiTargets || 2
+      var livingForDmg = updatedBattleForItem.enemies.filter(function(e) { return !e.isDown })
+      var shuffled2 = livingForDmg.slice().sort(function() { return Math.random() - 0.5 })
+      var targets2 = shuffled2.slice(0, multiN2)
+      var targetIds2 = targets2.map(function(e) { return e.id })
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
+        enemies: updatedBattleForItem.enemies.map(function(e) {
+          if (e.isDown || targetIds2.indexOf(e.id) === -1) return e
+          var newHp = Math.max(0, e.currentHp - dmgMulti)
+          return Object.assign({}, e, { currentHp: newHp, isDown: newHp <= 0 })
+        })
+      })
+      addLog({ type: 'player', text: dmgMulti + ' damage to ' + targets2.length + ' enemies!', tier: 'hit' })
+    }
+    // Cure all conditions
+    if (result.stateChanges.cureAll && battle) {
+      var curePlayers = {}
+      Object.keys(updatedBattleForItem.players).forEach(function(uid) {
+        var p = updatedBattleForItem.players[uid]
+        curePlayers[uid] = Object.assign({}, p, { statusEffects: [] })
+      })
+      updatedBattleForItem = Object.assign({}, updatedBattleForItem, { players: curePlayers })
+      addLog({ type: 'player', text: 'All conditions cleared!', tier: 'hit' })
     }
     if (result.stateChanges.guaranteedFlee) {
       // Remove item, then auto-flee successfully
@@ -5335,7 +5436,7 @@ function Game({ character, user, onEndRun }) {
               <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
-                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all'
+                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies'
                   if (isThrowable) return null // throwables go in the other list
                   return (
                     <button key={idx}
@@ -5366,7 +5467,7 @@ function Game({ character, user, onEndRun }) {
               <div className="flex flex-col gap-2 w-full max-h-48 overflow-y-auto">
                 {playerInventory.map(function(item, idx) {
                   if (item.type !== 'consumable') return null
-                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all'
+                  var isThrowable = item.effect === 'damage_all_enemies' || item.effect === 'condition_all_enemies' || item.effect === 'damage_and_condition_all' || item.effect === 'condition_one_enemy' || item.effect === 'condition_multi_enemies' || item.effect === 'damage_multi_enemies'
                   if (!isThrowable) return null
                   return (
                     <button key={idx}
@@ -5436,7 +5537,7 @@ function Game({ character, user, onEndRun }) {
             var itemsBlocked = areItemsBlocked(playerEffects)
             var hasUsables = playerInventory.some(function(it) {
               if (it.type !== 'consumable') return false
-              var isThrow = it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all'
+              var isThrow = it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all' || it.effect === 'condition_one_enemy' || it.effect === 'condition_multi_enemies' || it.effect === 'damage_multi_enemies'
               return !isThrow
             })
             var hasThrowables = playerInventory.some(function(it) {

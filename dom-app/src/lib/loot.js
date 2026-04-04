@@ -178,8 +178,10 @@ function getMerchantItems(floorId) {
 function getPeddlerItems(floorId) {
   var prefix = getFloorLootPrefix(floorId)
 
-  // Always stock 2x health potions
-  var stock = [getItem('health_potion'), getItem('health_potion')]
+  // Always stock 2x health potions + 1 random cheap throwable
+  var cheapThrowables = ['montors_watering_can', 'montors_vinegar_bottle', 'montors_rusty_nail_throw', 'montors_ice_lolly', 'montors_lighter_fluid']
+  var randomThrowable = getItem(cheapThrowables[Math.floor(Math.random() * cheapThrowables.length)])
+  var stock = [getItem('health_potion'), getItem('health_potion'), randomThrowable].filter(Boolean)
 
   // Build pool of consumables from floor's loot tables
   var pool = []
@@ -317,6 +319,34 @@ function applyConsumable(item, playerState) {
       ? 'ADRENALINE! +6 STR for 2 turns. Brace for the crash.'
       : item.effectCondition + ' applied!'
     result.stateChanges.applyCondition = item.effectCondition
+  } else if (item.effect === 'condition_all_enemies') {
+    result.description = item.effectCondition + ' applied to all enemies!'
+    result.stateChanges.conditionAllEnemies = item.effectCondition
+  } else if (item.effect === 'condition_one_enemy') {
+    result.description = item.effectCondition + ' applied!'
+    result.stateChanges.conditionOneEnemy = item.effectCondition
+    if (item.effectValue) result.stateChanges.throwDamage = item.effectValue
+  } else if (item.effect === 'condition_multi_enemies') {
+    result.description = item.effectCondition + ' hits ' + (item.effectTargets || 2) + ' enemies!'
+    result.stateChanges.conditionMultiEnemies = item.effectCondition
+    result.stateChanges.multiTargets = item.effectTargets || 2
+    if (item.effectValue) result.stateChanges.throwDamage = item.effectValue
+  } else if (item.effect === 'damage_and_condition_all') {
+    result.description = item.effectValue + ' damage + ' + item.effectCondition + ' to all enemies!'
+    result.stateChanges.damageAllEnemies = item.effectValue
+    result.stateChanges.conditionAllEnemies = item.effectCondition
+  } else if (item.effect === 'damage_multi_enemies') {
+    result.description = item.effectValue + ' damage to ' + (item.effectTargets || 2) + ' enemies!'
+    result.stateChanges.damageMultiEnemies = item.effectValue
+    result.stateChanges.multiTargets = item.effectTargets || 2
+    if (item.effectCondition) result.stateChanges.conditionMultiEnemies = item.effectCondition
+  } else if (item.effect === 'heal_and_buff') {
+    result.description = 'Healed ' + item.effectHeal + ' HP + ' + item.effectValue + ' ' + (item.effectStat || '').toUpperCase() + '!'
+    result.stateChanges.hpChange = item.effectHeal
+    result.stateChanges.buff = { stat: item.effectStat, value: item.effectValue, turnsRemaining: item.effectDuration || 3 }
+  } else if (item.effect === 'cure_all_conditions') {
+    result.description = 'All conditions cleared!'
+    result.stateChanges.cureAll = true
   } else if (item.effect === 'random_effect') {
     var effects = [
       { desc: 'Healed 20 HP!', changes: { hpChange: 20 } },

@@ -115,6 +115,18 @@
       "damagePerNoKill": 3,
       "canFlee": false,
       "description": "Kill to heal 3. No kill = lose 3. Can't flee. Body and mind consumed."
+    },
+    "WET": {
+      "id": "WET", "slot": "body", "name": "Wet",
+      "turns": 2,
+      "description": "Soaked. Does nothing alone — but doubles FROST effects, extinguishes BURN (creates BLIND), doubles CHARGED explosion."
+    },
+    "CHARGED": {
+      "id": "CHARGED", "slot": "body", "name": "Charged",
+      "turns": 3,
+      "chargedDrain": 3,
+      "chargedExplosion": 4,
+      "description": "Crackling with energy. Attackers drain 3 HP. Explodes for 4 AoE on death."
     }
   },
   "enemyConditions": {

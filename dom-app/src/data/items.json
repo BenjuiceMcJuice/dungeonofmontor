@@ -720,6 +720,84 @@
     "description": "Splash. Cures ALL your conditions. Cold. Refreshing. Undignified."
   },
 
+  "___COMMENT_THROWABLES_SINGLE": "=== THROWABLES — Single Target Condition ===",
+
+  "montors_watering_can": {
+    "id": "montors_watering_can", "name": "Montor's Watering Can", "type": "consumable",
+    "rarity": "common", "effect": "condition_all_enemies", "effectCondition": "WET",
+    "buyPrice": 5, "sellPrice": 2,
+    "description": "WET all enemies. Just water. But water changes everything."
+  },
+  "montors_spark_plug": {
+    "id": "montors_spark_plug", "name": "Montor's Spark Plug", "type": "consumable",
+    "rarity": "uncommon", "effect": "condition_one_enemy", "effectCondition": "CHARGED",
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "CHARGED one enemy. Pull it and throw. Crackles on impact."
+  },
+  "montors_vinegar_bottle": {
+    "id": "montors_vinegar_bottle", "name": "Montor's Vinegar Bottle", "type": "consumable",
+    "rarity": "common", "effect": "condition_one_enemy", "effectCondition": "POISON",
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "POISON one enemy. Chip shop vinegar. It burns."
+  },
+  "montors_lighter_fluid": {
+    "id": "montors_lighter_fluid", "name": "Montor's Lighter Fluid", "type": "consumable",
+    "rarity": "common", "effect": "condition_one_enemy", "effectCondition": "BURN",
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "BURN one enemy. Squirt and duck."
+  },
+  "montors_rusty_nail_throw": {
+    "id": "montors_rusty_nail_throw", "name": "Montor's Rusty Nail", "type": "consumable",
+    "rarity": "common", "effect": "condition_one_enemy", "effectCondition": "BLEED",
+    "buyPrice": 5, "sellPrice": 2,
+    "description": "BLEED one enemy. Throw it. It sticks."
+  },
+  "montors_ice_lolly": {
+    "id": "montors_ice_lolly", "name": "Montor's Ice Lolly", "type": "consumable",
+    "rarity": "common", "effect": "condition_one_enemy", "effectCondition": "FROST",
+    "buyPrice": 6, "sellPrice": 2,
+    "description": "FROST one enemy. Still frozen after centuries."
+  },
+  "montors_chilli_powder": {
+    "id": "montors_chilli_powder", "name": "Montor's Chilli Powder", "type": "consumable",
+    "rarity": "uncommon", "effect": "condition_one_enemy", "effectCondition": "BLIND", "effectValue": 2,
+    "buyPrice": 10, "sellPrice": 4,
+    "description": "BLIND + 2 dmg one enemy. In the eyes. Always in the eyes."
+  },
+
+  "___COMMENT_THROWABLES_MULTI": "=== THROWABLES — Multi-Target ===",
+
+  "montors_bag_of_marbles": {
+    "id": "montors_bag_of_marbles", "name": "Montor's Bag of Marbles", "type": "consumable",
+    "rarity": "common", "effect": "damage_multi_enemies", "effectValue": 3, "effectTargets": 2, "effectCondition": "DAZE",
+    "buyPrice": 8, "sellPrice": 3,
+    "description": "3 dmg + DAZE to 2 random enemies. Scatter and watch them slip."
+  },
+  "montors_handful_of_gravel": {
+    "id": "montors_handful_of_gravel", "name": "Montor's Handful of Gravel", "type": "consumable",
+    "rarity": "common", "effect": "damage_multi_enemies", "effectValue": 2, "effectTargets": 3,
+    "buyPrice": 5, "sellPrice": 2,
+    "description": "2 dmg to 3 random enemies. Not elegant. Effective."
+  },
+  "montors_mums_potpourri": {
+    "id": "montors_mums_potpourri", "name": "Montor's Mum's Potpourri", "type": "consumable",
+    "rarity": "uncommon", "effect": "condition_multi_enemies", "effectCondition": "POISON", "effectTargets": 2,
+    "buyPrice": 15, "sellPrice": 6,
+    "description": "POISON 2 random enemies. Dried flowers and something else. Smells fatal."
+  },
+  "montors_chain": {
+    "id": "montors_chain", "name": "Montor's Chain", "type": "consumable",
+    "rarity": "uncommon", "effect": "damage_multi_enemies", "effectValue": 4, "effectTargets": 2,
+    "buyPrice": 12, "sellPrice": 5,
+    "description": "4 dmg bouncing to 2 enemies. Swing it. Let go. It finds them."
+  },
+  "montors_glitter_bomb": {
+    "id": "montors_glitter_bomb", "name": "Montor's Glitter Bomb", "type": "consumable",
+    "rarity": "rare", "effect": "damage_and_condition_all", "effectValue": 3, "effectCondition": "BLIND",
+    "buyPrice": 25, "sellPrice": 10,
+    "description": "3 AoE dmg + BLIND all. Fabulous. Devastating. Impossible to clean up."
+  },
+
   "___COMMENT_STAT_BOOSTS": "=== CONSUMABLES — Permanent Stat Boosts ===",
 
   "montors_protein_shake": {
