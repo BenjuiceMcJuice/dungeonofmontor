@@ -4591,27 +4591,31 @@ function Game({ character, user, onEndRun }) {
           </div>
 
           {/* Junk piles — corner-hugging triangles, absolutely positioned */}
+          {/* Base sprite is bottom-left orientation (flat bottom + flat left). CSS transform flips for other corners. */}
           {currentChamber.junkPiles && currentChamber.junkPiles.length > 0 && !searchPhase && (function() {
             var activePiles = currentChamber.junkPiles.filter(function(p) { return !p.depleted })
             if (activePiles.length === 0) return null
             var floorTheme = zone.floorId === 'grounds' ? 'garden' : 'garden'
-            // Corner positions: bottom-left, bottom-right, top-right (avoid top-left near header)
+            // Corner positions with CSS transform to flip the base sprite
+            // Base sprite: right-angle at bottom-left (flat bottom, flat left)
             var corners = [
-              { pos: 'bottom-0 left-0', variant: 'a', align: 'items-start' },
-              { pos: 'bottom-0 right-0', variant: 'b', align: 'items-end' },
-              { pos: 'top-0 right-0', variant: 'b', align: 'items-end' },
+              { pos: 'bottom-0 left-0', transform: 'none',           align: 'items-start' },  // bottom-left: as-is
+              { pos: 'bottom-0 right-0', transform: 'scaleX(-1)',    align: 'items-end' },     // bottom-right: mirror horizontal
+              { pos: 'top-0 right-0', transform: 'scale(-1,-1)',     align: 'items-end' },     // top-right: mirror both
             ]
             return activePiles.map(function(pile, pi) {
               var corner = corners[pi % corners.length]
-              var spriteKey = 'junk_' + floorTheme + '_' + pile.size + corner.variant
-              var spriteScale = pile.size === 3 ? 40 : pile.size === 2 ? 32 : 24
+              var spriteKey = 'junk_' + floorTheme + '_' + pile.size
+              var spriteScale = pile.size === 3 ? 14 : pile.size === 2 ? 12 : 10
               var sizeLabel = pile.size === 3 ? 'Mound' : pile.size === 2 ? 'Heap' : 'Scraps'
               return (
                 <button key={pile.id}
                   onClick={function() { handleInspectPile(pile.id) }}
-                  className={'absolute ' + corner.pos + ' z-10 flex flex-col ' + corner.align + ' p-1 cursor-pointer transition-all hover:scale-110 active:scale-95'}
+                  className={'absolute ' + corner.pos + ' z-10 flex flex-col ' + corner.align + ' p-1 cursor-pointer transition-all active:scale-95'}
                 >
-                  <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
+                  <div style={{ transform: corner.transform }}>
+                    <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
+                  </div>
                   <span className="text-ink-faint text-[8px] font-sans">{sizeLabel}</span>
                 </button>
               )
