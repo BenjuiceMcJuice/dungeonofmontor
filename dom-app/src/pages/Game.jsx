@@ -3505,7 +3505,7 @@ function Game({ character, user, onEndRun }) {
             (isCleared ? 'border-border' : 'border-border-hl')
           }
         >
-          <DoorSprite theme="garden" scale={2} />
+          <DoorSprite theme={zone.doorTheme || 'garden'} scale={2} open={isVisited} />
           <span className="text-ink font-display text-xs">{DIR_LABELS[dir]}</span>
           {subtext && <span className={subtextCol + ' text-[9px] font-sans'}>{subtext}</span>}
         </button>
@@ -4617,7 +4617,6 @@ function Game({ character, user, onEndRun }) {
                   <div style={{ transform: corner.transform }}>
                     <ChamberIcon iconKey={spriteKey} theme={zone.doorTheme || 'garden'} scale={spriteScale} />
                   </div>
-                  <span className="text-ink-faint text-[8px] font-sans">{sizeLabel}</span>
                 </button>
               )
             })
