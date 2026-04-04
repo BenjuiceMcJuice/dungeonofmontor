@@ -145,13 +145,22 @@ function tickConditions(statusEffects, currentHp, maxHp) {
     return (TICK_PRIORITY[a.id] || 50) - (TICK_PRIORITY[b.id] || 50)
   })
 
+  // SEPSIS check: if both BLEED and POISON active, 30% chance to double DoT this tick
+  var hasBleed = sorted.some(function(c) { return c.id === 'BLEED' })
+  var hasPoison = sorted.some(function(c) { return c.id === 'POISON' })
+  var sepsisProc = hasBleed && hasPoison && Math.random() < 0.30
+  if (sepsisProc) {
+    narratives.push('SEPSIS! Poison in the bloodstream — damage doubles this turn!')
+  }
+
   for (var i = 0; i < sorted.length; i++) {
-    var c = Object.assign({}, statusEffects[i])
+    var c = Object.assign({}, sorted[i])
 
     // BLEED — stacking DoT, lasts until cured
     if (c.damagePerTurn > 0 && !c.burstDamage) {
-      damage += c.damagePerTurn
-      narratives.push(c.name + ': ' + c.damagePerTurn + ' damage.')
+      var dotDmg = sepsisProc ? c.damagePerTurn * 2 : c.damagePerTurn
+      damage += dotDmg
+      narratives.push(c.name + ': ' + dotDmg + ' damage.' + (sepsisProc ? ' (SEPSIS)' : ''))
     }
 
     // BURN — burst damage, one big hit, then gone. AoE to adjacent.
@@ -370,7 +379,7 @@ var REACTIONS = [
   { a: 'FROST', b: 'BURN',   name: 'SHATTER',        damage: 10, removeBoth: true,  applyEffect: { defPenalty: true, defPenaltyValue: -99, turns: 2 }, narrative: 'SHATTER! Frozen enemy cracks from the heat — DEF destroyed!' },
   { a: 'WET',   b: 'FROST',  name: 'INSTANT FREEZE',  damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'INSTANT FREEZE! Soaked enemy freezes solid!' },
   { a: 'WET',   b: 'BURN',   name: 'STEAM',           damage: 0,  removeBoth: true,  applyConditionAll: 'BLIND', narrative: 'STEAM! Fire meets water — blinding cloud fills the chamber!' },
-  { a: 'POISON', b: 'BLEED', name: 'SEPSIS',          damage: 0,  removeBoth: false, doubleDot: true, procChance: 0.30, narrative: 'SEPSIS! Poison enters the bloodstream — damage doubles!' },
+  // SEPSIS is handled per-tick in tickConditions, not as a reaction here
   { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!' },
   { a: 'DAZE',  b: 'FEAR',   name: 'CATATONIC',       damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'CATATONIC! Mind shuts down completely!' },
 ]
@@ -415,13 +424,9 @@ function checkConditionReactions(statusEffects) {
         }
       }
 
-      // Double DoT (SEPSIS)
+      // SEPSIS: flag for per-tick double (handled in tickConditions, not here)
       if (r.doubleDot) {
-        statusEffects.forEach(function(c) {
-          if (c.id === r.a || c.id === r.b) {
-            if (c.damagePerTurn) c.damagePerTurn = c.damagePerTurn * 2
-          }
-        })
+        result.sepsisActive = true
       }
 
       // AoE condition to apply to ALL enemies (caller must handle)
