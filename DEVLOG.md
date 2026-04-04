@@ -119,9 +119,23 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-03 | Stats/combat polish — XP on victory, XP bar, END→regen, CHA→premium, How It Works guide | ✅ Done |
 | 2026-04-03 | ErrorBoundary for iOS crash diagnosis, bugs.md tracker created | ✅ Done |
 | 2026-04-03 | Docs consolidation — 27 fragmented files → 5 clean topic docs, Montor narrative rewrite | ✅ Done |
+| 2026-04-04 | 7 healing gifts — Stoneskin Mend, Cauterise, Siphon, Quartz Resonance, Phoenix Spark | ✅ Done |
+| 2026-04-04 | Weapon condition proc gifts — Seismic Strike (DAZE), Dread Touch (FEAR) | ✅ Done |
+| 2026-04-04 | Gift proc reduction — weapon gift condition chance quartered if weapon already has a condition | ✅ Done |
+| 2026-04-04 | Shield reflect balance — condition proc reduced from 100% to 15% | ✅ Done |
+| 2026-04-04 | Domain floor crash fix — boss placement for final floor, safety fill for undefined chambers | ✅ Done |
+| 2026-04-04 | WET/CHARGED/ADRENALINE condition icons + missing icon fallback (0x0 canvas) | ✅ Done |
+| 2026-04-04 | Room UI overhaul — mottled pixel backgrounds per floor/chamber, walls as textured strips | ✅ Done |
+| 2026-04-04 | Garden gate door sprites — iron bars, stone pillars, vines, open/closed states | ✅ Done |
+| 2026-04-04 | Door themes per floor — unique colours for all 7 floor types | ✅ Done |
+| 2026-04-04 | Hi-res junk pile sprites (scale 3, matching door pixel density) | ✅ Done |
+| 2026-04-04 | Junk piles shrink as searched, keep corner position when others depleted | ✅ Done |
+| 2026-04-04 | Corpse sprites bigger (scale 5), border/box removed | ✅ Done |
+| 2026-04-04 | Direction labels + door labels removed — sprites speak for themselves | ✅ Done |
+| 2026-04-04 | Terminal hint gated by PER >= 12 | ✅ Done |
+| 2026-04-04 | Enemy flee/howl/heal visible in UI — 1.5s display with descriptive message | ✅ Done |
 |            | **Next up** | |
-|            | Diagnose Underground black screen (ErrorBoundary should capture details) | ⬜ |
-|            | Wire remaining passives — reflect_conditions, last_stand, see_enemy_hp_exact | ⬜ |
+|            | Themed hi-res junk sprites for non-garden floors | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
 |            | Gift leveling (Hades-style) + mono-gift synergy bonuses | ⬜ |
