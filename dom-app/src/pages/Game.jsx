@@ -2250,6 +2250,16 @@ function Game({ character, user, onEndRun }) {
         // Entropy Edge: random damage multiplier — handled in combat.js
       }
 
+      // Napalm (ember mind): enhance BURN from any source — extra turns + linger damage
+      if (mindG2 && mindG2.effect === 'burn_linger' && hitTarget.statusEffects) {
+        var burnOnTarget = hitTarget.statusEffects.find(function(c) { return c.id === 'BURN' && !c._napalmApplied })
+        if (burnOnTarget) {
+          burnOnTarget.turnsRemaining = (burnOnTarget.turnsRemaining || 1) + (mindG2.lingerTurns || 1)
+          if (!burnOnTarget.damagePerTurn) burnOnTarget.damagePerTurn = 2
+          burnOnTarget._napalmApplied = true // don't double-enhance same condition instance
+        }
+      }
+
       // Track kills for Scent of Blood
       if (r.enemyDefeated) {
         setKillsThisCombat(function(k) { return k + 1 })
