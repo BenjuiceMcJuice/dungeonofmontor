@@ -2192,8 +2192,8 @@ function Game({ character, user, onEndRun }) {
         // Crit multiplier (Avalanche): 2.5x crits — handled in combat.js
         // Flat damage bonus (Molten Edge): +3 damage — handled in combat.js
 
-        // DEF shred (Acid Edge): reduce enemy DEF by 2 per hit
-        if (weaponG.effect === 'def_shred') {
+        // DEF shred (Acid Edge): % chance to reduce enemy DEF per hit
+        if (weaponG.effect === 'def_shred' && rollGiftChance(weaponG.chance || 1.0)) {
           hitTarget.stats = Object.assign({}, hitTarget.stats, { def: Math.max(0, (hitTarget.stats.def || 0) - weaponG.value) })
           addLog({ type: 'condition', text: 'Acid Edge! ' + hitTarget.name + ' DEF -' + weaponG.value + ' (' + hitTarget.stats.def + ' remaining)!', tier: 'hit' })
         }

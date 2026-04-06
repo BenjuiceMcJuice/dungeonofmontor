@@ -386,9 +386,10 @@
       {
         "id": "acid_edge",
         "name": "Acid Edge",
-        "description": "All hits reduce enemy DEF by 1 (stacks, persists in combat).",
+        "description": "50% chance per hit to reduce enemy DEF by 1 (stacks, persists).",
         "effect": "def_shred",
-        "value": 1
+        "value": 1,
+        "chance": 0.5
       },
       {
         "id": "toilet_hands",
