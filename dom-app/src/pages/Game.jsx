@@ -1594,6 +1594,17 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           addLog({ type: 'player', text: 'Siphon! Healed ' + siphonBody.value + ' HP from dodge!', tier: 'hit' })
         }
       }
+      // Shadow Boxing (void fists): dodge counter-attack
+      var weaponGDodge = giftSlots.weapon
+      if (weaponGDodge && weaponGDodge.effect === 'dodge_counter' && rollGiftChance(weaponGDodge.chance)) {
+        var attackerForCounter = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
+        if (attackerForCounter && !attackerForCounter.isDown) {
+          var counterDmg = Math.max(2, Math.floor(character.stats.str / 3))
+          attackerForCounter.currentHp = Math.max(0, attackerForCounter.currentHp - counterDmg)
+          addLog({ type: 'player', text: 'Shadow Boxing! Counter-attack for ' + counterDmg + ' damage!', tier: 'crit' })
+          if (attackerForCounter.currentHp <= 0) { attackerForCounter.isDown = true; addLog({ type: 'player', text: attackerForCounter.name + ' felled!', tier: 'crit' }) }
+        }
+      }
     } else {
       addLog({ type: 'enemy', text: logEntry.text, tier: logEntry.tier })
     }
@@ -2399,119 +2410,268 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     if (r.damage > 0 && hitTarget && !hitTarget.isDown) {
       var wt3 = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
 
-      // --- PETAL WEAPON GIFTS (class-specific) ---
+      // --- CLASS-SPECIFIC WEAPON GIFTS (all gifts are now weapon-type specific) ---
       if (weaponG && weaponG.appliedWeaponType === wt3) {
-        // Briar Flurry (dagger): double strikes apply stacking bleed
-        if (weaponG.effect === 'double_strike_bleed' && r.doubleStrike) {
+        var eff = weaponG.effect
+
+        // === PETAL ===
+        if (eff === 'double_strike_bleed' && r.doubleStrike) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
-          addLog({ type: 'condition', text: 'Briar Flurry! Stacking bleed on ' + hitTarget.name + '!', tier: 'crit' })
+          addLog({ type: 'condition', text: weaponG.name + '! Stacking bleed on ' + hitTarget.name + '!', tier: 'crit' })
         }
-        // Vine Bind (sword): 20% chance enemy skips next turn
-        if (weaponG.effect === 'hit_skip_chance' && rollGiftChance(weaponG.chance)) {
+        if (eff === 'hit_skip_chance' && rollGiftChance(weaponG.chance)) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'DAZE', 'gift')
-          addLog({ type: 'condition', text: 'Vine Bind! ' + hitTarget.name + ' entangled!', tier: 'crit' })
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' entangled!', tier: 'crit' })
         }
-        // Thorn Reach (spear): +2 damage + first hit applies 2 BLEED stacks
-        if (weaponG.effect === 'bonus_damage_and_first_hit_condition' && !weaponG._firstHitUsed) {
+        if (eff === 'bonus_damage_and_first_hit_condition' && !weaponG._firstHitUsed) {
           for (var trsi = 0; trsi < (weaponG.conditionStacks || 1); trsi++) {
             hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
           }
           weaponG._firstHitUsed = true
-          addLog({ type: 'condition', text: 'Thorn Reach! ' + hitTarget.name + ' bleeds from the wound!', tier: 'hit' })
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' bleeds!', tier: 'hit' })
         }
-        // Root Shatter (mace): DEF-ignoring hits apply DAZE
-        if (weaponG.effect === 'def_ignore_condition' && r.damageBreakdown && r.damageBreakdown.defIgnored) {
+        if (eff === 'def_ignore_condition' && r.damageBreakdown && r.damageBreakdown.defIgnored) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
-          addLog({ type: 'condition', text: 'Root Shatter! ' + hitTarget.name + ' DAZED!', tier: 'hit' })
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' DAZED!', tier: 'hit' })
         }
-        // Harvest (axe): on kill, heal 5 HP + next hit +3 damage
-        if (weaponG.effect === 'kill_heal_and_buff' && r.enemyDefeated) {
+        if (eff === 'kill_heal_and_buff' && r.enemyDefeated) {
           setPlayerHp(function(hp) { return Math.min(hp + weaponG.healValue, character.maxHp) })
           setHarvestBuff(weaponG.buffDamage)
-          addLog({ type: 'player', text: 'Harvest! Heal ' + weaponG.healValue + ' HP + next hit +' + weaponG.buffDamage + ' damage!', tier: 'crit' })
+          addLog({ type: 'player', text: weaponG.name + '! Heal ' + weaponG.healValue + ' HP + next hit +' + weaponG.buffDamage + ' damage!', tier: 'crit' })
         }
-        // Pollen Fist (fists): 30% chance BLIND + 2 damage
-        if (weaponG.effect === 'hit_condition_and_damage' && rollGiftChance(weaponG.chance)) {
+        if (eff === 'hit_condition_and_damage' && rollGiftChance(weaponG.chance)) {
           hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
           hitTarget.currentHp = Math.max(0, hitTarget.currentHp - weaponG.bonusDamage)
-          addLog({ type: 'condition', text: 'Pollen Fist! ' + hitTarget.name + ' BLIND + ' + weaponG.bonusDamage + ' damage!', tier: 'crit' })
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + ' + ' + weaponG.bonusDamage + ' damage!', tier: 'crit' })
           if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
         }
-        // Hit condition (Spore Fist legacy pattern)
-        if (weaponG.effect === 'hit_condition' && rollGiftChance(weaponG.chance)) {
-          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
-          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
+
+        // === STONE ===
+        // Tremor Flurry (dagger): double strikes +40% stagger
+        if (eff === 'double_strike_stagger' && r.doubleStrike && rollGiftChance(weaponG.value)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'DAZE', 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' staggered by double strike!', tier: 'crit' })
         }
-        // Kill heal (Wild Growth legacy)
-        if (weaponG.effect === 'kill_heal' && r.enemyDefeated) {
-          setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
-          addLog({ type: 'player', text: weaponG.name + '! Heal ' + weaponG.value + ' HP.', tier: 'hit' })
-        }
-      }
-
-      // --- UNIVERSAL WEAPON GIFTS (Stone/Bile/Blood/Ember/Void — not class-specific) ---
-      if (weaponG && !weaponG.appliedWeaponType) {
-        // Stagger bonus (Crushing Blow): +25% stagger on all weapons — handled in combat.js
-        // DEF ignore bonus (Earthshatter): +20% DEF ignore — handled in combat.js
-        // Crit multiplier (Avalanche): 2.5x crits — handled in combat.js
-        // Flat damage bonus (Molten Edge): +3 damage — handled in combat.js
-
-        // DEF shred (Acid Edge): % chance to reduce enemy DEF per hit
-        if (weaponG.effect === 'def_shred' && rollGiftChance(weaponG.chance || 1.0)) {
-          hitTarget.stats = Object.assign({}, hitTarget.stats, { def: Math.max(0, (hitTarget.stats.def || 0) - weaponG.value) })
-          addLog({ type: 'condition', text: 'Acid Edge! ' + hitTarget.name + ' DEF -' + weaponG.value + ' (' + hitTarget.stats.def + ' remaining)!', tier: 'hit' })
-        }
-
-        // Hit condition (Toilet Hands/NAUSEA, Bloodletter/BLEED, Ignite/BURN, Seismic Strike/DAZE, Dread Touch/FEAR)
-        // If weapon already applies a condition, gift proc chance is quartered
-        if (weaponG.effect === 'hit_condition') {
-          var equipWeapon = character.equipped && character.equipped.weapon
-          var giftProcChance = (equipWeapon && equipWeapon.conditionOnHit) ? weaponG.chance * 0.25 : weaponG.chance
-          if (rollGiftChance(giftProcChance)) {
-            hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
-            addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
-          }
-        }
-
-        // Condition chance bonus (Corrosive Strike): +25% weapon condition chance — handled in combat.js
-
-        // Bleed damage bonus (Savage Strikes): +1 per bleed stack
-        if (weaponG.effect === 'bleed_damage_bonus' && hitTarget.statusEffects) {
-          var bleedStacks = 0
-          for (var bsi = 0; bsi < hitTarget.statusEffects.length; bsi++) {
-            if (hitTarget.statusEffects[bsi].id === 'BLEED') bleedStacks += (hitTarget.statusEffects[bsi].stacks || 1)
-          }
-          if (bleedStacks > 0) {
-            var bleedBonus = bleedStacks * weaponG.value
-            hitTarget.currentHp = Math.max(0, hitTarget.currentHp - bleedBonus)
-            r.damage += bleedBonus
-            addLog({ type: 'player', text: 'Savage Strikes! +' + bleedBonus + ' damage (' + bleedStacks + ' bleed stacks)!', tier: 'hit' })
+        // Granite Edge (sword): 2x damage on dazed enemies
+        if (eff === 'dazed_damage_multiplier') {
+          var isDazed = hitTarget.statusEffects && hitTarget.statusEffects.some(function(c) { return c.id === 'DAZE' })
+          if (isDazed) {
+            var geBonusDmg = r.damage // double it
+            hitTarget.currentHp = Math.max(0, hitTarget.currentHp - geBonusDmg)
+            r.damage += geBonusDmg
+            addLog({ type: 'player', text: weaponG.name + '! 2x damage on staggered enemy! +' + geBonusDmg + '!', tier: 'crit' })
             if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
           }
         }
-
-        // Crit bleed (Haemorrhage): crits apply 2 BLEED stacks
-        if (weaponG.effect === 'crit_bleed' && r.attackRoll && r.attackRoll.tierName === 'crit') {
-          for (var hbi = 0; hbi < weaponG.stacks; hbi++) {
-            hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
-          }
-          addLog({ type: 'condition', text: 'Haemorrhage! ' + weaponG.stacks + ' BLEED stacks from crit!', tier: 'crit' })
+        // Quake Thrust (spear): first hit DAZE + 5 damage
+        if (eff === 'first_hit_daze_and_damage' && !weaponG._firstHitUsed) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'DAZE', 'gift')
+          hitTarget.currentHp = Math.max(0, hitTarget.currentHp - weaponG.bonusDamage)
+          r.damage += weaponG.bonusDamage
+          weaponG._firstHitUsed = true
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' DAZED + ' + weaponG.bonusDamage + ' bonus damage!', tier: 'crit' })
+          if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
         }
-
-        // Double strike AoE (Firestorm): double strikes splash 2 to others
-        if (weaponG.effect === 'double_strike_aoe' && r.doubleStrike) {
+        // Tectonic Slam (mace): stagger extended + bonus — handled partially in combat.js stagger section
+        if (eff === 'stagger_extended' && r.staggerApplied) {
+          var dazeCond = hitTarget.statusEffects && hitTarget.statusEffects.find(function(c) { return c.id === 'DAZE' })
+          if (dazeCond) dazeCond.turnsRemaining = weaponG.dazeTurns || 2
+          addLog({ type: 'condition', text: weaponG.name + '! Stagger lasts ' + (weaponG.dazeTurns || 2) + ' turns!', tier: 'hit' })
+        }
+        // Landslide (axe): kills deal AoE
+        if (eff === 'kill_aoe_damage' && r.enemyDefeated) {
           giftBattle.enemies.forEach(function(e) {
             if (!e.isDown && e.id !== hitTarget.id) {
               e.currentHp = Math.max(0, e.currentHp - weaponG.value)
               if (e.currentHp <= 0) e.isDown = true
             }
           })
-          addLog({ type: 'player', text: 'Firestorm! ' + weaponG.value + ' AoE damage from double strike!', tier: 'crit' })
+          addLog({ type: 'player', text: weaponG.name + '! ' + weaponG.value + ' AoE damage!', tier: 'crit' })
+        }
+        // Stonefist (fists): unarmed upgrade + stagger — die handled in combat.js, stagger here
+        if (eff === 'unarmed_upgrade_and_stagger' && rollGiftChance(weaponG.staggerChance)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'DAZE', 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' staggered!', tier: 'hit' })
         }
 
-        // Void Strike: 10% chance to ignore ALL DEF — handled in combat.js
-        // Shadow Blade: misses deal half damage — handled in combat.js
-        // Entropy Edge: random damage multiplier — handled in combat.js
+        // === BILE ===
+        // Venom Flurry (dagger): 40% poison on all hits
+        // Toxic Touch (fists): 40% poison, extended duration
+        if ((eff === 'hit_condition' || eff === 'hit_condition_extended') && rollGiftChance(weaponG.chance)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          if (eff === 'hit_condition_extended') {
+            var extCond = hitTarget.statusEffects.find(function(c) { return c.id === weaponG.condition })
+            if (extCond && extCond.turnsRemaining) extCond.turnsRemaining = weaponG.conditionTurns
+          }
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
+        }
+        // Acid Edge (sword): DEF shred
+        if (eff === 'def_shred' && rollGiftChance(weaponG.chance || 1.0)) {
+          hitTarget.stats = Object.assign({}, hitTarget.stats, { def: Math.max(0, (hitTarget.stats.def || 0) - weaponG.value) })
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' DEF -' + weaponG.value + ' (' + hitTarget.stats.def + ' remaining)!', tier: 'hit' })
+        }
+        // Plague Reach (spear): weapon poison spreads to 1 other enemy
+        if (eff === 'poison_spread_on_hit' && r.conditionApplied === 'POISON') {
+          var otherEnemies = giftBattle.enemies.filter(function(e) { return !e.isDown && e.id !== hitTarget.id })
+          if (otherEnemies.length > 0) {
+            var spreadTarget = otherEnemies[Math.floor(Math.random() * otherEnemies.length)]
+            spreadTarget.statusEffects = applyConditionToEffects(spreadTarget.statusEffects || [], 'POISON', 'gift')
+            addLog({ type: 'condition', text: weaponG.name + '! Poison spreads to ' + spreadTarget.name + '!', tier: 'hit' })
+          }
+        }
+        // Festering Crush (mace): stagger applies NAUSEA
+        if (eff === 'stagger_condition' && r.staggerApplied) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + ' from stagger!', tier: 'hit' })
+        }
+        // Putrid Cleave (axe): kills poison all
+        if (eff === 'kill_condition_all' && r.enemyDefeated) {
+          giftBattle.enemies.forEach(function(e) {
+            if (!e.isDown) e.statusEffects = applyConditionToEffects(e.statusEffects || [], weaponG.condition, 'gift')
+          })
+          addLog({ type: 'condition', text: weaponG.name + '! All enemies ' + condName(weaponG.condition) + '!', tier: 'crit' })
+        }
+
+        // === BLOOD ===
+        // Crimson Flurry (dagger): double strikes heal
+        if (eff === 'double_strike_heal' && r.doubleStrike) {
+          setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
+          addLog({ type: 'player', text: weaponG.name + '! Healed ' + weaponG.value + ' HP from double strike!', tier: 'hit' })
+        }
+        // Blood Tithe (sword): each hit heals 1
+        if (eff === 'hit_heal') {
+          setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
+          addLog({ type: 'player', text: weaponG.name + '! Healed ' + weaponG.value + ' HP.', tier: 'hit' })
+        }
+        // Impale (spear): first hit 3 bleed + pin
+        if (eff === 'first_hit_bleed_and_pin' && !weaponG._firstHitUsed) {
+          for (var impSi = 0; impSi < (weaponG.bleedStacks || 1); impSi++) {
+            hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
+          }
+          if (weaponG.preventFlee && hitTarget.behaviour) hitTarget.behaviour.fleeThreshold = 0
+          weaponG._firstHitUsed = true
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' impaled — ' + weaponG.bleedStacks + ' BLEED + pinned!', tier: 'crit' })
+        }
+        // Bone Breaker (mace): +damage on bleeding
+        if (eff === 'bleed_damage_bonus' && hitTarget.statusEffects) {
+          var bleedStacks2 = 0
+          for (var bsi2 = 0; bsi2 < hitTarget.statusEffects.length; bsi2++) {
+            if (hitTarget.statusEffects[bsi2].id === 'BLEED') bleedStacks2 += (hitTarget.statusEffects[bsi2].stacks || 1)
+          }
+          if (bleedStacks2 > 0) {
+            var bbBonus = bleedStacks2 * weaponG.value
+            hitTarget.currentHp = Math.max(0, hitTarget.currentHp - bbBonus)
+            r.damage += bbBonus
+            addLog({ type: 'player', text: weaponG.name + '! +' + bbBonus + ' damage (' + bleedStacks2 + ' bleed stacks)!', tier: 'hit' })
+            if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+          }
+        }
+        // Butcher (axe): kill heals + bleed stacks → STR buff
+        if (eff === 'kill_heal_and_bleed_buff' && r.enemyDefeated) {
+          setPlayerHp(function(hp) { return Math.min(hp + weaponG.healValue, character.maxHp) })
+          var deadBleedStacks = 0
+          if (hitTarget.statusEffects) {
+            for (var dbs = 0; dbs < hitTarget.statusEffects.length; dbs++) {
+              if (hitTarget.statusEffects[dbs].id === 'BLEED') deadBleedStacks += (hitTarget.statusEffects[dbs].stacks || 1)
+            }
+          }
+          if (deadBleedStacks > 0) {
+            setActiveBuffs(function(prev) { return prev.concat([{ stat: 'str', value: deadBleedStacks, turnsRemaining: 2 }]) })
+          }
+          addLog({ type: 'player', text: weaponG.name + '! Heal ' + weaponG.healValue + ' HP' + (deadBleedStacks > 0 ? ' + ' + deadBleedStacks + ' STR buff!' : '!'), tier: 'crit' })
+        }
+        // Blood Knuckles (fists): 30% bleed + heal from stacks
+        if (eff === 'hit_bleed_and_heal' && rollGiftChance(weaponG.chance)) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], 'BLEED', 'gift')
+          var bkStacks = 0
+          for (var bki = 0; bki < hitTarget.statusEffects.length; bki++) {
+            if (hitTarget.statusEffects[bki].id === 'BLEED') bkStacks += (hitTarget.statusEffects[bki].stacks || 1)
+          }
+          if (bkStacks > 0) setPlayerHp(function(hp) { return Math.min(hp + bkStacks, character.maxHp) })
+          addLog({ type: 'condition', text: weaponG.name + '! BLEED + healed ' + bkStacks + ' HP!', tier: 'hit' })
+        }
+
+        // === EMBER ===
+        // Flash Fire (dagger): double strikes apply BURN
+        // Forge Fists: unarmed + condition on all hits
+        if (eff === 'double_strike_condition' && r.doubleStrike) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + ' from double strike!', tier: 'crit' })
+        }
+        if (eff === 'unarmed_upgrade_and_condition') {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(weaponG.condition) + '!', tier: 'hit' })
+        }
+        // Searing Blade (sword): +damage on burning
+        if (eff === 'burning_damage_bonus') {
+          var isBurning = hitTarget.statusEffects && hitTarget.statusEffects.some(function(c) { return c.id === 'BURN' })
+          if (isBurning) {
+            hitTarget.currentHp = Math.max(0, hitTarget.currentHp - weaponG.value)
+            r.damage += weaponG.value
+            addLog({ type: 'player', text: weaponG.name + '! +' + weaponG.value + ' fire damage on burning enemy!', tier: 'hit' })
+            if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+          }
+        }
+        // Fire Lance (spear): first hit BURN + damage
+        if (eff === 'first_hit_burn_and_damage' && !weaponG._firstHitUsed) {
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], weaponG.condition, 'gift')
+          hitTarget.currentHp = Math.max(0, hitTarget.currentHp - weaponG.bonusDamage)
+          r.damage += weaponG.bonusDamage
+          weaponG._firstHitUsed = true
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' BURN + ' + weaponG.bonusDamage + ' burst!', tier: 'crit' })
+          if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+        }
+        // Slag Hammer (mace): staggered+burning = 2x burst
+        if (eff === 'dazed_burning_burst_multiplier') {
+          var isDazedBurning = hitTarget.statusEffects && hitTarget.statusEffects.some(function(c) { return c.id === 'DAZE' }) && hitTarget.statusEffects.some(function(c) { return c.id === 'BURN' })
+          if (isDazedBurning) {
+            var burnCond = hitTarget.statusEffects.find(function(c) { return c.id === 'BURN' })
+            if (burnCond && burnCond.burstDamage) {
+              burnCond.burstDamage = Math.round(burnCond.burstDamage * weaponG.value)
+              addLog({ type: 'condition', text: weaponG.name + '! Staggered + burning = ' + burnCond.burstDamage + ' burst!', tier: 'crit' })
+            }
+          }
+        }
+        // Eruption Cleave (axe): kill AoE + BURN all
+        if (eff === 'kill_aoe_damage_and_condition' && r.enemyDefeated) {
+          giftBattle.enemies.forEach(function(e) {
+            if (!e.isDown && e.id !== hitTarget.id) {
+              e.currentHp = Math.max(0, e.currentHp - weaponG.aoeDamage)
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], weaponG.condition, 'gift')
+              if (e.currentHp <= 0) e.isDown = true
+            }
+          })
+          addLog({ type: 'player', text: weaponG.name + '! ' + weaponG.aoeDamage + ' AoE + ' + condName(weaponG.condition) + ' all!', tier: 'crit' })
+        }
+
+        // === VOID ===
+        // Phantom Flurry (dagger): offhand enhanced — handled in combat.js
+        // Reality Tear (sword): 25% double damage
+        if (eff === 'double_damage_chance' && rollGiftChance(weaponG.chance)) {
+          var tearBonus = r.damage
+          hitTarget.currentHp = Math.max(0, hitTarget.currentHp - tearBonus)
+          r.damage += tearBonus
+          addLog({ type: 'player', text: weaponG.name + '! Reality tears — double damage! +' + tearBonus + '!', tier: 'crit' })
+          if (hitTarget.currentHp <= 0) { hitTarget.isDown = true; r.enemyDefeated = true }
+        }
+        // Void Pierce (spear): random condition on hit
+        if (eff === 'random_condition_on_hit' && rollGiftChance(weaponG.chance)) {
+          var randomConds = ['BLEED', 'POISON', 'BURN', 'FROST', 'DAZE', 'FEAR', 'BLIND', 'NAUSEA']
+          var randomPick = randomConds[Math.floor(Math.random() * randomConds.length)]
+          hitTarget.statusEffects = applyConditionToEffects(hitTarget.statusEffects || [], randomPick, 'gift')
+          addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' ' + condName(randomPick) + '!', tier: 'hit' })
+        }
+        // Null Crush (mace): stagger ignores 50% DEF — handled in combat.js
+        // Dimensional Rift (axe): kill chain instakill
+        if (eff === 'kill_chain_instakill' && r.enemyDefeated && rollGiftChance(weaponG.chance)) {
+          var chainTargets = giftBattle.enemies.filter(function(e) { return !e.isDown && e.id !== hitTarget.id })
+          if (chainTargets.length > 0) {
+            var chainVictim = chainTargets[Math.floor(Math.random() * chainTargets.length)]
+            chainVictim.currentHp = 0; chainVictim.isDown = true
+            addLog({ type: 'player', text: weaponG.name + '! Reality fractures — ' + chainVictim.name + ' erased!', tier: 'crit' })
+          }
+        }
+        // Shadow Boxing (fists): dodge counter — handled in handleEnemyComplete
       }
 
       // Napalm (ember mind): enhance BURN from any source — extra turns + linger damage
