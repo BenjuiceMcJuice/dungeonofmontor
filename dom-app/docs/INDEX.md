@@ -1,6 +1,6 @@
 # Dungeon of Montor -- Documentation Index
 
-> All game documentation in one place. Updated 2026-04-04.
+> All game documentation in one place. Updated 2026-04-06.
 
 ---
 
@@ -13,6 +13,15 @@
 | [Multiplayer](multiplayer.md) | Co-op vision, async play, PvP, Playable Montor, Firebase sync architecture |
 | [Technical](technical.md) | Tech stack, file structure, data architecture, sprites, Firebase, code style |
 | [Roadmap](roadmap.md) | 5-stage development plan: The Crawl > The Tavern > The Network > The Mind > The Long Game |
+
+---
+
+## Implementation Specs
+
+| Document | Description |
+|---|---|
+| [Async Co-op Spec](async_coop_spec.md) | Detailed multiplayer implementation plan -- shared exploration, turn-gated combat, Firestore sync |
+| [Montor Mood & Greed Spec](montor_mood_greed_spec.md) | Tidiness, greed, taste tracking -- safe room tonics, mood-aware whispers, dialogue |
 
 ---
 

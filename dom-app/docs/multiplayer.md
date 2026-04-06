@@ -1,8 +1,9 @@
 # Multiplayer
 
 > Vision and architecture for multiplayer in Dungeon of Montor.
-> Updated 2026-04-03.
+> Updated 2026-04-06.
 > Status: All multiplayer features are **planned** (Stage 3+). The architecture is multiplayer-ready from day one.
+> **Detailed spec:** See [async_coop_spec.md](async_coop_spec.md) for the full implementation plan (Option A: shared exploration, turn-gated combat).
 
 ---
 
@@ -71,6 +72,7 @@ Asymmetric multiplayer: one player controls the dungeon itself.
 - The party plays against a human intelligence instead of AI/random
 - Montor player has a resource budget (can't just spawn infinite enemies)
 - This turns the game into a digital D&D with one player as the dungeon master
+- **Mood/tidiness/greed stats become Montor's resource pool** — the more players ransack, the more Montor can spend on traps/enemies. Restraint starves Montor of resources but earns his respect (better tonics)
 
 ---
 
@@ -106,4 +108,4 @@ On battle start:
 
 ---
 
-*Multiplayer -- v1.0 -- April 2026*
+*Multiplayer -- v1.1 -- April 2026*

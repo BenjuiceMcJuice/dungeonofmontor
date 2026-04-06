@@ -1,7 +1,7 @@
 # Montor
 
 > Everything about Montor the character, his Gifts, his mood, and his future as an AI personality.
-> Updated 2026-04-04.
+> Updated 2026-04-06.
 
 ---
 
@@ -164,7 +164,9 @@ Every gift type should offer something for every slot, but each type leans in a 
 
 ---
 
-## 4. Montor's Mood System (planned)
+## 4. Montor's Mood System (✅ IMPLEMENTED 2026-04-06)
+
+> **Detailed spec:** See [montor_mood_greed_spec.md](montor_mood_greed_spec.md) for full implementation details.
 
 Three pillars drive Montor's personality during a run:
 
