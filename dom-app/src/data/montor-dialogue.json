@@ -1,0 +1,81 @@
+{
+  "safeRoom": {
+    "happy": [
+      "You're careful. I appreciate that.",
+      "Most of them just... take.",
+      "The garden looks almost the same.",
+      "You move through my house like you belong. You don't. But still.",
+      "My grandmother would have liked you. She was wrong about most things."
+    ],
+    "neutral": [
+      "You could have been gentler.",
+      "I suppose you need to eat.",
+      "You're not the worst I've had.",
+      "At least you wiped your feet. Metaphorically."
+    ],
+    "annoyed": [
+      "Look at this place.",
+      "My grandmother would be appalled.",
+      "You know these things don't grow back.",
+      "Every pile you ransack was someone's memory.",
+      "I can hear you rummaging. I can always hear."
+    ],
+    "angry": [
+      "...",
+      "Get out.",
+      "I hope it was worth it.",
+      "You've taken enough.",
+      "There's nothing left for you here. You made sure of that."
+    ]
+  },
+  "whispers": {
+    "happy": [
+      "He seems content.",
+      "A faint humming from somewhere.",
+      "The air feels warmer.",
+      "Something sighs in the walls. Not unpleasantly.",
+      "The shadows lean away from you."
+    ],
+    "neutral": [
+      "Something watches.",
+      "A creak in the walls.",
+      "Dust settles.",
+      "The air is still.",
+      "Footsteps that aren't yours."
+    ],
+    "annoyed": [
+      "The walls feel closer.",
+      "A low rumble.",
+      "Something shifted in the dark.",
+      "The floor groans beneath you.",
+      "A draught from nowhere. Cold."
+    ],
+    "angry": [
+      "He knows.",
+      "The temperature drops.",
+      "You shouldn't have done that.",
+      "Something is following you.",
+      "The dungeon breathes. It sounds like grinding teeth."
+    ]
+  },
+  "greedComments": {
+    "low": [
+      "You left that behind. Interesting.",
+      "Restraint. Rare down here.",
+      "Not everything needs taking.",
+      "He noticed you walked past."
+    ],
+    "high": [
+      "Taking everything, are we?",
+      "Your pockets must be heavy.",
+      "There's a word for this. Starts with G.",
+      "He watches you stuff your pockets."
+    ]
+  },
+  "tonicReward": {
+    "twoChoice": "Montor offers two tonics. Choose wisely.",
+    "oneChoice": "A gift. Don't waste it.",
+    "montorChoice": "Montor chooses for you.",
+    "nothing": "He turns away. Nothing offered."
+  }
+}

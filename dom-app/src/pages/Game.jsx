@@ -13,6 +13,7 @@ import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffec
 import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
 import themeData from '../data/themes.json'
+import montorDialogue from '../data/montor-dialogue.json'
 import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
@@ -198,6 +199,16 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [runLevel, setRunLevel] = useState(0)
   var [pendingLevelUp, setPendingLevelUp] = useState(null) // { hpGain, statPick } or null
 
+  // Montor's mood system — tidiness, greed, taste
+  var [floorDisturbance, setFloorDisturbance] = useState(0)
+  var [maxFloorDisturbance, setMaxFloorDisturbance] = useState(0)
+  var [greedScore, setGreedScore] = useState(0)
+  var [montorTaste, setMontorTaste] = useState(function() {
+    var stats = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha', 'vit']
+    var shuffled = stats.slice().sort(function() { return Math.random() - 0.5 })
+    return { favours: shuffled[0], dislikes: shuffled[1] }
+  })
+
   // Gift system — Montor's sacrificed treasures, one per slot
   var [giftSlots, setGiftSlots] = useState({ body: null, mind: null, weapon: null, shield: null })
   var [unlockedGifts, setUnlockedGifts] = useState(character.godAllGifts ? ['petal', 'stone', 'bile', 'blood', 'ember', 'void'] : [])
@@ -219,6 +230,38 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [reflectNextAttack, setReflectNextAttack] = useState(false) // Mirror: reflect next enemy attack
   var [hitsTakenThisCombat, setHitsTakenThisCombat] = useState(0) // Stoneskin Mend: count hits for end-of-combat heal
   var [phoenixSparkUsed, setPhoenixSparkUsed] = useState(false) // Phoenix Spark: once per combat threshold heal
+
+  // Calculate max possible disturbance for a zone (sum of all pile layers × deep clean cost)
+  function calcMaxDisturbance(z) {
+    if (!z || !z.chambers) return 0
+    var total = 0
+    for (var ci = 0; ci < z.chambers.length; ci++) {
+      var piles = z.chambers[ci].junkPiles
+      if (piles) {
+        for (var pi = 0; pi < piles.length; pi++) {
+          total += (piles[pi].totalLayers || piles[pi].layersRemaining || 0)
+        }
+      }
+    }
+    return total * 6 // 6 = max disturbance per layer (deep clean)
+  }
+
+  // Montor mood derivation
+  function getMontorMood() {
+    var tidiness = maxFloorDisturbance > 0 ? 1 - (floorDisturbance / maxFloorDisturbance) : 1
+    if (tidiness >= 0.8 && greedScore < 10) return 'happy'
+    if (tidiness >= 0.8) return 'neutral'
+    if (tidiness >= 0.6) return 'neutral'
+    if (tidiness >= 0.4) return 'annoyed'
+    return 'angry'
+  }
+
+  function getMontorLine(category) {
+    var mood = getMontorMood()
+    var lines = montorDialogue[category] && montorDialogue[category][mood]
+    if (!lines || lines.length === 0) return ''
+    return lines[Math.floor(Math.random() * lines.length)]
+  }
 
   var XP_THRESHOLDS = progressionData.xpThresholds
 
@@ -425,12 +468,18 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         setZone(f.zones[0])
       }
       setFloor(f)
+      setMaxFloorDisturbance(calcMaxDisturbance(savedRun.zone || f.zones[0]))
+      setFloorDisturbance(savedRun.floorDisturbance || 0)
+      setGreedScore(savedRun.greedScore || 0)
+      if (savedRun.montorTaste) setMontorTaste(savedRun.montorTaste)
       setGamePhase('doors')
     } else {
       var f = generateFloor('grounds', collectedTreasures)
       setFloor(f)
       setZone(f.zones[0])
       setHasZoneKey(false)
+      setMaxFloorDisturbance(calcMaxDisturbance(f.zones[0]))
+      setFloorDisturbance(0)
       setGamePhase('doors')
     }
   }, [])
@@ -459,6 +508,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       unlockedGifts: unlockedGifts,
       activeBuffs: activeBuffs,
       runStats: runStats,
+      floorDisturbance: floorDisturbance,
+      greedScore: greedScore,
+      montorTaste: montorTaste,
     })
   }, [savePending])
 
@@ -523,7 +575,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     }
 
     // Montor whisper — random chance on entering a new room
-    var whisper = MONTOR_WHISPERS[Math.floor(Math.random() * MONTOR_WHISPERS.length)]
+    // Mood-aware whispers
+    var whisperPool = montorDialogue.whispers[getMontorMood()] || montorDialogue.whispers.neutral
+    var whisper = whisperPool[Math.floor(Math.random() * whisperPool.length)]
     setMontorWhisper(whisper)
     if (whisper) {
       setTimeout(function() { setMontorWhisper(null) }, 4000)
@@ -711,6 +765,10 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     applySearch(pile, level)
     setSearchResult(result)
     setSearchPhase('rolling')
+
+    // Track disturbance for Montor's mood
+    var disturbancePoints = { 1: 1, 2: 3, 3: 6 }
+    setFloorDisturbance(function(d) { return d + (disturbancePoints[level] || 1) })
 
     // Dice roll animation — search roll
     var rollCount = 0
@@ -1013,6 +1071,8 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     setFloor(nextFloor)
     setZone(nextFloor.zones[0])
     setHasZoneKey(false)
+    setFloorDisturbance(0)
+    setMaxFloorDisturbance(calcMaxDisturbance(nextFloor.zones[0]))
     setPreviousPosition(null)
     setLootingCorpseId(null)
     setLootingChestId(null)
@@ -1031,14 +1091,55 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     setSafeRoomSlotChoice(null)
   }
 
+  var [safeRoomTonic, setSafeRoomTonic] = useState(null) // { count, playerChooses, montorPick }
+
   function handleSafeRoomContinue() {
     if (isGuarded()) return
     transitionGuardRef.current = Date.now()
+
+    // If tonic not yet offered, calculate and show tonic step
+    if (safeRoomStep !== 'tonic' && safeRoomStep !== 'tonic_pick') {
+      var mood = getMontorMood()
+      var tonic = null
+      if (mood === 'happy') {
+        tonic = { count: greedScore < 10 ? 2 : 1, playerChooses: true }
+      } else if (mood === 'neutral') {
+        tonic = { count: 1, playerChooses: false, montorPick: montorTaste.favours }
+      } else if (mood === 'annoyed') {
+        tonic = Math.random() < 0.5 ? { count: 1, playerChooses: false, montorPick: montorTaste.favours } : null
+      }
+      // angry = nothing
+
+      if (tonic) {
+        setSafeRoomTonic(tonic)
+        setSafeRoomStep(tonic.playerChooses ? 'tonic_pick' : 'tonic')
+        return
+      }
+      // No tonic — show mood message briefly then continue
+      setSafeRoomStep('tonic')
+      setSafeRoomTonic(null)
+      return
+    }
+
+    // Tonic already shown — proceed to doors
     setSafeRoomStep('arrival')
     setSafeRoomGift(null)
     setSafeRoomSlotChoice(null)
+    setSafeRoomTonic(null)
     setGamePhase('doors')
     triggerSave()
+  }
+
+  function handleTonicPick(stat) {
+    if (!safeRoomTonic) return
+    // Apply permanent stat boost for this run
+    character.stats[stat] = (character.stats[stat] || 10) + 1
+    safeRoomTonic.count--
+    if (safeRoomTonic.count <= 0) {
+      handleSafeRoomContinue()
+    } else {
+      setSafeRoomTonic(Object.assign({}, safeRoomTonic))
+    }
   }
 
   function handleSmashGift() {
@@ -3159,6 +3260,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     if (!corpse || corpse.goldTaken) return
     setPlayerGold(playerGold + corpse.gold)
     updateCorpse(corpseId, function(c) { return Object.assign({}, c, { goldTaken: true }) })
+    setGreedScore(function(g) { return g + 1 })
   }
 
   // Take a specific item from opened corpse
@@ -3171,10 +3273,22 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     updateCorpse(corpseId, function(c) {
       return Object.assign({}, c, { itemsTaken: c.itemsTaken.concat([itemIndex]) })
     })
+    setGreedScore(function(g) { return g + 2 })
   }
 
-  // Close the loot panel (walk away)
+  // Close the loot panel (walk away — greed reduction if left loot behind)
   function handleCloseLoot() {
+    if (lootingCorpseId) {
+      var chamber = zone.chambers[zone.playerPosition]
+      var corpse = chamber.corpses && chamber.corpses.find(function(c) { return c.id === lootingCorpseId })
+      if (corpse) {
+        var hasUntakenGold = !corpse.goldTaken && corpse.gold > 0
+        var hasUntakenItems = corpse.items && corpse.items.some(function(it, idx) { return corpse.itemsTaken.indexOf(idx) === -1 })
+        if (hasUntakenGold || hasUntakenItems) {
+          setGreedScore(function(g) { return Math.max(0, g - 2) })
+        }
+      }
+    }
     setLootingCorpseId(null)
   }
 
@@ -3546,7 +3660,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
               You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
             </p>
             <p className="text-ink-faint text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
-              "{floor ? floor.montorLine : 'I see you.'}"
+              "{getMontorLine('safeRoom')}"
             </p>
           </div>
           <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs text-sm text-ink-dim">
@@ -3727,6 +3841,61 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
               Continue
             </button>
           </div>
+        </div>
+      )
+    }
+
+    // Tonic pick — player chooses stat(s)
+    if (safeRoomStep === 'tonic_pick' && safeRoomTonic && safeRoomTonic.playerChooses) {
+      var tonicStats = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha', 'vit']
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
+          <p className="text-gold/80 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            "{getMontorLine('safeRoom')}"
+          </p>
+          <p className="text-gold font-display text-xl">Montor's Tonic</p>
+          <p className="text-ink text-sm">{montorDialogue.tonicReward.twoChoice}</p>
+          <p className="text-ink-faint text-xs">{safeRoomTonic.count} pick{safeRoomTonic.count > 1 ? 's' : ''} remaining</p>
+          <div className="grid grid-cols-2 gap-2 w-full max-w-xs">
+            {tonicStats.map(function(stat) {
+              var isFavoured = montorTaste.favours === stat
+              return (
+                <button key={stat} onClick={function() { handleTonicPick(stat) }}
+                  className={'py-2 px-3 rounded-lg border text-sm font-sans transition-colors ' +
+                    (isFavoured ? 'border-gold/60 bg-gold/10 text-gold hover:border-gold' : 'border-border bg-surface text-ink hover:border-ink-faint')}>
+                  {stat.toUpperCase()} ({character.stats[stat] || 10})
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+
+    // Tonic — Montor's choice or nothing (auto-apply Montor's pick)
+    if (safeRoomStep === 'tonic') {
+      if (safeRoomTonic && safeRoomTonic.montorPick && !safeRoomTonic._applied) {
+        character.stats[safeRoomTonic.montorPick] = (character.stats[safeRoomTonic.montorPick] || 10) + 1
+        safeRoomTonic._applied = true
+      }
+      return (
+        <div onClick={handleSafeRoomContinue}
+          className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised cursor-pointer">
+          <p className="text-gold/80 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            "{getMontorLine('safeRoom')}"
+          </p>
+          {safeRoomTonic ? (
+            <>
+              <p className="text-gold font-display text-xl">Montor's Tonic</p>
+              <p className="text-ink text-sm">{montorDialogue.tonicReward.montorChoice}</p>
+              <p className="text-green-400 font-display text-lg">+1 {(safeRoomTonic.montorPick || 'str').toUpperCase()}</p>
+            </>
+          ) : (
+            <>
+              <p className="text-ink-dim font-display text-lg">{montorDialogue.tonicReward.nothing}</p>
+            </>
+          )}
+          <p className="text-ink-faint text-xs font-sans">Tap to continue</p>
         </div>
       )
     }

@@ -29,6 +29,9 @@ function buildSavePayload(state) {
     unlockedGifts: state.unlockedGifts,
     activeBuffs: state.activeBuffs,
     runStats: state.runStats,
+    floorDisturbance: state.floorDisturbance || 0,
+    greedScore: state.greedScore || 0,
+    montorTaste: state.montorTaste || null,
   }
 }
 
