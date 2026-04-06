@@ -310,11 +310,6 @@ function Game({ character, user, onEndRun }) {
   function isCombatGuarded() {
     return Date.now() - combatGuardRef.current < 350
   }
-  // Battle Won splash — show for 1.5s then transition to victory
-  function triggerBattleWon() {
-    guardedSetCombatPhase('battleWon')
-    setTimeout(function() { triggerBattleWon() }, 1500)
-  }
 
   // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
   useEffect(function() {
@@ -1232,7 +1227,7 @@ function Game({ character, user, onEndRun }) {
           setTotalXp(newXp)
           setLastXpGained(xpGained)
           checkLevelUp(newXp)
-          transitionGuardRef.current = Date.now(); triggerBattleWon()
+          transitionGuardRef.current = Date.now(); guardedSetCombatPhase('victory')
           return
         }
         // Other enemies still alive — skip dead enemy's turn
@@ -1286,7 +1281,7 @@ function Game({ character, user, onEndRun }) {
             var xpG2 = calculateXp(attackOut.newBattle)
             setTotalXp(totalXp + xpG2); setLastXpGained(xpG2); checkLevelUp(totalXp + xpG2)
             setBattle(attackOut.newBattle)
-            triggerBattleWon()
+            guardedSetCombatPhase('victory')
             return
           }
           var nextB4 = advanceTurn(attackOut.newBattle)
@@ -1668,7 +1663,7 @@ function Game({ character, user, onEndRun }) {
       checkLevelUp(newXpReflect)
       setBattle(updatedBattle)
       setEnemyAttackInfo(null)
-      triggerBattleWon()
+      guardedSetCombatPhase('victory')
       var reflectZone = Object.assign({}, zone, {
         chambers: zone.chambers.map(function(ch) {
           if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
@@ -2375,7 +2370,7 @@ function Game({ character, user, onEndRun }) {
       setLastXpGained(xpGained)
       checkLevelUp(newXp)
       setBattle(updatedBattle)
-      triggerBattleWon()
+      guardedSetCombatPhase('victory')
       var newZone = Object.assign({}, zone, {
         chambers: zone.chambers.map(function(ch) {
           if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
@@ -5561,12 +5556,6 @@ function Game({ character, user, onEndRun }) {
 
     return (
       <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden relative" style={roomBgStyle}>
-        {/* Battle Won overlay — floats over combat view */}
-        {combatPhase === 'battleWon' && (
-          <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
-            <p className="font-display text-4xl text-gold animate-pulse drop-shadow-lg">Battle Won!</p>
-          </div>
-        )}
         {/* Stats overlay (read-only during combat) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
@@ -5909,8 +5898,8 @@ function Game({ character, user, onEndRun }) {
           </div>
         )}
 
-        {/* Action area — hidden during battleWon overlay */}
-        <div className={'flex-1 flex flex-col items-center justify-center gap-2 min-h-0' + (combatPhase === 'battleWon' ? ' invisible' : '')}>
+        {/* Action area */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
           {combatPhase === 'enemyWindup' && (
             <div className="flex flex-col items-center gap-2 p-3 border-2 border-red-400/30 rounded-lg bg-red-400/5">
               <p className="text-red-400 text-xs font-sans uppercase tracking-wide">Enemy Turn</p>
