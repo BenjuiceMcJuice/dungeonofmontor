@@ -4266,7 +4266,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         {showInventoryPanel && (function() {
           var tabs = [
             { id: 'gear',        label: 'Gear',    types: ['weapon', 'armour'] },
-            { id: 'accessories', label: 'Acc',     types: ['relic', 'ring', 'amulet'] },
+            { id: 'accessories', label: 'Equip',   types: ['relic', 'ring', 'amulet'] },
             { id: 'consumables', label: 'Items',   types: ['consumable'] },
             { id: 'junk',        label: 'Junk',    types: ['junk'] },
           ]
