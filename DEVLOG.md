@@ -134,6 +134,11 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-04 | Direction labels + door labels removed — sprites speak for themselves | ✅ Done |
 | 2026-04-04 | Terminal hint gated by PER >= 12 | ✅ Done |
 | 2026-04-04 | Enemy flee/howl/heal visible in UI — 1.5s display with descriptive message | ✅ Done |
+| 2026-04-06 | Full effects audit — 11 unwired gifts, throwable button, condition UI, Napalm, Acid Edge | ✅ Done |
+| 2026-04-06 | Sepsis rebuffed (+4 flat), Acid Edge nerfed (50% proc, -1), item prices doubled | ✅ Done |
+| 2026-04-06 | Combat log cleanup, enemy condition display, enemy stat colour (green/red) | ✅ Done |
+| 2026-04-06 | Traps lethal, starter shop slimmed, loot balance (health potions halved) | ✅ Done |
+| 2026-04-06 | Basic run persistence — localStorage + Firestore, resume on reload | ✅ Done |
 |            | **Next up** | |
 |            | Themed hi-res junk sprites for non-garden floors | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |

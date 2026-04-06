@@ -177,7 +177,7 @@ function formatAttackLog(r, type) {
 // Game — first-person dungeon crawl + combat
 // ============================================================
 
-function Game({ character, user, onEndRun }) {
+function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   // --- Dungeon state ---
   var [floor, setFloor] = useState(null)
   var [zone, setZone] = useState(null)
@@ -385,15 +385,84 @@ function Game({ character, user, onEndRun }) {
   })
   var logRef = useRef(null)
 
-  // Init floor — start at Garden
+  // Init floor — restore from save or start fresh at Garden
   useEffect(function() {
     window.scrollTo(0, 0)
-    var f = generateFloor('grounds', collectedTreasures)
-    setFloor(f)
-    setZone(f.zones[0])
-    setHasZoneKey(false)
-    setGamePhase('doors')
+    if (savedRun) {
+      // Restore all state from saved run
+      setPlayerHp(savedRun.playerHp)
+      setPlayerGold(savedRun.playerGold)
+      setPlayerInventory(savedRun.playerInventory || [])
+      setPlayerJunkBag(savedRun.playerJunkBag || [])
+      setChambersCleared(savedRun.chambersCleared || 0)
+      setFloorsCompleted(savedRun.floorsCompleted || [])
+      setCollectedTreasures(savedRun.collectedTreasures || [])
+      setHasZoneKey(savedRun.hasZoneKey || false)
+      setTotalXp(savedRun.totalXp || 0)
+      setRunLevel(savedRun.runLevel || 0)
+      setGiftSlots(savedRun.giftSlots || { body: null, mind: null, weapon: null, shield: null })
+      setUnlockedGifts(savedRun.unlockedGifts || [])
+      setActiveBuffs(savedRun.activeBuffs || [])
+      setRunStats(savedRun.runStats || { enemiesDefeated: 0, enemiesFled: 0, itemsUsed: 0, damageDealt: 0, damageTaken: 0, critsLanded: 0, critsReceived: 0, killedBy: null, killedByTier: null, killedInChamber: null })
+      // Restore character mutable fields (maxHp changes from level-ups)
+      if (savedRun.character) {
+        character.maxHp = savedRun.character.maxHp
+        character.stats = savedRun.character.stats
+        character.equipped = savedRun.character.equipped
+        character.level = savedRun.character.level
+      }
+      // Regenerate floor structure but use saved zone state
+      var restoredFloorId = savedRun.floorId || 'grounds'
+      var f = generateFloor(restoredFloorId, savedRun.collectedTreasures || [])
+      // Replace the matching zone with saved state (preserves visited/cleared/corpses/junk)
+      if (savedRun.zone) {
+        f.zones = f.zones.map(function(z) {
+          if (z.zoneId === savedRun.zone.zoneId) return savedRun.zone
+          return z
+        })
+        setZone(savedRun.zone)
+      } else {
+        setZone(f.zones[0])
+      }
+      setFloor(f)
+      setGamePhase('doors')
+    } else {
+      var f = generateFloor('grounds', collectedTreasures)
+      setFloor(f)
+      setZone(f.zones[0])
+      setHasZoneKey(false)
+      setGamePhase('doors')
+    }
   }, [])
+
+  // Save run state — triggered by setting savePending, runs after React state flushes
+  var [savePending, setSavePending] = useState(false)
+
+  useEffect(function() {
+    if (!savePending || !onSaveRun || !floor) return
+    setSavePending(false)
+    onSaveRun({
+      character: character,
+      playerHp: playerHp,
+      playerGold: playerGold,
+      playerInventory: playerInventory,
+      playerJunkBag: playerJunkBag,
+      floorId: floor ? floor.floorId : 'grounds',
+      zone: zone,
+      chambersCleared: chambersCleared,
+      floorsCompleted: floorsCompleted,
+      collectedTreasures: collectedTreasures,
+      hasZoneKey: hasZoneKey,
+      totalXp: totalXp,
+      runLevel: runLevel,
+      giftSlots: giftSlots,
+      unlockedGifts: unlockedGifts,
+      activeBuffs: activeBuffs,
+      runStats: runStats,
+    })
+  }, [savePending])
+
+  function triggerSave() { setSavePending(true) }
 
   useEffect(function() {
     // logRef scroll removed — now showing last 2 entries only
@@ -463,6 +532,7 @@ function Game({ character, user, onEndRun }) {
     // If already cleared or has corpses (fought), just show doors (backtracking)
     if (chamber.cleared || chamber.corpses) {
       setGamePhase('doors')
+      triggerSave()
       return
     }
 
@@ -470,6 +540,7 @@ function Game({ character, user, onEndRun }) {
     if ((chamber.chest && chamber.chest.opened) || chamber.npc) {
       setChamberContent(null)
       setGamePhase('doors')
+      triggerSave()
       return
     }
 
@@ -948,6 +1019,7 @@ function Game({ character, user, onEndRun }) {
     setLootingNpcId(null)
     initSafeRoom()
     guardedSetPhase('safe_room')
+    triggerSave()
   }
 
   // --- Safe room: Montor's audience chamber ---
@@ -966,6 +1038,7 @@ function Game({ character, user, onEndRun }) {
     setSafeRoomGift(null)
     setSafeRoomSlotChoice(null)
     setGamePhase('doors')
+    triggerSave()
   }
 
   function handleSmashGift() {
@@ -1224,9 +1297,6 @@ function Game({ character, user, onEndRun }) {
 
     var hasEnemyConditionEffects = tickResult.damage > 0 || tickResult.narrative
     var enemyCondDelay = hasEnemyConditionEffects ? 1000 : 0
-
-    // Immediately update battle state so condition icons reflect expired/changed conditions
-    if (hasEnemyConditionEffects) setBattle(tickedBattle)
 
     if (tickResult.died) {
       // Enemy died from conditions — skip windup, go straight to result
@@ -3069,6 +3139,7 @@ function Game({ character, user, onEndRun }) {
     setCombatLog([])
     setChamberContent(null)
     setGamePhase('doors')
+    triggerSave()
   }
 
   // Open a corpse to see what's inside
@@ -3160,6 +3231,7 @@ function Game({ character, user, onEndRun }) {
     })
     setZone(newZone)
     setChambersCleared(chambersCleared + 1)
+    triggerSave()
   }
 
   function updateNpc(updater) {
