@@ -15,7 +15,8 @@
     "attackStat": "str",
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "Left behind by someone who didn't make it. Quick, at least."
+    "description": "Left behind by someone who didn't make it. Quick, at least.",
+    "weight": 2
   },
   "sword_base": {
     "id": "sword_base",
@@ -32,7 +33,8 @@
     "attackStat": "str",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Reliable. Dull. +1 accuracy. Like its previous owner."
+    "description": "Reliable. Dull. +1 accuracy. Like its previous owner.",
+    "weight": 2
   },
   "spear_base": {
     "id": "spear_base",
@@ -49,7 +51,8 @@
     "attackStat": "str",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Long reach. Strike first, ask questions never."
+    "description": "Long reach. Strike first, ask questions never.",
+    "weight": 2
   },
   "mace_base": {
     "id": "mace_base",
@@ -67,7 +70,8 @@
     "attackStat": "str",
     "buyPrice": 36,
     "sellPrice": 14,
-    "description": "Blunt. Heavy. Punches through armour. 15% stagger."
+    "description": "Blunt. Heavy. Punches through armour. 15% stagger.",
+    "weight": 3
   },
   "axe_base": {
     "id": "axe_base",
@@ -86,7 +90,8 @@
     "attackStat": "str",
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Big. Slow. Hits like a falling tree. 20% stagger."
+    "description": "Big. Slow. Hits like a falling tree. 20% stagger.",
+    "weight": 3
   },
   "___COMMENT_GIFTED_DAGGER": "=== TIER 2: MONTOR'S GIFTED DAGGERS (has giftPower) ===",
   "montors_peeling_knife": {
@@ -107,7 +112,8 @@
     "giftPower": "bile",
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Still has potato on it. Also venom."
+    "description": "Still has potato on it. Also venom.",
+    "weight": 2
   },
   "montors_pruning_shears": {
     "id": "montors_pruning_shears",
@@ -127,7 +133,8 @@
     "giftPower": "blood",
     "buyPrice": 48,
     "sellPrice": 20,
-    "description": "For the garden. Grows back sharper each time."
+    "description": "For the garden. Grows back sharper each time.",
+    "weight": 2
   },
   "montors_candle_snuffer": {
     "id": "montors_candle_snuffer",
@@ -145,9 +152,10 @@
     "conditionOnHit": "BURN",
     "conditionChance": 0.8,
     "giftPower": "ember",
-    "buyPrice": 64,
-    "sellPrice": 26,
-    "description": "Ironic. It puts out candles but sets everything else on fire."
+    "buyPrice": 96,
+    "sellPrice": 39,
+    "description": "Ironic. It puts out candles but sets everything else on fire.",
+    "weight": 2
   },
   "montors_icicle": {
     "id": "montors_icicle",
@@ -165,9 +173,10 @@
     "conditionOnHit": "FROST",
     "conditionChance": 1,
     "giftPower": "stone",
-    "buyPrice": 60,
-    "sellPrice": 24,
-    "description": "Snapped from the eaves. Never melts. Freeze them, then shatter them."
+    "buyPrice": 90,
+    "sellPrice": 36,
+    "description": "Snapped from the eaves. Never melts. Freeze them, then shatter them.",
+    "weight": 2
   },
   "montors_nail_file": {
     "id": "montors_nail_file",
@@ -187,7 +196,8 @@
     "giftPower": "void",
     "buyPrice": 52,
     "sellPrice": 20,
-    "description": "Tiny. Vicious. He was very particular about his nails."
+    "description": "Tiny. Vicious. He was very particular about his nails.",
+    "weight": 2
   },
   "montors_cheese_wire": {
     "id": "montors_cheese_wire",
@@ -205,9 +215,10 @@
     "conditionOnHit": "DAZE",
     "conditionChance": 0.7,
     "giftPower": "stone",
-    "buyPrice": 70,
-    "sellPrice": 28,
-    "description": "Thin. Silent. Cuts through anything. Leaves them seeing stars."
+    "buyPrice": 105,
+    "sellPrice": 42,
+    "description": "Thin. Silent. Cuts through anything. Leaves them seeing stars.",
+    "weight": 2
   },
   "___COMMENT_GIFTED_SWORD": "=== TIER 2: MONTOR'S GIFTED SWORDS ===",
   "montors_umbrella": {
@@ -228,7 +239,8 @@
     "giftPower": "bile",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "Hidden blade inside. Tipped with something green. He takes it everywhere."
+    "description": "Hidden blade inside. Tipped with something green. He takes it everywhere.",
+    "weight": 2
   },
   "montors_letter_opener": {
     "id": "montors_letter_opener",
@@ -248,7 +260,8 @@
     "giftPower": "blood",
     "buyPrice": 56,
     "sellPrice": 22,
-    "description": "Silver. Monogrammed. Paper cuts that never heal."
+    "description": "Silver. Monogrammed. Paper cuts that never heal.",
+    "weight": 2
   },
   "montors_fireplace_poker": {
     "id": "montors_fireplace_poker",
@@ -266,9 +279,10 @@
     "conditionOnHit": "BURN",
     "conditionChance": 1,
     "giftPower": "ember",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "Still hot. Always hot. Sears on contact."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "Still hot. Always hot. Sears on contact.",
+    "weight": 2
   },
   "montors_ice_pick": {
     "id": "montors_ice_pick",
@@ -286,9 +300,10 @@
     "conditionOnHit": "FROST",
     "conditionChance": 1,
     "giftPower": "stone",
-    "buyPrice": 76,
-    "sellPrice": 30,
-    "description": "Keeps the drinks cold. And the enemies."
+    "buyPrice": 114,
+    "sellPrice": 45,
+    "description": "Keeps the drinks cold. And the enemies.",
+    "weight": 2
   },
   "montors_mums_bread_knife": {
     "id": "montors_mums_bread_knife",
@@ -306,9 +321,10 @@
     "conditionOnHit": "FEAR",
     "conditionChance": 0.7,
     "giftPower": "blood",
-    "buyPrice": 84,
-    "sellPrice": 34,
-    "description": "She could silence a room. So can this."
+    "buyPrice": 126,
+    "sellPrice": 51,
+    "description": "She could silence a room. So can this.",
+    "weight": 2
   },
   "montors_sabatier": {
     "id": "montors_sabatier",
@@ -328,7 +344,8 @@
     "giftPower": "stone",
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "French. Precise. The flat of the blade rattles the skull."
+    "description": "French. Precise. The flat of the blade rattles the skull.",
+    "weight": 2
   },
   "___COMMENT_GIFTED_SPEAR": "=== TIER 2: MONTOR'S GIFTED SPEARS ===",
   "montors_garden_fork": {
@@ -349,7 +366,8 @@
     "giftPower": "petal",
     "buyPrice": 48,
     "sellPrice": 20,
-    "description": "Prongs caked in compost. The compost is alive."
+    "description": "Prongs caked in compost. The compost is alive.",
+    "weight": 2
   },
   "montors_fishing_spear": {
     "id": "montors_fishing_spear",
@@ -369,7 +387,8 @@
     "giftPower": "blood",
     "buyPrice": 52,
     "sellPrice": 20,
-    "description": "Barbed. What it catches, it keeps."
+    "description": "Barbed. What it catches, it keeps.",
+    "weight": 2
   },
   "montors_toasting_fork": {
     "id": "montors_toasting_fork",
@@ -387,9 +406,10 @@
     "conditionOnHit": "BURN",
     "conditionChance": 0.8,
     "giftPower": "ember",
-    "buyPrice": 70,
-    "sellPrice": 28,
-    "description": "Made for crumpets. The prongs glow red."
+    "buyPrice": 105,
+    "sellPrice": 42,
+    "description": "Made for crumpets. The prongs glow red.",
+    "weight": 2
   },
   "montors_curtain_rod": {
     "id": "montors_curtain_rod",
@@ -409,7 +429,8 @@
     "giftPower": "stone",
     "buyPrice": 56,
     "sellPrice": 22,
-    "description": "Long reach. Cold brass. The curtains are on the floor now."
+    "description": "Long reach. Cold brass. The curtains are on the floor now.",
+    "weight": 2
   },
   "montors_broom_handle": {
     "id": "montors_broom_handle",
@@ -429,7 +450,8 @@
     "giftPower": "void",
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Snapped in half. The jagged end does the talking."
+    "description": "Snapped in half. The jagged end does the talking.",
+    "weight": 2
   },
   "montors_weathervane": {
     "id": "montors_weathervane",
@@ -447,9 +469,10 @@
     "conditionOnHit": "DAZE",
     "conditionChance": 0.7,
     "giftPower": "stone",
-    "buyPrice": 68,
-    "sellPrice": 28,
-    "description": "Arrow-shaped tip. Ripped from the roof. One good crack to the temple."
+    "buyPrice": 102,
+    "sellPrice": 42,
+    "description": "Arrow-shaped tip. Ripped from the roof. One good crack to the temple.",
+    "weight": 2
   },
   "___COMMENT_GIFTED_MACE": "=== TIER 2: MONTOR'S GIFTED MACES ===",
   "montors_mums_ladle": {
@@ -471,7 +494,8 @@
     "giftPower": "bile",
     "buyPrice": 48,
     "sellPrice": 20,
-    "description": "She stirred things best left unstirred. Something green drips from it."
+    "description": "She stirred things best left unstirred. Something green drips from it.",
+    "weight": 3
   },
   "montors_tenderiser": {
     "id": "montors_tenderiser",
@@ -492,7 +516,8 @@
     "giftPower": "blood",
     "buyPrice": 56,
     "sellPrice": 22,
-    "description": "For meat. You're meat. The spikes leave marks."
+    "description": "For meat. You're meat. The spikes leave marks.",
+    "weight": 3
   },
   "montors_candlestick": {
     "id": "montors_candlestick",
@@ -511,9 +536,10 @@
     "conditionOnHit": "BURN",
     "conditionChance": 1,
     "giftPower": "ember",
-    "buyPrice": 76,
-    "sellPrice": 30,
-    "description": "Solid brass. Still lit. Colonel Montor. In the dungeon. With this."
+    "buyPrice": 114,
+    "sellPrice": 45,
+    "description": "Solid brass. Still lit. Colonel Montor. In the dungeon. With this.",
+    "weight": 3
   },
   "montors_pestle": {
     "id": "montors_pestle",
@@ -532,9 +558,10 @@
     "conditionOnHit": "FROST",
     "conditionChance": 1,
     "giftPower": "stone",
-    "buyPrice": 72,
-    "sellPrice": 28,
-    "description": "Marble. Cold to the touch. Grinds spices. Grinds bones."
+    "buyPrice": 108,
+    "sellPrice": 42,
+    "description": "Marble. Cold to the touch. Grinds spices. Grinds bones.",
+    "weight": 3
   },
   "montors_mums_rolling_pin": {
     "id": "montors_mums_rolling_pin",
@@ -555,7 +582,8 @@
     "giftPower": "blood",
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "She didn't need magic. Neither does this. The thud alone terrifies."
+    "description": "She didn't need magic. Neither does this. The thud alone terrifies.",
+    "weight": 3
   },
   "montors_door_knocker": {
     "id": "montors_door_knocker",
@@ -574,9 +602,10 @@
     "conditionOnHit": "DAZE",
     "conditionChance": 1,
     "giftPower": "stone",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "Brass lion head. Knock knock. Lights out."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "Brass lion head. Knock knock. Lights out.",
+    "weight": 3
   },
   "___COMMENT_GIFTED_AXE": "=== TIER 2: MONTOR'S GIFTED AXES ===",
   "montors_woodsmans_axe": {
@@ -599,7 +628,8 @@
     "giftPower": "petal",
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "Sap-stained. The tree sap is toxic. So is everything in Montor's garden."
+    "description": "Sap-stained. The tree sap is toxic. So is everything in Montor's garden.",
+    "weight": 3
   },
   "montors_cleaver": {
     "id": "montors_cleaver",
@@ -621,7 +651,8 @@
     "giftPower": "blood",
     "buyPrice": 64,
     "sellPrice": 26,
-    "description": "Kitchen grade. Butcher grade. The edge never dulls."
+    "description": "Kitchen grade. Butcher grade. The edge never dulls.",
+    "weight": 3
   },
   "montors_coal_shovel": {
     "id": "montors_coal_shovel",
@@ -641,9 +672,10 @@
     "conditionOnHit": "BURN",
     "conditionChance": 1,
     "giftPower": "ember",
-    "buyPrice": 84,
-    "sellPrice": 34,
-    "description": "Full of embers. Swings like a cricket bat. Everything catches fire."
+    "buyPrice": 126,
+    "sellPrice": 51,
+    "description": "Full of embers. Swings like a cricket bat. Everything catches fire.",
+    "weight": 3
   },
   "montors_pickaxe": {
     "id": "montors_pickaxe",
@@ -663,9 +695,10 @@
     "conditionOnHit": "FROST",
     "conditionChance": 0.8,
     "giftPower": "stone",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "Caked in frozen rock dust. Each hit cracks like permafrost."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "Caked in frozen rock dust. Each hit cracks like permafrost.",
+    "weight": 3
   },
   "montors_executioners_hatchet": {
     "id": "montors_executioners_hatchet",
@@ -685,9 +718,10 @@
     "conditionOnHit": "FEAR",
     "conditionChance": 0.8,
     "giftPower": "void",
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Ceremonial. Notched. They see it and they know what's coming."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Ceremonial. Notched. They see it and they know what's coming.",
+    "weight": 3
   },
   "montors_sledgehammer": {
     "id": "montors_sledgehammer",
@@ -707,9 +741,10 @@
     "conditionOnHit": "DAZE",
     "conditionChance": 1,
     "giftPower": "stone",
-    "buyPrice": 96,
-    "sellPrice": 38,
-    "description": "Not subtle. Not fast. But nothing stays standing."
+    "buyPrice": 144,
+    "sellPrice": 57,
+    "description": "Not subtle. Not fast. But nothing stays standing.",
+    "weight": 3
   },
   "___COMMENT_HARDENED": "=== TIER 3: MONTOR'S HARDENED WEAPONS (strong stats, NO giftPower) ===",
   "montors_skeleton_key": {
@@ -725,9 +760,10 @@
     "rarity": "epic",
     "damageDie": 4,
     "attackStat": "str",
-    "buyPrice": 180,
-    "sellPrice": 72,
-    "description": "Opens anything. Including enemies. 40% double strike, 30% DEF ignore, +3 init."
+    "buyPrice": 360,
+    "sellPrice": 144,
+    "description": "Opens anything. Including enemies. 40% double strike, 30% DEF ignore, +3 init.",
+    "weight": 2
   },
   "montors_letter_knife": {
     "id": "montors_letter_knife",
@@ -742,9 +778,10 @@
     "rarity": "rare",
     "damageDie": 4,
     "attackStat": "str",
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "Silver. Perfectly balanced. 35% double strike, +2 init. A precision instrument."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "Silver. Perfectly balanced. 35% double strike, +2 init. A precision instrument.",
+    "weight": 2
   },
   "montors_family_heirloom": {
     "id": "montors_family_heirloom",
@@ -759,9 +796,10 @@
     "rarity": "epic",
     "damageDie": 8,
     "attackStat": "str",
-    "buyPrice": 240,
-    "sellPrice": 96,
-    "description": "His grandmother forged it. d8, +3 accuracy, 15% double strike. It hums when you hold it."
+    "buyPrice": 480,
+    "sellPrice": 192,
+    "description": "His grandmother forged it. d8, +3 accuracy, 15% double strike. It hums when you hold it.",
+    "weight": 2
   },
   "montors_sabatier_hardened": {
     "id": "montors_sabatier_hardened",
@@ -776,9 +814,10 @@
     "rarity": "rare",
     "damageDie": 8,
     "attackStat": "str",
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "French steel, honed by dungeon air. d8, +3 accuracy, 15% DEF ignore."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "French steel, honed by dungeon air. d8, +3 accuracy, 15% DEF ignore.",
+    "weight": 2
   },
   "montors_flagpole": {
     "id": "montors_flagpole",
@@ -793,9 +832,10 @@
     "rarity": "rare",
     "damageDie": 8,
     "attackStat": "str",
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "Still has the flag on it. d8, +4 init. Always strikes first."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "Still has the flag on it. d8, +4 init. Always strikes first.",
+    "weight": 2
   },
   "montors_lightning_rod": {
     "id": "montors_lightning_rod",
@@ -811,9 +851,10 @@
     "rarity": "epic",
     "damageDie": 8,
     "attackStat": "str",
-    "buyPrice": 200,
-    "sellPrice": 80,
-    "description": "Ripped from the roof. Copper tip still hums. d8, +3 init, +1 accuracy, 20% DEF ignore."
+    "buyPrice": 400,
+    "sellPrice": 160,
+    "description": "Ripped from the roof. Copper tip still hums. d8, +3 init, +1 accuracy, 20% DEF ignore.",
+    "weight": 2
   },
   "montors_void_cleaver": {
     "id": "montors_void_cleaver",
@@ -829,9 +870,10 @@
     "rarity": "epic",
     "damageDie": 8,
     "attackStat": "str",
-    "buyPrice": 220,
-    "sellPrice": 88,
-    "description": "Montor's personal mace. d8, 50% DEF ignore, 30% stagger. He's noticed it's missing."
+    "buyPrice": 440,
+    "sellPrice": 176,
+    "description": "Montor's personal mace. d8, 50% DEF ignore, 30% stagger. He's noticed it's missing.",
+    "weight": 3
   },
   "montors_hardened_pestle": {
     "id": "montors_hardened_pestle",
@@ -847,9 +889,10 @@
     "rarity": "rare",
     "damageDie": 8,
     "attackStat": "str",
-    "buyPrice": 130,
-    "sellPrice": 52,
-    "description": "Marble. Reinforced. d8, 45% DEF ignore, 25% stagger. He ground spices with it. And other things."
+    "buyPrice": 195,
+    "sellPrice": 78,
+    "description": "Marble. Reinforced. d8, 45% DEF ignore, 25% stagger. He ground spices with it. And other things.",
+    "weight": 3
   },
   "montors_grandfather_clock_hand": {
     "id": "montors_grandfather_clock_hand",
@@ -866,9 +909,10 @@
     "rarity": "epic",
     "damageDie": 12,
     "attackStat": "str",
-    "buyPrice": 200,
-    "sellPrice": 80,
-    "description": "The minute hand. Six feet of brass. d12, 20% DEF ignore, 30% stagger. Time stops for no one."
+    "buyPrice": 400,
+    "sellPrice": 160,
+    "description": "The minute hand. Six feet of brass. d12, 20% DEF ignore, 30% stagger. Time stops for no one.",
+    "weight": 3
   },
   "montors_hardened_cleaver": {
     "id": "montors_hardened_cleaver",
@@ -885,9 +929,10 @@
     "rarity": "rare",
     "damageDie": 12,
     "attackStat": "str",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "Tempered in the furnace. d12, 15% DEF ignore, 25% stagger. Cleaner cuts."
+    "buyPrice": 210,
+    "sellPrice": 84,
+    "description": "Tempered in the furnace. d12, 15% DEF ignore, 25% stagger. Cleaner cuts.",
+    "weight": 3
   },
   "___COMMENT_UNIQUE": "=== TIER 4: UNIQUE WEAPONS (legendary, rule-breaking) ===",
   "montors_mums_slipper": {
@@ -906,9 +951,10 @@
     "attackStat": "str",
     "conditionOnHit": "FEAR",
     "conditionChance": 1,
-    "buyPrice": 400,
-    "sellPrice": 160,
-    "description": "Everyone feared it. d8, 50% DEF ignore, 50% stagger, guaranteed FEAR. No AGI penalty. She was fast."
+    "buyPrice": 1200,
+    "sellPrice": 480,
+    "description": "Everyone feared it. d8, 50% DEF ignore, 50% stagger, guaranteed FEAR. No AGI penalty. She was fast.",
+    "weight": 3
   },
   "montors_family_sword": {
     "id": "montors_family_sword",
@@ -923,9 +969,10 @@
     "rarity": "legendary",
     "damageDie": 10,
     "attackStat": "str",
-    "buyPrice": 500,
-    "sellPrice": 200,
-    "description": "His grandmother forged it. His mother wielded it. d10, +3 accuracy, 20% double strike, 25% DEF ignore. It sings."
+    "buyPrice": 1500,
+    "sellPrice": 600,
+    "description": "His grandmother forged it. His mother wielded it. d10, +3 accuracy, 20% double strike, 25% DEF ignore. It sings.",
+    "weight": 2
   },
   "___COMMENT_SHIELDS": "=== SHIELDS ===",
   "shield_base": {
@@ -940,7 +987,8 @@
     "passiveValue": 0.1,
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "A plank with a handle nailed on. 10% block. It's something."
+    "description": "A plank with a handle nailed on. 10% block. It's something.",
+    "weight": 2
   },
   "wooden_shield": {
     "id": "wooden_shield",
@@ -954,7 +1002,8 @@
     "passiveValue": 0.15,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "A better plank. With a better handle. 15% block."
+    "description": "A better plank. With a better handle. 15% block.",
+    "weight": 2
   },
   "montors_pot_lid": {
     "id": "montors_pot_lid",
@@ -969,7 +1018,8 @@
     "giftPower": "stone",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "Dented. Scorched. Blocks surprisingly well. 20% block."
+    "description": "Dented. Scorched. Blocks surprisingly well. 20% block.",
+    "weight": 2
   },
   "montors_chopping_board": {
     "id": "montors_chopping_board",
@@ -985,7 +1035,8 @@
     "giftPower": "blood",
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Knife marks everywhere. Splinters on impact. 15% block, BLEED on block."
+    "description": "Knife marks everywhere. Splinters on impact. 15% block, BLEED on block.",
+    "weight": 2
   },
   "montors_frying_pan": {
     "id": "montors_frying_pan",
@@ -1001,7 +1052,8 @@
     "giftPower": "ember",
     "buyPrice": 56,
     "sellPrice": 22,
-    "description": "Cast iron. Still warm. 20% block, BURN on block."
+    "description": "Cast iron. Still warm. 20% block, BURN on block.",
+    "weight": 2
   },
   "montors_dinner_tray": {
     "id": "montors_dinner_tray",
@@ -1017,9 +1069,10 @@
       "stone",
       "ember"
     ],
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Silver. Monogrammed 'M'. 25% block."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Silver. Monogrammed 'M'. 25% block.",
+    "weight": 2
   },
   "montors_mirror_shield": {
     "id": "montors_mirror_shield",
@@ -1033,9 +1086,10 @@
     "passiveValue": 0.15,
     "conditionOnBlock": "DAZE",
     "giftPower": "void",
-    "buyPrice": 70,
-    "sellPrice": 28,
-    "description": "They see themselves and hesitate. 15% block, DAZE on block."
+    "buyPrice": 105,
+    "sellPrice": 42,
+    "description": "They see themselves and hesitate. 15% block, DAZE on block.",
+    "weight": 2
   },
   "montors_hardened_shield": {
     "id": "montors_hardened_shield",
@@ -1047,9 +1101,10 @@
     "agiPenalty": -1,
     "passiveEffect": "block_chance",
     "passiveValue": 0.3,
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "Hammered flat by the smith. +5 DEF, 30% block. A proper shield from improper materials."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "Hammered flat by the smith. +5 DEF, 30% block. A proper shield from improper materials.",
+    "weight": 2
   },
   "___COMMENT_ARMOUR": "=== ARMOUR ===",
   "leather_common": {
@@ -1062,7 +1117,8 @@
     "agiPenalty": 0,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "Smells. Barely holds together. Better than nothing."
+    "description": "Smells. Barely holds together. Better than nothing.",
+    "weight": 3
   },
   "chainmail_common": {
     "id": "chainmail_common",
@@ -1074,7 +1130,8 @@
     "agiPenalty": -1,
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "Loud. Heavy. Announces you to everything."
+    "description": "Loud. Heavy. Announces you to everything.",
+    "weight": 3
   },
   "montors_welcome_mat": {
     "id": "montors_welcome_mat",
@@ -1087,9 +1144,10 @@
     "passiveEffect": "damage_reflect",
     "passiveValue": 2,
     "giftPower": "ember",
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "+5 DEF, -2 AGI. Reflects 2 damage to attackers. Wipe your feet. Or bleed on them."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "+5 DEF, -2 AGI. Reflects 2 damage to attackers. Wipe your feet. Or bleed on them.",
+    "weight": 3
   },
   "montors_dressing_gown": {
     "id": "montors_dressing_gown",
@@ -1102,9 +1160,10 @@
     "passiveEffect": "dodge_chance",
     "passiveValue": 0.15,
     "giftPower": "void",
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "Threadbare. Smells of pipe smoke. Somehow invisible."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "Threadbare. Smells of pipe smoke. Somehow invisible.",
+    "weight": 3
   },
   "___COMMENT_CONSUMABLES": "=== CONSUMABLES — Healing ===",
   "health_potion": {
@@ -1116,7 +1175,8 @@
     "effectValue": 15,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "Found in a cupboard. Unlabelled. Heals 15 HP somehow."
+    "description": "Found in a cupboard. Unlabelled. Heals 15 HP somehow.",
+    "weight": 0
   },
   "montors_marvelous_medicine": {
     "id": "montors_marvelous_medicine",
@@ -1127,7 +1187,8 @@
     "effectValue": 0,
     "buyPrice": 10,
     "sellPrice": 4,
-    "description": "Unlabelled bottle. Could be anything. Montor swears it's fine."
+    "description": "Unlabelled bottle. Could be anything. Montor swears it's fine.",
+    "weight": 0
   },
   "greater_health_potion": {
     "id": "greater_health_potion",
@@ -1138,7 +1199,8 @@
     "effectValue": 30,
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "Thicker. Warmer. Heals 30 HP. Don't think about it."
+    "description": "Thicker. Warmer. Heals 30 HP. Don't think about it.",
+    "weight": 0
   },
   "montors_homebrew": {
     "id": "montors_homebrew",
@@ -1148,9 +1210,10 @@
     "effect": "heal",
     "effectValue": 45,
     "giftPower": "bile",
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "Brewed in the cellar. Don't ask what's in it. Heals everything."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "Brewed in the cellar. Don't ask what's in it. Heals everything.",
+    "weight": 0
   },
   "rage_draught": {
     "id": "rage_draught",
@@ -1163,7 +1226,8 @@
     "effectDuration": 3,
     "buyPrice": 36,
     "sellPrice": 14,
-    "description": "Thick. Red. Tastes of iron. +4 STR for 3 turns."
+    "description": "Thick. Red. Tastes of iron. +4 STR for 3 turns.",
+    "weight": 0
   },
   "smoke_bomb": {
     "id": "smoke_bomb",
@@ -1174,7 +1238,8 @@
     "effectValue": 1,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "Smells like the Cook's socks. Guaranteed escape."
+    "description": "Smells like the Cook's socks. Guaranteed escape.",
+    "weight": 0
   },
   "antidote": {
     "id": "antidote",
@@ -1185,7 +1250,8 @@
     "effectValue": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "Found in the bathroom cabinet. Cures body conditions."
+    "description": "Found in the bathroom cabinet. Cures body conditions.",
+    "weight": 0
   },
   "smelling_salts": {
     "id": "smelling_salts",
@@ -1196,7 +1262,8 @@
     "effectValue": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "One whiff and your head clears. Violently. Cures mind conditions."
+    "description": "One whiff and your head clears. Violently. Cures mind conditions.",
+    "weight": 0
   },
   "montors_bath_bomb": {
     "id": "montors_bath_bomb",
@@ -1208,7 +1275,8 @@
     "giftPower": "ember",
     "buyPrice": 48,
     "sellPrice": 20,
-    "description": "Fizzy. Floral. Explosive. Not for baths."
+    "description": "Fizzy. Floral. Explosive. Not for baths.",
+    "weight": 0
   },
   "montors_mums_smelling_salts": {
     "id": "montors_mums_smelling_salts",
@@ -1220,7 +1288,8 @@
     "giftPower": "petal",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "Industrial strength. She used them on Montor as a boy."
+    "description": "Industrial strength. She used them on Montor as a boy.",
+    "weight": 0
   },
   "montors_adrenaline_shot": {
     "id": "montors_adrenaline_shot",
@@ -1230,9 +1299,10 @@
     "effect": "apply_condition",
     "effectCondition": "ADRENALINE",
     "giftPower": "blood",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "Syringe from the medicine cabinet. +6 STR for 2 turns. Then the crash."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "Syringe from the medicine cabinet. +6 STR for 2 turns. Then the crash.",
+    "weight": 0
   },
   "fortify_draught": {
     "id": "fortify_draught",
@@ -1245,7 +1315,8 @@
     "effectDuration": 3,
     "buyPrice": 36,
     "sellPrice": 14,
-    "description": "Drink it. Skin hardens. +4 DEF for 3 turns. Try not to think about the texture."
+    "description": "Drink it. Skin hardens. +4 DEF for 3 turns. Try not to think about the texture.",
+    "weight": 0
   },
   "___COMMENT_TONICS": "=== CONSUMABLES — Stat Tonics ===",
   "tonic_str": {
@@ -1259,7 +1330,8 @@
     "effectDuration": 4,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Thick. Meaty. +3 STR for 4 turns. Made from something."
+    "description": "Thick. Meaty. +3 STR for 4 turns. Made from something.",
+    "weight": 0
   },
   "tonic_agi": {
     "id": "tonic_agi",
@@ -1272,7 +1344,8 @@
     "effectDuration": 4,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Stings the tongue. +3 AGI for 4 turns. Move faster, think faster."
+    "description": "Stings the tongue. +3 AGI for 4 turns. Move faster, think faster.",
+    "weight": 0
   },
   "tonic_per": {
     "id": "tonic_per",
@@ -1285,7 +1358,8 @@
     "effectDuration": 4,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Burns. Then everything sharpens. +3 PER for 4 turns."
+    "description": "Burns. Then everything sharpens. +3 PER for 4 turns.",
+    "weight": 0
   },
   "tonic_int": {
     "id": "tonic_int",
@@ -1298,7 +1372,8 @@
     "effectDuration": 4,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Fizzy. Tastes of metal. +3 INT for 4 turns. Conditions land harder."
+    "description": "Fizzy. Tastes of metal. +3 INT for 4 turns. Conditions land harder.",
+    "weight": 0
   },
   "tonic_lck": {
     "id": "tonic_lck",
@@ -1309,9 +1384,10 @@
     "effectStat": "lck",
     "effectValue": 3,
     "effectDuration": 4,
-    "buyPrice": 60,
-    "sellPrice": 24,
-    "description": "Gran's secret recipe. +3 LCK for 4 turns. Everything goes your way."
+    "buyPrice": 90,
+    "sellPrice": 36,
+    "description": "Gran's secret recipe. +3 LCK for 4 turns. Everything goes your way.",
+    "weight": 0
   },
   "tonic_all": {
     "id": "tonic_all",
@@ -1321,9 +1397,10 @@
     "effect": "stat_buff_all",
     "effectValue": 2,
     "effectDuration": 3,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Somehow still warm. +2 all stats for 3 turns. She'd be proud."
+    "buyPrice": 240,
+    "sellPrice": 96,
+    "description": "Somehow still warm. +2 all stats for 3 turns. She'd be proud.",
+    "weight": 0
   },
   "___COMMENT_THROWABLES": "=== CONSUMABLES — Throwables & AoE ===",
   "montors_grans_perfume": {
@@ -1334,9 +1411,10 @@
     "effect": "damage_all_enemies",
     "effectValue": 12,
     "giftPower": "bile",
-    "buyPrice": 70,
-    "sellPrice": 28,
-    "description": "One spray clears the room. 12 damage to all enemies. She wore it to church."
+    "buyPrice": 105,
+    "sellPrice": 42,
+    "description": "One spray clears the room. 12 damage to all enemies. She wore it to church.",
+    "weight": 0
   },
   "montors_pepper_pot": {
     "id": "montors_pepper_pot",
@@ -1348,7 +1426,8 @@
     "giftPower": "petal",
     "buyPrice": 36,
     "sellPrice": 14,
-    "description": "Shake vigorously. Everyone sneezes. All enemies BLINDED."
+    "description": "Shake vigorously. Everyone sneezes. All enemies BLINDED.",
+    "weight": 0
   },
   "montors_stink_bomb": {
     "id": "montors_stink_bomb",
@@ -1360,7 +1439,8 @@
     "giftPower": "bile",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Found under his bed. All enemies NAUSEOUS. Even you feel a bit off."
+    "description": "Found under his bed. All enemies NAUSEOUS. Even you feel a bit off.",
+    "weight": 0
   },
   "montors_flash_powder": {
     "id": "montors_flash_powder",
@@ -1370,9 +1450,10 @@
     "effect": "condition_all_enemies",
     "effectCondition": "DAZE",
     "giftPower": "ember",
-    "buyPrice": 60,
-    "sellPrice": 24,
-    "description": "From the workshop. BANG. All enemies DAZED. Your ears ring."
+    "buyPrice": 90,
+    "sellPrice": 36,
+    "description": "From the workshop. BANG. All enemies DAZED. Your ears ring.",
+    "weight": 0
   },
   "montors_mums_cooking_wine": {
     "id": "montors_mums_cooking_wine",
@@ -1387,7 +1468,8 @@
     "giftPower": "blood",
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Heal 20 HP, +2 STR for 3 turns. She put it in everything."
+    "description": "Heal 20 HP, +2 STR for 3 turns. She put it in everything.",
+    "weight": 0
   },
   "montors_ice_cube_tray": {
     "id": "montors_ice_cube_tray",
@@ -1397,9 +1479,10 @@
     "effect": "condition_all_enemies",
     "effectCondition": "FROST",
     "giftPower": "stone",
-    "buyPrice": 64,
-    "sellPrice": 26,
-    "description": "Throw the whole tray. All enemies FROZEN. Brittle and slow."
+    "buyPrice": 96,
+    "sellPrice": 39,
+    "description": "Throw the whole tray. All enemies FROZEN. Brittle and slow.",
+    "weight": 0
   },
   "montors_mustard_gas": {
     "id": "montors_mustard_gas",
@@ -1409,9 +1492,10 @@
     "effect": "condition_all_enemies",
     "effectCondition": "POISON",
     "giftPower": "bile",
-    "buyPrice": 56,
-    "sellPrice": 22,
-    "description": "English mustard. Industrial strength. All enemies POISONED."
+    "buyPrice": 84,
+    "sellPrice": 33,
+    "description": "English mustard. Industrial strength. All enemies POISONED.",
+    "weight": 0
   },
   "montors_firecracker": {
     "id": "montors_firecracker",
@@ -1423,7 +1507,8 @@
     "giftPower": "ember",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Left over from bonfire night. 6 damage to all enemies. Small but loud."
+    "description": "Left over from bonfire night. 6 damage to all enemies. Small but loud.",
+    "weight": 0
   },
   "montors_mums_hairspray": {
     "id": "montors_mums_hairspray",
@@ -1434,9 +1519,10 @@
     "effectValue": 8,
     "effectCondition": "BURN",
     "giftPower": "ember",
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "Flammable. Very flammable. 8 damage + BURN to all enemies. Don't use near candles."
+    "buyPrice": 200,
+    "sellPrice": 80,
+    "description": "Flammable. Very flammable. 8 damage + BURN to all enemies. Don't use near candles.",
+    "weight": 0
   },
   "montors_bucket_of_water": {
     "id": "montors_bucket_of_water",
@@ -1447,7 +1533,8 @@
     "effectValue": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "Splash. Cures ALL your conditions. Cold. Refreshing. Undignified."
+    "description": "Splash. Cures ALL your conditions. Cold. Refreshing. Undignified.",
+    "weight": 0
   },
   "___COMMENT_THROWABLES_SINGLE": "=== THROWABLES — Single Target Condition ===",
   "montors_watering_can": {
@@ -1459,7 +1546,8 @@
     "effectCondition": "WET",
     "buyPrice": 10,
     "sellPrice": 4,
-    "description": "WET all enemies. Just water. But water changes everything."
+    "description": "WET all enemies. Just water. But water changes everything.",
+    "weight": 0
   },
   "montors_spark_plug": {
     "id": "montors_spark_plug",
@@ -1470,7 +1558,8 @@
     "effectCondition": "CHARGED",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "CHARGED one enemy. Pull it and throw. Crackles on impact."
+    "description": "CHARGED one enemy. Pull it and throw. Crackles on impact.",
+    "weight": 0
   },
   "montors_vinegar_bottle": {
     "id": "montors_vinegar_bottle",
@@ -1481,7 +1570,8 @@
     "effectCondition": "POISON",
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "POISON one enemy. Chip shop vinegar. It burns."
+    "description": "POISON one enemy. Chip shop vinegar. It burns.",
+    "weight": 0
   },
   "montors_lighter_fluid": {
     "id": "montors_lighter_fluid",
@@ -1492,7 +1582,8 @@
     "effectCondition": "BURN",
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "BURN one enemy. Squirt and duck."
+    "description": "BURN one enemy. Squirt and duck.",
+    "weight": 0
   },
   "montors_rusty_nail_throw": {
     "id": "montors_rusty_nail_throw",
@@ -1503,7 +1594,8 @@
     "effectCondition": "BLEED",
     "buyPrice": 10,
     "sellPrice": 4,
-    "description": "BLEED one enemy. Throw it. It sticks."
+    "description": "BLEED one enemy. Throw it. It sticks.",
+    "weight": 0
   },
   "montors_ice_lolly": {
     "id": "montors_ice_lolly",
@@ -1514,7 +1606,8 @@
     "effectCondition": "FROST",
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "FROST one enemy. Still frozen after centuries."
+    "description": "FROST one enemy. Still frozen after centuries.",
+    "weight": 0
   },
   "montors_chilli_powder": {
     "id": "montors_chilli_powder",
@@ -1526,7 +1619,8 @@
     "effectValue": 2,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "BLIND + 2 dmg one enemy. In the eyes. Always in the eyes."
+    "description": "BLIND + 2 dmg one enemy. In the eyes. Always in the eyes.",
+    "weight": 0
   },
   "___COMMENT_THROWABLES_MULTI": "=== THROWABLES — Multi-Target ===",
   "montors_bag_of_marbles": {
@@ -1540,7 +1634,8 @@
     "effectCondition": "DAZE",
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "3 dmg + DAZE to 2 random enemies. Scatter and watch them slip."
+    "description": "3 dmg + DAZE to 2 random enemies. Scatter and watch them slip.",
+    "weight": 0
   },
   "montors_handful_of_gravel": {
     "id": "montors_handful_of_gravel",
@@ -1552,7 +1647,8 @@
     "effectTargets": 3,
     "buyPrice": 10,
     "sellPrice": 4,
-    "description": "2 dmg to 3 random enemies. Not elegant. Effective."
+    "description": "2 dmg to 3 random enemies. Not elegant. Effective.",
+    "weight": 0
   },
   "montors_mums_potpourri": {
     "id": "montors_mums_potpourri",
@@ -1564,7 +1660,8 @@
     "effectTargets": 2,
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "POISON 2 random enemies. Dried flowers and something else. Smells fatal."
+    "description": "POISON 2 random enemies. Dried flowers and something else. Smells fatal.",
+    "weight": 0
   },
   "montors_chain": {
     "id": "montors_chain",
@@ -1576,7 +1673,8 @@
     "effectTargets": 2,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "4 dmg bouncing to 2 enemies. Swing it. Let go. It finds them."
+    "description": "4 dmg bouncing to 2 enemies. Swing it. Let go. It finds them.",
+    "weight": 0
   },
   "montors_glitter_bomb": {
     "id": "montors_glitter_bomb",
@@ -1586,9 +1684,10 @@
     "effect": "damage_and_condition_all",
     "effectValue": 3,
     "effectCondition": "BLIND",
-    "buyPrice": 50,
-    "sellPrice": 20,
-    "description": "3 AoE dmg + BLIND all. Fabulous. Devastating. Impossible to clean up."
+    "buyPrice": 75,
+    "sellPrice": 30,
+    "description": "3 AoE dmg + BLIND all. Fabulous. Devastating. Impossible to clean up.",
+    "weight": 0
   },
   "___COMMENT_STAT_BOOSTS": "=== CONSUMABLES — Permanent Stat Boosts ===",
   "montors_protein_shake": {
@@ -1599,9 +1698,10 @@
     "effect": "permanent_stat",
     "effectStat": "str",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 STR. Thick. Gritty. You feel stronger immediately."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 STR. Thick. Gritty. You feel stronger immediately.",
+    "weight": 0
   },
   "montors_yoga_mat": {
     "id": "montors_yoga_mat",
@@ -1611,9 +1711,10 @@
     "effect": "permanent_stat",
     "effectStat": "agi",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 AGI. A quick stretch. Surprisingly effective."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 AGI. A quick stretch. Surprisingly effective.",
+    "weight": 0
   },
   "montors_multivitamin": {
     "id": "montors_multivitamin",
@@ -1623,9 +1724,10 @@
     "effect": "permanent_stat",
     "effectStat": "vit",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 VIT (+5 max HP). Chalky. His mum made him take one every morning."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 VIT (+5 max HP). Chalky. His mum made him take one every morning.",
+    "weight": 0
   },
   "montors_reading_glasses": {
     "id": "montors_reading_glasses",
@@ -1635,9 +1737,10 @@
     "effect": "permanent_stat",
     "effectStat": "per",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 PER. Everything's sharper. He left them on the nightstand."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 PER. Everything's sharper. He left them on the nightstand.",
+    "weight": 0
   },
   "montors_sudoku_book": {
     "id": "montors_sudoku_book",
@@ -1647,9 +1750,10 @@
     "effect": "permanent_stat",
     "effectStat": "int",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 INT. Half-finished. You complete a few puzzles."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 INT. Half-finished. You complete a few puzzles.",
+    "weight": 0
   },
   "montors_lucky_horseshoe": {
     "id": "montors_lucky_horseshoe",
@@ -1659,9 +1763,10 @@
     "effect": "permanent_stat",
     "effectStat": "lck",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 LCK. Hung above his door. Upside down, which explains a lot."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 LCK. Hung above his door. Upside down, which explains a lot.",
+    "weight": 0
   },
   "montors_shield_polish": {
     "id": "montors_shield_polish",
@@ -1671,9 +1776,10 @@
     "effect": "permanent_stat",
     "effectStat": "def",
     "effectValue": 1,
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Permanently +1 DEF. Rub it in. Skin toughens. Smells of beeswax."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Permanently +1 DEF. Rub it in. Skin toughens. Smells of beeswax.",
+    "weight": 0
   },
   "montors_mums_recipe_book": {
     "id": "montors_mums_recipe_book",
@@ -1687,9 +1793,10 @@
       "def"
     ],
     "effectValue": 1,
-    "buyPrice": 240,
-    "sellPrice": 96,
-    "description": "Permanently +1 STR, VIT, DEF. Her cooking made you stronger. Literally."
+    "buyPrice": 480,
+    "sellPrice": 192,
+    "description": "Permanently +1 STR, VIT, DEF. Her cooking made you stronger. Literally.",
+    "weight": 0
   },
   "montors_grans_wisdom": {
     "id": "montors_grans_wisdom",
@@ -1703,9 +1810,10 @@
       "lck"
     ],
     "effectValue": 1,
-    "buyPrice": 240,
-    "sellPrice": 96,
-    "description": "Permanently +1 INT, PER, LCK. She knew things. Now you know them too."
+    "buyPrice": 480,
+    "sellPrice": 192,
+    "description": "Permanently +1 INT, PER, LCK. She knew things. Now you know them too.",
+    "weight": 0
   },
   "___COMMENT_RELICS": "=== RELICS ===",
   "___COMMENT_RELICS_UTILITY": "=== RELICS — Utility ===",
@@ -1720,7 +1828,8 @@
     "giftPower": "stone",
     "buyPrice": 70,
     "sellPrice": 28,
-    "description": "+15 max HP. His seal. Worn smooth."
+    "description": "+15 max HP. His seal. Worn smooth.",
+    "weight": 0
   },
   "montors_garden_charm": {
     "id": "montors_garden_charm",
@@ -1733,7 +1842,8 @@
     "giftPower": "petal",
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "Heals 2 HP per new chamber. A pressed flower in resin."
+    "description": "Heals 2 HP per new chamber. A pressed flower in resin.",
+    "weight": 0
   },
   "montors_greenhouse_key": {
     "id": "montors_greenhouse_key",
@@ -1747,9 +1857,10 @@
       "petal",
       "stone"
     ],
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "Heals 4 HP per new chamber. The vines still grow around it."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "Heals 4 HP per new chamber. The vines still grow around it.",
+    "weight": 0
   },
   "montors_lucky_penny": {
     "id": "montors_lucky_penny",
@@ -1762,7 +1873,8 @@
     "giftPower": "petal",
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "+2 LCK. Better loot and crits. Found in the fountain."
+    "description": "+2 LCK. Better loot and crits. Found in the fountain.",
+    "weight": 0
   },
   "montors_thimble": {
     "id": "montors_thimble",
@@ -1773,9 +1885,10 @@
     "passiveEffect": "crit_bonus",
     "passiveValue": 1,
     "giftPower": "blood",
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "Crits on 19+. His mum used it for sewing. And threats."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "Crits on 19+. His mum used it for sewing. And threats.",
+    "weight": 0
   },
   "montors_mums_wedding_ring": {
     "id": "montors_mums_wedding_ring",
@@ -1789,9 +1902,10 @@
       "blood",
       "void"
     ],
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "10% lifesteal. She never took it off. The ring remembers."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "10% lifesteal. She never took it off. The ring remembers.",
+    "weight": 0
   },
   "montors_grans_lottery_ticket": {
     "id": "montors_grans_lottery_ticket",
@@ -1802,9 +1916,10 @@
     "passiveEffect": "lottery",
     "passiveValue": 0,
     "giftPower": "void",
-    "buyPrice": 200,
-    "sellPrice": 2,
-    "description": "If any d20 matches your numbers, you win something rare."
+    "buyPrice": 400,
+    "sellPrice": 4,
+    "description": "If any d20 matches your numbers, you win something rare.",
+    "weight": 0
   },
   "montors_monocle": {
     "id": "montors_monocle",
@@ -1815,9 +1930,10 @@
     "passiveEffect": "see_enemy_hp_exact",
     "passiveValue": 1,
     "giftPower": "void",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "See exact enemy HP. Knowledge is half the battle."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "See exact enemy HP. Knowledge is half the battle.",
+    "weight": 0
   },
   "montors_loaded_dice": {
     "id": "montors_loaded_dice",
@@ -1828,9 +1944,10 @@
     "passiveEffect": "reroll_ones",
     "passiveValue": 1,
     "giftPower": "void",
-    "buyPrice": 120,
-    "sellPrice": 48,
-    "description": "Ones become twos. He cheats at everything."
+    "buyPrice": 180,
+    "sellPrice": 72,
+    "description": "Ones become twos. He cheats at everything.",
+    "weight": 0
   },
   "montors_magnifying_glass": {
     "id": "montors_magnifying_glass",
@@ -1841,9 +1958,10 @@
     "passiveEffect": "double_condition",
     "passiveValue": 1,
     "giftPower": "bile",
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "Weapon conditions apply twice on hit."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "Weapon conditions apply twice on hit.",
+    "weight": 0
   },
   "montors_last_stand_brooch": {
     "id": "montors_last_stand_brooch",
@@ -1857,9 +1975,10 @@
       "blood",
       "stone"
     ],
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "+1 DEF per 20% HP missing. Pinned to his coat the day he built the dungeon."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "+1 DEF per 20% HP missing. Pinned to his coat the day he built the dungeon.",
+    "weight": 0
   },
   "montors_nudge": {
     "id": "montors_nudge",
@@ -1870,9 +1989,10 @@
     "passiveEffect": "d20_nudge",
     "passiveValue": 1,
     "giftPower": "void",
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "+1 to all d20 rolls. A gentle push from Montor. He's watching."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "+1 to all d20 rolls. A gentle push from Montor. He's watching.",
+    "weight": 0
   },
   "montors_chaos_marble": {
     "id": "montors_chaos_marble",
@@ -1883,9 +2003,10 @@
     "passiveEffect": "chaos_shift",
     "passiveValue": 2,
     "giftPower": "void",
-    "buyPrice": 150,
-    "sellPrice": 60,
-    "description": "All dice shift randomly by -2 to +2. Could save you. Could doom you. Montor loves it."
+    "buyPrice": 300,
+    "sellPrice": 120,
+    "description": "All dice shift randomly by -2 to +2. Could save you. Could doom you. Montor loves it.",
+    "weight": 0
   },
   "montors_compass": {
     "id": "montors_compass",
@@ -1898,7 +2019,8 @@
     "giftPower": "void",
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "+2 PER. Points somewhere. Not north. Better searches, better inspections."
+    "description": "+2 PER. Points somewhere. Not north. Better searches, better inspections.",
+    "weight": 0
   },
   "montors_pocket_watch": {
     "id": "montors_pocket_watch",
@@ -1909,9 +2031,10 @@
     "passiveEffect": "init_bonus",
     "passiveValue": 2,
     "giftPower": "void",
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "+2 initiative. Always ahead. Ticks backwards."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "+2 initiative. Always ahead. Ticks backwards.",
+    "weight": 0
   },
   "montors_mums_apron": {
     "id": "montors_mums_apron",
@@ -1924,7 +2047,8 @@
     "giftPower": "petal",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "+2 to all junk pile search rolls. She could find anything."
+    "description": "+2 to all junk pile search rolls. She could find anything.",
+    "weight": 0
   },
   "montors_coin_purse": {
     "id": "montors_coin_purse",
@@ -1937,7 +2061,8 @@
     "giftPower": "petal",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "+25% gold from all sources. Jingles suspiciously."
+    "description": "+25% gold from all sources. Jingles suspiciously.",
+    "weight": 0
   },
   "___COMMENT_RELICS_RESIST": "=== RELICS — Condition Resistance (tiered) ===",
   "montors_plaster": {
@@ -1952,7 +2077,8 @@
     "giftPower": "blood",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "25% BLEED resist. Slightly sticky. Better than nothing."
+    "description": "25% BLEED resist. Slightly sticky. Better than nothing.",
+    "weight": 0
   },
   "montors_mums_bandage": {
     "id": "montors_mums_bandage",
@@ -1966,7 +2092,8 @@
     "giftPower": "blood",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "50% BLEED resist. She always had one ready."
+    "description": "50% BLEED resist. She always had one ready.",
+    "weight": 0
   },
   "montors_tourniquette": {
     "id": "montors_tourniquette",
@@ -1978,9 +2105,10 @@
     "passiveCondition": "BLEED",
     "passiveValue": 0.75,
     "giftPower": "blood",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "75% BLEED resist. Tight. Professional. She was a nurse before Montor."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "75% BLEED resist. Tight. Professional. She was a nurse before Montor.",
+    "weight": 0
   },
   "montors_blood_ward": {
     "id": "montors_blood_ward",
@@ -1991,9 +2119,10 @@
     "passiveEffect": "condition_immunity",
     "passiveCondition": "BLEED",
     "giftPower": "blood",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "100% BLEED immunity. Your blood stays inside. Always."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "100% BLEED immunity. Your blood stays inside. Always.",
+    "weight": 0
   },
   "montors_herb_sachet": {
     "id": "montors_herb_sachet",
@@ -2007,7 +2136,8 @@
     "giftPower": "bile",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "25% POISON resist. Smells of lavender and denial."
+    "description": "25% POISON resist. Smells of lavender and denial.",
+    "weight": 0
   },
   "montors_herb_pouch": {
     "id": "montors_herb_pouch",
@@ -2021,7 +2151,8 @@
     "giftPower": "bile",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "50% POISON resist. Dried garden herbs. Smell awful."
+    "description": "50% POISON resist. Dried garden herbs. Smell awful.",
+    "weight": 0
   },
   "montors_antivenom_vial": {
     "id": "montors_antivenom_vial",
@@ -2033,9 +2164,10 @@
     "passiveCondition": "POISON",
     "passiveValue": 0.75,
     "giftPower": "bile",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "75% POISON resist. Milked from his own snakes. Apparently."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "75% POISON resist. Milked from his own snakes. Apparently.",
+    "weight": 0
   },
   "montors_bile_ward": {
     "id": "montors_bile_ward",
@@ -2046,9 +2178,10 @@
     "passiveEffect": "condition_immunity",
     "passiveCondition": "POISON",
     "giftPower": "bile",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "100% POISON immunity. Nothing toxic can reach you."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "100% POISON immunity. Nothing toxic can reach you.",
+    "weight": 0
   },
   "montors_spark_guard": {
     "id": "montors_spark_guard",
@@ -2062,7 +2195,8 @@
     "giftPower": "ember",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "25% BURN resist. A wire mesh glove. Smells of soot."
+    "description": "25% BURN resist. A wire mesh glove. Smells of soot.",
+    "weight": 0
   },
   "montors_oven_mitt": {
     "id": "montors_oven_mitt",
@@ -2076,7 +2210,8 @@
     "giftPower": "ember",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "50% BURN resist. Scorched but functional. His mum's."
+    "description": "50% BURN resist. Scorched but functional. His mum's.",
+    "weight": 0
   },
   "montors_fire_blanket": {
     "id": "montors_fire_blanket",
@@ -2088,9 +2223,10 @@
     "passiveCondition": "BURN",
     "passiveValue": 0.75,
     "giftPower": "ember",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "75% BURN resist. Rolled up under the kitchen sink."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "75% BURN resist. Rolled up under the kitchen sink.",
+    "weight": 0
   },
   "montors_ember_ward": {
     "id": "montors_ember_ward",
@@ -2101,9 +2237,10 @@
     "passiveEffect": "condition_immunity",
     "passiveCondition": "BURN",
     "giftPower": "ember",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "100% BURN immunity. Fire finds someone else."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "100% BURN immunity. Fire finds someone else.",
+    "weight": 0
   },
   "montors_woolly_hat": {
     "id": "montors_woolly_hat",
@@ -2117,7 +2254,8 @@
     "giftPower": "stone",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "25% FROST resist. Itchy. Hand-knitted by Gran."
+    "description": "25% FROST resist. Itchy. Hand-knitted by Gran.",
+    "weight": 0
   },
   "montors_thermal_vest": {
     "id": "montors_thermal_vest",
@@ -2131,7 +2269,8 @@
     "giftPower": "stone",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "50% FROST resist. M&S. Surprisingly effective against magical cold."
+    "description": "50% FROST resist. M&S. Surprisingly effective against magical cold.",
+    "weight": 0
   },
   "montors_hot_water_bottle": {
     "id": "montors_hot_water_bottle",
@@ -2143,9 +2282,10 @@
     "passiveCondition": "FROST",
     "passiveValue": 0.75,
     "giftPower": "stone",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "75% FROST resist. Still warm after centuries. She made it for him."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "75% FROST resist. Still warm after centuries. She made it for him.",
+    "weight": 0
   },
   "montors_frost_ward": {
     "id": "montors_frost_ward",
@@ -2156,9 +2296,10 @@
     "passiveEffect": "condition_immunity",
     "passiveCondition": "FROST",
     "giftPower": "stone",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "100% FROST immunity. Cold can't find you."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "100% FROST immunity. Cold can't find you.",
+    "weight": 0
   },
   "montors_comfort_blanket": {
     "id": "montors_comfort_blanket",
@@ -2172,7 +2313,8 @@
     "giftPower": "void",
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "25% FEAR resist. Threadbare. Smells of childhood."
+    "description": "25% FEAR resist. Threadbare. Smells of childhood.",
+    "weight": 0
   },
   "montors_nightlight": {
     "id": "montors_nightlight",
@@ -2186,7 +2328,8 @@
     "giftPower": "void",
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "50% FEAR resist. He's had it since he was small."
+    "description": "50% FEAR resist. He's had it since he was small.",
+    "weight": 0
   },
   "montors_teddy_bear": {
     "id": "montors_teddy_bear",
@@ -2198,9 +2341,10 @@
     "passiveCondition": "FEAR",
     "passiveValue": 0.75,
     "giftPower": "void",
-    "buyPrice": 80,
-    "sellPrice": 32,
-    "description": "75% FEAR resist. One eye missing. Still fiercely protective."
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "75% FEAR resist. One eye missing. Still fiercely protective.",
+    "weight": 0
   },
   "montors_void_ward": {
     "id": "montors_void_ward",
@@ -2211,9 +2355,10 @@
     "passiveEffect": "condition_immunity",
     "passiveCondition": "FEAR",
     "giftPower": "void",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "100% FEAR immunity. The dark can't find you."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "100% FEAR immunity. The dark can't find you.",
+    "weight": 0
   },
   "___COMMENT_RELICS_COMBO": "=== RELICS — Combo Resistance ===",
   "montors_first_aid_kit": {
@@ -2234,7 +2379,8 @@
     ],
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "25% BLEED + POISON resist. Plasters, herbs, and hope."
+    "description": "25% BLEED + POISON resist. Plasters, herbs, and hope.",
+    "weight": 0
   },
   "montors_hazmat_gloves": {
     "id": "montors_hazmat_gloves",
@@ -2252,9 +2398,10 @@
       "bile",
       "ember"
     ],
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "50% POISON + BURN resist. From the workshop. Yellow rubber."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "50% POISON + BURN resist. From the workshop. Yellow rubber.",
+    "weight": 0
   },
   "montors_winter_coat": {
     "id": "montors_winter_coat",
@@ -2272,9 +2419,10 @@
       "stone",
       "void"
     ],
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "50% FROST + FEAR resist. Warm and reassuring. Smells of pipe smoke."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "50% FROST + FEAR resist. Warm and reassuring. Smells of pipe smoke.",
+    "weight": 0
   },
   "montors_mums_medicine_cabinet": {
     "id": "montors_mums_medicine_cabinet",
@@ -2294,9 +2442,10 @@
       "bile",
       "ember"
     ],
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "50% resist to BLEED, POISON, and BURN. She was prepared for everything."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "50% resist to BLEED, POISON, and BURN. She was prepared for everything.",
+    "weight": 0
   },
   "montors_anxiety_blanket": {
     "id": "montors_anxiety_blanket",
@@ -2312,9 +2461,10 @@
     ],
     "passiveValue": 0.5,
     "giftPower": "void",
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "50% resist to FEAR, DAZE, and CHARM. All mind conditions. Weighted."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "50% resist to FEAR, DAZE, and CHARM. All mind conditions. Weighted.",
+    "weight": 0
   },
   "montors_hazard_suit": {
     "id": "montors_hazard_suit",
@@ -2324,9 +2474,10 @@
     "rarity": "legendary",
     "passiveEffect": "condition_resist_all",
     "passiveValue": 0.35,
-    "buyPrice": 300,
-    "sellPrice": 120,
-    "description": "35% resist to ALL conditions. Sealed. Uncomfortable. Extremely effective."
+    "buyPrice": 900,
+    "sellPrice": 360,
+    "description": "35% resist to ALL conditions. Sealed. Uncomfortable. Extremely effective.",
+    "weight": 0
   },
   "___COMMENT_WEAPONS_VARIETY": "=== WEAPONS — Variety Pack ===",
   "montors_butter_knife": {
@@ -2345,7 +2496,8 @@
     "attackStat": "str",
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "Surprisingly sharp for breakfast cutlery. +2 accuracy."
+    "description": "Surprisingly sharp for breakfast cutlery. +2 accuracy.",
+    "weight": 2
   },
   "montors_corkscrew": {
     "id": "montors_corkscrew",
@@ -2364,7 +2516,8 @@
     "conditionChance": 0.15,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "Twist on impact. Pop. 15% BLEED."
+    "description": "Twist on impact. Pop. 15% BLEED.",
+    "weight": 2
   },
   "montors_carving_knife": {
     "id": "montors_carving_knife",
@@ -2383,7 +2536,8 @@
     "conditionChance": 0.2,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "Sunday roast ready. 20% BLEED."
+    "description": "Sunday roast ready. 20% BLEED.",
+    "weight": 2
   },
   "montors_knitting_needle": {
     "id": "montors_knitting_needle",
@@ -2402,7 +2556,8 @@
     "conditionChance": 0.25,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "She made jumpers. And puncture wounds. 25% BLEED."
+    "description": "She made jumpers. And puncture wounds. 25% BLEED.",
+    "weight": 2
   },
   "montors_hammer": {
     "id": "montors_hammer",
@@ -2420,7 +2575,8 @@
     "attackStat": "str",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Just a hammer. Hit things with it. 25% stagger."
+    "description": "Just a hammer. Hit things with it. 25% stagger.",
+    "weight": 3
   },
   "montors_mums_frying_pan": {
     "id": "montors_mums_frying_pan",
@@ -2440,7 +2596,8 @@
     "conditionChance": 0.3,
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Cast iron. Indestructible. 30% DAZE. Ask his dad."
+    "description": "Cast iron. Indestructible. 30% DAZE. Ask his dad.",
+    "weight": 3
   },
   "montors_broken_bottle": {
     "id": "montors_broken_bottle",
@@ -2460,7 +2617,8 @@
     "conditionChance": 0.4,
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "Messy. Effective. Anti-social. 40% BLEED, -1 accuracy."
+    "description": "Messy. Effective. Anti-social. 40% BLEED, -1 accuracy.",
+    "weight": 2
   },
   "montors_feather_duster": {
     "id": "montors_feather_duster",
@@ -2479,7 +2637,8 @@
     "conditionChance": 0.3,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "Gets in the eyes. Gets everywhere. 30% BLIND."
+    "description": "Gets in the eyes. Gets everywhere. 30% BLIND.",
+    "weight": 2
   },
   "montors_mop": {
     "id": "montors_mop",
@@ -2498,7 +2657,8 @@
     "conditionChance": 1,
     "buyPrice": 36,
     "sellPrice": 14,
-    "description": "Soaking. Dripping. 100% WET on hit. Combo catalyst."
+    "description": "Soaking. Dripping. 100% WET on hit. Combo catalyst.",
+    "weight": 2
   },
   "montors_cattle_prod": {
     "id": "montors_cattle_prod",
@@ -2517,7 +2677,8 @@
     "conditionChance": 0.25,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "For the cows. He doesn't have cows. 25% CHARGED."
+    "description": "For the cows. He doesn't have cows. 25% CHARGED.",
+    "weight": 2
   },
   "montors_cheese_grater": {
     "id": "montors_cheese_grater",
@@ -2536,7 +2697,8 @@
     "conditionChance": 0.3,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Shreds armour. And cheese. And skin. 30% BLEED, ignores 15% DEF."
+    "description": "Shreds armour. And cheese. And skin. 30% BLEED, ignores 15% DEF.",
+    "weight": 2
   },
   "montors_hot_poker": {
     "id": "montors_hot_poker",
@@ -2555,7 +2717,8 @@
     "conditionChance": 0.3,
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Pulled from the fireplace. Still glowing. 30% BURN."
+    "description": "Pulled from the fireplace. Still glowing. 30% BURN.",
+    "weight": 2
   },
   "montors_soup_ladle": {
     "id": "montors_soup_ladle",
@@ -2575,7 +2738,8 @@
     "conditionChance": 0.2,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Flings hot liquid on follow-through. 20% BURN, 15% stagger."
+    "description": "Flings hot liquid on follow-through. 20% BURN, 15% stagger.",
+    "weight": 3
   },
   "montors_garden_hose": {
     "id": "montors_garden_hose",
@@ -2594,7 +2758,8 @@
     "conditionChance": 1,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "Turn it on. Point. Run. 100% WET. Low damage but sets up combos."
+    "description": "Turn it on. Point. Run. 100% WET. Low damage but sets up combos.",
+    "weight": 2
   },
   "___COMMENT_CHAOS_WEAPONS": "=== CHAOS WEAPONS ===",
   "montors_chaos_blade": {
@@ -2611,9 +2776,10 @@
     "damageDie": 8,
     "attackStat": "str",
     "chaosCondition": true,
-    "buyPrice": 300,
-    "sellPrice": 120,
-    "description": "d8 damage. Condition based on d20 roll. The dice choose. You just swing."
+    "buyPrice": 900,
+    "sellPrice": 360,
+    "description": "d8 damage. Condition based on d20 roll. The dice choose. You just swing.",
+    "weight": 2
   },
   "montors_loaded_weapon": {
     "id": "montors_loaded_weapon",
@@ -2629,9 +2795,10 @@
     "damageDie": 4,
     "attackStat": "str",
     "loadedDice": true,
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "Weapon die determines bonus. 1=miss, 2=normal, 3=+3 dmg, 4=tier upgrade. Every stab is a gamble."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "Weapon die determines bonus. 1=miss, 2=normal, 3=+3 dmg, 4=tier upgrade. Every stab is a gamble.",
+    "weight": 2
   },
   "montors_boomerang": {
     "id": "montors_boomerang",
@@ -2651,7 +2818,8 @@
     "boomerang": true,
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "On miss: 50% comes back for d4. On hit: 30% bounces to second enemy. Throw it. It comes back. Usually."
+    "description": "On miss: 50% comes back for d4. On hit: 30% bounces to second enemy. Throw it. It comes back. Usually.",
+    "weight": 3
   },
   "___COMMENT_NUKE_AND_BOMBS": "=== NUKE + TIMED BOMBS ===",
   "montors_big_red_button": {
@@ -2662,9 +2830,10 @@
     "rarity": "legendary",
     "passiveEffect": "nuke",
     "passiveValue": 0,
-    "buyPrice": 400,
-    "sellPrice": 2,
-    "description": "If d20 AND weapon die show same number: EVERYTHING dies. Item consumed. Don't press it."
+    "buyPrice": 1200,
+    "sellPrice": 6,
+    "description": "If d20 AND weapon die show same number: EVERYTHING dies. Item consumed. Don't press it.",
+    "weight": 0
   },
   "montors_cherry_bomb": {
     "id": "montors_cherry_bomb",
@@ -2677,7 +2846,8 @@
     "explosionAoe": true,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "2-turn fuse. 8 AoE damage. Light it. Drop it. Walk away slowly."
+    "description": "2-turn fuse. 8 AoE damage. Light it. Drop it. Walk away slowly.",
+    "weight": 0
   },
   "montors_nail_bomb": {
     "id": "montors_nail_bomb",
@@ -2691,7 +2861,8 @@
     "explosionAoe": true,
     "buyPrice": 36,
     "sellPrice": 14,
-    "description": "3-turn fuse. 3 BLEED stacks to all enemies. Nails everywhere. In everything."
+    "description": "3-turn fuse. 3 BLEED stacks to all enemies. Nails everywhere. In everything.",
+    "weight": 0
   },
   "montors_gas_canister": {
     "id": "montors_gas_canister",
@@ -2705,7 +2876,8 @@
     "explosionAoe": true,
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "2-turn fuse. POISON + NAUSEA all enemies. Hissing. Getting louder."
+    "description": "2-turn fuse. POISON + NAUSEA all enemies. Hissing. Getting louder.",
+    "weight": 0
   },
   "montors_slow_cooker": {
     "id": "montors_slow_cooker",
@@ -2717,9 +2889,10 @@
     "explosionDamage": 20,
     "explosionCondition": "BURN",
     "explosionAoe": true,
-    "buyPrice": 60,
-    "sellPrice": 24,
-    "description": "4-turn fuse. 20 AoE + BURN all. Low and slow. Then everything boils over."
+    "buyPrice": 90,
+    "sellPrice": 36,
+    "description": "4-turn fuse. 20 AoE + BURN all. Low and slow. Then everything boils over.",
+    "weight": 0
   },
   "montors_ticking_parcel": {
     "id": "montors_ticking_parcel",
@@ -2731,9 +2904,10 @@
     "explosionDamage": 15,
     "explosionRandomCondition": true,
     "explosionAoe": true,
-    "buyPrice": 50,
-    "sellPrice": 20,
-    "description": "3-turn fuse. 15 AoE + random condition each enemy. It's wrapped nicely. That makes it worse."
+    "buyPrice": 75,
+    "sellPrice": 30,
+    "description": "3-turn fuse. 15 AoE + random condition each enemy. It's wrapped nicely. That makes it worse.",
+    "weight": 0
   },
   "___COMMENT_WHACKY_CONSUMABLES": "=== WHACKY CONSUMABLES ===",
   "montors_whoopee_cushion": {
@@ -2747,7 +2921,8 @@
     "effectDuration": 2,
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "All enemies -2 accuracy 2 turns. Strategic deployment. Under the orc."
+    "description": "All enemies -2 accuracy 2 turns. Strategic deployment. Under the orc.",
+    "weight": 0
   },
   "montors_banana_peel": {
     "id": "montors_banana_peel",
@@ -2758,7 +2933,8 @@
     "effectCondition": "DAZE",
     "buyPrice": 10,
     "sellPrice": 4,
-    "description": "Target enemy skips next turn. Classic. Timeless. Devastating."
+    "description": "Target enemy skips next turn. Classic. Timeless. Devastating.",
+    "weight": 0
   },
   "montors_rubber_duck": {
     "id": "montors_rubber_duck",
@@ -2770,7 +2946,8 @@
     "effectHeal": 5,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "WET all enemies + heal 5 HP. Bath time. Everyone gets wet."
+    "description": "WET all enemies + heal 5 HP. Bath time. Everyone gets wet.",
+    "weight": 0
   },
   "montors_mirror_throw": {
     "id": "montors_mirror_throw",
@@ -2780,7 +2957,8 @@
     "effect": "reflect_next_attack",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Next enemy attack hits themselves instead. Hold it up. They see themselves. They swing."
+    "description": "Next enemy attack hits themselves instead. Hold it up. They see themselves. They swing.",
+    "weight": 0
   },
   "montors_party_popper": {
     "id": "montors_party_popper",
@@ -2793,7 +2971,8 @@
     "effectCondition2": "FEAR",
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "5 dmg + DAZE + FEAR one enemy. SURPRISE! Nobody expected this."
+    "description": "5 dmg + DAZE + FEAR one enemy. SURPRISE! Nobody expected this.",
+    "weight": 0
   },
   "montors_expired_yoghurt": {
     "id": "montors_expired_yoghurt",
@@ -2806,7 +2985,8 @@
     "badValue": 3,
     "buyPrice": 6,
     "sellPrice": 2,
-    "description": "Throw: 50% POISON enemy, 50% heals them 3 HP. Might be probiotic."
+    "description": "Throw: 50% POISON enemy, 50% heals them 3 HP. Might be probiotic.",
+    "weight": 0
   },
   "montors_mums_perfume_throw": {
     "id": "montors_mums_perfume_throw",
@@ -2815,9 +2995,10 @@
     "rarity": "rare",
     "effect": "condition_all_enemies",
     "effectCondition": "CHARM",
-    "buyPrice": 60,
-    "sellPrice": 24,
-    "description": "CHARM all enemies 1 turn. One spritz. They forget why they're fighting."
+    "buyPrice": 90,
+    "sellPrice": 36,
+    "description": "CHARM all enemies 1 turn. One spritz. They forget why they're fighting.",
+    "weight": 0
   },
   "montors_cat": {
     "id": "montors_cat",
@@ -2829,9 +3010,10 @@
     "summonDamage": 6,
     "summonCondition": "BLEED",
     "summonChance": 0.3,
-    "buyPrice": 70,
-    "sellPrice": 28,
-    "description": "Summons a cat for 3 turns. d6 dmg, 30% BLEED. It was sleeping. It's angry now."
+    "buyPrice": 105,
+    "sellPrice": 42,
+    "description": "Summons a cat for 3 turns. d6 dmg, 30% BLEED. It was sleeping. It's angry now.",
+    "weight": 0
   },
   "___COMMENT_DICE_RELICS": "=== DICE-TRIGGERED RELICS ===",
   "montors_pressure_cooker": {
@@ -2843,9 +3025,10 @@
     "passiveEffect": "pressure_cooker",
     "passiveValue": 5,
     "persistent": true,
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "Counts nat 1s across fights. At 5: DETONATE — 15 AoE + BURN + DAZE all. Then resets."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "Counts nat 1s across fights. At 5: DETONATE — 15 AoE + BURN + DAZE all. Then resets.",
+    "weight": 0
   },
   "montors_metronome": {
     "id": "montors_metronome",
@@ -2857,7 +3040,8 @@
     "passiveValue": 4,
     "buyPrice": 70,
     "sellPrice": 28,
-    "description": "Every 4th turn: guaranteed crit. Visible counter. Tick. Tick. Tick. BOOM."
+    "description": "Every 4th turn: guaranteed crit. Visible counter. Tick. Tick. Tick. BOOM.",
+    "weight": 0
   },
   "montors_magic_8_ball": {
     "id": "montors_magic_8_ball",
@@ -2869,7 +3053,8 @@
     "passiveValue": 0,
     "buyPrice": 80,
     "sellPrice": 32,
-    "description": "On nat 20: roll d6. 1=instakill, 2=full heal, 3=double gold, 4=FEAR self, 5=DAZE all enemies, 6=nothing."
+    "description": "On nat 20: roll d6. 1=instakill, 2=full heal, 3=double gold, 4=FEAR self, 5=DAZE all enemies, 6=nothing.",
+    "weight": 0
   },
   "montors_egg_timer": {
     "id": "montors_egg_timer",
@@ -2881,7 +3066,8 @@
     "passiveValue": 3,
     "buyPrice": 24,
     "sellPrice": 10,
-    "description": "After 3 turns without a kill: next attack +50% damage. She timed everything."
+    "description": "After 3 turns without a kill: next attack +50% damage. She timed everything.",
+    "weight": 0
   },
   "montors_coin_flip_relic": {
     "id": "montors_coin_flip_relic",
@@ -2893,7 +3079,8 @@
     "passiveValue": 0,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "Every attack: 50% chance +3 dmg, 50% chance -2 dmg. Heads you win big."
+    "description": "Every attack: 50% chance +3 dmg, 50% chance -2 dmg. Heads you win big.",
+    "weight": 0
   },
   "montors_double_or_nothing": {
     "id": "montors_double_or_nothing",
@@ -2903,9 +3090,10 @@
     "rarity": "rare",
     "passiveEffect": "double_or_nothing",
     "passiveValue": 0,
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "On crit: 50% double the damage. 50% crit becomes miss. Everything or nothing."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "On crit: 50% double the damage. 50% crit becomes miss. Everything or nothing.",
+    "weight": 0
   },
   "montors_gremlin_bell": {
     "id": "montors_gremlin_bell",
@@ -2915,9 +3103,10 @@
     "rarity": "rare",
     "passiveEffect": "gremlin_bell",
     "passiveValue": 0,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "On nat 1: instead of fumble, apply random condition to enemy. Bad luck becomes their problem."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "On nat 1: instead of fumble, apply random condition to enemy. Bad luck becomes their problem.",
+    "weight": 0
   },
   "montors_countdown_timer": {
     "id": "montors_countdown_timer",
@@ -2928,9 +3117,10 @@
     "passiveEffect": "countdown",
     "passiveValue": 10,
     "persistent": true,
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "10-turn counter. At 0: 20 AoE damage all enemies. You take 5 dmg/turn while counting. Resets."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "10-turn counter. At 0: 20 AoE damage all enemies. You take 5 dmg/turn while counting. Resets.",
+    "weight": 0
   },
   "___COMMENT_UTILITY_ITEMS": "=== UTILITY ITEMS ===",
   "montors_petrol_can": {
@@ -2941,9 +3131,10 @@
     "rarity": "rare",
     "passiveEffect": "burn_linger",
     "passiveValue": 1,
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "BURN you apply lingers 1 extra turn (2 dmg + AoE). Stacks with Napalm gift. Rusted. Sloshing. Never runs dry."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "BURN you apply lingers 1 extra turn (2 dmg + AoE). Stacks with Napalm gift. Rusted. Sloshing. Never runs dry.",
+    "weight": 0
   },
   "montors_alarm_clock": {
     "id": "montors_alarm_clock",
@@ -2955,7 +3146,8 @@
     "passiveValue": 2,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "+2 initiative. Enemies can't ambush you. Rings before they strike."
+    "description": "+2 initiative. Enemies can't ambush you. Rings before they strike.",
+    "weight": 0
   },
   "montors_rubber_gloves": {
     "id": "montors_rubber_gloves",
@@ -2967,7 +3159,8 @@
     "passiveValue": 0.1,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "10% resist ALL conditions. Insulating. Practical. Unfashionable."
+    "description": "10% resist ALL conditions. Insulating. Practical. Unfashionable.",
+    "weight": 0
   },
   "montors_tin_foil_hat": {
     "id": "montors_tin_foil_hat",
@@ -2984,7 +3177,8 @@
     "passiveValue": 1,
     "buyPrice": 30,
     "sellPrice": 12,
-    "description": "Immune to CHARM + FEAR. -1 DEF. He wore it unironically. It works."
+    "description": "Immune to CHARM + FEAR. -1 DEF. He wore it unironically. It works.",
+    "weight": 1
   },
   "___COMMENT_HELMETS": "=== HELMETS ===",
   "helmet_base": {
@@ -2996,7 +3190,8 @@
     "defBonus": 1,
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "+1 DEF. Hardened leather. Better than nothing."
+    "description": "+1 DEF. Hardened leather. Better than nothing.",
+    "weight": 1
   },
   "montors_colander": {
     "id": "montors_colander",
@@ -3007,7 +3202,8 @@
     "defBonus": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "+1 DEF. Strains pasta. Strains blows. Looks ridiculous."
+    "description": "+1 DEF. Strains pasta. Strains blows. Looks ridiculous.",
+    "weight": 1
   },
   "montors_saucepan": {
     "id": "montors_saucepan",
@@ -3019,7 +3215,8 @@
     "agiPenalty": -1,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "+2 DEF, -1 AGI. Heavy. Loud. Handle sticks out. Nobody takes you seriously."
+    "description": "+2 DEF, -1 AGI. Heavy. Loud. Handle sticks out. Nobody takes you seriously.",
+    "weight": 1
   },
   "montors_bowler_hat": {
     "id": "montors_bowler_hat",
@@ -3034,7 +3231,8 @@
     "setId": "sunday_best",
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "+1 DEF, 25% DAZE resist. Formal. Sturdy. A gentleman's defence."
+    "description": "+1 DEF, 25% DAZE resist. Formal. Sturdy. A gentleman's defence.",
+    "weight": 1
   },
   "montors_cricket_helmet": {
     "id": "montors_cricket_helmet",
@@ -3048,7 +3246,8 @@
     "passiveValue": 0.25,
     "buyPrice": 56,
     "sellPrice": 22,
-    "description": "+2 DEF, 25% DAZE resist. From the garden shed. Visor down. Howzat."
+    "description": "+2 DEF, 25% DAZE resist. From the garden shed. Visor down. Howzat.",
+    "weight": 1
   },
   "montors_hair_dryer_hood": {
     "id": "montors_hair_dryer_hood",
@@ -3063,9 +3262,10 @@
       "FEAR"
     ],
     "passiveValue": 0.4,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "+2 DEF, 40% DAZE + FEAR resist. Sits over the whole head. Warm. Muffles screaming."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "+2 DEF, 40% DAZE + FEAR resist. Sits over the whole head. Warm. Muffles screaming.",
+    "weight": 1
   },
   "montors_knight_helm": {
     "id": "montors_knight_helm",
@@ -3076,9 +3276,10 @@
     "defBonus": 3,
     "passiveEffect": "condition_immunity",
     "passiveCondition": "DAZE",
-    "buyPrice": 140,
-    "sellPrice": 56,
-    "description": "+3 DEF, DAZE immunity. The real thing. He kept it in the attic. Visor squeaks."
+    "buyPrice": 280,
+    "sellPrice": 112,
+    "description": "+3 DEF, DAZE immunity. The real thing. He kept it in the attic. Visor squeaks.",
+    "weight": 1
   },
   "___COMMENT_BOOTS": "=== BOOTS ===",
   "boots_base": {
@@ -3090,7 +3291,8 @@
     "agiBonus": 1,
     "buyPrice": 12,
     "sellPrice": 4,
-    "description": "+1 AGI. Scuffed. Broken in. At least they fit."
+    "description": "+1 AGI. Scuffed. Broken in. At least they fit.",
+    "weight": 1
   },
   "montors_wellies": {
     "id": "montors_wellies",
@@ -3101,7 +3303,8 @@
     "agiBonus": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "+1 AGI. Green. Muddy. Garden standard issue."
+    "description": "+1 AGI. Green. Muddy. Garden standard issue.",
+    "weight": 1
   },
   "montors_slippers": {
     "id": "montors_slippers",
@@ -3113,7 +3316,8 @@
     "setId": "sunday_best",
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "+1 init. Quiet. Surprisingly fast. Tartan."
+    "description": "+1 init. Quiet. Surprisingly fast. Tartan.",
+    "weight": 1
   },
   "montors_mums_heels": {
     "id": "montors_mums_heels",
@@ -3126,7 +3330,8 @@
     "passiveValue": 0.05,
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "+1 AGI, 5% dodge. Click click click. She was quick in these."
+    "description": "+1 AGI, 5% dodge. Click click click. She was quick in these.",
+    "weight": 1
   },
   "montors_hiking_boots": {
     "id": "montors_hiking_boots",
@@ -3138,7 +3343,8 @@
     "defBonus": 1,
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "+1 AGI, +1 DEF. Sturdy. Waterproof. For the fells."
+    "description": "+1 AGI, +1 DEF. Sturdy. Waterproof. For the fells.",
+    "weight": 1
   },
   "montors_dancing_shoes": {
     "id": "montors_dancing_shoes",
@@ -3149,9 +3355,10 @@
     "agiBonus": 2,
     "passiveEffect": "dodge_chance",
     "passiveValue": 0.1,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "+2 AGI, 10% dodge. Patent leather. He took lessons. Secretly."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "+2 AGI, 10% dodge. Patent leather. He took lessons. Secretly.",
+    "weight": 1
   },
   "montors_iron_boots": {
     "id": "montors_iron_boots",
@@ -3163,9 +3370,10 @@
     "agiPenalty": -1,
     "passiveEffect": "damage_reflect",
     "passiveValue": 2,
-    "buyPrice": 130,
-    "sellPrice": 52,
-    "description": "+3 DEF, -1 AGI, reflect 2 damage. Magnetic. Heavy. Kick like a mule."
+    "buyPrice": 260,
+    "sellPrice": 104,
+    "description": "+3 DEF, -1 AGI, reflect 2 damage. Magnetic. Heavy. Kick like a mule.",
+    "weight": 1
   },
   "___COMMENT_BODY_ARMOUR_NEW": "=== BODY ARMOUR (new) ===",
   "montors_apron_armour": {
@@ -3177,7 +3385,8 @@
     "defBonus": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "+1 DEF. Stained. Stiff. Smells of Sunday roast."
+    "description": "+1 DEF. Stained. Stiff. Smells of Sunday roast.",
+    "weight": 3
   },
   "montors_duffel_coat": {
     "id": "montors_duffel_coat",
@@ -3192,7 +3401,8 @@
     "passiveValue": 0.25,
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "+3 DEF, -1 AGI, 25% FROST resist. Toggle buttons. Warm. Smells of mothballs."
+    "description": "+3 DEF, -1 AGI, 25% FROST resist. Toggle buttons. Warm. Smells of mothballs.",
+    "weight": 3
   },
   "montors_mums_fur_coat": {
     "id": "montors_mums_fur_coat",
@@ -3203,9 +3413,10 @@
     "defBonus": 3,
     "passiveEffect": "dodge_chance",
     "passiveValue": 0.1,
-    "buyPrice": 110,
-    "sellPrice": 44,
-    "description": "+3 DEF, 10% dodge. Fake fur. Real protection. She wore it to bingo."
+    "buyPrice": 165,
+    "sellPrice": 66,
+    "description": "+3 DEF, 10% dodge. Fake fur. Real protection. She wore it to bingo.",
+    "weight": 3
   },
   "montors_suit_of_armour": {
     "id": "montors_suit_of_armour",
@@ -3215,9 +3426,10 @@
     "rarity": "epic",
     "defBonus": 6,
     "agiPenalty": -2,
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "+6 DEF, -2 AGI. From the hallway. Missing a gauntlet. Clanks when you breathe."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "+6 DEF, -2 AGI. From the hallway. Missing a gauntlet. Clanks when you breathe.",
+    "weight": 3
   },
   "___COMMENT_RINGS": "=== RINGS ===",
   "montors_curtain_ring": {
@@ -3230,7 +3442,8 @@
     "passiveValue": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "+1 initiative. Brass. Slides off the curtain rail. Fits a finger perfectly."
+    "description": "+1 initiative. Brass. Slides off the curtain rail. Fits a finger perfectly.",
+    "weight": 0
   },
   "montors_washer_ring": {
     "id": "montors_washer_ring",
@@ -3242,7 +3455,8 @@
     "passiveValue": 1,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "+1 DEF. A plumbing washer. Steel. Surprisingly tough on the knuckle."
+    "description": "+1 DEF. A plumbing washer. Steel. Surprisingly tough on the knuckle.",
+    "weight": 0
   },
   "montors_mums_thimble_ring": {
     "id": "montors_mums_thimble_ring",
@@ -3254,7 +3468,8 @@
     "passiveValue": 5,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "+5 max HP. She wore it like a ring. Pockmarked from a thousand needles."
+    "description": "+5 max HP. She wore it like a ring. Pockmarked from a thousand needles.",
+    "weight": 0
   },
   "montors_rubber_band_ring": {
     "id": "montors_rubber_band_ring",
@@ -3266,7 +3481,8 @@
     "passiveValue": 0.05,
     "buyPrice": 40,
     "sellPrice": 16,
-    "description": "5% dodge. Stretched around his finger. Twangs when danger's near."
+    "description": "5% dodge. Stretched around his finger. Twangs when danger's near.",
+    "weight": 0
   },
   "montors_key_ring": {
     "id": "montors_key_ring",
@@ -3278,7 +3494,8 @@
     "passiveValue": 1,
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "+1 LCK. Full of keys. None of them fit anything. Jingles constantly."
+    "description": "+1 LCK. Full of keys. None of them fit anything. Jingles constantly.",
+    "weight": 0
   },
   "montors_pipe_ring": {
     "id": "montors_pipe_ring",
@@ -3288,9 +3505,10 @@
     "rarity": "rare",
     "passiveEffect": "regen_per_chamber",
     "passiveValue": 2,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Heal 2 HP/chamber. The silver band from his pipe. Still warm. Smells of cherry tobacco."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Heal 2 HP/chamber. The silver band from his pipe. Still warm. Smells of cherry tobacco.",
+    "weight": 0
   },
   "montors_grans_ring": {
     "id": "montors_grans_ring",
@@ -3300,9 +3518,10 @@
     "rarity": "rare",
     "passiveEffect": "crit_bonus",
     "passiveValue": 1,
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "Crits on 19+. She had a sharp tongue. This has a sharp edge. Don't shake hands."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "Crits on 19+. She had a sharp tongue. This has a sharp edge. Don't shake hands.",
+    "weight": 0
   },
   "montors_engagement_ring": {
     "id": "montors_engagement_ring",
@@ -3312,9 +3531,10 @@
     "rarity": "epic",
     "passiveEffect": "lifesteal",
     "passiveValue": 0.05,
-    "buyPrice": 150,
-    "sellPrice": 60,
-    "description": "5% lifesteal. He never gave it to anyone. The diamond still sparkles."
+    "buyPrice": 300,
+    "sellPrice": 120,
+    "description": "5% lifesteal. He never gave it to anyone. The diamond still sparkles.",
+    "weight": 0
   },
   "___COMMENT_AMULETS": "=== AMULETS ===",
   "montors_dog_tag": {
@@ -3327,7 +3547,8 @@
     "passiveValue": 1,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "+1 STR. Engraved with GOOD BOY. The dog's name was also Montor."
+    "description": "+1 STR. Engraved with GOOD BOY. The dog's name was also Montor.",
+    "weight": 0
   },
   "montors_mums_locket": {
     "id": "montors_mums_locket",
@@ -3338,7 +3559,8 @@
     "twinFangsGrant": true,
     "buyPrice": 70,
     "sellPrice": 28,
-    "description": "Grants Twin Fangs: dual-wield bleed on double-connect. She kept a photo inside. Of the dog."
+    "description": "Grants Twin Fangs: dual-wield bleed on double-connect. She kept a photo inside. Of the dog.",
+    "weight": 0
   },
   "montors_bifocals": {
     "id": "montors_bifocals",
@@ -3350,7 +3572,8 @@
     "passiveValue": 1,
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "See exact enemy HP. Thick lenses. Everything's clearer. Hung on a chain."
+    "description": "See exact enemy HP. Thick lenses. Everything's clearer. Hung on a chain.",
+    "weight": 0
   },
   "montors_rabbits_foot": {
     "id": "montors_rabbits_foot",
@@ -3360,9 +3583,10 @@
     "rarity": "rare",
     "passiveEffect": "reroll_ones",
     "passiveValue": 1,
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "Reroll 1s on damage. From the garden. The rabbit survived. Probably."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "Reroll 1s on damage. From the garden. The rabbit survived. Probably.",
+    "weight": 0
   },
   "montors_mums_crucifix": {
     "id": "montors_mums_crucifix",
@@ -3372,9 +3596,10 @@
     "rarity": "rare",
     "passiveEffect": "condition_resist_all",
     "passiveValue": 0.15,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "15% resist ALL conditions. She wore it every Sunday. The chain never broke."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "15% resist ALL conditions. She wore it every Sunday. The chain never broke.",
+    "weight": 0
   },
   "montors_lodestone": {
     "id": "montors_lodestone",
@@ -3384,9 +3609,10 @@
     "rarity": "epic",
     "passiveEffect": "d20_nudge",
     "passiveValue": 2,
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "+2 to all d20 rolls. Heavy. Pulls north. And pulls luck toward you."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "+2 to all d20 rolls. Heavy. Pulls north. And pulls luck toward you.",
+    "weight": 0
   },
   "___COMMENT_AMULETS_DAMAGE": "=== AMULETS — Damage ===",
   "montors_tooth_necklace": {
@@ -3399,7 +3625,8 @@
     "passiveValue": 1,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "+1 damage on all hits. Milk teeth on fishing line. Fell out naturally. Mostly."
+    "description": "+1 damage on all hits. Milk teeth on fishing line. Fell out naturally. Mostly.",
+    "weight": 0
   },
   "montors_claw_pendant": {
     "id": "montors_claw_pendant",
@@ -3411,7 +3638,8 @@
     "passiveValue": 1.25,
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "1.25x weapon damage. Cat's claw in resin. The cat's fine. Probably."
+    "description": "1.25x weapon damage. Cat's claw in resin. The cat's fine. Probably.",
+    "weight": 0
   },
   "montors_blood_bead": {
     "id": "montors_blood_bead",
@@ -3421,9 +3649,10 @@
     "rarity": "rare",
     "passiveEffect": "damage_multiplier_low_hp",
     "passiveValue": 1.5,
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "1.5x damage when HP below 50%. Pulses when you're hurt. Feeds on desperation."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "1.5x damage when HP below 50%. Pulses when you're hurt. Feeds on desperation.",
+    "weight": 0
   },
   "montors_executioners_coin": {
     "id": "montors_executioners_coin",
@@ -3433,9 +3662,10 @@
     "rarity": "epic",
     "passiveEffect": "first_hit_multiplier",
     "passiveValue": 2,
-    "buyPrice": 160,
-    "sellPrice": 64,
-    "description": "First hit each combat = 2x damage. Flip it. Heads they lose. It's always heads."
+    "buyPrice": 320,
+    "sellPrice": 128,
+    "description": "First hit each combat = 2x damage. Flip it. Heads they lose. It's always heads.",
+    "weight": 0
   },
   "___COMMENT_AMULETS_CONDITION": "=== AMULETS — Condition Enhancement ===",
   "montors_fever_stone": {
@@ -3448,7 +3678,8 @@
     "passiveValue": 1.5,
     "buyPrice": 56,
     "sellPrice": 22,
-    "description": "Condition DoT damage +50%. A hot pebble from the garden path. Infections love it."
+    "description": "Condition DoT damage +50%. A hot pebble from the garden path. Infections love it.",
+    "weight": 0
   },
   "montors_rusty_nail_chain": {
     "id": "montors_rusty_nail_chain",
@@ -3458,9 +3689,10 @@
     "rarity": "rare",
     "passiveEffect": "poison_enhanced_drain",
     "passiveValue": 2,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Poison drains -2/tick instead of -1. Tetanus on a string. His mum told him to pick them up."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Poison drains -2/tick instead of -1. Tetanus on a string. His mum told him to pick them up.",
+    "weight": 0
   },
   "montors_barbed_wire_twist": {
     "id": "montors_barbed_wire_twist",
@@ -3470,9 +3702,10 @@
     "rarity": "rare",
     "passiveEffect": "bleed_enhanced_damage",
     "passiveValue": 1,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Bleed +1 damage per stack. From the garden fence. Twisted into a loop."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Bleed +1 damage per stack. From the garden fence. Twisted into a loop.",
+    "weight": 0
   },
   "___COMMENT_UNARMED": "=== UNARMED GEAR ===",
   "montors_mums_costume_ring": {
@@ -3487,7 +3720,8 @@
     "unarmedConditionChance": 0.3,
     "buyPrice": 16,
     "sellPrice": 6,
-    "description": "Unarmed: +1 damage, 30% BLEED. Fake gold. The gem fell out. The prong draws blood."
+    "description": "Unarmed: +1 damage, 30% BLEED. Fake gold. The gem fell out. The prong draws blood.",
+    "weight": 0
   },
   "montors_knuckleduster_ring": {
     "id": "montors_knuckleduster_ring",
@@ -3500,7 +3734,8 @@
     "unarmedCritBonus": 1,
     "buyPrice": 44,
     "sellPrice": 18,
-    "description": "Unarmed: +2 damage, crit 19+. Brass curtain fitting. Makes a fist feel like a mace."
+    "description": "Unarmed: +2 damage, crit 19+. Brass curtain fitting. Makes a fist feel like a mace.",
+    "weight": 0
   },
   "montors_mums_sovereign_amulet": {
     "id": "montors_mums_sovereign_amulet",
@@ -3512,7 +3747,8 @@
     "unarmedDieUpgrade": 6,
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "Unarmed damage d4 to d6. She wore it on a chain. Swung it once at a burglar."
+    "description": "Unarmed damage d4 to d6. She wore it on a chain. Swung it once at a burglar.",
+    "weight": 0
   },
   "montors_mums_hairpin": {
     "id": "montors_mums_hairpin",
@@ -3522,9 +3758,10 @@
     "rarity": "rare",
     "unarmedBonus": true,
     "unarmedDoubleStrike": 0.25,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Unarmed: 25% double strike. She'd jab you with it. Quick. Precise. Twice."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Unarmed: 25% double strike. She'd jab you with it. Quick. Precise. Twice.",
+    "weight": 0
   },
   "montors_boxing_boots": {
     "id": "montors_boxing_boots",
@@ -3535,9 +3772,10 @@
     "agiBonus": 2,
     "strBonus": 2,
     "unarmedBonus": true,
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "Unarmed: +2 STR, +2 AGI. Laced high. Smell of old leather. County champion."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "Unarmed: +2 STR, +2 AGI. Laced high. Smell of old leather. County champion.",
+    "weight": 1
   },
   "montors_lego_brick": {
     "id": "montors_lego_brick",
@@ -3549,7 +3787,8 @@
     "passiveValue": 3,
     "buyPrice": 20,
     "sellPrice": 8,
-    "description": "Enemies take 3 damage when they hit you. Single red 2x2. Impossible to see in the dark. Agony."
+    "description": "Enemies take 3 damage when they hit you. Single red 2x2. Impossible to see in the dark. Agony.",
+    "weight": 0
   },
   "___COMMENT_SET_SUNDAY": "=== SET: Montor's Sunday Best ===",
   "montors_sunday_shirt": {
@@ -3576,7 +3815,8 @@
     },
     "buyPrice": 50,
     "sellPrice": 20,
-    "description": "+2 DEF. Pressed. Starched. She ironed it the night before."
+    "description": "+2 DEF. Pressed. Starched. She ironed it the night before.",
+    "weight": 3
   },
   "___COMMENT_SET_PEAKY": "=== SET: Montor's Peaky Set ===",
   "montors_newsboy_cap": {
@@ -3609,9 +3849,10 @@
         "label": "First hit = guaranteed crit (By Order)"
       }
     },
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "+2 DEF, +1 init. Eight-panel. Stitched razor in the peak. By order."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "+2 DEF, +1 init. Eight-panel. Stitched razor in the peak. By order.",
+    "weight": 1
   },
   "montors_tweed_overcoat": {
     "id": "montors_tweed_overcoat",
@@ -3642,9 +3883,10 @@
         "label": "First hit = guaranteed crit (By Order)"
       }
     },
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "+3 DEF. Heavy tweed. Lined pockets. Hides a multitude of sins."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "+3 DEF. Heavy tweed. Lined pockets. Hides a multitude of sins.",
+    "weight": 3
   },
   "montors_hobnail_boots": {
     "id": "montors_hobnail_boots",
@@ -3677,9 +3919,10 @@
         "label": "First hit = guaranteed crit (By Order)"
       }
     },
-    "buyPrice": 90,
-    "sellPrice": 36,
-    "description": "+1 AGI, +1 DEF, +1 init. Steel-capped. Cobbled together. Kick first."
+    "buyPrice": 135,
+    "sellPrice": 54,
+    "description": "+1 AGI, +1 DEF, +1 init. Steel-capped. Cobbled together. Kick first.",
+    "weight": 1
   },
   "montors_sovereign_ring": {
     "id": "montors_sovereign_ring",
@@ -3711,8 +3954,9 @@
         "label": "First hit = guaranteed crit (By Order)"
       }
     },
-    "buyPrice": 100,
-    "sellPrice": 40,
-    "description": "+1 STR, +1 LCK. Gold. Thick. Leaves a mark. By order."
+    "buyPrice": 150,
+    "sellPrice": 60,
+    "description": "+1 STR, +1 LCK. Gold. Thick. Leaves a mark. By order.",
+    "weight": 0
   }
 }

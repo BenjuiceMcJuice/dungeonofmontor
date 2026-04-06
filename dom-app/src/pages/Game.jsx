@@ -1125,43 +1125,87 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     setSafeRoomSlotChoice(null)
   }
 
-  var [safeRoomTonic, setSafeRoomTonic] = useState(null) // { count, playerChooses, montorPick }
+  var [safeRoomTonic, setSafeRoomTonic] = useState(null)
+  var [safeRoomRewardItem, setSafeRoomRewardItem] = useState(null)
 
   function handleSafeRoomContinue() {
     if (isGuarded()) return
     transitionGuardRef.current = Date.now()
 
-    // If tonic not yet offered, calculate and show tonic step
-    if (safeRoomStep !== 'tonic' && safeRoomStep !== 'tonic_pick') {
+    // Show reward choice if not yet shown
+    if (safeRoomStep !== 'reward_choice' && safeRoomStep !== 'tonic' && safeRoomStep !== 'tonic_pick' && safeRoomStep !== 'tonic_done' && safeRoomStep !== 'reward_item' && safeRoomStep !== 'reward_montor') {
       var mood = getMontorMood()
-      var tonic = null
-      if (mood === 'happy') {
-        tonic = { count: greedScore < 10 ? 2 : 1, playerChooses: true }
-      } else if (mood === 'neutral') {
-        tonic = { count: 1, playerChooses: false, montorPick: montorTaste.favours }
-      } else if (mood === 'annoyed') {
-        tonic = Math.random() < 0.5 ? { count: 1, playerChooses: false, montorPick: montorTaste.favours } : null
-      }
-      // angry = nothing
-
-      if (tonic) {
-        setSafeRoomTonic(tonic)
-        setSafeRoomStep(tonic.playerChooses ? 'tonic_pick' : 'tonic')
+      if (mood === 'angry') {
+        // No reward — skip to tonic step showing nothing
+        setSafeRoomStep('tonic')
+        setSafeRoomTonic(null)
         return
       }
-      // No tonic — show mood message briefly then continue
-      setSafeRoomStep('tonic')
-      setSafeRoomTonic(null)
+      setSafeRoomStep('reward_choice')
       return
     }
 
-    // Tonic already shown — proceed to doors
+    // After any reward, proceed to doors
     setSafeRoomStep('arrival')
     setSafeRoomGift(null)
     setSafeRoomSlotChoice(null)
     setSafeRoomTonic(null)
+    setSafeRoomRewardItem(null)
     setGamePhase('doors')
     triggerSave()
+  }
+
+  function handleRewardChoice(choice) {
+    var mood = getMontorMood()
+    if (choice === 'tonic') {
+      var tonic = null
+      if (mood === 'happy') {
+        tonic = { count: greedScore < 10 ? 2 : 1, playerChooses: true }
+      } else if (mood === 'neutral') {
+        tonic = { count: 1, playerChooses: true }
+      } else if (mood === 'annoyed') {
+        tonic = { count: 1, playerChooses: false, montorPick: montorTaste.favours }
+      }
+      if (tonic) {
+        setSafeRoomTonic(tonic)
+        setSafeRoomStep(tonic.playerChooses ? 'tonic_pick' : 'tonic')
+      } else {
+        setSafeRoomStep('tonic')
+        setSafeRoomTonic(null)
+      }
+    } else if (choice === 'item') {
+      // Montor gives an item — quality based on mood
+      var pool = mood === 'happy' ? 'rare' : mood === 'neutral' ? 'uncommon' : 'common'
+      var candidates = Object.values(ITEMS).filter(function(it) { return it.rarity === pool && it.type !== 'consumable' })
+      if (candidates.length === 0) candidates = Object.values(ITEMS).filter(function(it) { return it.rarity === 'common' && it.type !== 'consumable' })
+      var pick = candidates[Math.floor(Math.random() * candidates.length)]
+      if (pick) {
+        var itemCopy = Object.assign({}, pick)
+        setSafeRoomRewardItem(itemCopy)
+        setPlayerInventory(function(prev) { return prev.concat([itemCopy]) })
+      }
+      setSafeRoomStep('reward_item')
+    } else if (choice === 'montor') {
+      // Montor's choice — blind, potentially much better (or worse)
+      var roll = Math.random()
+      var montorPool = 'common'
+      if (mood === 'happy') {
+        montorPool = roll < 0.4 ? 'epic' : roll < 0.7 ? 'rare' : 'uncommon'
+      } else if (mood === 'neutral') {
+        montorPool = roll < 0.2 ? 'rare' : roll < 0.6 ? 'uncommon' : 'common'
+      } else {
+        montorPool = roll < 0.1 ? 'uncommon' : 'common'
+      }
+      var montorCandidates = Object.values(ITEMS).filter(function(it) { return it.rarity === montorPool })
+      if (montorCandidates.length === 0) montorCandidates = Object.values(ITEMS).filter(function(it) { return it.rarity === 'common' })
+      var montorPick = montorCandidates[Math.floor(Math.random() * montorCandidates.length)]
+      if (montorPick) {
+        var montorItemCopy = Object.assign({}, montorPick)
+        setSafeRoomRewardItem(montorItemCopy)
+        setPlayerInventory(function(prev) { return prev.concat([montorItemCopy]) })
+      }
+      setSafeRoomStep('reward_montor')
+    }
   }
 
   var [tonicPicks, setTonicPicks] = useState([]) // track what was picked for display
@@ -3881,6 +3925,62 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       )
     }
 
+    // Reward choice — tonic, item, or Montor's choice
+    if (safeRoomStep === 'reward_choice') {
+      var tidiness3 = getTidinessSummary()
+      var mood3 = getMontorMood()
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
+          <p className="text-purple-400 text-sm font-display">
+            "{getMontorLine('safeRoom')}"
+          </p>
+          <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
+            <p className={'text-xs font-sans ' + tidiness3.colour}>Floor tidiness: {tidiness3.label}</p>
+            <p className="text-ink-faint text-[10px] mt-0.5">{tidiness3.desc}</p>
+          </div>
+          <p className="text-gold font-display text-lg">Montor offers a reward</p>
+          <div className="flex flex-col gap-2 w-full max-w-xs">
+            <button onClick={function() { handleRewardChoice('tonic') }}
+              className="py-3 px-6 rounded-lg bg-green-500/10 border border-green-500/40 text-green-400 font-sans text-sm hover:border-green-400 transition-colors">
+              Tonic — {mood3 === 'happy' ? 'Pick ' + (greedScore < 10 ? '2' : '1') + ' stat' + (greedScore < 10 ? 's' : '') : mood3 === 'neutral' ? 'Pick 1 stat' : 'Montor chooses'}
+            </button>
+            <button onClick={function() { handleRewardChoice('item') }}
+              className="py-3 px-6 rounded-lg bg-blue-500/10 border border-blue-500/40 text-blue-400 font-sans text-sm hover:border-blue-400 transition-colors">
+              Item — {mood3 === 'happy' ? 'Rare quality' : mood3 === 'neutral' ? 'Uncommon quality' : 'Common quality'}
+            </button>
+            <button onClick={function() { handleRewardChoice('montor') }}
+              className="py-3 px-6 rounded-lg bg-purple-500/10 border border-purple-500/40 text-purple-400 font-sans text-sm hover:border-purple-400 transition-colors">
+              Montor's Choice — ???
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    // Item reward — show what Montor gave
+    if (safeRoomStep === 'reward_item' || safeRoomStep === 'reward_montor') {
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
+          <p className="text-purple-400 text-sm font-display">
+            {safeRoomStep === 'reward_montor' ? '"I choose for you."' : '"Take it. Before I change my mind."'}
+          </p>
+          {safeRoomRewardItem ? (
+            <div className={'p-4 rounded-lg border-2 w-full max-w-xs ' + rarityCol(safeRoomRewardItem.rarity).border + ' ' + rarityCol(safeRoomRewardItem.rarity).bg}>
+              <p className={rarityCol(safeRoomRewardItem.rarity).text + ' font-display text-xl'}>{safeRoomRewardItem.name}</p>
+              <p className={rarityCol(safeRoomRewardItem.rarity).text + ' text-xs uppercase mt-1'}>{rarityCol(safeRoomRewardItem.rarity).label}</p>
+              <p className="text-ink text-sm italic mt-2">{safeRoomRewardItem.description || ''}</p>
+            </div>
+          ) : (
+            <p className="text-ink-dim text-sm">Montor rummages... finds nothing.</p>
+          )}
+          <button onClick={handleSafeRoomContinue}
+            className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors mt-2">
+            Continue
+          </button>
+        </div>
+      )
+    }
+
     // Tonic pick — player chooses stat(s)
     if (safeRoomStep === 'tonic_pick' && safeRoomTonic && safeRoomTonic.playerChooses) {
       var tonicStats = STAT_ORDER.map(function(s) { return s.id })
@@ -4336,13 +4436,31 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
           return (
             <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <span className="font-display text-lg text-gold">Inventory</span>
-                <button onClick={function() { setShowInventoryPanel(false); setSelectedItemIdx(null) }}
-                  className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
-                  Close
-                </button>
+              {/* Header with weight bar */}
+              <div className="px-4 py-3 border-b border-border">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-display text-lg text-gold">Inventory</span>
+                  <button onClick={function() { setShowInventoryPanel(false); setSelectedItemIdx(null) }}
+                    className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
+                    Close
+                  </button>
+                </div>
+                {(function() {
+                  var endMod = Math.max(0, Math.floor(((character.stats.end || 10) - 10) / 2))
+                  var capacity = 10 + (endMod * 3)
+                  var carried = playerInventory.reduce(function(sum, it) { return sum + (it.weight || 0) }, 0)
+                  carried += playerJunkBag.reduce(function(sum, j) { return sum + (j.count || 0) }, 0)
+                  var pct = Math.min(100, Math.round((carried / capacity) * 100))
+                  var barColour = pct >= 100 ? 'bg-red-500' : pct >= 75 ? 'bg-amber-500' : 'bg-emerald-500'
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-bg rounded-full h-1.5">
+                        <div className={barColour + ' rounded-full h-1.5 transition-all duration-300'} style={{ width: pct + '%' }} />
+                      </div>
+                      <span className={'text-[10px] font-sans ' + (pct >= 100 ? 'text-red-400' : pct >= 75 ? 'text-amber-400' : 'text-ink-dim')}>{carried}/{capacity}</span>
+                    </div>
+                  )
+                })()}
               </div>
               {/* Tab bar */}
               <div className="flex border-b border-border">
