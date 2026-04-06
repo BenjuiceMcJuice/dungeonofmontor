@@ -701,6 +701,13 @@ function Game({ character, user, onEndRun }) {
     }
     // Apply condition hazard — check immunity relics first, then DEF reduces physical damage
     if (result.condition && !result.agiSaved) {
+      // Tremor Sense (stone mind): immune to trap damage/conditions from searches
+      if (giftSlots.mind && giftSlots.mind.effect === 'search_trap_immunity') {
+        result.trapImmune = true
+        result.trapResistType = 'immune'
+        result.condition = null
+        result.trapDamage = 0
+      }
       // Check condition resistance from relics (immunity, resist chance, multi, all)
       var resistResult = checkConditionResist(character.equipped, result.condition)
       if (resistResult.blocked) {
@@ -1120,6 +1127,12 @@ function Game({ character, user, onEndRun }) {
     bs.players[user.uid].maxHp = character.maxHp
     bs.players[user.uid]._firstHitAvailable = true // Executioner's Coin
     bs.players[user.uid]._gifts = giftSlots // Pass gifts to combat.js
+    // Forge Body (ember body): +2 DEF at combat start
+    if (giftSlots.body && giftSlots.body.effect === 'burn_immunity_and_def' && giftSlots.body.defBonus) {
+      bs.players[user.uid].combatStats = Object.assign({}, bs.players[user.uid].combatStats, {
+        def: bs.players[user.uid].combatStats.def + giftSlots.body.defBonus
+      })
+    }
     setBattle(bs)
     setSelectedTarget(null)
     setCombatLog([])
@@ -1155,6 +1168,19 @@ function Game({ character, user, onEndRun }) {
     var tickResult = tickTurnStart(battle, currentId)
     var tickedBattle = tickResult.newBattle
 
+    // Decay Aura (bile shield): enemies lose 1 HP at start of their turn
+    var shieldGTick = (character.equipped && character.equipped.offhand) ? giftSlots.shield : null
+    if (shieldGTick && shieldGTick.effect === 'enemy_dot') {
+      var dotEnemy = tickedBattle.enemies.find(function(e) { return e.id === currentId })
+      if (dotEnemy && !dotEnemy.isDown) {
+        dotEnemy.currentHp = Math.max(0, dotEnemy.currentHp - shieldGTick.value)
+        tickResult.damage += shieldGTick.value
+        if (!tickResult.narrative) tickResult.narrative = ''
+        tickResult.narrative += ' Decay Aura drains ' + shieldGTick.value + ' HP.'
+        if (dotEnemy.currentHp <= 0) { dotEnemy.isDown = true; tickResult.died = true }
+      }
+    }
+
     // Split narrative into individual log lines
     if (tickResult.narrative) {
       var eParts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
@@ -1168,6 +1194,9 @@ function Game({ character, user, onEndRun }) {
 
     var hasEnemyConditionEffects = tickResult.damage > 0 || tickResult.narrative
     var enemyCondDelay = hasEnemyConditionEffects ? 1000 : 0
+
+    // Immediately update battle state so condition icons reflect expired/changed conditions
+    if (hasEnemyConditionEffects) setBattle(tickedBattle)
 
     if (tickResult.died) {
       // Enemy died from conditions — skip windup, go straight to result
@@ -1484,8 +1513,38 @@ function Game({ character, user, onEndRun }) {
         pState.currentHp = Math.min(pState.currentHp + bodyG.damageReduction, pState.maxHp)
       }
 
-      // Dodge bonus (Phase Shift — handled in combat.js via getPassiveTotal)
-      // Burn immunity (Forge Body — handled via condition_immunity in checkConditionResist)
+      // Burn immunity + DEF (Forge Body): immune to BURN, +2 DEF applied at combat start
+      if (bodyG && bodyG.effect === 'burn_immunity_and_def' && r.conditionApplied === 'BURN') {
+        pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== 'BURN' })
+        r.conditionApplied = null
+        addLog({ type: 'player', text: 'Forge Body! Immune to BURN!', tier: 'hit' })
+      }
+
+      // Condition immunity multi (Rot Resistance): immune to POISON and NAUSEA
+      if (bodyG && bodyG.effect === 'condition_immunity_multi' && r.conditionApplied) {
+        if (bodyG.conditions && bodyG.conditions.indexOf(r.conditionApplied) !== -1) {
+          pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== r.conditionApplied })
+          addLog({ type: 'player', text: bodyG.name + '! Immune to ' + condName(r.conditionApplied) + '!', tier: 'hit' })
+          r.conditionApplied = null
+        }
+      }
+
+      // Fear immunity + accuracy (Predator's Focus): immune to FEAR
+      if (mindG && mindG.effect === 'fear_immunity_and_accuracy' && r.conditionApplied === 'FEAR') {
+        pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== 'FEAR' })
+        r.conditionApplied = null
+        addLog({ type: 'player', text: 'Predator\'s Focus! Immune to FEAR!', tier: 'hit' })
+      }
+
+      // Skip immunity (Void Anchor): immune to DAZE/CHARM/NAUSEA skip effects
+      if (shieldG && shieldG.effect === 'skip_immunity' && r.conditionApplied) {
+        var skipConditions = ['DAZE', 'CHARM', 'NAUSEA']
+        if (skipConditions.indexOf(r.conditionApplied) !== -1) {
+          pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== r.conditionApplied })
+          addLog({ type: 'player', text: 'Void Anchor! Immune to ' + condName(r.conditionApplied) + '!', tier: 'hit' })
+          r.conditionApplied = null
+        }
+      }
 
       // Condition reflect (Void Skin — 25% chance condition hits attacker instead)
       if (bodyG && bodyG.effect === 'condition_reflect' && r.conditionApplied && attackerEnemy && !attackerEnemy.isDown) {
@@ -1494,6 +1553,20 @@ function Game({ character, user, onEndRun }) {
           pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== r.conditionApplied })
           attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], r.conditionApplied, 'gift')
           addLog({ type: 'condition', text: 'Void Skin! ' + condName(r.conditionApplied) + ' reflected to ' + attackerEnemy.name + '!', tier: 'crit' })
+        }
+      }
+
+      // Chaos Reroll (void mind): force enemy to reroll — once per combat
+      if (mindG && mindG.effect === 'force_reroll' && !chaosRerollUsed && r.damage > 0 && attackerEnemy) {
+        setChaosRerollUsed(true)
+        // Reroll — resolve a new enemy attack and use the lower damage
+        var reroll = resolveEnemyAttack(updatedBattle, r.attackerId)
+        if (reroll && reroll.result.damage < r.damage) {
+          var savedDmg = r.damage - reroll.result.damage
+          pState.currentHp = Math.min(pState.currentHp + savedDmg, pState.maxHp)
+          addLog({ type: 'player', text: 'Chaos Reroll! Enemy forced to reroll — saved ' + savedDmg + ' damage!', tier: 'crit' })
+        } else {
+          addLog({ type: 'player', text: 'Chaos Reroll! Enemy forced to reroll — no improvement.', tier: 'glancing' })
         }
       }
 
@@ -1656,6 +1729,40 @@ function Game({ character, user, onEndRun }) {
 
     // Tick conditions and build message queue
     var tickResult = tickTurnStart(battle, playerUid)
+
+    // Gift: Lick Wounds (blood body) — BLEED heals instead of damaging
+    var bodyGiftTick = giftSlots.body
+    if (bodyGiftTick && bodyGiftTick.effect === 'bleed_heal_and_buff') {
+      var hasBleedTick = player.statusEffects.some(function(c) { return c.id === 'BLEED' })
+      if (hasBleedTick && tickResult.damage > 0) {
+        // Bleed damage was dealt — invert to heal
+        var bleedCond = player.statusEffects.find(function(c) { return c.id === 'BLEED' })
+        var bleedDmg = bleedCond ? (bleedCond.stacks || 1) : 1
+        var pTick = tickResult.newBattle.players[playerUid]
+        if (pTick) {
+          // Undo bleed damage + heal instead
+          pTick.currentHp = Math.min(pTick.currentHp + bleedDmg * 2, pTick.maxHp) // undo + heal
+          tickResult.damage = Math.max(0, tickResult.damage - bleedDmg)
+        }
+        tickResult.narrative = (tickResult.narrative || '') + ' Lick Wounds! Bleed heals ' + bleedDmg + ' HP!'
+      }
+    }
+
+    // Gift: Bile Blood (bile body) — POISON heals instead of damaging
+    if (bodyGiftTick && bodyGiftTick.effect === 'poison_heal') {
+      var hasPoisonTick = player.statusEffects.some(function(c) { return c.id === 'POISON' })
+      if (hasPoisonTick && tickResult.damage > 0) {
+        var poisonCond = player.statusEffects.find(function(c) { return c.id === 'POISON' })
+        var poisonDmg = poisonCond ? (poisonCond.damagePerTurn || 2) : 2
+        var pTick2 = tickResult.newBattle.players[playerUid]
+        if (pTick2) {
+          pTick2.currentHp = Math.min(pTick2.currentHp + poisonDmg + bodyGiftTick.value, pTick2.maxHp) // undo + heal
+          tickResult.damage = Math.max(0, tickResult.damage - poisonDmg)
+        }
+        tickResult.narrative = (tickResult.narrative || '') + ' Bile Blood! Poison heals ' + bodyGiftTick.value + ' HP!'
+      }
+    }
+
     var messages = []
 
     // Only show important condition messages (skips, adrenaline) — routine damage is visible via HP bar
@@ -2152,6 +2259,15 @@ function Game({ character, user, onEndRun }) {
           }
         })
         addLog({ type: 'condition', text: 'Pollen Cloud! All enemies BLIND!', tier: 'crit' })
+      }
+
+      // Pyromaniac (ember mind): BURN applied by player deals double burst damage
+      if (mindG2 && mindG2.effect === 'burn_double_burst' && r.conditionApplied === 'BURN') {
+        var burnCond = hitTarget.statusEffects.find(function(c) { return c.id === 'BURN' })
+        if (burnCond && burnCond.burstDamage) {
+          burnCond.burstDamage = burnCond.burstDamage * 2
+          addLog({ type: 'condition', text: 'Pyromaniac! BURN burst damage doubled to ' + burnCond.burstDamage + '!', tier: 'crit' })
+        }
       }
 
       // Chain Lightning (ember mind): crits deal 3 AoE to all enemies
@@ -5977,7 +6093,7 @@ function Game({ character, user, onEndRun }) {
             })
             var hasThrowables = playerInventory.some(function(it) {
               if (it.type !== 'consumable') return false
-              return it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all'
+              return it.effect === 'damage_all_enemies' || it.effect === 'condition_all_enemies' || it.effect === 'damage_and_condition_all' || it.effect === 'condition_one_enemy' || it.effect === 'condition_multi_enemies' || it.effect === 'damage_multi_enemies' || it.effect === 'timed_bomb' || it.effect === 'reflect_next_attack' || it.effect === 'wet_all_and_heal' || it.effect === 'risky_throw' || it.effect === 'damage_and_condition_one' || it.effect === 'debuff_all_enemies' || it.effect === 'summon_ally'
             })
             return (
               <div className="flex gap-2 mt-1 flex-wrap justify-center">
