@@ -3680,7 +3680,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
               You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
             </p>
-            <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            <p className="text-purple-400 text-sm font-display">
               "{getMontorLine('safeRoom')}"
             </p>
           </div>
@@ -3872,7 +3872,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       var tidiness = getTidinessSummary()
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
-          <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+          <p className="text-purple-400 text-sm font-display">
             "{getMontorLine('safeRoom')}"
           </p>
           <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
@@ -3902,7 +3902,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     if (safeRoomStep === 'tonic_done') {
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
-          <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+          <p className="text-purple-400 text-sm font-display">
             "{getMontorLine('safeRoom')}"
           </p>
           <p className="text-gold font-display text-xl">Tonic Applied</p>
@@ -3928,7 +3928,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       var tidiness2 = getTidinessSummary()
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
-          <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+          <p className="text-purple-400 text-sm font-display">
             "{getMontorLine('safeRoom')}"
           </p>
           <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
@@ -4816,8 +4816,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <div className="h-full flex flex-col items-center justify-center gap-3 px-2 relative" style={{ zIndex: 1 }}>
               {/* Montor whisper */}
               {montorWhisper && (
-                <p className="text-purple-400/70 text-xs italic text-center max-w-xs mb-2 animate-pulse"
-                  style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+                <p className="text-purple-400/70 text-xs text-center max-w-xs mb-2 animate-pulse font-display">
                   "{montorWhisper}"
                 </p>
               )}
