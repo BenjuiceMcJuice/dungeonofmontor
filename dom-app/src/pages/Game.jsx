@@ -327,7 +327,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [combatItemPhase, setCombatItemPhase] = useState(null) // null | 'use' | 'throw'
   var [consumeResult, setConsumeResult] = useState(null) // { success, narrative, junkName }
   var [expandedJunkId, setExpandedJunkId] = useState(null)
-  var [inventoryTab, setInventoryTab] = useState('weapons')
+  var [inventoryTab, setInventoryTab] = useState('gear')
   var [selectedItemIdx, setSelectedItemIdx] = useState(null)
 
   // --- Run tracking (for balance logging) ---
@@ -4221,10 +4221,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         {/* Inventory panel — full screen overlay */}
         {showInventoryPanel && (function() {
           var tabs = [
-            { id: 'weapons',     label: 'Arms',    types: ['weapon', 'armour'], filterSlots: ['weapon', 'offhand'] },
-            { id: 'wearables',   label: 'Wear',    types: ['armour', 'ring', 'amulet'], excludeSlots: ['offhand'] },
-            { id: 'relics',      label: 'Relics',  types: ['relic'] },
-            { id: 'consumables', label: 'Use',     types: ['consumable'] },
+            { id: 'gear',        label: 'Gear',    types: ['weapon', 'armour'] },
+            { id: 'accessories', label: 'Acc',     types: ['relic', 'ring', 'amulet'] },
+            { id: 'consumables', label: 'Items',   types: ['consumable'] },
             { id: 'junk',        label: 'Junk',    types: ['junk'] },
           ]
           var activeTab = tabs.find(function(t) { return t.id === inventoryTab }) || tabs[0]
@@ -4232,9 +4231,6 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           for (var fi = 0; fi < playerInventory.length; fi++) {
             var invItem = playerInventory[fi]
             if (activeTab.types.indexOf(invItem.type) === -1) continue
-            // Slot-based filtering: Arms tab gets offhand/shields, Wear excludes them
-            if (activeTab.filterSlots && activeTab.filterSlots.indexOf(invItem.slot || invItem.type) === -1) continue
-            if (activeTab.excludeSlots && activeTab.excludeSlots.indexOf(invItem.slot) !== -1) continue
             filteredRaw.push({ item: invItem, idx: fi })
           }
           // Stack identical items by ID
@@ -4267,8 +4263,6 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
               for (var pi = 0; pi < playerInventory.length; pi++) {
                 var countItem = playerInventory[pi]
                 if (tabs[ci].types.indexOf(countItem.type) === -1) continue
-                if (tabs[ci].filterSlots && tabs[ci].filterSlots.indexOf(countItem.slot || countItem.type) === -1) continue
-                if (tabs[ci].excludeSlots && tabs[ci].excludeSlots.indexOf(countItem.slot) !== -1) continue
                 tabCounts[tabId]++
               }
             }
@@ -4302,8 +4296,8 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 })}
               </div>
 
-              {/* Currently equipped (weapons/armour tabs) */}
-              {activeTab.id === 'weapons' && character.equipped && (
+              {/* Currently equipped (gear tab — weapons + armour + shield) */}
+              {activeTab.id === 'gear' && character.equipped && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
                     <div className="flex items-center justify-between">
@@ -4354,14 +4348,14 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   )}
                 </div>
               )}
-              {activeTab.id === 'wearables' && (
+              {activeTab.id === 'gear' && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.armour && (
                     <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-gold uppercase tracking-wide">Armour</span>
-                          <span className="text-ink">{character.equipped.armour.name}</span>
+                          <span className={rarityCol(character.equipped.armour.rarity).text}>{character.equipped.armour.name}</span>
                           <span className="text-ink-faint text-[10px]">+{character.equipped.armour.defBonus || 0} DEF{character.equipped.armour.agiPenalty ? ', ' + character.equipped.armour.agiPenalty + ' AGI' : ''}</span>
                         </div>
                         {canEquipNow && (
@@ -4378,7 +4372,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-amber-400 uppercase tracking-wide">Helmet</span>
-                          <span className="text-ink">{character.equipped.helmet.name}</span>
+                          <span className={rarityCol(character.equipped.helmet.rarity).text}>{character.equipped.helmet.name}</span>
                           <span className="text-ink-faint text-[10px]">+{character.equipped.helmet.defBonus || 0} DEF{character.equipped.helmet.agiPenalty ? ', ' + character.equipped.helmet.agiPenalty + ' AGI' : ''}</span>
                         </div>
                         {canEquipNow && (
@@ -4395,7 +4389,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-emerald-400 uppercase tracking-wide">Boots</span>
-                          <span className="text-ink">{character.equipped.boots.name}</span>
+                          <span className={rarityCol(character.equipped.boots.rarity).text}>{character.equipped.boots.name}</span>
                           <span className="text-ink-faint text-[10px]">{character.equipped.boots.agiBonus ? '+' + character.equipped.boots.agiBonus + ' AGI' : ''}{character.equipped.boots.defBonus ? (character.equipped.boots.agiBonus ? ', ' : '') + '+' + character.equipped.boots.defBonus + ' DEF' : ''}{character.equipped.boots.initBonus ? ', +' + character.equipped.boots.initBonus + ' initiative' : ''}</span>
                         </div>
                         {canEquipNow && (
@@ -4412,7 +4406,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-violet-400 uppercase tracking-wide">Amulet</span>
-                          <span className="text-ink">{character.equipped.amulet.name}</span>
+                          <span className={rarityCol(character.equipped.amulet.rarity).text}>{character.equipped.amulet.name}</span>
                           <span className="text-ink-faint text-[10px]">{character.equipped.amulet.description}</span>
                         </div>
                         {canEquipNow && (
@@ -4447,7 +4441,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   )}
                 </div>
               )}
-              {activeTab.id === 'relics' && (
+              {activeTab.id === 'accessories' && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.relics && (function() {
                     var isResist = function(r) { return r.passiveEffect === 'condition_resist' || r.passiveEffect === 'condition_immunity' || r.passiveEffect === 'condition_resist_multi' || r.passiveEffect === 'condition_resist_all' }
