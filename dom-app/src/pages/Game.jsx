@@ -733,7 +733,7 @@ function Game({ character, user, onEndRun }) {
           defReduction = Math.floor(getModifier(totalDef2))
         }
         var finalDmg = Math.max(1, result.trapDamage - defReduction)
-        setPlayerHp(function(hp) { return Math.max(1, hp - finalDmg) })
+        setPlayerHp(function(hp) { return Math.max(0, hp - finalDmg) })
         result.trapDamage = finalDmg
       }
     }
@@ -784,6 +784,12 @@ function Game({ character, user, onEndRun }) {
       searchTapGuardRef.current = Date.now()
       // Apply damage + conditions NOW, before reveal shows
       applySearchRewards(searchResult)
+      // Check if trap killed the player
+      if (searchResult.trapDamage > 0 && playerHp - searchResult.trapDamage <= 0) {
+        setPlayerHp(0)
+        guardedSetPhase('defeat')
+        return
+      }
       setSearchPhase('reveal')
     }
   }
