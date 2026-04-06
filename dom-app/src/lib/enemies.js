@@ -42,6 +42,7 @@ function generateEnemy(archetypeKey, tierKey, difficulty) {
       def: def,
       int: int,
     },
+    _baseStats: { str: str, def: def },
     weaponDie: base.weaponDie,
     xp: Math.round(base.xp * tierMul),
     isDown: false,
