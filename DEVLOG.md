@@ -139,6 +139,14 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-06 | Combat log cleanup, enemy condition display, enemy stat colour (green/red) | ✅ Done |
 | 2026-04-06 | Traps lethal, starter shop slimmed, loot balance (health potions halved) | ✅ Done |
 | 2026-04-06 | Basic run persistence — localStorage + Firestore, resume on reload | ✅ Done |
+| 2026-04-06 | Combat victory fix — removed setBattle race condition in enemy tick | ✅ Done |
+| 2026-04-06 | Single-target throwables auto-target first living enemy | ✅ Done |
+| 2026-04-06 | Universal weapon gifts fixed (Acid Edge, Ignite, Bloodletter etc.) | ✅ Done |
+| 2026-04-06 | Acid Edge nerfed — 50% proc, -1 DEF (was guaranteed -2) | ✅ Done |
+| 2026-04-06 | Napalm enhances BURN from all sources (was weapon-only) | ✅ Done |
+| 2026-04-06 | Item prices doubled (244 items), starter shop slimmed, loot rebalanced | ✅ Done |
+| 2026-04-06 | Montor's mood system — tidiness, greed, taste, safe room tonics, whispers | ✅ Done |
+| 2026-04-06 | Async co-op multiplayer spec + Montor mood/greed spec written | ✅ Done |
 |            | **Next up** | |
 |            | Themed hi-res junk sprites for non-garden floors | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
