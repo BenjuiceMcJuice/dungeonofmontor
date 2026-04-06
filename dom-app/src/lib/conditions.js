@@ -13,7 +13,7 @@ var CONDITIONS = conditionData.conditions
 
 // Apply a condition to a combatant's statusEffects array
 // One per slot — replaces existing condition in same slot
-function applyCondition(statusEffects, conditionId, source) {
+function applyCondition(statusEffects, conditionId, source, options) {
   var def = CONDITIONS[conditionId]
   if (!def) return statusEffects
 
@@ -21,7 +21,7 @@ function applyCondition(statusEffects, conditionId, source) {
   if (def.stackable) {
     var existing = statusEffects.find(function(c) { return c.id === def.id })
     if (existing) {
-      var maxStacks = def.maxStacks || 5
+      var maxStacks = (options && options.maxStacksBonus) ? (def.maxStacks || 5) + options.maxStacksBonus : (def.maxStacks || 5)
       var currentStacks = existing.stacks || 1
       if (currentStacks >= maxStacks) return statusEffects // capped
       var newEffects = statusEffects.map(function(c) {
@@ -386,6 +386,9 @@ var REACTIONS = [
   // SEPSIS is handled per-tick in tickConditions, not as a reaction here
   { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!' },
   { a: 'DAZE',  b: 'FEAR',   name: 'CATATONIC',       damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'CATATONIC! Mind shuts down completely!' },
+  { a: 'POISON', b: 'NAUSEA', name: 'DYSENTERY',      damage: 3,  removeBoth: true,  applyCondition: 'NAUSEA', applyTurns: 3, narrative: 'DYSENTERY! Poison and nausea combine — the body gives up!' },
+  { a: 'POISON', b: 'FEAR',   name: 'DELIRIUM',       damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'DELIRIUM! Poisoned mind snaps — hallucinating and swinging wild!' },
+  { a: 'POISON', b: 'FROST',  name: 'NECROSIS',       damage: 5,  removeBoth: true,  applyEffect: { defPenalty: true, defPenaltyValue: -2, turns: 99 }, narrative: 'NECROSIS! Frozen poison eats tissue — permanent damage!' },
 ]
 
 // Check for reactions after a condition is applied

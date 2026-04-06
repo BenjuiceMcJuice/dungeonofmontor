@@ -611,13 +611,40 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     result.damageBreakdown = breakdown
     if (intDmgBonus > 0) result.intBonus = intDmgBonus
 
+    // Haemorrhagic Blood — bleed max stacks bonus
+    var bleedOptions = null
+    var gifts3 = player._gifts || {}
+    if (gifts3.body && gifts3.body.effect === 'bleed_max_stacks_bonus') {
+      bleedOptions = { maxStacksBonus: gifts3.body.value }
+    }
+
+    // Festering Bile — poison stacking
+    var poisonStacking = gifts3.body && gifts3.body.effect === 'poison_stacking'
+
     // Try to apply weapon condition on hit
     if (weapon && weapon.conditionOnHit) {
       var intStat = player.combatStats.int || 10
       // Gift: Corrosive Strike (bile weapon) — +25% condition chance
       var condChanceBonus = (gifts.weapon && gifts.weapon.effect === 'condition_chance_bonus') ? gifts.weapon.value : 0
       if (rollConditionApplication(attackResult.tier, intStat, Math.min(1.0, (weapon.conditionChance || 1.0) + condChanceBonus))) {
-        enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon')
+        var condOpts = weapon.conditionOnHit === 'BLEED' ? bleedOptions : null
+        // Festering Bile: stack poison like bleed
+        if (poisonStacking && weapon.conditionOnHit === 'POISON') {
+          var existingPoison = (enemy.statusEffects || []).find(function(c) { return c.id === 'POISON' })
+          if (existingPoison) {
+            var pStacks = existingPoison.stacks || 1
+            if (pStacks < gifts3.body.maxStacks) {
+              existingPoison.stacks = pStacks + 1
+              existingPoison.damagePerTurn = (pStacks + 1) * 2
+              existingPoison.turnsRemaining = 3 // refresh duration
+              existingPoison.name = 'Poisoned x' + (pStacks + 1)
+            }
+          } else {
+            enemy.statusEffects = applyCondition(enemy.statusEffects || [], 'POISON', 'weapon')
+          }
+        } else {
+          enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon', condOpts)
+        }
         result.conditionApplied = weapon.conditionOnHit
         // Gift: Virulent Mind (bile mind) — conditions last 1 extra turn
         if (gifts.mind && gifts.mind.effect === 'condition_duration_bonus') {

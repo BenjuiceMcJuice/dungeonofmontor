@@ -348,12 +348,12 @@
         "value": 2
       },
       {
-        "id": "rot_resistance",
-        "name": "Rot Resistance",
-        "type": "defence",
-        "description": "Immune to POISON and NAUSEA.",
-        "effect": "condition_immunity_multi",
-        "conditions": ["POISON", "NAUSEA"]
+        "id": "festering_bile",
+        "name": "Festering Bile",
+        "type": "attack",
+        "description": "Your POISON stacks up to 5 (normally 1). Each stack: +2 dmg/turn + extra stat drain.",
+        "effect": "poison_stacking",
+        "maxStacks": 5
       }
     ],
     "mind": [
@@ -454,12 +454,12 @@
         "strPerStack": 1
       },
       {
-        "id": "crimson_vitality",
-        "name": "Crimson Vitality",
-        "type": "defence",
-        "description": "+20 max HP.",
-        "effect": "hp_bonus",
-        "value": 20
+        "id": "haemorrhagic_blood",
+        "name": "Haemorrhagic Blood",
+        "type": "attack",
+        "description": "Max BLEED stacks doubled (5 → 10). Bleeds deeper.",
+        "effect": "bleed_max_stacks_bonus",
+        "value": 5
       },
       {
         "id": "bloodpact",
@@ -475,10 +475,10 @@
         "id": "bloodrage",
         "name": "Bloodrage",
         "type": "attack",
-        "description": "+2 STR when HP below 50%.",
+        "description": "+4 STR when HP below 50%.",
         "effect": "low_hp_stat_bonus",
         "stat": "str",
-        "value": 2,
+        "value": 4,
         "hpThreshold": 0.5
       },
       {
