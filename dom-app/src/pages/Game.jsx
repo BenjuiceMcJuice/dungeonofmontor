@@ -4659,14 +4659,22 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                           </div>
                         )
                       })()}
-                      {detailItem.type === 'armour' && detailItem.slot !== 'offhand' && character.equipped && character.equipped.armour && (function() {
-                        var eq = character.equipped.armour
+                      {detailItem.type === 'armour' && detailItem.slot !== 'offhand' && character.equipped && (function() {
+                        var slotMap = { armour: 'armour', helmet: 'helmet', boots: 'boots' }
+                        var eqSlot = slotMap[detailItem.slot] || 'armour'
+                        var eq = character.equipped[eqSlot]
+                        if (!eq) return null
                         var newDef = detailItem.defBonus || 0
                         var eqDef = eq.defBonus || 0
+                        var newAgi = (detailItem.agiBonus || 0) + (detailItem.agiPenalty || 0)
+                        var eqAgi = (eq.agiBonus || 0) + (eq.agiPenalty || 0)
                         return (
                           <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
                             <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
-                            <span className={newDef > eqDef ? 'text-green-400' : newDef < eqDef ? 'text-red-400' : 'text-ink-dim'}>DEF +{newDef} {newDef > eqDef ? '\u25B2' : newDef < eqDef ? '\u25BC' : '='}</span>
+                            <div className="flex gap-3">
+                              <span className={newDef > eqDef ? 'text-green-400' : newDef < eqDef ? 'text-red-400' : 'text-ink-dim'}>DEF +{newDef} {newDef > eqDef ? '\u25B2' : newDef < eqDef ? '\u25BC' : '='}</span>
+                              {(newAgi !== 0 || eqAgi !== 0) && <span className={newAgi > eqAgi ? 'text-green-400' : newAgi < eqAgi ? 'text-red-400' : 'text-ink-dim'}>AGI {newAgi >= 0 ? '+' : ''}{newAgi} {newAgi > eqAgi ? '\u25B2' : newAgi < eqAgi ? '\u25BC' : '='}</span>}
+                            </div>
                           </div>
                         )
                       })()}
