@@ -1006,10 +1006,15 @@ function Game({ character, user, onEndRun }) {
     // Build the slot data
     var slotData = Object.assign({}, option, { giftId: giftPickerGift, giftName: giftPickerGift })
 
-    // For weapon, tag with the current weapon type (for class-specific gifts like Petal)
+    // For weapon, tag with the current weapon type ONLY for class-specific gifts (Petal)
+    // Petal weapon data is an object keyed by weapon type; all others are arrays (universal)
     if (giftPickerSlot === 'weapon') {
-      var wt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
-      slotData.appliedWeaponType = wt
+      var giftDef = getGiftDef(giftPickerGift)
+      var isClassSpecific = giftDef && giftDef.weapon && !Array.isArray(giftDef.weapon)
+      if (isClassSpecific) {
+        var wt = character.equipped && character.equipped.weapon ? character.equipped.weapon.weaponType : 'fists'
+        slotData.appliedWeaponType = wt
+      }
     }
 
     // Reverse old gift's stat boosts before applying new ones
@@ -5869,9 +5874,9 @@ function Game({ character, user, onEndRun }) {
                             style={{ width: Math.max(0, (enemy.currentHp / enemy.maxHp) * 100) + '%' }} />
                         </div>
                         <span className="text-ink text-xs font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
-                        <div className="flex gap-2 text-[10px] font-sans text-ink-dim">
-                          <span>STR {enemy.stats.str}</span>
-                          <span>DEF {enemy.stats.def}</span>
+                        <div className="flex gap-2 text-[10px] font-sans">
+                          <span className={enemy._baseStats && enemy.stats.str > enemy._baseStats.str ? 'text-green-400' : enemy._baseStats && enemy.stats.str < enemy._baseStats.str ? 'text-red-400' : 'text-ink-dim'}>STR {enemy.stats.str}</span>
+                          <span className={enemy._baseStats && enemy.stats.def > enemy._baseStats.def ? 'text-green-400' : enemy._baseStats && enemy.stats.def < enemy._baseStats.def ? 'text-red-400' : 'text-ink-dim'}>DEF {enemy.stats.def}</span>
                         </div>
                         {enemy.statusEffects && enemy.statusEffects.length > 0 && (
                           <div className="flex gap-1 flex-wrap mt-0.5 items-center">
