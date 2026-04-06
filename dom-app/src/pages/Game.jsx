@@ -310,6 +310,11 @@ function Game({ character, user, onEndRun }) {
   function isCombatGuarded() {
     return Date.now() - combatGuardRef.current < 350
   }
+  // Battle Won splash — show for 1.5s then transition to victory
+  function triggerBattleWon() {
+    guardedSetCombatPhase('battleWon')
+    setTimeout(function() { triggerBattleWon() }, 1500)
+  }
 
   // --- Debug helpers (call from browser console: window.domDebug.xxx()) ---
   useEffect(function() {
@@ -1181,13 +1186,19 @@ function Game({ character, user, onEndRun }) {
       }
     }
 
-    // Split narrative into individual log lines
+    // Split narrative into individual log lines — filter out noise
     if (tickResult.narrative) {
       var eParts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
       for (var ei = 0; ei < eParts.length; ei++) {
         var ePart = eParts[ei].replace(/\.+$/, '')
+        // Skip "wears off" messages — condition icon disappearing already tells you
+        if (ePart.indexOf('wears off') !== -1) continue
+        // Skip routine DoT messages (Bleeding: X, Poisoned: X) — HP bar already shows it
+        if (ePart.indexOf('damage') !== -1 && ePart.indexOf('SEPSIS') === -1 && ePart.indexOf('SHATTER') === -1 && ePart.indexOf('burst') === -1) continue
+        // Keep: turn lost, skips, adrenaline, sepsis, poison drains, kicks in
         var eTier = 'glancing'
-        if (ePart.indexOf('turn lost') !== -1 || ePart.indexOf('skip') !== -1) eTier = 'miss'
+        if (ePart.indexOf('turn lost') !== -1 || ePart.indexOf('skip') !== -1 || ePart.indexOf('Paralysed') !== -1) eTier = 'miss'
+        if (ePart.indexOf('SEPSIS') !== -1 || ePart.indexOf('ADRENALINE') !== -1) eTier = 'crit'
         addLog({ type: 'condition', text: ePart, tier: eTier })
       }
     }
@@ -1210,7 +1221,7 @@ function Game({ character, user, onEndRun }) {
           setTotalXp(newXp)
           setLastXpGained(xpGained)
           checkLevelUp(newXp)
-          transitionGuardRef.current = Date.now(); guardedSetCombatPhase('victory')
+          transitionGuardRef.current = Date.now(); triggerBattleWon()
           return
         }
         // Other enemies still alive — skip dead enemy's turn
@@ -1264,7 +1275,7 @@ function Game({ character, user, onEndRun }) {
             var xpG2 = calculateXp(attackOut.newBattle)
             setTotalXp(totalXp + xpG2); setLastXpGained(xpG2); checkLevelUp(totalXp + xpG2)
             setBattle(attackOut.newBattle)
-            guardedSetCombatPhase('victory')
+            triggerBattleWon()
             return
           }
           var nextB4 = advanceTurn(attackOut.newBattle)
@@ -1646,7 +1657,7 @@ function Game({ character, user, onEndRun }) {
       checkLevelUp(newXpReflect)
       setBattle(updatedBattle)
       setEnemyAttackInfo(null)
-      guardedSetCombatPhase('victory')
+      triggerBattleWon()
       var reflectZone = Object.assign({}, zone, {
         chambers: zone.chambers.map(function(ch) {
           if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
@@ -2343,7 +2354,7 @@ function Game({ character, user, onEndRun }) {
       setLastXpGained(xpGained)
       checkLevelUp(newXp)
       setBattle(updatedBattle)
-      guardedSetCombatPhase('victory')
+      triggerBattleWon()
       var newZone = Object.assign({}, zone, {
         chambers: zone.chambers.map(function(ch) {
           if (ch.id === zone.playerPosition) return Object.assign({}, ch, { cleared: true })
@@ -5486,6 +5497,17 @@ function Game({ character, user, onEndRun }) {
 
   // --- Combat ---
   if (gamePhase === 'combat') {
+    // Battle Won splash — dramatic overlay before victory screen
+    if (combatPhase === 'battleWon') {
+      return (
+        <div className="h-full flex items-center justify-center bg-raised" style={roomBgStyle}>
+          <div className="text-center">
+            <p className="font-display text-5xl text-gold animate-pulse">Battle Won!</p>
+          </div>
+        </div>
+      )
+    }
+
     // Combat victory — show doors after
     if (combatPhase === 'victory') {
       return (
