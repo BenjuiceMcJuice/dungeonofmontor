@@ -287,6 +287,11 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
   // If no pre-rolled result provided, roll now (includes weapon accuracy bonus)
   if (!attackResult) {
     var accBonus = (player.equipped && player.equipped.weapon) ? (player.equipped.weapon.accuracyBonus || 0) : -1 // unarmed: -1 accuracy
+    // Gift: Predator's Focus (blood mind) — +1 accuracy
+    var gifts = player._gifts || {}
+    if (gifts.mind && gifts.mind.effect === 'fear_immunity_and_accuracy' && gifts.mind.accuracyBonus) {
+      accBonus += gifts.mind.accuracyBonus
+    }
     // Nudge — +1 to d20 rolls
     var nudgeBonus = getPassiveTotalCombat(player, 'd20_nudge')
     var chaosShift = 0
@@ -1010,9 +1015,12 @@ function resolveEnemyAttack(battleState, enemyId) {
       return { newBattle: bs, result: result }
     }
 
-    // Dodge chance — AGI base (2% per mod) + all equipment with dodge_chance
+    // Dodge chance — AGI base (2% per mod) + all equipment with dodge_chance + gift bonus
     var agiDodge = getModifier(target.combatStats.agi || 10) * 0.02
     var dodgeChance = Math.max(0, agiDodge) + getPassiveTotalCombat(target, 'dodge_chance')
+    // Gift: Phase Shift (void body) — +15% dodge
+    var targetGifts2 = target._gifts || {}
+    if (targetGifts2.body && targetGifts2.body.effect === 'dodge_bonus') dodgeChance += targetGifts2.body.value
     if (dodgeChance > 0 && Math.random() < Math.min(dodgeChance, 0.35)) {
       attackResult = Object.assign({}, attackResult, { tier: 4, tierName: 'miss' })
       result.attackRoll = attackResult

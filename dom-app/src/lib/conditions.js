@@ -145,12 +145,16 @@ function tickConditions(statusEffects, currentHp, maxHp) {
     return (TICK_PRIORITY[a.id] || 50) - (TICK_PRIORITY[b.id] || 50)
   })
 
-  // SEPSIS check: if both BLEED and POISON active, 30% chance to double DoT this tick
+  // SEPSIS check: if both BLEED and POISON active, 30% chance for nasty bonus damage
   var hasBleed = sorted.some(function(c) { return c.id === 'BLEED' })
   var hasPoison = sorted.some(function(c) { return c.id === 'POISON' })
   var sepsisProc = hasBleed && hasPoison && Math.random() < 0.30
+  var sepsisBonusDamage = 0
   if (sepsisProc) {
-    narratives.push('SEPSIS! Poison in the bloodstream — damage doubles this turn!')
+    // Flat 4 bonus damage on top of doubled DoT — makes SEPSIS feel dangerous
+    sepsisBonusDamage = 4
+    damage += sepsisBonusDamage
+    narratives.push('SEPSIS! Poison in the bloodstream — ' + sepsisBonusDamage + ' sepsis damage + DoT doubles!')
   }
 
   for (var i = 0; i < sorted.length; i++) {
