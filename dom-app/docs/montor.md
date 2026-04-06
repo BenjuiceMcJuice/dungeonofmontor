@@ -143,11 +143,14 @@ When two gifts are placed in the Soul slot, their pairing creates a unique syner
   - Blood: lifesteal, frenzy (dmg when hurt), bleed amplify, absorb (block->HP)
   - Ember: burn aura, AoE splash, ignite/damage boost, fire shield
   - Void: evasion/phase, meta (rerolls), chaos damage, nullify attacks
-- **429 lines of combat integration** in combat.js: defensive gifts (damage reduction, condition resist, regen, thorns), offensive gifts (bonus damage, condition application, crit mods), enemy modifier gifts (stat debuffs, accuracy penalties)
+- **All 6 gifts now have class-specific weapon effects** (dagger/sword/spear/mace/axe/fists variants)
+- **Combat integration** across combat.js + Game.jsx: defensive gifts, offensive gifts, enemy modifier gifts
 - **Gift stat boosts are reversed when switching** -- no infinite stacking exploit
+- **Condition reactions expanded:** DYSENTERY (POISON+NAUSEA), DELIRIUM (POISON+FEAR), NECROSIS (POISON+FROST)
+- **Stackable conditions via gifts:** Haemorrhagic Blood (BLEED 5→10), Festering Bile (POISON stacks to 5)
 - **Soul slot:** Designed, not yet implemented
 - **Cross-run persistence:** Requires Firebase (Stage 2)
-- **Give mechanic:** Requires mood system (planned)
+- **Give mechanic:** Requires mood system (✅ implemented)
 
 ### Gift Design Philosophy
 
@@ -263,4 +266,4 @@ The rarest outcome. If a player has high WIS, responds with genuine empathy duri
 
 ---
 
-*Montor -- v1.1 -- April 2026*
+*Montor -- v1.2 -- April 2026*

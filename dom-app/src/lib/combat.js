@@ -447,6 +447,11 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           unarmedStrBonus += allItems[udi].unarmedDamageBonus
         }
       }
+      // Gift unarmed die upgrade (Stonefist d6, Forge Fists d6)
+      var giftW = (player._gifts || {}).weapon
+      if (giftW && giftW.dieUpgrade) {
+        weaponDie = Math.max(weaponDie, giftW.dieUpgrade)
+      }
     }
 
     var dmgResult = rollDamage(weaponDie, strMod + unarmedStrBonus)
@@ -673,13 +678,22 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     }
 
     // Stagger — heavy weapons can DAZE enemies on hit
-    // Gift: Crushing Blow (stone weapon) adds +25% stagger to ALL weapons
     var staggerChance = (weapon && weapon.staggerChance) || 0
-    if (gifts.weapon && gifts.weapon.effect === 'stagger_bonus') staggerChance += gifts.weapon.value
+    // Tectonic Slam (stone mace): +30% stagger
+    if (gifts.weapon && gifts.weapon.effect === 'stagger_extended') staggerChance += (gifts.weapon.staggerBonus || 0)
     if (staggerChance > 0 && breakdown.final > 0 && !enemy.isDown) {
       if (Math.random() < staggerChance) {
         enemy.statusEffects = applyCondition(enemy.statusEffects || [], 'DAZE', 'stagger')
         result.staggerApplied = true
+        // Null Crush (void mace): stagger ignores 50% DEF — apply retroactive damage
+        if (gifts.weapon && gifts.weapon.effect === 'stagger_def_ignore') {
+          var extraFromDef = Math.round(breakdown.defReduction * gifts.weapon.value)
+          if (extraFromDef > 0) {
+            enemy.currentHp = Math.max(0, enemy.currentHp - extraFromDef)
+            result.damage += extraFromDef
+            if (enemy.currentHp <= 0) { enemy.isDown = true; result.enemyDefeated = true }
+          }
+        }
       }
     }
 
@@ -779,9 +793,13 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     }
 
     // Dual wield — offhand dagger gets a bonus attack (-2 accuracy, no crits)
+    // Phantom Flurry (void dagger): removes penalty + allows crits
     if (!enemy.isDown && player.equipped && player.equipped.offhand && player.equipped.offhand.type === 'weapon') {
       var offhand = player.equipped.offhand
-      var offhandRoll = d20Attack(strMod + rollsMod - 2, 99) // critThreshold 99 = no crits
+      var phantomFlurry = gifts.weapon && gifts.weapon.effect === 'offhand_enhanced'
+      var offhandPenalty = phantomFlurry ? 0 : -2
+      var offhandCritThreshold = phantomFlurry ? 20 : 99
+      var offhandRoll = d20Attack(strMod + rollsMod + offhandPenalty, offhandCritThreshold)
       if (offhandRoll.tier <= 3) {
         var offDmg = rollDamage(offhand.damageDie || 4, strMod)
         var offBreakdown = calculateTierDamage(offDmg.roll, strMod, offhandRoll.tier, effectiveDef, 1.0)

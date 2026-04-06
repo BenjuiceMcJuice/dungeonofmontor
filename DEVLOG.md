@@ -147,6 +147,13 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-06 | Item prices doubled (244 items), starter shop slimmed, loot rebalanced | ✅ Done |
 | 2026-04-06 | Montor's mood system — tidiness, greed, taste, safe room tonics, whispers | ✅ Done |
 | 2026-04-06 | Async co-op multiplayer spec + Montor mood/greed spec written | ✅ Done |
+| 2026-04-06 | Inventory overhaul — rarity colours, 4 tabs, sort, comparison, weight bar, combat status | ✅ Done |
+| 2026-04-06 | Safe room 3-way choice (tonic/item/Montor's choice), rarity price curve | ✅ Done |
+| 2026-04-06 | All 6 gifts now class-specific weapon effects (30 new effects wired) | ✅ Done |
+| 2026-04-06 | 3 new condition reactions: DYSENTERY, DELIRIUM, NECROSIS | ✅ Done |
+| 2026-04-06 | Blood/Bile gift rework: Haemorrhagic Blood, Festering Bile, Bloodrage +4 | ✅ Done |
+| 2026-04-06 | Dense Core (Stone), Montor purple pixel text, stat order consistency | ✅ Done |
+| 2026-04-06 | Inventory + junk economy + multiplayer specs written | ✅ Done |
 |            | **Next up** | |
 |            | Themed hi-res junk sprites for non-garden floors | ⬜ |
 |            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |

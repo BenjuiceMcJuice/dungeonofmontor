@@ -204,12 +204,12 @@
         "value": 2
       },
       {
-        "id": "stone_skin",
-        "name": "Stone Skin",
+        "id": "dense_core",
+        "name": "Dense Core",
         "type": "defence",
-        "description": "+3 DEF permanently.",
+        "description": "+3 END permanently. More HP regen, more carry capacity.",
         "effect": "stat_boost",
-        "stats": { "def": 3 }
+        "stats": { "end": 3 }
       },
       {
         "id": "bedrock",
@@ -263,38 +263,53 @@
         "stats": { "per": 3 }
       }
     ],
-    "weapon": [
-      {
-        "id": "crushing_blow",
-        "name": "Crushing Blow",
-        "description": "+25% stagger chance on all weapons.",
-        "effect": "stagger_bonus",
-        "value": 0.25
+    "weapon": {
+      "dagger": {
+        "id": "tremor_flurry",
+        "name": "Tremor Flurry",
+        "description": "Double-strikes have +40% stagger chance.",
+        "effect": "double_strike_stagger",
+        "value": 0.40
       },
-      {
-        "id": "earthshatter",
-        "name": "Earthshatter",
-        "description": "Hits ignore 20% enemy DEF.",
-        "effect": "def_ignore_bonus",
-        "value": 0.20
+      "sword": {
+        "id": "granite_edge",
+        "name": "Granite Edge",
+        "description": "2x damage on staggered (DAZED) enemies.",
+        "effect": "dazed_damage_multiplier",
+        "value": 2.0
       },
-      {
-        "id": "avalanche",
-        "name": "Avalanche",
-        "description": "Crits deal 2.5x instead of 2x damage.",
-        "effect": "crit_multiplier",
-        "value": 2.5
+      "spear": {
+        "id": "quake_thrust",
+        "name": "Quake Thrust",
+        "description": "First hit each combat: guaranteed DAZE + 5 bonus damage.",
+        "effect": "first_hit_daze_and_damage",
+        "bonusDamage": 5,
+        "condition": "DAZE"
       },
-      {
-        "id": "seismic_strike",
-        "name": "Seismic Strike",
-        "description": "All weapons gain 20% DAZE chance.",
-        "effect": "hit_condition",
-        "chance": 0.20,
-        "condition": "DAZE",
-        "conditionTurns": 1
+      "mace": {
+        "id": "tectonic_slam",
+        "name": "Tectonic Slam",
+        "description": "Stagger lasts 2 turns instead of 1, +30% stagger chance.",
+        "effect": "stagger_extended",
+        "staggerBonus": 0.30,
+        "dazeTurns": 2
+      },
+      "axe": {
+        "id": "landslide",
+        "name": "Landslide",
+        "description": "Kills deal 5 damage to all other enemies.",
+        "effect": "kill_aoe_damage",
+        "value": 5
+      },
+      "fists": {
+        "id": "stonefist",
+        "name": "Stonefist",
+        "description": "Unarmed d4→d6, 50% stagger chance.",
+        "effect": "unarmed_upgrade_and_stagger",
+        "dieUpgrade": 6,
+        "staggerChance": 0.50
       }
-    ],
+    },
     "shield": [
       {
         "id": "granite_guard",
@@ -382,8 +397,17 @@
         "value": -1
       }
     ],
-    "weapon": [
-      {
+    "weapon": {
+      "dagger": {
+        "id": "venom_flurry",
+        "name": "Venom Flurry",
+        "description": "All hits 40% chance to apply POISON.",
+        "effect": "hit_condition",
+        "chance": 0.40,
+        "condition": "POISON",
+        "conditionTurns": 3
+      },
+      "sword": {
         "id": "acid_edge",
         "name": "Acid Edge",
         "description": "50% chance per hit to reduce enemy DEF by 1 (stacks, persists).",
@@ -391,23 +415,37 @@
         "value": 1,
         "chance": 0.5
       },
-      {
-        "id": "toilet_hands",
-        "name": "Toilet Hands",
-        "description": "All hits have 40% chance to apply NAUSEA.",
-        "effect": "hit_condition",
-        "chance": 0.40,
+      "spear": {
+        "id": "plague_reach",
+        "name": "Plague Reach",
+        "description": "When weapon applies POISON, it spreads to 1 random other enemy.",
+        "effect": "poison_spread_on_hit"
+      },
+      "mace": {
+        "id": "festering_crush",
+        "name": "Festering Crush",
+        "description": "Stagger also applies NAUSEA.",
+        "effect": "stagger_condition",
         "condition": "NAUSEA",
         "conditionTurns": 2
       },
-      {
-        "id": "corrosive_strike",
-        "name": "Corrosive Strike",
-        "description": "Weapon condition application chance +25%.",
-        "effect": "condition_chance_bonus",
-        "value": 0.25
+      "axe": {
+        "id": "putrid_cleave",
+        "name": "Putrid Cleave",
+        "description": "Kills: all surviving enemies get POISON.",
+        "effect": "kill_condition_all",
+        "condition": "POISON"
+      },
+      "fists": {
+        "id": "toxic_touch",
+        "name": "Toxic Touch",
+        "description": "40% POISON per hit, lasts 1 extra turn.",
+        "effect": "hit_condition_extended",
+        "chance": 0.40,
+        "condition": "POISON",
+        "conditionTurns": 4
       }
-    ],
+    },
     "shield": [
       {
         "id": "bile_splash",
@@ -498,31 +536,51 @@
         "accuracyBonus": 1
       }
     ],
-    "weapon": [
-      {
-        "id": "savage_strikes",
-        "name": "Savage Strikes",
-        "description": "Hits deal +1 damage per BLEED stack on target.",
-        "effect": "bleed_damage_bonus",
+    "weapon": {
+      "dagger": {
+        "id": "crimson_flurry",
+        "name": "Crimson Flurry",
+        "description": "Double-strikes heal 4 HP each.",
+        "effect": "double_strike_heal",
+        "value": 4
+      },
+      "sword": {
+        "id": "blood_tithe",
+        "name": "Blood Tithe",
+        "description": "Each hit heals 1 HP.",
+        "effect": "hit_heal",
         "value": 1
       },
-      {
-        "id": "bloodletter",
-        "name": "Bloodletter",
-        "description": "All weapons gain 15% BLEED chance.",
-        "effect": "hit_condition",
-        "chance": 0.15,
-        "condition": "BLEED",
-        "conditionTurns": null
+      "spear": {
+        "id": "impale",
+        "name": "Impale",
+        "description": "First hit: 3 BLEED stacks + enemy can't flee.",
+        "effect": "first_hit_bleed_and_pin",
+        "bleedStacks": 3,
+        "preventFlee": true
       },
-      {
-        "id": "haemorrhage",
-        "name": "Haemorrhage",
-        "description": "Crits apply 2 BLEED stacks.",
-        "effect": "crit_bleed",
-        "stacks": 2
+      "mace": {
+        "id": "bone_breaker",
+        "name": "Bone Breaker",
+        "description": "+3 damage on bleeding enemies.",
+        "effect": "bleed_damage_bonus",
+        "value": 3
+      },
+      "axe": {
+        "id": "butcher",
+        "name": "Butcher",
+        "description": "Kill: heal 8 HP + bleed stacks become STR buff (1 turn).",
+        "effect": "kill_heal_and_bleed_buff",
+        "healValue": 8
+      },
+      "fists": {
+        "id": "blood_knuckles",
+        "name": "Blood Knuckles",
+        "description": "30% BLEED per hit + heal equal to bleed stacks on target.",
+        "effect": "hit_bleed_and_heal",
+        "chance": 0.30
       }
-    ],
+    },
     "shield": [
       {
         "id": "blood_absorb",
@@ -628,31 +686,55 @@
         "effect": "burn_double_burst"
       }
     ],
-    "weapon": [
-      {
-        "id": "ignite",
-        "name": "Ignite",
-        "description": "All weapons gain 20% BURN chance.",
-        "effect": "hit_condition",
-        "chance": 0.20,
+    "weapon": {
+      "dagger": {
+        "id": "flash_fire",
+        "name": "Flash Fire",
+        "description": "Double-strikes apply BURN.",
+        "effect": "double_strike_condition",
         "condition": "BURN",
         "conditionTurns": 1
       },
-      {
-        "id": "molten_edge",
-        "name": "Molten Edge",
-        "description": "+3 flat damage on all hits.",
-        "effect": "flat_damage_bonus",
-        "value": 3
+      "sword": {
+        "id": "searing_blade",
+        "name": "Searing Blade",
+        "description": "+4 bonus damage on burning enemies.",
+        "effect": "burning_damage_bonus",
+        "value": 4
       },
-      {
-        "id": "firestorm",
-        "name": "Firestorm",
-        "description": "Double strike hits also deal 2 AoE to other enemies.",
-        "effect": "double_strike_aoe",
-        "value": 2
+      "spear": {
+        "id": "fire_lance",
+        "name": "Fire Lance",
+        "description": "First hit each combat: BURN + 5 burst damage.",
+        "effect": "first_hit_burn_and_damage",
+        "bonusDamage": 5,
+        "condition": "BURN"
+      },
+      "mace": {
+        "id": "slag_hammer",
+        "name": "Slag Hammer",
+        "description": "Staggered + burning enemies take 2x burst damage.",
+        "effect": "dazed_burning_burst_multiplier",
+        "value": 2.0
+      },
+      "axe": {
+        "id": "eruption_cleave",
+        "name": "Eruption Cleave",
+        "description": "Kill: 6 AoE damage + BURN all enemies.",
+        "effect": "kill_aoe_damage_and_condition",
+        "aoeDamage": 6,
+        "condition": "BURN"
+      },
+      "fists": {
+        "id": "forge_fists",
+        "name": "Forge Fists",
+        "description": "Unarmed d4→d6, all hits apply 1-turn BURN.",
+        "effect": "unarmed_upgrade_and_condition",
+        "dieUpgrade": 6,
+        "condition": "BURN",
+        "conditionTurns": 1
       }
-    ],
+    },
     "shield": [
       {
         "id": "flame_shield",
@@ -746,41 +828,52 @@
         "value": -2
       }
     ],
-    "weapon": [
-      {
-        "id": "void_strike",
-        "name": "Void Strike",
-        "description": "10% of hits ignore ALL enemy DEF.",
-        "effect": "full_def_ignore_chance",
-        "chance": 0.10
+    "weapon": {
+      "dagger": {
+        "id": "phantom_flurry",
+        "name": "Phantom Flurry",
+        "description": "Offhand: no accuracy penalty + can crit.",
+        "effect": "offhand_enhanced",
+        "removePenalty": true,
+        "allowCrits": true
       },
-      {
-        "id": "shadow_blade",
-        "name": "Shadow Blade",
-        "description": "Misses have 30% chance to deal half damage anyway.",
-        "effect": "miss_damage_chance",
-        "chance": 0.30,
-        "damageMultiplier": 0.5
+      "sword": {
+        "id": "reality_tear",
+        "name": "Reality Tear",
+        "description": "25% chance hit deals double damage.",
+        "effect": "double_damage_chance",
+        "chance": 0.25,
+        "multiplier": 2.0
       },
-      {
-        "id": "entropy_edge",
-        "name": "Entropy Edge",
-        "description": "Weapon damage randomly +50% or -25% per hit.",
-        "effect": "chaos_damage",
-        "highMultiplier": 1.5,
-        "lowMultiplier": 0.75,
-        "highChance": 0.5
+      "spear": {
+        "id": "void_pierce",
+        "name": "Void Pierce",
+        "description": "20% chance to apply a random condition on hit.",
+        "effect": "random_condition_on_hit",
+        "chance": 0.20
       },
-      {
-        "id": "dread_touch",
-        "name": "Dread Touch",
-        "description": "All weapons gain 15% FEAR chance.",
-        "effect": "hit_condition",
-        "chance": 0.15,
-        "condition": "FEAR",
-        "conditionTurns": 2
+      "mace": {
+        "id": "null_crush",
+        "name": "Null Crush",
+        "description": "Stagger ignores 50% enemy DEF.",
+        "effect": "stagger_def_ignore",
+        "value": 0.50
+      },
+      "axe": {
+        "id": "dimensional_rift",
+        "name": "Dimensional Rift",
+        "description": "Kill: 20% chance to instakill another random enemy.",
+        "effect": "kill_chain_instakill",
+        "chance": 0.20
+      },
+      "fists": {
+        "id": "shadow_boxing",
+        "name": "Shadow Boxing",
+        "description": "25% chance: dodge triggers free counter-attack.",
+        "effect": "dodge_counter",
+        "chance": 0.25
       }
-    ],
+    },
     "shield": [
       {
         "id": "null_block",
