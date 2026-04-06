@@ -37,6 +37,17 @@ var DIR_LABELS = { N: 'North', S: 'South', E: 'East', W: 'West' }
 
 var MONTOR_WHISPERS = dialogueData.montorWhispers
 
+// Rarity colour system
+var RARITY_COLOURS = {
+  common: { text: 'text-ink', border: 'border-border', bg: 'bg-surface', label: '' },
+  uncommon: { text: 'text-green-400', border: 'border-green-500/40', bg: 'bg-green-500/5', label: 'Uncommon' },
+  rare: { text: 'text-blue-400', border: 'border-blue-500/40', bg: 'bg-blue-500/5', label: 'Rare' },
+  epic: { text: 'text-purple-400', border: 'border-purple-500/40', bg: 'bg-purple-500/5', label: 'Epic' },
+  legendary: { text: 'text-gold', border: 'border-gold/60', bg: 'bg-gold/5', label: 'Legendary' },
+  heirloom: { text: 'text-crimson', border: 'border-crimson/60', bg: 'bg-crimson/5', label: 'Heirloom' },
+}
+function rarityCol(rarity) { return RARITY_COLOURS[rarity] || RARITY_COLOURS.common }
+
 // Helper: collect all equipped items that can have passive effects
 function getAllPassiveItems(equipped) {
   var items = []
@@ -4300,7 +4311,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                         <span className="text-[10px] text-gold uppercase tracking-wide">Main Hand</span>
                         {character.equipped.weapon ? (
                           <>
-                            <span className="text-ink">{character.equipped.weapon.name}</span>
+                            <span className={rarityCol(character.equipped.weapon.rarity).text}>{character.equipped.weapon.name}</span>
                             <span className="text-ink-faint text-[10px]">d{character.equipped.weapon.damageDie || character.equipped.weapon.die} dmg ({character.equipped.weapon.weaponType || 'weapon'})</span>
                           </>
                         ) : (
@@ -4508,10 +4519,10 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   var isEquippable = detailItem.type === 'weapon' || detailItem.type === 'armour' || detailItem.type === 'relic' || detailItem.type === 'ring' || detailItem.type === 'amulet'
                   var isConsumable = detailItem.type === 'consumable'
                   return (
-                    <div className="mb-2 p-4 rounded-lg bg-surface border-2 border-gold/40">
+                    <div className={'mb-2 p-4 rounded-lg border-2 ' + rarityCol(detailItem.rarity).border + ' ' + rarityCol(detailItem.rarity).bg}>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-gold font-display text-lg">{detailItem.name}</span>
-                        <span className="text-ink-dim text-xs uppercase">{detailItem.rarity || ''}</span>
+                        <span className={rarityCol(detailItem.rarity).text + ' font-display text-lg'}>{detailItem.name}</span>
+                        <span className={rarityCol(detailItem.rarity).text + ' text-xs uppercase font-sans'}>{rarityCol(detailItem.rarity).label}</span>
                       </div>
                       <p className="text-ink text-sm italic mb-3">{detailItem.description || ''}</p>
                       <div className="flex flex-col gap-1.5 text-xs text-ink mb-3">
@@ -4584,9 +4595,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       var idx = entry.idx
                       return (
                         <button key={idx} onClick={function() { setSelectedItemIdx(idx) }}
-                          className="flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans hover:border-gold border border-border transition-colors text-left cursor-pointer">
+                          className={'flex items-center justify-between p-3 rounded-lg bg-raised text-sm font-sans hover:border-gold border transition-colors text-left cursor-pointer ' + rarityCol(item.rarity).border}>
                           <div className="flex flex-col">
-                            <span className="text-ink font-medium">{item.name}</span>
+                            <span className={rarityCol(item.rarity).text + ' font-medium'}>{item.name}</span>
                             <span className="text-ink-dim text-xs">
                               {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
                                item.type === 'armour' && item.slot === 'offhand' ? '+' + item.defBonus + ' DEF, ' + Math.round((item.passiveValue || 0) * 100) + '% block' :
@@ -5118,7 +5129,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       (isPremium ? 'border-amber-400/40 bg-amber-400/5' : 'border-border-hl bg-surface')}>
                       <div className="flex flex-col items-start flex-1 mr-3">
                         <div className="flex items-center gap-2">
-                          <span className={'text-base ' + (isPremium ? 'text-amber-300' : 'text-ink')}>{item.name}</span>
+                          <span className={'text-base ' + (isPremium ? 'text-amber-300' : rarityCol(item.rarity).text)}>{item.name}</span>
                           {isPremium && <span className="text-[9px] text-amber-400 uppercase tracking-wide border border-amber-400/30 px-1 rounded">Premium</span>}
                         </div>
                         <span className="text-ink-faint text-xs">
@@ -5153,9 +5164,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   var baseSellNpc = item.sellPrice || Math.max(1, Math.round((item.buyPrice || 10) * 0.4))
                   var sellPrice = Math.max(1, baseSellNpc + Math.max(0, Math.round(baseSellNpc * npcChaMod * 0.05)))
                   return (
-                    <div key={'sell-' + i} className="flex items-center justify-between p-4 rounded-lg border border-border-hl bg-surface text-sm font-sans">
+                    <div key={'sell-' + i} className={'flex items-center justify-between p-4 rounded-lg border bg-surface text-sm font-sans ' + rarityCol(item.rarity).border}>
                       <div className="flex flex-col items-start">
-                        <span className="text-ink text-base">{item.name}</span>
+                        <span className={rarityCol(item.rarity).text + ' text-base'}>{item.name}</span>
                         <span className="text-ink-faint text-xs">
                           {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
                            item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
@@ -5208,9 +5219,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 {chest.items.map(function(item, idx) {
                   var taken = chest.itemsTaken.indexOf(idx) !== -1
                   return (
-                    <div key={idx} className="flex items-center justify-between p-4 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
+                    <div key={idx} className={'flex items-center justify-between p-4 rounded-lg border bg-surface text-sm font-sans ' + rarityCol(item.rarity).border}>
                       <div className="flex flex-col">
-                        <span className="text-ink text-base">{item.name}</span>
+                        <span className={rarityCol(item.rarity).text + ' text-base'}>{item.name}</span>
                         <span className="text-ink-faint text-xs">
                           {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
                            item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
@@ -5271,9 +5282,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 {corpse.items.map(function(item, idx) {
                   var taken = corpse.itemsTaken.indexOf(idx) !== -1
                   return (
-                    <div key={idx} className="flex items-center justify-between p-4 rounded-lg border border-emerald-500/30 bg-surface text-sm font-sans">
+                    <div key={idx} className={'flex items-center justify-between p-4 rounded-lg border bg-surface text-sm font-sans ' + rarityCol(item.rarity).border}>
                       <div className="flex flex-col">
-                        <span className="text-ink text-base">{item.name}</span>
+                        <span className={rarityCol(item.rarity).text + ' text-base'}>{item.name}</span>
                         <span className="text-ink-faint text-xs">
                           {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' dmg' :
                            item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
@@ -5510,7 +5521,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
                     {searchResult.item && (
                       <div className="p-4 rounded-lg border-2 border-amber-400/50 bg-amber-400/5 text-center">
-                        <p className="text-amber-400 font-display text-xl">{searchResult.item.name}</p>
+                        <p className={rarityCol(searchResult.item.rarity).text + ' font-display text-xl'}>{searchResult.item.name}</p>
                         <p className="text-ink-dim text-xs font-sans mt-1">{searchResult.item.description || ''}</p>
                       </div>
                     )}
