@@ -2709,12 +2709,13 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         }
       })
     }
-    // Condition throwable — apply condition to selected target
-    if (result.stateChanges.conditionOneEnemy && battle && selectedTarget) {
+    // Condition throwable — apply condition to selected target (auto-target first living if none selected)
+    var throwTarget = selectedTarget || (battle ? (battle.enemies.find(function(e) { return !e.isDown }) || {}).id : null)
+    if (result.stateChanges.conditionOneEnemy && battle && throwTarget) {
       var condOne = result.stateChanges.conditionOneEnemy
       updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
         enemies: updatedBattleForItem.enemies.map(function(e) {
-          if (e.id !== selectedTarget || e.isDown) return e
+          if (e.id !== throwTarget || e.isDown) return e
           var newE = Object.assign({}, e, { statusEffects: applyConditionToEffects(e.statusEffects || [], condOne, 'throwable') })
           if (result.stateChanges.throwDamage) {
             newE.currentHp = Math.max(0, newE.currentHp - result.stateChanges.throwDamage)
@@ -2723,7 +2724,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           return newE
         })
       })
-      var targetName = updatedBattleForItem.enemies.find(function(e) { return e.id === selectedTarget })
+      var targetName = updatedBattleForItem.enemies.find(function(e) { return e.id === throwTarget })
       addLog({ type: 'condition', text: condOne + ' applied to ' + (targetName ? targetName.name : 'enemy') + '!', tier: 'hit' })
     }
     // Multi-target throwable — apply to N random enemies
@@ -2786,20 +2787,20 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       addLog({ type: 'player', text: 'Mirror raised! Next attack will be reflected!', tier: 'hit' })
     }
     // Heal enemy (Expired Yoghurt backfire)
-    if (result.stateChanges.healEnemy && battle && selectedTarget) {
+    if (result.stateChanges.healEnemy && battle && throwTarget) {
       updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
         enemies: updatedBattleForItem.enemies.map(function(e) {
-          if (e.id !== selectedTarget || e.isDown) return e
+          if (e.id !== throwTarget || e.isDown) return e
           return Object.assign({}, e, { currentHp: Math.min(e.maxHp, e.currentHp + result.stateChanges.healEnemy) })
         })
       })
       addLog({ type: 'enemy', text: 'Backfire! Enemy heals ' + result.stateChanges.healEnemy + ' HP!', tier: 'miss' })
     }
     // Second condition on single target (Party Popper)
-    if (result.stateChanges.conditionOneEnemy2 && battle && selectedTarget) {
+    if (result.stateChanges.conditionOneEnemy2 && battle && throwTarget) {
       updatedBattleForItem = Object.assign({}, updatedBattleForItem, {
         enemies: updatedBattleForItem.enemies.map(function(e) {
-          if (e.id !== selectedTarget || e.isDown) return e
+          if (e.id !== throwTarget || e.isDown) return e
           return Object.assign({}, e, { statusEffects: applyConditionToEffects(e.statusEffects || [], result.stateChanges.conditionOneEnemy2, 'throwable') })
         })
       })
