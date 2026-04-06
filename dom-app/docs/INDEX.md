@@ -23,6 +23,7 @@
 | [Async Co-op Spec](async_coop_spec.md) | Detailed multiplayer implementation plan -- shared exploration, turn-gated combat, Firestore sync |
 | [Montor Mood & Greed Spec](montor_mood_greed_spec.md) | Tidiness, greed, taste tracking -- safe room tonics, mood-aware whispers, dialogue |
 | [Inventory Overhaul Spec](inventory_overhaul_spec.md) | Rarity display, weight/encumbrance, item comparison, tab cleanup, sort, quick actions |
+| [Junk Economy Spec](junk_economy_spec.md) | Junk offload rooms, junk-scaling items, weight, safe room 3-way choice |
 
 ---
 
