@@ -267,6 +267,14 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     return 'angry'
   }
 
+  function getTidinessSummary() {
+    var tidiness = maxFloorDisturbance > 0 ? 1 - (floorDisturbance / maxFloorDisturbance) : 1
+    if (tidiness >= 0.8) return { label: 'Pristine', colour: 'text-green-400', desc: 'You barely touched anything.' }
+    if (tidiness >= 0.6) return { label: 'Tidy', colour: 'text-emerald-400', desc: 'A few things out of place.' }
+    if (tidiness >= 0.4) return { label: 'Messy', colour: 'text-amber-400', desc: 'He can tell you\'ve been rummaging.' }
+    return { label: 'Ransacked', colour: 'text-red-400', desc: 'You\'ve torn the place apart.' }
+  }
+
   function getMontorLine(category) {
     var mood = getMontorMood()
     var lines = montorDialogue[category] && montorDialogue[category][mood]
@@ -1141,13 +1149,15 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     triggerSave()
   }
 
+  var [tonicPicks, setTonicPicks] = useState([]) // track what was picked for display
+
   function handleTonicPick(stat) {
     if (!safeRoomTonic) return
-    // Apply permanent stat boost for this run
     character.stats[stat] = (character.stats[stat] || 10) + 1
+    setTonicPicks(function(prev) { return prev.concat([stat]) })
     safeRoomTonic.count--
     if (safeRoomTonic.count <= 0) {
-      handleSafeRoomContinue()
+      setSafeRoomStep('tonic_done')
     } else {
       setSafeRoomTonic(Object.assign({}, safeRoomTonic))
     }
@@ -3670,7 +3680,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
               You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
             </p>
-            <p className="text-ink-faint text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
               "{getMontorLine('safeRoom')}"
             </p>
           </div>
@@ -3859,13 +3869,18 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     // Tonic pick — player chooses stat(s)
     if (safeRoomStep === 'tonic_pick' && safeRoomTonic && safeRoomTonic.playerChooses) {
       var tonicStats = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha', 'vit']
+      var tidiness = getTidinessSummary()
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
-          <p className="text-gold/80 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+          <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
             "{getMontorLine('safeRoom')}"
           </p>
+          <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
+            <p className={'text-xs font-sans ' + tidiness.colour}>Floor tidiness: {tidiness.label}</p>
+            <p className="text-ink-faint text-[10px] mt-0.5">{tidiness.desc}</p>
+          </div>
           <p className="text-gold font-display text-xl">Montor's Tonic</p>
-          <p className="text-ink text-sm">{montorDialogue.tonicReward.twoChoice}</p>
+          <p className="text-ink text-sm">He offers a reward for your restraint.</p>
           <p className="text-ink-faint text-xs">{safeRoomTonic.count} pick{safeRoomTonic.count > 1 ? 's' : ''} remaining</p>
           <div className="grid grid-cols-2 gap-2 w-full max-w-xs">
             {tonicStats.map(function(stat) {
@@ -3883,30 +3898,59 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       )
     }
 
+    // Tonic done — show what was picked with continue button
+    if (safeRoomStep === 'tonic_done') {
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
+          <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            "{getMontorLine('safeRoom')}"
+          </p>
+          <p className="text-gold font-display text-xl">Tonic Applied</p>
+          <div className="flex flex-col gap-1">
+            {tonicPicks.map(function(stat, i) {
+              return <p key={i} className="text-green-400 font-display text-lg">+1 {stat.toUpperCase()}</p>
+            })}
+          </div>
+          <button onClick={function() { setTonicPicks([]); handleSafeRoomContinue() }}
+            className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors mt-2">
+            Continue
+          </button>
+        </div>
+      )
+    }
+
     // Tonic — Montor's choice or nothing (auto-apply Montor's pick)
     if (safeRoomStep === 'tonic') {
       if (safeRoomTonic && safeRoomTonic.montorPick && !safeRoomTonic._applied) {
         character.stats[safeRoomTonic.montorPick] = (character.stats[safeRoomTonic.montorPick] || 10) + 1
         safeRoomTonic._applied = true
       }
+      var tidiness2 = getTidinessSummary()
       return (
-        <div onClick={handleSafeRoomContinue}
-          className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised cursor-pointer">
-          <p className="text-gold/80 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
+          <p className="text-purple-400 text-sm italic" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
             "{getMontorLine('safeRoom')}"
           </p>
+          <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
+            <p className={'text-xs font-sans ' + tidiness2.colour}>Floor tidiness: {tidiness2.label}</p>
+            <p className="text-ink-faint text-[10px] mt-0.5">{tidiness2.desc}</p>
+          </div>
           {safeRoomTonic ? (
             <>
               <p className="text-gold font-display text-xl">Montor's Tonic</p>
-              <p className="text-ink text-sm">{montorDialogue.tonicReward.montorChoice}</p>
+              <p className="text-ink text-sm">He chooses for you.</p>
               <p className="text-green-400 font-display text-lg">+1 {(safeRoomTonic.montorPick || 'str').toUpperCase()}</p>
             </>
           ) : (
             <>
-              <p className="text-ink-dim font-display text-lg">{montorDialogue.tonicReward.nothing}</p>
+              <p className="text-red-400/80 font-display text-lg">Nothing offered.</p>
+              <p className="text-ink-faint text-sm">{tidiness2.desc}</p>
             </>
           )}
-          <p className="text-ink-faint text-xs font-sans">Tap to continue</p>
+          <button onClick={handleSafeRoomContinue}
+            className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors mt-2">
+            Continue
+          </button>
         </div>
       )
     }
@@ -4772,7 +4816,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <div className="h-full flex flex-col items-center justify-center gap-3 px-2 relative" style={{ zIndex: 1 }}>
               {/* Montor whisper */}
               {montorWhisper && (
-                <p className="text-ink-faint text-xs italic text-center max-w-xs mb-2 animate-pulse"
+                <p className="text-purple-400/70 text-xs italic text-center max-w-xs mb-2 animate-pulse"
                   style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
                   "{montorWhisper}"
                 </p>
