@@ -6182,93 +6182,84 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           )
         })()}
 
-        {/* Read-only inventory overlay (combat) */}
+        {/* Combat inventory — glanceable status card */}
         {showInventoryPanel && (function() {
-          var sections = [
-            { label: 'Weapons', items: playerInventory.filter(function(i) { return i.type === 'weapon' }) },
-            { label: 'Armour', items: playerInventory.filter(function(i) { return i.type === 'armour' }) },
-            { label: 'Relics', items: playerInventory.filter(function(i) { return i.type === 'relic' }) },
-            { label: 'Consumables', items: playerInventory.filter(function(i) { return i.type === 'consumable' }) },
-          ]
+          var eq = character.equipped || {}
+          var consumableCount = playerInventory.filter(function(i) { return i.type === 'consumable' }).length
+          var throwableCount = playerInventory.filter(function(i) {
+            return i.type === 'consumable' && (i.effect === 'damage_all_enemies' || i.effect === 'condition_all_enemies' || i.effect === 'damage_and_condition_all' || i.effect === 'condition_one_enemy' || i.effect === 'condition_multi_enemies' || i.effect === 'damage_multi_enemies' || i.effect === 'timed_bomb' || i.effect === 'reflect_next_attack' || i.effect === 'wet_all_and_heal' || i.effect === 'risky_throw' || i.effect === 'damage_and_condition_one' || i.effect === 'debuff_all_enemies' || i.effect === 'summon_ally')
+          }).length
+          var usableCount = consumableCount - throwableCount
+          var gearCount = playerInventory.filter(function(i) { return i.type === 'weapon' || i.type === 'armour' }).length
+          var junkCount = playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)
           return (
             <div className="fixed inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <span className="font-display text-lg text-gold">Inventory (read-only)</span>
+                <span className="font-display text-lg text-gold">Combat Status</span>
                 <button onClick={function() { setShowInventoryPanel(false) }}
                   className="text-sm text-ink-dim border border-border px-3 py-1 rounded hover:text-ink transition-colors">
                   Close
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-4">
-                <p className="text-ink-faint text-[10px] font-sans mb-3 italic">Use items via the Use Item / Throw actions during your turn.</p>
-                {/* Equipped */}
-                <div className="mb-3">
-                  <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Equipped</span>
-                  <div className="flex flex-col gap-1 mt-1">
-                    <div className="p-2 rounded bg-gold/10 border border-gold/20 text-xs font-sans">
-                      <span className="text-[10px] text-gold uppercase">Weapon:</span> <span className="text-ink">{character.equipped && character.equipped.weapon ? character.equipped.weapon.name : 'Fists'}</span>
-                    </div>
-                    {character.equipped && character.equipped.armour && (
-                      <div className="p-2 rounded bg-gold/10 border border-gold/20 text-xs font-sans">
-                        <span className="text-[10px] text-gold uppercase">Armour:</span> <span className="text-ink">{character.equipped.armour.name} (+{character.equipped.armour.defBonus} DEF)</span>
-                      </div>
-                    )}
-                    {character.equipped && character.equipped.offhand && (
-                      <div className="p-2 rounded bg-gold/10 border border-gold/20 text-xs font-sans">
-                        <span className="text-[10px] text-gold uppercase">Off-hand:</span> <span className="text-ink">{character.equipped.offhand.name}</span>
-                      </div>
-                    )}
-                    {character.equipped && character.equipped.relics && character.equipped.relics.map(function(r, ri) {
-                      return (
-                        <div key={ri} className="p-2 rounded bg-purple-400/10 border border-purple-400/20 text-xs font-sans">
-                          <span className="text-[10px] text-purple-400 uppercase">Relic:</span> <span className="text-ink">{r.name}</span>
-                        </div>
-                      )
-                    })}
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                {/* Equipped gear */}
+                <div className="p-3 rounded-lg bg-surface border border-border">
+                  <p className="text-[10px] text-gold uppercase tracking-wide font-sans mb-2">Equipped</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-sans">
+                    <span className="text-ink-dim">Weapon</span>
+                    <span className={eq.weapon ? rarityCol(eq.weapon.rarity).text : 'text-ink-faint'}>{eq.weapon ? eq.weapon.name : 'Fists'}</span>
+                    {eq.offhand && <><span className="text-ink-dim">Off-hand</span><span className={rarityCol(eq.offhand.rarity).text}>{eq.offhand.name}</span></>}
+                    {eq.armour && <><span className="text-ink-dim">Armour</span><span className={rarityCol(eq.armour.rarity).text}>{eq.armour.name}</span></>}
+                    {eq.helmet && <><span className="text-ink-dim">Helmet</span><span className={rarityCol(eq.helmet.rarity).text}>{eq.helmet.name}</span></>}
+                    {eq.boots && <><span className="text-ink-dim">Boots</span><span className={rarityCol(eq.boots.rarity).text}>{eq.boots.name}</span></>}
+                    {eq.amulet && <><span className="text-ink-dim">Amulet</span><span className={rarityCol(eq.amulet.rarity).text}>{eq.amulet.name}</span></>}
                   </div>
-                </div>
-                {/* Carried items by section */}
-                {sections.map(function(sec) {
-                  if (sec.items.length === 0) return null
-                  return (
-                    <div key={sec.label} className="mb-3">
-                      <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">{sec.label} ({sec.items.length})</span>
-                      <div className="flex flex-col gap-1 mt-1">
-                        {sec.items.map(function(item, ii) {
-                          return (
-                            <div key={ii} className="p-2 rounded bg-raised border border-border text-xs font-sans flex items-center justify-between">
-                              <span className="text-ink">{item.name}</span>
-                              <span className="text-ink-faint text-[10px]">
-                                {item.type === 'weapon' ? 'd' + (item.damageDie || item.die) + ' ' + (item.weaponType || '') :
-                                 item.type === 'armour' ? '+' + (item.defBonus || 0) + ' DEF' :
-                                 item.description || ''}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
+                  {eq.relics && eq.relics.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {eq.relics.map(function(r, ri) {
+                        return <span key={ri} className="text-[10px] text-purple-400 bg-purple-400/10 border border-purple-400/20 px-1.5 py-0.5 rounded">{r.name}</span>
+                      })}
                     </div>
-                  )
-                })}
-                {/* Junk bag summary */}
-                {playerJunkBag.length > 0 && (
-                  <div className="mb-3">
-                    <span className="text-ink-dim text-[10px] uppercase tracking-wide font-sans">Junk ({playerJunkBag.reduce(function(s, j) { return s + j.count }, 0)} items)</span>
-                    <div className="flex flex-col gap-1 mt-1">
-                      {playerJunkBag.map(function(junk) {
+                  )}
+                  {eq.rings && eq.rings.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {eq.rings.map(function(r, ri) {
+                        return <span key={ri} className="text-[10px] text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded">{r.name}</span>
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Active conditions */}
+                {battle && battle.players[user.uid] && battle.players[user.uid].statusEffects.length > 0 && (
+                  <div className="p-3 rounded-lg bg-surface border border-border">
+                    <p className="text-[10px] text-red-400 uppercase tracking-wide font-sans mb-2">Active Conditions</p>
+                    <div className="flex flex-wrap gap-2">
+                      {battle.players[user.uid].statusEffects.map(function(c, ci) {
+                        var label = c.stacks > 1 ? 'x' + c.stacks : c.turnsRemaining ? c.turnsRemaining + 't' : '~'
                         return (
-                          <div key={junk.id} className="p-2 rounded bg-raised border border-border text-xs font-sans flex items-center justify-between">
-                            <span className="text-ink">{junk.name}</span>
-                            <span className="text-ink-faint text-[10px]">{junk.consumable ? 'consumable' : ''} x{junk.count}</span>
+                          <div key={ci} className="flex items-center gap-1 px-2 py-1 rounded bg-red-500/10 border border-red-500/20">
+                            <ConditionIcon conditionId={c.id} scale={2} />
+                            <span className="text-[10px] text-red-300 font-sans">{c.name} {label}</span>
                           </div>
                         )
                       })}
                     </div>
                   </div>
                 )}
-                {playerInventory.length === 0 && playerJunkBag.length === 0 && (
-                  <p className="text-ink-faint text-xs italic text-center p-4">No items.</p>
-                )}
+
+                {/* Item counts */}
+                <div className="p-3 rounded-lg bg-surface border border-border">
+                  <p className="text-[10px] text-ink-dim uppercase tracking-wide font-sans mb-2">Carrying</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-sans">
+                    {usableCount > 0 && <><span className="text-emerald-400">Usable items</span><span className="text-ink">{usableCount}</span></>}
+                    {throwableCount > 0 && <><span className="text-red-400">Throwables</span><span className="text-ink">{throwableCount}</span></>}
+                    {gearCount > 0 && <><span className="text-ink-dim">Spare gear</span><span className="text-ink">{gearCount}</span></>}
+                    {junkCount > 0 && <><span className="text-amber-400">Junk</span><span className="text-ink">{junkCount}</span></>}
+                  </div>
+                </div>
+
+                <p className="text-ink-faint text-[10px] font-sans italic text-center">Use items via the Use Item / Throw buttons during your turn.</p>
               </div>
             </div>
           )
