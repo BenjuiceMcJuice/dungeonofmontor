@@ -5518,17 +5518,6 @@ function Game({ character, user, onEndRun }) {
 
   // --- Combat ---
   if (gamePhase === 'combat') {
-    // Battle Won splash — dramatic overlay before victory screen
-    if (combatPhase === 'battleWon') {
-      return (
-        <div className="h-full flex items-center justify-center bg-raised" style={roomBgStyle}>
-          <div className="text-center">
-            <p className="font-display text-5xl text-gold animate-pulse">Battle Won!</p>
-          </div>
-        </div>
-      )
-    }
-
     // Combat victory — show doors after
     if (combatPhase === 'victory') {
       return (
@@ -5571,7 +5560,13 @@ function Game({ character, user, onEndRun }) {
     var combatChamber = zone.chambers[zone.playerPosition]
 
     return (
-      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden" style={roomBgStyle}>
+      <div className="h-full flex flex-col px-3 pt-2 pb-2 overflow-hidden relative" style={roomBgStyle}>
+        {/* Battle Won overlay — floats over combat view */}
+        {combatPhase === 'battleWon' && (
+          <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+            <p className="font-display text-4xl text-gold animate-pulse drop-shadow-lg">Battle Won!</p>
+          </div>
+        )}
         {/* Stats overlay (read-only during combat) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
