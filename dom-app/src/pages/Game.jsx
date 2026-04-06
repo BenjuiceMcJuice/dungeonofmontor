@@ -48,6 +48,20 @@ var RARITY_COLOURS = {
 }
 function rarityCol(rarity) { return RARITY_COLOURS[rarity] || RARITY_COLOURS.common }
 
+// Canonical stat order — used everywhere stats are displayed
+var STAT_ORDER = [
+  { id: 'str', label: 'STR', hint: 'Attack + damage' },
+  { id: 'def', label: 'DEF', hint: 'Damage reduction' },
+  { id: 'agi', label: 'AGI', hint: 'Initiative + dodge' },
+  { id: 'vit', label: 'VIT', hint: 'Max HP' },
+  { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
+  { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
+  { id: 'per', label: 'PER', hint: 'Searching' },
+  { id: 'end', label: 'END', hint: 'HP regen per room' },
+  { id: 'wis', label: 'WIS', hint: 'Gift power' },
+  { id: 'cha', label: 'CHA', hint: 'Merchant prices' },
+]
+
 // Helper: collect all equipped items that can have passive effects
 function getAllPassiveItems(equipped) {
   var items = []
@@ -3869,7 +3883,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
     // Tonic pick — player chooses stat(s)
     if (safeRoomStep === 'tonic_pick' && safeRoomTonic && safeRoomTonic.playerChooses) {
-      var tonicStats = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha', 'vit']
+      var tonicStats = STAT_ORDER.map(function(s) { return s.id })
       var tidiness = getTidinessSummary()
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
@@ -4043,18 +4057,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         {/* Character stats panel — full screen overlay */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
-          var statRows = [
-            { id: 'str', label: 'STR', hint: 'Attack + damage' },
-            { id: 'def', label: 'DEF', hint: 'Damage reduction' },
-            { id: 'agi', label: 'AGI', hint: 'Initiative + dodge' },
-            { id: 'vit', label: 'VIT', hint: 'Max HP' },
-            { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
-            { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
-            { id: 'per', label: 'PER', hint: 'Searching' },
-            { id: 'end', label: 'END', hint: 'HP regen per room' },
-            { id: 'wis', label: 'WIS', hint: 'Gift power' },
-            { id: 'cha', label: 'CHA', hint: 'Prices' },
-          ]
+          var statRows = STAT_ORDER
           var w = character.equipped && character.equipped.weapon
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
@@ -4166,7 +4169,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                     var color = bonus > 0 ? 'text-green-400' : bonus < 0 ? 'text-red-400' : 'text-ink'
                     return (
                       <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
-                        <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
+                        <span className="text-ink text-[10px] uppercase font-sans">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
                         {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
                       </div>
@@ -5721,18 +5724,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         {/* Character stats panel — full screen overlay (chamber) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
-          var statRows = [
-            { id: 'str', label: 'STR', hint: 'Attack + damage' },
-            { id: 'def', label: 'DEF', hint: 'Damage reduction' },
-            { id: 'agi', label: 'AGI', hint: 'Initiative + dodge' },
-            { id: 'vit', label: 'VIT', hint: 'Max HP' },
-            { id: 'int', label: 'INT', hint: 'Conditions + enchant dmg' },
-            { id: 'lck', label: 'LCK', hint: 'Crits + loot' },
-            { id: 'per', label: 'PER', hint: 'Searching' },
-            { id: 'end', label: 'END', hint: 'HP regen per room' },
-            { id: 'wis', label: 'WIS', hint: 'Gift power' },
-            { id: 'cha', label: 'CHA', hint: 'Prices' },
-          ]
+          var statRows = STAT_ORDER
           var w = character.equipped && character.equipped.weapon
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
@@ -5811,7 +5803,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                     var color = bonus > 0 ? 'text-green-400' : bonus < 0 ? 'text-red-400' : 'text-ink'
                     return (
                       <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
-                        <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
+                        <span className="text-ink text-[10px] uppercase font-sans">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
                         {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
                       </div>
@@ -5941,11 +5933,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         {/* Stats overlay (read-only during combat) */}
         {showCharPanel && (function() {
           var mod = function(v) { var m = Math.floor(((v || 10) - 10) / 2); return m >= 0 ? '+' + m : '' + m }
-          var statRows = [
-            { id: 'str', label: 'STR' }, { id: 'def', label: 'DEF' }, { id: 'agi', label: 'AGI' },
-            { id: 'vit', label: 'VIT' }, { id: 'int', label: 'INT' }, { id: 'lck', label: 'LCK' },
-            { id: 'per', label: 'PER' }, { id: 'end', label: 'END' }, { id: 'wis', label: 'WIS' }, { id: 'cha', label: 'CHA' },
-          ]
+          var statRows = STAT_ORDER
           var w = character.equipped && character.equipped.weapon
           var a = character.equipped && character.equipped.armour
           var o = character.equipped && character.equipped.offhand
@@ -6025,7 +6013,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                     var color = bonus > 0 ? 'text-green-400' : bonus < 0 ? 'text-red-400' : 'text-ink'
                     return (
                       <div key={s.id} className="flex flex-col items-center p-2 rounded bg-raised border border-border">
-                        <span className="text-ink-faint text-[9px] uppercase">{s.label}</span>
+                        <span className="text-ink text-[10px] uppercase font-sans">{s.label}</span>
                         <span className={color + ' font-display text-base'}>{effective}</span>
                         {bonus !== 0 && <span className={bonus > 0 ? 'text-green-400 text-[8px]' : 'text-red-400 text-[8px]'}>{bonus > 0 ? '+' + bonus : bonus} gear</span>}
                       </div>
