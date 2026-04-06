@@ -1298,9 +1298,6 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     var hasEnemyConditionEffects = tickResult.damage > 0 || tickResult.narrative
     var enemyCondDelay = hasEnemyConditionEffects ? 1000 : 0
 
-    // Immediately update battle state so condition icons reflect expired/changed conditions
-    if (hasEnemyConditionEffects) setBattle(tickedBattle)
-
     if (tickResult.died) {
       // Enemy died from conditions — skip windup, go straight to result
       addLog({ type: 'condition', text: getActor(tickedBattle, currentId) ? getActor(tickedBattle, currentId).data.name + ' dies from conditions!' : 'Enemy dies from conditions!', tier: 'crit' })
