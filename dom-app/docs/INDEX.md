@@ -1,6 +1,6 @@
 # Dungeon of Montor -- Documentation Index
 
-> All game documentation in one place. Updated 2026-04-06.
+> All game documentation in one place. Updated 2026-04-06 (major session).
 
 ---
 

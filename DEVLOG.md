@@ -155,8 +155,11 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-06 | Dense Core (Stone), Montor purple pixel text, stat order consistency | ✅ Done |
 | 2026-04-06 | Inventory + junk economy + multiplayer specs written | ✅ Done |
 |            | **Next up** | |
+|            | Enemy variety + boss abilities | ⬜ |
+|            | Floor-scaled enemy conditions (deeper = nastier) | ⬜ |
+|            | Junk offload rooms + junk-scaling items (spec written) | ⬜ |
+|            | Inventory weight penalties (bar visible, no penalty yet) | ⬜ |
 |            | Themed hi-res junk sprites for non-garden floors | ⬜ |
-|            | Inventory weight — END governs capacity, encumbrance penalties | ⬜ |
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
 |            | Gift leveling (Hades-style) + mono-gift synergy bonuses | ⬜ |
 |            | The Dump — pre-run junk trade hub for permanent unlocks | ⬜ |
