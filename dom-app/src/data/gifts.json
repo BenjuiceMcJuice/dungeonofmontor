@@ -386,9 +386,9 @@
       {
         "id": "acid_edge",
         "name": "Acid Edge",
-        "description": "All hits reduce enemy DEF by 2 (stacks, persists in combat).",
+        "description": "All hits reduce enemy DEF by 1 (stacks, persists in combat).",
         "effect": "def_shred",
-        "value": 2
+        "value": 1
       },
       {
         "id": "toilet_hands",
