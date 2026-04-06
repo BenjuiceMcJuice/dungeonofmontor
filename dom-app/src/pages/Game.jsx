@@ -5909,8 +5909,8 @@ function Game({ character, user, onEndRun }) {
           </div>
         )}
 
-        {/* Action area */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
+        {/* Action area — hidden during battleWon overlay */}
+        <div className={'flex-1 flex flex-col items-center justify-center gap-2 min-h-0' + (combatPhase === 'battleWon' ? ' invisible' : '')}>
           {combatPhase === 'enemyWindup' && (
             <div className="flex flex-col items-center gap-2 p-3 border-2 border-red-400/30 rounded-lg bg-red-400/5">
               <p className="text-red-400 text-xs font-sans uppercase tracking-wide">Enemy Turn</p>
