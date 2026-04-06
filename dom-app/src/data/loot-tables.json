@@ -42,12 +42,12 @@
       "entries": [
         {
           "itemId": "health_potion",
-          "weight": 40,
+          "weight": 15,
           "minRarity": "common"
         },
         {
           "itemId": "montors_marvelous_medicine",
-          "weight": 10,
+          "weight": 5,
           "minRarity": "common"
         },
         {
@@ -67,12 +67,12 @@
         },
         {
           "itemId": "smoke_bomb",
-          "weight": 10,
+          "weight": 12,
           "minRarity": "common"
         },
         {
           "itemId": "antidote",
-          "weight": 8,
+          "weight": 10,
           "minRarity": "common"
         },
         {
@@ -310,7 +310,7 @@
       "entries": [
         {
           "itemId": "health_potion",
-          "weight": 20,
+          "weight": 10,
           "minRarity": "common"
         },
         {
@@ -618,7 +618,7 @@
       "entries": [
         {
           "itemId": "health_potion",
-          "weight": 10,
+          "weight": 5,
           "minRarity": "common"
         },
         {
@@ -791,7 +791,7 @@
       "entries": [
         {
           "itemId": "health_potion",
-          "weight": 18,
+          "weight": 8,
           "minRarity": "common"
         },
         {
@@ -959,7 +959,7 @@
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 12,
+          "weight": 6,
           "minRarity": "common"
         },
         {
@@ -1167,7 +1167,7 @@
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 8,
+          "weight": 4,
           "minRarity": "common"
         },
         {
@@ -1400,12 +1400,12 @@
       "entries": [
         {
           "itemId": "health_potion",
-          "weight": 18,
+          "weight": 8,
           "minRarity": "common"
         },
         {
           "itemId": "greater_health_potion",
-          "weight": 8,
+          "weight": 4,
           "minRarity": "common"
         },
         {
@@ -1508,7 +1508,7 @@
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 12,
+          "weight": 6,
           "minRarity": "common"
         },
         {
@@ -1641,7 +1641,7 @@
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 8,
+          "weight": 4,
           "minRarity": "common"
         },
         {
@@ -1779,7 +1779,7 @@
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 16,
+          "weight": 8,
           "minRarity": "common"
         },
         {
@@ -2065,7 +2065,7 @@
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 12,
+          "weight": 6,
           "minRarity": "common"
         },
         {
@@ -2534,7 +2534,7 @@
         },
         {
           "itemId": "greater_health_potion",
-          "weight": 8,
+          "weight": 4,
           "minRarity": "common"
         },
         {

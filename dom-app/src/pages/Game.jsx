@@ -362,6 +362,7 @@ function Game({ character, user, onEndRun }) {
   var [pendingAttackResult, setPendingAttackResult] = useState(null)
   var [enemyAttackInfo, setEnemyAttackInfo] = useState(null)
   var [enemyBehaviourMsg, setEnemyBehaviourMsg] = useState(null) // { name, text } for non-attack actions
+  var [enemyConditionMsg, setEnemyConditionMsg] = useState(null) // condition tick message for enemy turn display
   var [enemyRollerKey, setEnemyRollerKey] = useState(0)
   var [lootableCorpses, setLootableCorpses] = useState([])
   var [lootingCorpseId, setLootingCorpseId] = useState(null)
@@ -1150,6 +1151,7 @@ function Game({ character, user, onEndRun }) {
     setPendingAttackResult(null)
     setEnemyAttackInfo(null)
     setEnemyBehaviourMsg(null)
+    setEnemyConditionMsg(null)
     // Reset per-combat gift flags
     setSporeCloudUsed(false)
     setBedrockCharges(0)
@@ -1189,6 +1191,17 @@ function Game({ character, user, onEndRun }) {
         if (!tickResult.narrative) tickResult.narrative = ''
         tickResult.narrative += ' Decay Aura drains ' + shieldGTick.value + ' HP.'
         if (dotEnemy.currentHp <= 0) { dotEnemy.isDown = true; tickResult.died = true }
+      }
+    }
+
+    // Show condition effects in the windup display instead of "prepares to strike"
+    setEnemyConditionMsg(null)
+    if (tickResult.narrative) {
+      var condParts = tickResult.narrative.split('. ').filter(function(s) { return s.trim() })
+      var displayParts = condParts.filter(function(p) { return p.indexOf('wears off') === -1 }).map(function(p) { return p.replace(/\.+$/, '') }).filter(Boolean)
+      if (displayParts.length > 0) {
+        var actorForMsg = getActor(tickedBattle, currentId)
+        setEnemyConditionMsg({ name: actorForMsg ? actorForMsg.data.name : 'Enemy', text: displayParts.join('. ') })
       }
     }
 
@@ -5907,6 +5920,11 @@ function Game({ character, user, onEndRun }) {
                 <>
                   <p className="text-red-400 text-lg font-display">{enemyBehaviourMsg.name}</p>
                   <p className="text-ink text-sm italic">{enemyBehaviourMsg.text}</p>
+                </>
+              ) : enemyConditionMsg ? (
+                <>
+                  <p className="text-red-400 text-lg font-display">{enemyConditionMsg.name}</p>
+                  <p className="text-amber-400 text-sm italic">{enemyConditionMsg.text}</p>
                 </>
               ) : enemyResult ? (
                 <>
