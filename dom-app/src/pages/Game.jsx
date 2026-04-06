@@ -336,6 +336,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [consumeResult, setConsumeResult] = useState(null) // { success, narrative, junkName }
   var [expandedJunkId, setExpandedJunkId] = useState(null)
   var [inventoryTab, setInventoryTab] = useState('gear')
+  var [inventorySort, setInventorySort] = useState('rarity') // rarity | damage | def | name
   var [selectedItemIdx, setSelectedItemIdx] = useState(null)
 
   // --- Run tracking (for balance logging) ---
@@ -4290,6 +4291,24 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             }
           }
 
+          // Sort items
+          var rarityRank = { heirloom: 6, legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 }
+          filteredItems.sort(function(a, b) {
+            if (inventorySort === 'rarity') {
+              return (rarityRank[b.item.rarity] || 0) - (rarityRank[a.item.rarity] || 0)
+            }
+            if (inventorySort === 'damage') {
+              return (b.item.damageDie || b.item.die || 0) - (a.item.damageDie || a.item.die || 0)
+            }
+            if (inventorySort === 'def') {
+              return (b.item.defBonus || 0) - (a.item.defBonus || 0)
+            }
+            if (inventorySort === 'name') {
+              return (a.item.name || '').localeCompare(b.item.name || '')
+            }
+            return 0
+          })
+
           // Count items per tab for badges
           var tabCounts = {}
           for (var ci = 0; ci < tabs.length; ci++) {
@@ -4339,6 +4358,22 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   )
                 })}
               </div>
+
+              {/* Sort toggle */}
+              {(activeTab.id === 'gear' || activeTab.id === 'accessories' || activeTab.id === 'consumables') && (
+                <div className="flex items-center gap-1 px-4 py-1.5 border-b border-border">
+                  <span className="text-ink-faint text-[10px] font-sans mr-1">Sort:</span>
+                  {['rarity', activeTab.id === 'gear' ? 'damage' : null, activeTab.id === 'gear' ? 'def' : null, 'name'].filter(Boolean).map(function(s) {
+                    return (
+                      <button key={s} onClick={function() { setInventorySort(s) }}
+                        className={'text-[10px] font-sans px-2 py-0.5 rounded transition-colors ' +
+                          (inventorySort === s ? 'bg-gold/20 text-gold' : 'text-ink-dim hover:text-ink')}>
+                        {s === 'damage' ? 'DMG' : s === 'def' ? 'DEF' : s.charAt(0).toUpperCase() + s.slice(1)}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
 
               {/* Currently equipped (gear tab — weapons + armour + shield) */}
               {activeTab.id === 'gear' && character.equipped && (
@@ -4604,6 +4639,50 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                         })()}
                         {detailItem.buyPrice && <span>Value: {detailItem.sellPrice || Math.round(detailItem.buyPrice * 0.4)}g</span>}
                       </div>
+                      {/* Comparison to equipped */}
+                      {detailItem.type === 'weapon' && character.equipped && character.equipped.weapon && (function() {
+                        var eq = character.equipped.weapon
+                        var newDie = detailItem.damageDie || detailItem.die || 0
+                        var eqDie = eq.damageDie || eq.die || 0
+                        var newAcc = detailItem.accuracyBonus || 0
+                        var eqAcc = eq.accuracyBonus || 0
+                        return (
+                          <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
+                            <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
+                            <div className="flex gap-3">
+                              <span className={newDie > eqDie ? 'text-green-400' : newDie < eqDie ? 'text-red-400' : 'text-ink-dim'}>DMG d{newDie} {newDie > eqDie ? '\u25B2' : newDie < eqDie ? '\u25BC' : '='}</span>
+                              <span className={newAcc > eqAcc ? 'text-green-400' : newAcc < eqAcc ? 'text-red-400' : 'text-ink-dim'}>ACC {newAcc >= 0 ? '+' : ''}{newAcc} {newAcc > eqAcc ? '\u25B2' : newAcc < eqAcc ? '\u25BC' : '='}</span>
+                            </div>
+                          </div>
+                        )
+                      })()}
+                      {detailItem.type === 'armour' && detailItem.slot !== 'offhand' && character.equipped && character.equipped.armour && (function() {
+                        var eq = character.equipped.armour
+                        var newDef = detailItem.defBonus || 0
+                        var eqDef = eq.defBonus || 0
+                        return (
+                          <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
+                            <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
+                            <span className={newDef > eqDef ? 'text-green-400' : newDef < eqDef ? 'text-red-400' : 'text-ink-dim'}>DEF +{newDef} {newDef > eqDef ? '\u25B2' : newDef < eqDef ? '\u25BC' : '='}</span>
+                          </div>
+                        )
+                      })()}
+                      {detailItem.type === 'armour' && detailItem.slot === 'offhand' && character.equipped && character.equipped.offhand && (function() {
+                        var eq = character.equipped.offhand
+                        var newDef = detailItem.defBonus || 0
+                        var eqDef = eq.defBonus || 0
+                        var newBlock = Math.round((detailItem.passiveValue || 0) * 100)
+                        var eqBlock = Math.round((eq.passiveValue || 0) * 100)
+                        return (
+                          <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
+                            <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
+                            <div className="flex gap-3">
+                              <span className={newDef > eqDef ? 'text-green-400' : newDef < eqDef ? 'text-red-400' : 'text-ink-dim'}>DEF +{newDef} {newDef > eqDef ? '\u25B2' : newDef < eqDef ? '\u25BC' : '='}</span>
+                              <span className={newBlock > eqBlock ? 'text-green-400' : newBlock < eqBlock ? 'text-red-400' : 'text-ink-dim'}>Block {newBlock}% {newBlock > eqBlock ? '\u25B2' : newBlock < eqBlock ? '\u25BC' : '='}</span>
+                            </div>
+                          </div>
+                        )
+                      })()}
                       <div className="flex gap-2">
                         {isEquippable && canEquipNow && (
                           <button onClick={function() { handleEquipItem(selectedItemIdx); setSelectedItemIdx(null) }}
