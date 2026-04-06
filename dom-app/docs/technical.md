@@ -1,6 +1,6 @@
 # Technical Architecture
 
-> How Dungeon of Montor is built. Updated 2026-04-04.
+> How Dungeon of Montor is built. Updated 2026-04-06.
 
 ---
 

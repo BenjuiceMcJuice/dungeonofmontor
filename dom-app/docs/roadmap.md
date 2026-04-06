@@ -1,7 +1,7 @@
 # Development Roadmap
 
 > 5-stage plan from solo crawl to full multiplayer RPG with AI narrative.
-> Updated 2026-04-04.
+> Updated 2026-04-06.
 
 ---
 
@@ -31,14 +31,16 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 - 8 equipment slots: weapon, offhand, armour, helmet, boots, ring, amulet, relic
 - **243 total items** across all categories (64 weapons, 36 armour, 62 consumables, 55 relics, 15 amulets, 11 rings)
 - **18 conditions** with multiple coexistence, BLEED stacking, FEAR fight-or-flight, DAZE stun, WET/CHARGED catalysts
-- **6 condition reactions** -- SHATTER, INSTANT FREEZE, STEAM, SEPSIS, FRENZY, CATATONIC
+- **9 condition reactions** -- SHATTER, INSTANT FREEZE, STEAM, SEPSIS, FRENZY, CATATONIC, DYSENTERY, DELIRIUM, NECROSIS
 - 12 enemy archetypes across 5 power tiers with **7 AI behaviours** (flee, howl, heal ally, eat corpse, sacrifice, slime coat, spawn)
 - 7 dungeon floors with 13 zones, each a 4x4 grid of 16 chambers (208 chambers total)
 - Junk pile searching: PER-based rolls, 3 search intensities, trap-loot link (trap = +25% item chance, gold x1.5), consumable junk usable in combat
 - Terminals hidden in junk piles to unlock stairwells
 - **All 6 Montor's Gift types fully wired** with combat effects across body/mind/weapon/shield (Petal, Stone, Bile, Blood, Ember, Void)
+- **All 6 gifts have class-specific weapon effects** (30 total: dagger/sword/spear/mace/axe/fists per gift)
 - Card-based gift picker at terminals ("Manage Gifts") with slot limits = gifts unlocked
 - Gift stat boosts reversed on switch (no stacking exploit)
+- Stackable conditions via gifts: Haemorrhagic Blood (BLEED 5→10), Festering Bile (POISON stacks to 5)
 - Montor's treasures hidden as regular junk (one per floor)
 - Dual vendor system: Tailors (zone-themed equipment + CHA-gated randomised premiums) + Peddlers (consumables/throwables)
 - **Throwable system** -- single-target, multi-hit, AoE delivery types
@@ -47,12 +49,17 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 - **14 variety weapons** (Mop/WET, Cattle Prod/CHARGED, Frying Pan, Cheese Grater, etc.) + 3 chaos weapons
 - **Whacky consumables** (Banana Peel, Rubber Duck, Cat, Mirror, etc.)
 - In-run levelling: **30 levels**, front-loaded XP curve (~3-5 levels per floor)
-- Pre-run stat allocation (10 points) + starting merchant (50g)
-- END stat = HP regen per room, CHA 12+ = premium vendor access
+- Pre-run stat allocation (8 points) + starting merchant (sword or dagger + consumables)
+- END stat = HP regen per room + carry capacity, CHA 12+ = premium vendor access
 - BBC Micro-style pixel sprites for all enemies, player, conditions, doors, terminals, junk piles
 - Floor-themed pixelated borders
 - Full-screen stats panel with HP bar (green/yellow/red), active gifts display, condition resistance summary
-- Safe rooms between floors with Gift activation
+- Safe rooms between floors with Gift activation + 3-way reward choice (tonic/item/Montor's choice)
+- **Montor's Mood system** — tidiness tracking, greed score, taste preferences, mood-scaled rewards
+- **Montor speaks in purple pixel font** — unique visual identity
+- **Run persistence** — localStorage + Firestore backup, resume on reload
+- **Inventory overhaul** — rarity colours, 4 tabs, sort, item comparison, weight bar, combat status card
+- **Rarity price curve** — rare 1.5x, epic 2x, legendary 3x, heirloom 4x
 - ErrorBoundary component for crash diagnosis (iOS WebKit)
 - Firebase Auth (email + Google sign-in)
 - GitHub Pages deployment with auto-deploy from main
@@ -61,12 +68,13 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 
 | Task | Status |
 |---|---|
-| Wire remaining relic passives (reflect_conditions, last_stand, see_enemy_hp) | Backlog |
-| Inventory UI redesign -- better layout, weight system, END governs capacity | Backlog |
+| Enemy variety + boss abilities | Backlog — biggest content gap |
+| Floor-scaled enemy conditions (deeper = nastier) | Backlog |
+| Junk offload rooms + junk-scaling items | Spec written |
+| Inventory weight penalties (bar visible, no penalty yet) | Backlog |
 | Room events -- pollen, rain, grease fires, day/night (Garden) | Backlog |
-| Montor's Mood system -- tidiness tracking, safe room tonics, between-room whispers | Backlog |
 | WIS stat wired for gift activation rolls | Backlog |
-| Sprite polish -- junk pile sprites for all floors (Garden done), corpse sprites, player class variants | Backlog |
+| Sprite polish -- junk pile sprites for all floors (Garden done) | Backlog |
 | Dungeon map UI improvements -- fog of war, PER-based reveal | Backlog |
 | Firebase persistence -- save/load run state to Firestore | Backlog |
 | Soul slot synergies -- 21 pairings for endgame depth | Backlog |

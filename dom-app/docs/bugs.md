@@ -7,12 +7,24 @@
 | 1 | LOW | Condition icons briefly stale after enemy tick | Kill enemy with conditions, icons linger ~300ms | Known — immediate setBattle caused worse bug (combat lock), reverted |
 | 2 | LOW | Enemy STR/DEF shows green on first floor (old cached runs) | Start run from before _baseStats deploy | Self-resolves on new runs |
 
-## Testing Checklist (2026-04-03 build)
-- [ ] Enter every room type on Underground (combat, empty, merchant, quest_npc, zone_door, stairwell)
-- [ ] Use zone door to travel between zones
-- [ ] Equip/unequip all new gear types (rings, amulets, helmets, boots)
-- [ ] Dual wield sword+dagger and dagger+dagger
-- [ ] Find a Tailor NPC — check zone-themed stock + premium CHA-gated item
+## Testing Checklist (2026-04-06 build)
+- [ ] Run persistence: close browser mid-run, reopen, verify resume prompt works
+- [ ] Resume a run: HP, gold, inventory, position, gifts all correct
+- [ ] Die or complete run: no resume prompt next time (save cleared)
+- [ ] Montor mood: be tidy (Careful Clean only) → check safe room gives 2 tonic picks
+- [ ] Montor mood: ransack everything → check safe room gives nothing
+- [ ] Safe room 3-way choice: try each option (Tonic/Item/Montor's Choice)
+- [ ] Inventory: rarity colours showing on all items (inventory, merchants, loot, search)
+- [ ] Inventory: sort toggle works (Rarity/DMG/DEF/Name)
+- [ ] Inventory: item comparison shows when viewing equippable item
+- [ ] Inventory: weight bar visible in header
+- [ ] Combat inventory: shows glanceable status card (not old scrollable list)
+- [ ] Gift weapon effects: test at least 1 class-specific weapon gift per gift type
+- [ ] Condition reactions: POISON + NAUSEA = DYSENTERY, POISON + FEAR = DELIRIUM, POISON + FROST = NECROSIS
+- [ ] Throwables: single-target throws work without pre-selecting enemy
+- [ ] Traps: can die from trap damage (HP reaches 0)
+- [ ] Enemy stats: green when buffed, red when debuffed (e.g. Acid Edge)
+- [ ] Montor speaks in purple pixel font everywhere (whispers + safe room)
 - [ ] Find a Peddler NPC — check consumables stock
 - [ ] Get poisoned AND bleeding simultaneously (multiple conditions coexist)
 - [ ] Level up — check XP bar, stat descriptions, How It Works guide
