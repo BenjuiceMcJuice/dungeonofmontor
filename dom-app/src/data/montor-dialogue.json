@@ -102,6 +102,23 @@
       "Tick tock."
     ]
   },
+  "personalityWhispers": {
+    "melancholy": ["Gran used to love this room.", "It was better before.", "Everything fades.", "I miss the quiet."],
+    "paranoid": ["Who sent you? The rats?", "I'm watching. Always.", "You're not alone down here.", "Trust nothing."],
+    "comedic": ["Why did the knight cross the dungeon?", "I've got a million of these.", "Knock knock. No really. Knock.", "That's what she said. My mum. About the gravy."],
+    "proud": ["Notice the cornicing.", "I built this corridor myself.", "Original features throughout.", "Not many dungeons have underfloor heating."],
+    "lonely": ["Stay a while?", "It's been so quiet.", "Nobody visits anymore.", "I just want someone to talk to."],
+    "vengeful": ["I remember what you did.", "Payback is coming.", "Every step is noted.", "You'll regret this."],
+    "passive_aggressive": ["No, go ahead. It's fine.", "I'm not upset. Why would I be upset?", "Take whatever you want. I don't mind.", "Sure. Fine. Whatever."],
+    "mum_mode": ["Have you eaten?", "Wipe your feet.", "You'll catch your death.", "Put a coat on."],
+    "dramatic": ["This is the WORST.", "HOW could you?", "I may never recover.", "The AUDACITY."],
+    "sleepy": ["*yawn*", "What time is it?", "Five more minutes.", "Zzz... huh? Oh. You."],
+    "philosophical": ["What even IS a dungeon?", "Does the gnome dream?", "If I'm not seen, am I real?", "The void stares also."],
+    "petty": ["You moved that chair.", "That was 2 inches to the left.", "I JUST tidied that.", "Was that scratch there before?"],
+    "chef": ["That's not a weapon. It's a PEELER.", "The roast needs turning.", "Season it properly.", "My kitchen. My rules."],
+    "estate_agent": ["Open plan. Loads of character.", "South-facing. Very desirable.", "Scope for improvement.", "Would suit first-time dungeon crawler."],
+    "bureaucratic": ["Have you filled in a form?", "That's not procedure.", "I'll need that in triplicate.", "There should be a form for this."]
+  },
   "tonicReward": {
     "twoChoice": "Montor offers two tonics. Choose wisely.",
     "oneChoice": "A gift. Don't waste it.",

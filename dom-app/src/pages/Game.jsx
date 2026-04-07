@@ -641,6 +641,21 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       setPlayerHp(function(hp) { return Math.min(hp + regenAmount, character.maxHp) })
     }
 
+    // Pick a static whisper — 40% personality, 30% room entry, 30% atmospheric
+    function pickStaticWhisper(mood) {
+      var roll = Math.random()
+      var personalityPool = montorDialogue.personalityWhispers && montorDialogue.personalityWhispers[montorPersonality.id]
+      if (roll < 0.4 && personalityPool && personalityPool.length > 0) {
+        return personalityPool[Math.floor(Math.random() * personalityPool.length)]
+      } else if (roll < 0.7) {
+        var roomPool = montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral
+        return roomPool[Math.floor(Math.random() * roomPool.length)]
+      } else {
+        var whisperPool = montorDialogue.whispers[mood] || montorDialogue.whispers.neutral
+        return whisperPool[Math.floor(Math.random() * whisperPool.length)]
+      }
+    }
+
     // Montor whisper — 30% chance on entering a new room
     if (Math.random() < 0.3) {
       var mood = getMontorMood()
@@ -651,19 +666,13 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           if (result && result.whisper) {
             setMontorWhisper(result.whisper)
           } else {
-            // Fallback to static
-            var pool = Math.random() < 0.5
-              ? (montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral)
-              : (montorDialogue.whispers[mood] || montorDialogue.whispers.neutral)
-            setMontorWhisper(pool[Math.floor(Math.random() * pool.length)])
+            // Fallback to static — mix mood, room entry, and personality
+            setMontorWhisper(pickStaticWhisper(mood))
           }
           setTimeout(function() { setMontorWhisper(null) }, 6000)
         })
       } else {
-        var pool = Math.random() < 0.5
-          ? (montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral)
-          : (montorDialogue.whispers[mood] || montorDialogue.whispers.neutral)
-        setMontorWhisper(pool[Math.floor(Math.random() * pool.length)])
+        setMontorWhisper(pickStaticWhisper(mood))
         setTimeout(function() { setMontorWhisper(null) }, 6000)
       }
     } else {
@@ -5654,7 +5663,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <div className="h-full flex flex-col items-center justify-center gap-3 px-2 relative" style={{ zIndex: 1 }}>
               {/* Montor whisper */}
               {montorWhisper && (
-                <p className="text-purple-400 text-sm text-center max-w-xs mb-3 font-display">
+                <p className="text-purple-400 text-lg text-center max-w-xs mb-3 font-display">
                   "{montorWhisper}"
                 </p>
               )}
