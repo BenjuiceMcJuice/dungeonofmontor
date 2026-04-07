@@ -31,33 +31,9 @@ var MAX_LOG_ENTRIES = 6
 // Safe room background — cached pixel art data URL
 var _safeRoomBgCache = null
 function getSafeRoomBgStyle() {
-  if (!_safeRoomBgCache) {
-    var sprite = CHAMBER_ICONS.safe_room
-    if (sprite) {
-      var scale = 4
-      var canvas = document.createElement('canvas')
-      canvas.width = sprite.cols * scale
-      canvas.height = sprite.rows * scale
-      var ctx = canvas.getContext('2d')
-      ctx.imageSmoothingEnabled = false
-      for (var r = 0; r < sprite.rows; r++) {
-        if (!sprite.grid[r]) continue
-        for (var c = 0; c < sprite.cols; c++) {
-          var v = sprite.grid[r][c]
-          if (v === null || v === undefined) continue
-          ctx.fillStyle = v
-          ctx.fillRect(c * scale, r * scale, scale, scale)
-        }
-      }
-      _safeRoomBgCache = canvas.toDataURL()
-    }
+  return {
+    background: 'linear-gradient(180deg, #12091a 0%, #0e0714 50%, #0a050f 100%)',
   }
-  return _safeRoomBgCache ? {
-    backgroundImage: 'url(' + _safeRoomBgCache + ')',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-  } : { background: '#0a0a0f' }
 }
 
 // Condition ID → display name (e.g. "BLEED" → "Bleeding", "FEAR" → "Afraid")
