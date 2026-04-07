@@ -972,13 +972,16 @@ function resolveEnemyAttack(battleState, enemyId) {
     }
   }
 
-  // SPAWN — rats and moths breed in long fights
-  if (beh.canSpawn && enemy.turnCount >= (beh.spawnAfterTurns || 4) && Math.random() < (beh.spawnChance || 0.2)) {
+  // SPAWN — adults breed in long fights. Babies CANNOT spawn. Max 5 enemies.
+  var livingEnemyCount = bs.enemies.filter(function(e) { return !e.isDown }).length
+  if (beh.canSpawn && !enemy.isBaby && livingEnemyCount < 5 && enemy.turnCount >= (beh.spawnAfterTurns || 4) && Math.random() < (beh.spawnChance || 0.2)) {
     var spawnType = enemy.archetypeKey
     var spawnEnemy = generateEnemy(spawnType, 'dust', 'novice')
     spawnEnemy.name = 'Baby ' + spawnEnemy.name
     spawnEnemy.currentHp = Math.round(spawnEnemy.currentHp * 0.5)
     spawnEnemy.maxHp = spawnEnemy.currentHp
+    spawnEnemy.isBaby = true // babies cannot spawn more babies
+    spawnEnemy.behaviour = Object.assign({}, spawnEnemy.behaviour || {}, { canSpawn: false })
     bs.enemies.push(spawnEnemy)
     bs.turnOrder.push(spawnEnemy.id)
     return { newBattle: bs, result: {
