@@ -3958,5 +3958,44 @@
     "sellPrice": 60,
     "description": "+1 STR, +1 LCK. Gold. Thick. Leaves a mark. By order.",
     "weight": 0
+  },
+  "montors_venom_band": {
+    "id": "montors_venom_band",
+    "name": "Montor's Venom Band",
+    "type": "ring",
+    "slot": "ring",
+    "rarity": "uncommon",
+    "passiveEffect": "condition_dot_multiplier",
+    "passiveValue": 1.5,
+    "buyPrice": 48,
+    "sellPrice": 20,
+    "description": "Condition DoT +50%. Green tarnish. Smells like the sewers.",
+    "weight": 0
+  },
+  "montors_ember_ring": {
+    "id": "montors_ember_ring",
+    "name": "Montor's Ember Ring",
+    "type": "ring",
+    "slot": "ring",
+    "rarity": "rare",
+    "passiveEffect": "condition_dot_multiplier",
+    "passiveValue": 2.0,
+    "buyPrice": 120,
+    "sellPrice": 48,
+    "description": "Condition DoT doubled. Still warm. Always warm.",
+    "weight": 0
+  },
+  "montors_bleed_band": {
+    "id": "montors_bleed_band",
+    "name": "Montor's Bleed Band",
+    "type": "ring",
+    "slot": "ring",
+    "rarity": "uncommon",
+    "passiveEffect": "bleed_enhanced_damage",
+    "passiveValue": 1,
+    "buyPrice": 44,
+    "sellPrice": 18,
+    "description": "BLEED deals +1 per stack. Barbed wire wrapped in velvet.",
+    "weight": 0
   }
 }
