@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import GroqKeyInput from './GroqKeyInput.jsx'
+import PersonalityPicker from './PersonalityPicker.jsx'
 
 var P = 3, W = 480, H = 340
 
@@ -392,8 +393,9 @@ function LandingScene({ onEnter }) {
             </div>
           )}
         </div>
-        {/* AI key input — bottom corner */}
-        <div style={{ position: 'absolute', bottom: '12px', right: '12px' }}>
+        {/* AI settings — bottom corner */}
+        <div style={{ position: 'absolute', bottom: '12px', right: '12px' }} className="flex flex-col items-end gap-1">
+          <PersonalityPicker />
           <GroqKeyInput />
         </div>
       </div>

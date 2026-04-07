@@ -248,6 +248,14 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   ]
 
   var [montorPersonality, setMontorPersonality] = useState(function() {
+    // Check if user selected a specific personality
+    try {
+      var pick = localStorage.getItem('dom_montor_personality') || 'random'
+      if (pick !== 'random') {
+        var found = MONTOR_PERSONALITIES.find(function(p) { return p.id === pick })
+        if (found) return found
+      }
+    } catch (e) { /* ignore */ }
     return MONTOR_PERSONALITIES[Math.floor(Math.random() * MONTOR_PERSONALITIES.length)]
   })
 
@@ -1174,6 +1182,8 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [negotiationHistory, setNegotiationHistory] = useState([])
   var [negotiationRound, setNegotiationRound] = useState(0)
   var [negotiationImpression, setNegotiationImpression] = useState(5) // 1-10 AI score
+  var [negotiationFreeText, setNegotiationFreeText] = useState('') // free text input
+  var [showNegotiationFreeText, setShowNegotiationFreeText] = useState(false)
 
   function initSafeRoom() {
     // Check if player has any unsmashed treasures in junk bag
@@ -4172,39 +4182,73 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             )}
 
             {/* Player options (if Montor still arguing) */}
-            {negotiationStep === 'talking' && negotiationOptions.length > 0 && (
+            {negotiationStep === 'talking' && (function() {
+              function sendPlayerChoice(text) {
+                var nextRound = negotiationRound + 1
+                var historyText = negotiationHistory.map(function(h) { return (h.role === 'montor' ? 'Montor: ' : 'Player: ') + h.text }).join(' | ')
+                var newHistory = negotiationHistory.concat([{ role: 'player', text: text }])
+                setNegotiationHistory(newHistory)
+                setNegotiationStep('loading')
+                setNegotiationRound(nextRound)
+                setShowNegotiationFreeText(false)
+                setNegotiationFreeText('')
+                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }
+                generateTreasureFollowUp(ctx, safeRoomGift.name, text, historyText, nextRound).then(function(result) {
+                  if (result && result.montor) {
+                    setNegotiationMontor(result.montor)
+                    setNegotiationOptions(result.options || [])
+                    setNegotiationHistory(newHistory.concat([{ role: 'montor', text: result.montor }]))
+                    var isDone = result.done || nextRound >= 4
+                    setNegotiationStep(isDone ? 'done' : 'talking')
+                    if (isDone && result.impression) setNegotiationImpression(result.impression)
+                  } else {
+                    setNegotiationStep('done')
+                    setNegotiationMontor('...')
+                  }
+                })
+              }
+              return (
               <div className="flex flex-col gap-2 w-full max-w-xs">
-                {negotiationOptions.map(function(opt, oi) {
+                {!showNegotiationFreeText && negotiationOptions.length > 0 && negotiationOptions.map(function(opt, oi) {
                   return (
-                    <button key={oi} onClick={function() {
-                      var nextRound = negotiationRound + 1
-                      var historyText = negotiationHistory.map(function(h) { return (h.role === 'montor' ? 'Montor: ' : 'Player: ') + h.text }).join(' | ')
-                      var newHistory = negotiationHistory.concat([{ role: 'player', text: opt }])
-                      setNegotiationHistory(newHistory)
-                      setNegotiationStep('loading')
-                      setNegotiationRound(nextRound)
-                      var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }
-                      generateTreasureFollowUp(ctx, safeRoomGift.name, opt, historyText, nextRound).then(function(result) {
-                        if (result && result.montor) {
-                          setNegotiationMontor(result.montor)
-                          setNegotiationOptions(result.options || [])
-                          setNegotiationHistory(newHistory.concat([{ role: 'montor', text: result.montor }]))
-                          var isDone = result.done || nextRound >= 4
-                          setNegotiationStep(isDone ? 'done' : 'talking')
-                          if (isDone && result.impression) setNegotiationImpression(result.impression)
-                        } else {
-                          setNegotiationStep('done')
-                          setNegotiationMontor('...')
-                        }
-                      })
-                    }}
+                    <button key={oi} onClick={function() { sendPlayerChoice(opt) }}
                       className="py-2.5 px-4 rounded-lg bg-surface border border-border text-ink text-sm font-sans hover:border-gold hover:text-gold transition-colors text-left">
                       "{opt}"
                     </button>
                   )
                 })}
+                {/* Free text option */}
+                {!showNegotiationFreeText && (
+                  <button onClick={function() { setShowNegotiationFreeText(true) }}
+                    className="py-1.5 px-4 rounded-lg border border-purple-400/30 text-purple-400 text-xs font-sans hover:border-purple-400 transition-colors">
+                    Say something else...
+                  </button>
+                )}
+                {showNegotiationFreeText && (
+                  <div className="flex flex-col gap-2" onClick={function(e) { e.stopPropagation() }}>
+                    <input type="text" value={negotiationFreeText}
+                      onChange={function(e) { setNegotiationFreeText(e.target.value) }}
+                      onKeyDown={function(e) { if (e.key === 'Enter' && negotiationFreeText.trim()) sendPlayerChoice(negotiationFreeText.trim()) }}
+                      placeholder="Speak to Montor..."
+                      maxLength={80}
+                      autoFocus
+                      className="bg-bg border border-purple-400/30 rounded px-3 py-2 text-sm text-ink font-sans w-full" />
+                    <div className="flex gap-2">
+                      <button onClick={function() { if (negotiationFreeText.trim()) sendPlayerChoice(negotiationFreeText.trim()) }}
+                        disabled={!negotiationFreeText.trim()}
+                        className="flex-1 py-1.5 rounded border border-purple-400/40 text-purple-400 text-xs font-sans hover:border-purple-400 transition-colors">
+                        Send
+                      </button>
+                      <button onClick={function() { setShowNegotiationFreeText(false); setNegotiationFreeText('') }}
+                        className="flex-1 py-1.5 rounded border border-border text-ink-dim text-xs font-sans hover:text-ink transition-colors">
+                        Back
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+              )
+            })()}
 
             {/* Smash / Keep (when Montor is done arguing) */}
             {negotiationStep === 'done' && (
