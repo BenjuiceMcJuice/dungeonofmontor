@@ -997,25 +997,35 @@ function resolveEnemyAttack(battleState, enemyId) {
   var livingEnemyCount = bs.enemies.filter(function(e) { return !e.isDown }).length
   if (beh.canSpawn && !enemy.isBaby && livingEnemyCount < 5 && enemy.turnCount >= (beh.spawnAfterTurns || 4) && Math.random() < (beh.spawnChance || 0.2)) {
     var spawnType = enemy.archetypeKey
-    var spawnEnemy = generateEnemy(spawnType, 'dust', 'novice')
-    spawnEnemy.name = 'Baby ' + spawnEnemy.name
-    spawnEnemy.currentHp = Math.round(spawnEnemy.currentHp * 0.4)
-    spawnEnemy.maxHp = spawnEnemy.currentHp
-    spawnEnemy.stats = Object.assign({}, spawnEnemy.stats, {
-      str: Math.max(2, Math.round(spawnEnemy.stats.str * 0.4)),
-      def: Math.max(1, Math.round(spawnEnemy.stats.def * 0.3)),
-      agi: Math.max(2, Math.round(spawnEnemy.stats.agi * 0.5)),
-    })
-    spawnEnemy.weaponDie = Math.max(2, Math.round(spawnEnemy.weaponDie * 0.5))
-    spawnEnemy.isBaby = true // babies cannot spawn more babies
-    spawnEnemy.behaviour = Object.assign({}, spawnEnemy.behaviour || {}, { canSpawn: false })
-    // Spiders: babies can't mature, stay fragile
-    if (spawnType === 'spider') { spawnEnemy.cannotMature = true; spawnEnemy.currentHp = 1; spawnEnemy.maxHp = 1 }
-    bs.enemies.push(spawnEnemy)
-    bs.turnOrder.push(spawnEnemy.id)
+    // Per-creature spawn count: spiders spawn 2, others spawn 1
+    var spawnCount = spawnType === 'spider' ? 2 : 1
+    var spawnNames = []
+    for (var spawnI = 0; spawnI < spawnCount && livingEnemyCount + spawnI < 5; spawnI++) {
+      var spawnEnemy = generateEnemy(spawnType, 'dust', 'novice')
+      // Moths lay eggs (not live babies)
+      var isMothEgg = spawnType === 'moth'
+      spawnEnemy.name = isMothEgg ? 'Moth Egg' : 'Baby ' + spawnEnemy.name
+      spawnEnemy.currentHp = Math.round(spawnEnemy.currentHp * 0.4)
+      spawnEnemy.maxHp = spawnEnemy.currentHp
+      spawnEnemy.stats = Object.assign({}, spawnEnemy.stats, {
+        str: Math.max(2, Math.round(spawnEnemy.stats.str * 0.4)),
+        def: Math.max(1, Math.round(spawnEnemy.stats.def * 0.3)),
+        agi: Math.max(2, Math.round(spawnEnemy.stats.agi * 0.5)),
+      })
+      spawnEnemy.weaponDie = Math.max(2, Math.round(spawnEnemy.weaponDie * 0.5))
+      spawnEnemy.isBaby = true
+      spawnEnemy.behaviour = Object.assign({}, spawnEnemy.behaviour || {}, { canSpawn: false })
+      // Moth eggs: 0 STR (can't attack), hatch in 2 turns
+      if (isMothEgg) { spawnEnemy.stats.str = 0; spawnEnemy.stats.def = 1; spawnEnemy.currentHp = 2; spawnEnemy.maxHp = 2 }
+      // Spiders: babies can't mature, stay fragile
+      if (spawnType === 'spider') { spawnEnemy.cannotMature = true; spawnEnemy.currentHp = 1; spawnEnemy.maxHp = 1 }
+      bs.enemies.push(spawnEnemy)
+      bs.turnOrder.push(spawnEnemy.id)
+      spawnNames.push(spawnEnemy.name)
+    }
     return { newBattle: bs, result: {
       attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
-      attackRoll: null, damage: 0, spawned: true, spawnedName: spawnEnemy.name,
+      attackRoll: null, damage: 0, spawned: true, spawnedName: spawnNames.join(' + '),
     }}
   }
 
