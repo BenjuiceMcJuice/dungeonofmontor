@@ -282,10 +282,10 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
   function getTidinessSummary() {
     var tidiness = maxFloorDisturbance > 0 ? 1 - (floorDisturbance / maxFloorDisturbance) : 1
-    if (tidiness >= 0.8) return { label: 'Pristine', colour: 'text-green-400', desc: 'You barely touched anything.' }
-    if (tidiness >= 0.6) return { label: 'Tidy', colour: 'text-emerald-400', desc: 'A few things out of place.' }
-    if (tidiness >= 0.4) return { label: 'Messy', colour: 'text-amber-400', desc: 'He can tell you\'ve been rummaging.' }
-    return { label: 'Ransacked', colour: 'text-red-400', desc: 'You\'ve torn the place apart.' }
+    if (tidiness >= 0.8) return { label: 'As I left it', colour: 'text-green-400', desc: 'You barely touched anything.' }
+    if (tidiness >= 0.6) return { label: 'Tolerable', colour: 'text-emerald-400', desc: 'A few things out of place.' }
+    if (tidiness >= 0.4) return { label: 'Disturbed', colour: 'text-amber-400', desc: 'He can tell you\'ve been rummaging.' }
+    return { label: 'Violated', colour: 'text-red-400', desc: 'You\'ve torn his home apart.' }
   }
 
   function getMontorLine(category) {
