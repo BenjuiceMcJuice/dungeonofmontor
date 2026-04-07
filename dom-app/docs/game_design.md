@@ -63,7 +63,7 @@ Stat modifiers shift results between tiers. The crit threshold can be lowered by
 | Stat | Abbr | What it does | Status |
 |---|---|---|---|
 | Perception | PER | Added to d20 junk search roll; spot hidden rooms/traps | Active for junk search |
-| Endurance | END | HP regen per room (END modifier HP restored each room transition) | Active for regen |
+| Endurance | END | Base 1 HP + END modifier regen per room. Also governs carry capacity (10 + END mod × 3). | Active for regen + weight |
 
 ### Relationship Stats (planned)
 
