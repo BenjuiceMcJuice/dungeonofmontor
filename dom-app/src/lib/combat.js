@@ -897,14 +897,14 @@ function resolveEnemyAttack(battleState, enemyId) {
     }}
   }
 
-  // HOWL — buff all allies (orc warchief)
-  if (beh.canHowl && enemy.howlCooldownLeft <= 0) {
+  // HOWL — buff all allies (orc warchief) — once per combat
+  if (beh.canHowl && !enemy.hasHowled) {
     var livingAllies = bs.enemies.filter(function(e) { return !e.isDown && e.id !== enemy.id })
     if (livingAllies.length > 0 && Math.random() < 0.4) {
       livingAllies.forEach(function(ally) {
         ally.stats = Object.assign({}, ally.stats, { str: ally.stats.str + beh.howlBonus })
       })
-      enemy.howlCooldownLeft = beh.howlCooldown || 3
+      enemy.hasHowled = true
       return { newBattle: bs, result: {
         attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
         attackRoll: null, damage: 0, howled: true, howlBonus: beh.howlBonus,
@@ -912,12 +912,13 @@ function resolveEnemyAttack(battleState, enemyId) {
     }
   }
 
-  // HEAL ALLY — hounds lick wounded packmate
-  if (beh.canHealAlly) {
+  // HEAL ALLY — hounds lick wounded packmate — once per combat
+  if (beh.canHealAlly && !enemy.hasHealed) {
     var woundedAlly = bs.enemies.find(function(e) { return !e.isDown && e.id !== enemy.id && e.currentHp < e.maxHp * 0.5 })
     if (woundedAlly && Math.random() < 0.5) {
       var healAmt = beh.healAmount || 5
       woundedAlly.currentHp = Math.min(woundedAlly.maxHp, woundedAlly.currentHp + healAmt)
+      enemy.hasHealed = true
       return { newBattle: bs, result: {
         attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
         attackRoll: null, damage: 0, healedAlly: true, healedAllyName: woundedAlly.name, healAmount: healAmt,
