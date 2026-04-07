@@ -888,6 +888,27 @@ function resolveEnemyAttack(battleState, enemyId) {
 
   var hpPercent = enemy.currentHp / enemy.maxHp
 
+  // MATURE — babies grow into adults after enough turns
+  if (enemy.isBaby && !enemy.cannotMature) {
+    var matureTurns = { rat: 4, hound: 3, moth: 2 }
+    var matureAt = matureTurns[enemy.archetypeKey] || 4
+    if (enemy.turnCount >= matureAt) {
+      enemy.isBaby = false
+      enemy.name = enemy.name.replace('Baby ', '')
+      // Grow to full stats
+      var adult = generateEnemy(enemy.archetypeKey, enemy.tierKey || 'dust', 'novice')
+      enemy.maxHp = adult.maxHp
+      enemy.currentHp = Math.min(enemy.currentHp + Math.round(adult.maxHp * 0.5), adult.maxHp)
+      enemy.stats = Object.assign({}, adult.stats)
+      enemy.weaponDie = adult.weaponDie
+      enemy.behaviour = Object.assign({}, adult.behaviour || {})
+      return { newBattle: bs, result: {
+        attacker: enemy.name, attackerId: enemy.id, target: target.name, targetUid: target.uid,
+        attackRoll: null, damage: 0, matured: true, maturedName: enemy.name,
+      }}
+    }
+  }
+
   // FLEE — cowardly enemies run at low HP
   if (beh.fleeThreshold && hpPercent <= beh.fleeThreshold && Math.random() < 0.6) {
     enemy.isDown = true; enemy.fled = true // fled = removed from battle, drops bag
@@ -982,6 +1003,8 @@ function resolveEnemyAttack(battleState, enemyId) {
     spawnEnemy.maxHp = spawnEnemy.currentHp
     spawnEnemy.isBaby = true // babies cannot spawn more babies
     spawnEnemy.behaviour = Object.assign({}, spawnEnemy.behaviour || {}, { canSpawn: false })
+    // Spiders: babies can't mature, stay fragile
+    if (spawnType === 'spider') { spawnEnemy.cannotMature = true; spawnEnemy.currentHp = 1; spawnEnemy.maxHp = 1 }
     bs.enemies.push(spawnEnemy)
     bs.turnOrder.push(spawnEnemy.id)
     return { newBattle: bs, result: {
