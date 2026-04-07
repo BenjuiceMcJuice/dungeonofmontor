@@ -663,7 +663,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       // Try AI whisper first, fall back to static
       if (hasGroqKey()) {
         var tidySummary = getTidinessSummary()
-        generateWhisper({ mood: mood, tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }).then(function(result) {
+        generateWhisper({ mood: mood, tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality, playerName: character.name }).then(function(result) {
           if (result && result.whisper) {
             setMontorWhisper(result.whisper)
           } else {
@@ -1205,7 +1205,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     setSafeRoomAiLine(null)
     if (hasGroqKey()) {
       var tidySummary = getTidinessSummary()
-      generateSafeRoomLine({ mood: getMontorMood(), tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }).then(function(result) {
+      generateSafeRoomLine({ mood: getMontorMood(), tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality, playerName: character.name }).then(function(result) {
         if (result && result.line) setSafeRoomAiLine(result.line)
       })
     }
@@ -4123,7 +4123,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 setNegotiationStep('loading')
                 setNegotiationRound(1)
                 setNegotiationHistory([])
-                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }
+                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality, playerName: character.name }
                 generateTreasureReaction(ctx, safeRoomGift.name).then(function(result) {
                   if (result && result.montor) {
                     setNegotiationMontor(result.montor)
@@ -4202,7 +4202,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 setNegotiationRound(nextRound)
                 setShowNegotiationFreeText(false)
                 setNegotiationFreeText('')
-                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }
+                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality, playerName: character.name }
                 generateTreasureFollowUp(ctx, safeRoomGift.name, text, historyText, nextRound).then(function(result) {
                   if (result && result.montor) {
                     setNegotiationMontor(result.montor)
