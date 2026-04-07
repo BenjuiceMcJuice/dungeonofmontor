@@ -38,9 +38,9 @@
         "id": "thorn_bark",
         "name": "Thorn Bark",
         "type": "attack",
-        "description": "20% chance when hit: attacker gets BLEED.",
+        "description": "35% chance when hit: attacker gets BLEED.",
         "effect": "reflect_condition",
-        "chance": 0.20,
+        "chance": 0.35,
         "condition": "BLEED",
         "conditionTurns": null
       },
