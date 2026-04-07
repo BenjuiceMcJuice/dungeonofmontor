@@ -607,13 +607,18 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       setPlayerHp(function(hp) { return Math.min(hp + regenAmount, character.maxHp) })
     }
 
-    // Montor whisper — random chance on entering a new room
-    // Mood-aware whispers
-    var whisperPool = montorDialogue.whispers[getMontorMood()] || montorDialogue.whispers.neutral
-    var whisper = whisperPool[Math.floor(Math.random() * whisperPool.length)]
-    setMontorWhisper(whisper)
-    if (whisper) {
+    // Montor whisper — 30% chance on entering a new room
+    // Mix atmospheric whispers with room entry trolling
+    if (Math.random() < 0.3) {
+      var mood = getMontorMood()
+      var pool = Math.random() < 0.5
+        ? (montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral)
+        : (montorDialogue.whispers[mood] || montorDialogue.whispers.neutral)
+      var whisper = pool[Math.floor(Math.random() * pool.length)]
+      setMontorWhisper(whisper)
       setTimeout(function() { setMontorWhisper(null) }, 4000)
+    } else {
+      setMontorWhisper(null)
     }
 
     // If already cleared or has corpses (fought), just show doors (backtracking)
@@ -5070,7 +5075,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                           {isExpanded && (
                             <div className="px-3 pb-3 flex flex-col gap-2">
                               <p className="text-ink-faint text-[10px]">Sell: {junk.sellPrice}g</p>
-                              {canEquipNow && gamePhase === 'combat' && (
+                              {junk.consumable && (gamePhase === 'doors' || (canEquipNow && gamePhase === 'combat')) && (
                                 <button onClick={function() {
                                   var consumeTarget = junk
                                   // Green Patience (mind gift): reduce consume risk
@@ -5092,7 +5097,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                                       setActiveBuffs(function(prev) { return prev.concat([{ stat: result.effect.stat, value: result.effect.value, turnsRemaining: result.effect.turns || 3 }]) })
                                     }
                                   } else if (!result.success && result.effect && result.effect.effect === 'condition') {
-                                    // Bad outcome — apply condition (poison, daze, etc.)
+                                    // Bad outcome — apply condition in combat, or small HP loss in exploration
                                     if (battle) {
                                       var condId = result.effect.condition
                                       setBattle(function(prev) {
@@ -5106,6 +5111,10 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                                         })
                                         return Object.assign({}, prev, { players: newPlayers })
                                       })
+                                    } else {
+                                      // Out of combat — minor HP loss instead of condition
+                                      var junkDmg = Math.max(1, Math.floor(Math.random() * 4) + 1) // 1-4 HP
+                                      setPlayerHp(function(hp) { return Math.max(1, hp - junkDmg) })
                                     }
                                   }
                                   setConsumeResult({ success: result.success, narrative: result.narrative, junkName: junk.name })

@@ -72,6 +72,36 @@
       "He watches you stuff your pockets."
     ]
   },
+  "roomEntry": {
+    "happy": [
+      "I painted that ceiling myself.",
+      "Don't scuff the floor.",
+      "This used to be the good room.",
+      "Careful with the furniture.",
+      "Gran liked this room."
+    ],
+    "neutral": [
+      "You won't find anything useful in here.",
+      "Another room. Another trespasser.",
+      "I've been meaning to tidy this.",
+      "Mind the damp.",
+      "Don't touch anything."
+    ],
+    "annoyed": [
+      "Careful. That's load-bearing.",
+      "You're tracking mud everywhere.",
+      "This is why I can't have nice things.",
+      "I just cleaned in here.",
+      "You smell like my sewers."
+    ],
+    "angry": [
+      "I know exactly where you are.",
+      "You shouldn't be in here.",
+      "This room remembers what you did.",
+      "Turn back.",
+      "Tick tock."
+    ]
+  },
   "tonicReward": {
     "twoChoice": "Montor offers two tonics. Choose wisely.",
     "oneChoice": "A gift. Don't waste it.",
