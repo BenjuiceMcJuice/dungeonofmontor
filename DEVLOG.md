@@ -161,6 +161,10 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-07 | Condition reactions — CONDUCTANCE added, INSTANT FREEZE fixed, FRENZY source check | ✅ Done |
 | 2026-04-07 | Inventory — Worn tab, empty slot comparison, merchant markers, shield gate | ✅ Done |
 | 2026-04-07 | All 126 gift effects verified 100% wired | ✅ Done |
+| 2026-04-07 | Groq AI foundation — wrapper, key input with test/validate, system prompt | ✅ Done |
+| 2026-04-07 | AI whispers — 30% room entry, unique Montor lines via Groq | ✅ Done |
+| 2026-04-07 | AI safe room dialogue — mood-aware greeting via Groq | ✅ Done |
+| 2026-04-07 | AI treasure negotiation — up to 4 exchanges, Montor decides when done | ✅ Done |
 |            | **Next up** | |
 |            | Enemy variety + boss abilities | ⬜ |
 |            | Floor-scaled enemy conditions (deeper = nastier) | ⬜ |

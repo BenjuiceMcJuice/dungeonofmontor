@@ -106,32 +106,33 @@ Weights by type:
 - junk items: 1 per stack
 ```
 
-## Implementation Order
+## Implementation Status
 
-### Sprint 1: Rarity display (1-2 hours)
-- Rarity colour helper function
-- Apply to inventory list, detail panel, equipped display
-- Apply to merchant stock, loot panels, combat item picker
+### Sprint 1: Rarity display ✅ DONE
+- RARITY_COLOURS constant + rarityCol() helper
+- Applied everywhere: inventory list, detail panel, equipped display, merchant stock, loot panels, corpse/chest loot, junk search results
 
-### Sprint 2: Better list view + tab cleanup (2-3 hours)
-- Inline stat summaries per item type
-- Reduce to 4 tabs
-- Equipped summary bar at top
+### Sprint 2: Tab cleanup ✅ DONE
+- 5 tabs: Worn (equipped) / Gear / Equip / Items / Junk
+- Equipped items in dedicated Worn tab — no more stealing scroll space
+- Old equipped sections disabled on Gear/Equip tabs
 
-### Sprint 3: Sort options + comparison (1-2 hours)
-- Sort toggle per tab
-- Item comparison overlay when viewing equippable items
+### Sprint 3: Sort + comparison ✅ DONE
+- Sort toggle: Rarity / DMG / DEF / Name on Gear/Equip/Items tabs
+- Item comparison: weapon vs weapon, armour by slot, shield vs shield
+- Comparison vs empty slot ("No Helmet ▲ upgrade")
+- Merchant upgrade/downgrade markers (green ▲ / red ▼)
 
-### Sprint 4: Weight system (2-3 hours)
-- Add weight field to all items in items.json
-- Capacity calculation from END
-- Weight bar in inventory header
-- Encumbrance penalty wiring
-- Can't-pick-up guard
+### Sprint 4: Weight system ✅ PARTIALLY DONE
+- Weight field on all 280 items (0-3 by type)
+- END-based capacity: 10 + (END mod × 3)
+- Weight bar in inventory header (green/amber/red)
+- ❌ Encumbrance penalties NOT YET implemented (visible only, no gameplay effect)
+- ❌ Can't-pick-up guard NOT YET implemented
 
-### Sprint 5: Quick actions (1-2 hours)
-- Tap to equip
-- Bulk sell junk button
+### Sprint 5: Quick actions — REMAINING
+- ❌ Tap to equip
+- ❌ Bulk sell junk button
 - Drop item (with confirm)
 
 ### Sprint 6: Combat inventory cleanup (1 hour)

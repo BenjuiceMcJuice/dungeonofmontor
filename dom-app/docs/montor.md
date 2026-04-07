@@ -1,7 +1,7 @@
 # Montor
 
 > Everything about Montor the character, his Gifts, his mood, and his future as an AI personality.
-> Updated 2026-04-06.
+> Updated 2026-04-07.
 
 ---
 
@@ -257,12 +257,24 @@ The AI scores each conversation 1-10 based on mood alignment:
 
 The rarest outcome. If a player has high WIS, responds with genuine empathy during Melancholy/Nostalgic mood, and is carrying his mum's items -- Montor goes quiet, then says "You remind me of her." Full heal, unique relic, and Montor stops attacking for the rest of the floor.
 
-### AI Implementation
+### AI Implementation (✅ PARTIALLY LIVE)
 
-- Groq API (user-supplied key, stored in localStorage only)
-- Max 5 exchanges per conversation, max 2 per floor
-- Fallback: if no API key, use static dialogue from whispers array
-- Stats affect conversations: CHA governs response options, WIS governs mood reading, CUN unlocks manipulation (risky)
+**Foundation built (2026-04-07):**
+- `lib/groq.js` — Groq API wrapper with Montor system prompt (mood, tidiness, greed, floor context)
+- `GroqKeyInput` component — API key input on landing screen with test & validate
+- Model: Llama 3.3 70B via Groq API
+- Fallback: if no API key, all features use static dialogue pools
+
+**Live AI features:**
+- **AI Whispers** — 30% chance on room entry, generates unique Montor lines via Groq
+- **AI Safe Room Dialogue** — Montor's greeting generated with full mood/tidiness context
+- **AI Treasure Negotiation** — up to 4-exchange conversation where Montor argues against smashing. Montor decides when to stop. Player picks from 3 AI-generated responses per exchange.
+
+**Planned AI features:**
+- AI notice boards — player posts message, Montor replies in next zone
+- AI narrative gameplay mode — text adventure with AI as DM, dice rolls, Montor narrates
+- Full conversation system (max 5 exchanges per conversation, max 2 per floor)
+- Stats affect conversations: CHA governs response options, WIS governs mood reading
 
 ---
 

@@ -25,6 +25,15 @@
 - [ ] Traps: can die from trap damage (HP reaches 0)
 - [ ] Enemy stats: green when buffed, red when debuffed (e.g. Acid Edge)
 - [ ] Montor speaks in purple pixel font everywhere (whispers + safe room)
+- [ ] Spawn system: babies weak, can't spawn, mature after turns, max 5 enemies
+- [ ] Spiders spawn 2 (1 HP each), moths lay eggs (hatch in 2 turns)
+- [ ] AoE gifts: test Spore Burst (kill→BLIND all), Aftershock (stagger→3 AoE)
+- [ ] FRENZY doesn't trigger from bleed-auto-FEAR (only player-applied FEAR)
+- [ ] Shield gifts only work with actual shield (not dual-wield offhand)
+- [ ] Groq key: test & save on landing screen validates API key
+- [ ] AI whispers: with key, unique Montor lines on room entry (30% chance)
+- [ ] AI treasure negotiation: up to 4 exchanges, Montor decides when done
+- [ ] AI fallback: without key, all features use static dialogue
 - [ ] Find a Peddler NPC — check consumables stock
 - [ ] Get poisoned AND bleeding simultaneously (multiple conditions coexist)
 - [ ] Level up — check XP bar, stat descriptions, How It Works guide
@@ -64,8 +73,25 @@
 | 18 | Combat victory not firing (setBattle race condition) | Removed immediate setBattle in enemy tick useEffect |
 | 19 | Battle Won overlay locked game (recursive call) | Removed feature entirely |
 
+## Fixed Bugs (2026-04-07)
+| # | Description | Fix |
+|---|---|---|
+| 20 | Montor mood dialogue wrong tier (neutral for pristine) | Pristine always returns 'happy' |
+| 21 | Gerald smash dialogue fires on find instead of smash | Split into montorFind (find) and montorSmash (smash) |
+| 22 | Junk search positive flavour alongside trap results | Suppress positive text when trap hits, remove duplicate trap card |
+| 23 | Orc can eat same corpse twice | Added !e.eaten check |
+| 24 | Tidiness calculation broken (totalLayers not stored) | Added totalLayers to pile creation |
+| 25 | Unshakeable (DAZE immune) not wired | Wired condition_immunity in handleEnemyComplete |
+| 26 | Mountain Mind (50% resist) not wired | Wired mind_condition_resist in handleEnemyComplete |
+| 27 | FRENZY chain from bleed auto-FEAR wiped all stacks | FRENZY skipped if FEAR source is bleed_panic |
+| 28 | Shield gifts firing with dual-wield (not actual shield) | Added offhand.slot === 'offhand' check |
+| 29 | Babies spawning babies infinitely | isBaby flag + canSpawn:false + 5 enemy cap |
+| 30 | WET + CHARGED reaction missing (CONDUCTANCE) | Added to REACTIONS array: 8 AoE + DAZE all |
+| 31 | INSTANT FREEZE had no damage or brittle | Added 5 damage + -3 DEF brittle effect |
+
 ## Sign-off Log
 | Date | Tester | Build | Notes |
 |---|---|---|---|
 | 2026-04-03 | Steve | post-gift-wiring | Testing in progress |
 | 2026-04-06 | Steve | post-effects-audit | Full effects audit, persistence, mood system |
+| 2026-04-07 | Steve | post-playtest-fixes | Playtest bugs, AoE gifts, spawn, AI, inventory |
