@@ -268,12 +268,15 @@ The rarest outcome. If a player has high WIS, responds with genuine empathy duri
 **Live AI features:**
 - **AI Whispers** — 30% chance on room entry, generates unique Montor lines via Groq
 - **AI Safe Room Dialogue** — Montor's greeting generated with full mood/tidiness context
-- **AI Treasure Negotiation** — up to 4-exchange conversation where Montor argues against smashing. Montor decides when to stop. Player picks from 3 AI-generated responses per exchange.
+- **AI Treasure Negotiation** — up to 4-exchange conversation where Montor argues against smashing. Montor decides when to stop. Player picks from 3 AI-generated responses OR types free text (max 80 chars).
+- **15 Personalities** — random per run: melancholy, paranoid, comedic, proud, lonely, vengeful, passive aggressive, mum mode, dramatic, sleepy, philosophical, petty, chef, estate agent, bureaucratic. Player can select via Mood picker on landing screen.
+- **Conversation Scoring** — Montor rates the negotiation 1-10. What impresses him depends on personality. Score 7+ and keep = bonus stat point.
+- **Free Text Input** — "Say something else..." option in negotiations. Type anything to Montor.
+- **Safety Guardrails** — strict family-friendly rules in all prompts. No inappropriate content. Player abuse gets in-character deflection.
 
 **Planned AI features:**
 - AI notice boards — player posts message, Montor replies in next zone
 - AI narrative gameplay mode — text adventure with AI as DM, dice rolls, Montor narrates
-- Full conversation system (max 5 exchanges per conversation, max 2 per floor)
 - Stats affect conversations: CHA governs response options, WIS governs mood reading
 
 ---

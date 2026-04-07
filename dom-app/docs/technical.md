@@ -11,7 +11,7 @@
 | Frontend | React 18 + Vite + Tailwind v4 | Mobile-first PWA |
 | Auth | Firebase Auth | Email + Google sign-in |
 | Database | Firestore | Real-time sync for multiplayer (Spark/free plan, europe-west2) |
-| AI | Groq API (Llama 3.3 70B) | AI whispers, safe room dialogue, treasure negotiation. User-supplied key stored in localStorage. Fallback to static text without key. |
+| AI | Groq API (Llama 3.3 70B) | AI whispers, safe room, treasure negotiation (4 exchanges + scoring + free text), 15 personalities, safety guardrails. User key in localStorage. Static fallback without key. |
 | Hosting | GitHub Pages | Auto-deploy from `main` via GitHub Actions |
 | Sprites | Canvas grid arrays | No image files; sprites are JS data |
 
