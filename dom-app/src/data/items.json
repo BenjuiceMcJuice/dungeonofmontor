@@ -3635,10 +3635,10 @@
     "slot": "amulet",
     "rarity": "uncommon",
     "passiveEffect": "damage_multiplier",
-    "passiveValue": 1.25,
+    "passiveValue": 1.5,
     "buyPrice": 60,
     "sellPrice": 24,
-    "description": "1.25x weapon damage. Cat's claw in resin. The cat's fine. Probably.",
+    "description": "1.5x weapon damage. Cat's claw in resin. The cat's fine. Probably.",
     "weight": 0
   },
   "montors_blood_bead": {
