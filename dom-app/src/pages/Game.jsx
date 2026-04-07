@@ -255,6 +255,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [reflectNextAttack, setReflectNextAttack] = useState(false) // Mirror: reflect next enemy attack
   var [hitsTakenThisCombat, setHitsTakenThisCombat] = useState(0) // Stoneskin Mend: count hits for end-of-combat heal
   var [phoenixSparkUsed, setPhoenixSparkUsed] = useState(false) // Phoenix Spark: once per combat threshold heal
+  var [tremorWaveUsed, setTremorWaveUsed] = useState(false) // Tremor Wave: once per combat AoE
 
   // Calculate max possible disturbance for a zone (sum of all pile layers × deep clean cost)
   function calcMaxDisturbance(z) {
@@ -1423,6 +1424,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     setReflectNextAttack(false)
     setHitsTakenThisCombat(0)
     setPhoenixSparkUsed(false)
+    setTremorWaveUsed(false)
     setGamePhase('combat')
 
     var firstTurnId = bs.turnOrder[bs.currentTurnIndex]
@@ -1775,6 +1777,33 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             }
           })
           addLog({ type: 'condition', text: 'Spore Cloud! All enemies ' + condName(bodyG.condition) + '!', tier: 'crit' })
+        }
+      }
+
+      // Tremor Wave (stone mind): below 30% HP → all enemies DAZE + FROST (once/combat)
+      if (mindG && mindG.effect === 'threshold_aoe_dual_condition' && !tremorWaveUsed) {
+        var tremorPercent = pState.currentHp / pState.maxHp
+        if (tremorPercent < mindG.hpThreshold && pState.currentHp > 0) {
+          setTremorWaveUsed(true)
+          updatedBattle.enemies.forEach(function(e) {
+            if (!e.isDown) {
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], mindG.condition1, 'gift')
+              e.statusEffects = applyConditionToEffects(e.statusEffects || [], mindG.condition2, 'gift')
+            }
+          })
+          addLog({ type: 'condition', text: 'TREMOR WAVE! All enemies ' + condName(mindG.condition1) + ' + ' + condName(mindG.condition2) + '!', tier: 'crit' })
+        }
+      }
+
+      // Blood Spray (blood body): 20% when hit → attacker BLEED + 1 random other FEAR
+      if (bodyG && bodyG.effect === 'hit_taken_bleed_and_fear_spread' && attackerEnemy && !attackerEnemy.isDown && rollGiftChance(bodyG.chance)) {
+        attackerEnemy.statusEffects = applyConditionToEffects(attackerEnemy.statusEffects || [], 'BLEED', 'gift')
+        addLog({ type: 'condition', text: 'Blood Spray! ' + attackerEnemy.name + ' BLEED!', tier: 'hit' })
+        var othersForFear = updatedBattle.enemies.filter(function(e) { return !e.isDown && e.id !== attackerEnemy.id })
+        if (othersForFear.length > 0) {
+          var fearTarget = othersForFear[Math.floor(Math.random() * othersForFear.length)]
+          fearTarget.statusEffects = applyConditionToEffects(fearTarget.statusEffects || [], 'FEAR', 'gift')
+          addLog({ type: 'condition', text: fearTarget.name + ' FEAR from the blood!', tier: 'hit' })
         }
       }
 
@@ -2723,7 +2752,72 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         }
       }
 
+      // Spore Burst (petal body): kill → all others BLIND
+      if (bodyG2Pre && bodyG2Pre.effect === 'kill_aoe_condition' && r.enemyDefeated) {
+        giftBattle.enemies.forEach(function(e) {
+          if (!e.isDown) e.statusEffects = applyConditionToEffects(e.statusEffects || [], bodyG2Pre.condition, 'gift')
+        })
+        addLog({ type: 'condition', text: bodyG2Pre.name + '! All enemies ' + condName(bodyG2Pre.condition) + '!', tier: 'crit' })
+      }
+
+      // Plague Burst (bile body): poisoned enemy dies → all others NAUSEA
+      if (bodyG2Pre && bodyG2Pre.effect === 'poison_kill_aoe_condition' && r.enemyDefeated) {
+        var deadForPoison = giftBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
+        var wasPoisoned = deadForPoison && deadForPoison.statusEffects && deadForPoison.statusEffects.some(function(c) { return c.id === 'POISON' })
+        if (wasPoisoned) {
+          giftBattle.enemies.forEach(function(e) {
+            if (!e.isDown) e.statusEffects = applyConditionToEffects(e.statusEffects || [], bodyG2Pre.condition, 'gift')
+          })
+          addLog({ type: 'condition', text: bodyG2Pre.name + '! Poison death spreads ' + condName(bodyG2Pre.condition) + ' to all!', tier: 'crit' })
+        }
+      }
+
+      // Aftershock (stone body): stagger → 3 AoE to others
+      if (bodyG2Pre && bodyG2Pre.effect === 'stagger_aoe_damage' && r.staggerApplied) {
+        giftBattle.enemies.forEach(function(e) {
+          if (!e.isDown && e.id !== hitTarget.id) {
+            e.currentHp = Math.max(0, e.currentHp - bodyG2Pre.value)
+            if (e.currentHp <= 0) e.isDown = true
+          }
+        })
+        addLog({ type: 'player', text: bodyG2Pre.name + '! ' + bodyG2Pre.value + ' AoE from stagger!', tier: 'crit' })
+      }
+
       // --- MIND GIFTS (offensive) ---
+
+      // Pollen Storm (petal mind): 20% per hit → random condition spreads to 1 other
+      if (mindG2 && mindG2.effect === 'hit_spread_random_condition' && r.damage > 0 && rollGiftChance(mindG2.chance)) {
+        var spreadConds = ['BLIND', 'NAUSEA', 'FEAR']
+        var spreadPick = spreadConds[Math.floor(Math.random() * spreadConds.length)]
+        var otherForSpread = giftBattle.enemies.filter(function(e) { return !e.isDown && e.id !== hitTarget.id })
+        if (otherForSpread.length > 0) {
+          var spreadVictim = otherForSpread[Math.floor(Math.random() * otherForSpread.length)]
+          spreadVictim.statusEffects = applyConditionToEffects(spreadVictim.statusEffects || [], spreadPick, 'gift')
+          addLog({ type: 'condition', text: mindG2.name + '! ' + condName(spreadPick) + ' spreads to ' + spreadVictim.name + '!', tier: 'hit' })
+        }
+      }
+
+      // Toxic Cloud (bile mind): conditions applied spread to 1 other (INT scaling)
+      if (mindG2 && mindG2.effect === 'condition_spread_on_apply' && r.conditionApplied) {
+        var intMod3 = Math.max(0, Math.floor(((character.stats.int || 10) - 10) / 2))
+        var spreadChance = mindG2.baseChance + (intMod3 * mindG2.intScaling)
+        if (rollGiftChance(spreadChance)) {
+          var otherForToxic = giftBattle.enemies.filter(function(e) { return !e.isDown && e.id !== hitTarget.id })
+          if (otherForToxic.length > 0) {
+            var toxicVictim = otherForToxic[Math.floor(Math.random() * otherForToxic.length)]
+            toxicVictim.statusEffects = applyConditionToEffects(toxicVictim.statusEffects || [], r.conditionApplied, 'gift')
+            addLog({ type: 'condition', text: mindG2.name + '! ' + condName(r.conditionApplied) + ' spreads to ' + toxicVictim.name + '!', tier: 'hit' })
+          }
+        }
+      }
+
+      // Feeding Frenzy (blood mind): kill → all living enemies get 1 BLEED
+      if (mindG2 && mindG2.effect === 'kill_aoe_bleed' && r.enemyDefeated) {
+        giftBattle.enemies.forEach(function(e) {
+          if (!e.isDown) e.statusEffects = applyConditionToEffects(e.statusEffects || [], 'BLEED', 'gift')
+        })
+        addLog({ type: 'condition', text: mindG2.name + '! Blood scent — all enemies BLEED!', tier: 'crit' })
+      }
 
       // Pollen Cloud (petal mind): on crit, all enemies BLIND
       if (mindG2 && mindG2.effect === 'crit_aoe_condition' && r.attackRoll && r.attackRoll.tierName === 'crit') {

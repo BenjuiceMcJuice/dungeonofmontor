@@ -16,12 +16,13 @@
         "stats": { "def": 2, "end": 1 }
       },
       {
-        "id": "roothold",
-        "name": "Roothold",
-        "type": "defence",
-        "description": "Single hits can't reduce you below 3 HP.",
-        "effect": "damage_floor",
-        "minHpAfterHit": 3
+        "id": "spore_burst",
+        "name": "Spore Burst",
+        "type": "attack",
+        "description": "When you kill an enemy, all others get BLIND 1 turn.",
+        "effect": "kill_aoe_condition",
+        "condition": "BLIND",
+        "conditionTurns": 1
       },
       {
         "id": "spore_cloud",
@@ -92,12 +93,12 @@
         "conditionTurns": 1
       },
       {
-        "id": "natures_whisper",
-        "name": "Nature's Whisper",
-        "type": "other",
-        "description": "+2 PER, +1 LCK. The garden tells you where things are.",
-        "effect": "stat_boost",
-        "stats": { "per": 2, "lck": 1 }
+        "id": "pollen_storm",
+        "name": "Pollen Storm",
+        "type": "attack",
+        "description": "20% per hit: random condition (BLIND/NAUSEA/FEAR) spreads to 1 other enemy.",
+        "effect": "hit_spread_random_condition",
+        "chance": 0.20
       },
       {
         "id": "green_patience",
@@ -223,12 +224,12 @@
         "charges": 3
       },
       {
-        "id": "stoneskin_mend",
-        "name": "Stoneskin Mend",
-        "type": "other",
-        "description": "Heal 1 HP per hit taken this combat (triggers at end of combat).",
-        "effect": "hits_taken_heal",
-        "healPerHit": 1
+        "id": "aftershock",
+        "name": "Aftershock",
+        "type": "attack",
+        "description": "When you stagger an enemy, 3 damage to all other enemies.",
+        "effect": "stagger_aoe_damage",
+        "value": 3
       }
     ],
     "mind": [
@@ -241,12 +242,16 @@
         "value": 2
       },
       {
-        "id": "unshakeable",
-        "name": "Unshakeable",
-        "type": "defence",
-        "description": "Immune to DAZE.",
-        "effect": "condition_immunity",
-        "condition": "DAZE"
+        "id": "tremor_wave",
+        "name": "Tremor Wave",
+        "type": "attack",
+        "description": "Below 30% HP: all enemies DAZE + FROST 1 turn. Once per combat.",
+        "effect": "threshold_aoe_dual_condition",
+        "hpThreshold": 0.30,
+        "condition1": "DAZE",
+        "condition2": "FROST",
+        "conditionTurns": 1,
+        "oncePerCombat": true
       },
       {
         "id": "mountain_mind",
@@ -372,6 +377,15 @@
         "description": "Your POISON stacks up to 5 (normally 1). Each stack: +2 dmg/turn + extra stat drain.",
         "effect": "poison_stacking",
         "maxStacks": 5
+      },
+      {
+        "id": "plague_burst",
+        "name": "Plague Burst",
+        "type": "attack",
+        "description": "When a poisoned enemy dies, all others get NAUSEA 2 turns.",
+        "effect": "poison_kill_aoe_condition",
+        "condition": "NAUSEA",
+        "conditionTurns": 2
       }
     ],
     "mind": [
@@ -398,6 +412,15 @@
         "effect": "enemy_stat_penalty",
         "stat": "str",
         "value": -1
+      },
+      {
+        "id": "toxic_cloud",
+        "name": "Toxic Cloud",
+        "type": "attack",
+        "description": "Conditions you apply have 15% + INT mod × 3% chance to spread to 1 other enemy.",
+        "effect": "condition_spread_on_apply",
+        "baseChance": 0.15,
+        "intScaling": 0.03
       }
     ],
     "weapon": {
@@ -510,6 +533,14 @@
         "description": "Lifesteal 10% on all damage dealt.",
         "effect": "lifesteal",
         "value": 0.10
+      },
+      {
+        "id": "blood_spray",
+        "name": "Blood Spray",
+        "type": "attack",
+        "description": "20% when hit: attacker gets BLEED + 1 random other enemy gets FEAR.",
+        "effect": "hit_taken_bleed_and_fear_spread",
+        "chance": 0.20
       }
     ],
     "mind": [
@@ -538,6 +569,13 @@
         "description": "Immune to FEAR, +1 accuracy.",
         "effect": "fear_immunity_and_accuracy",
         "accuracyBonus": 1
+      },
+      {
+        "id": "feeding_frenzy",
+        "name": "Feeding Frenzy",
+        "type": "attack",
+        "description": "Each kill: all living enemies get 1 BLEED stack.",
+        "effect": "kill_aoe_bleed"
       }
     ],
     "weapon": {
