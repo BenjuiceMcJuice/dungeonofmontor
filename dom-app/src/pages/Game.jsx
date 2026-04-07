@@ -1530,6 +1530,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         else if (eResult.sacrificed) behMsg = eResult.attacker + ' sacrifices itself!'
         else if (eResult.slimeCoated) behMsg = eResult.attacker + ' coats itself in slime!'
         else if (eResult.hid) behMsg = eResult.attacker + ' burrows away!'
+        else if (eResult.matured) behMsg = eResult.maturedName + ' has grown up!'
         else if (eResult.spawned) behMsg = eResult.attacker + ' spawns ' + eResult.spawnedName + '!'
         setEnemyBehaviourMsg({ name: eResult.attacker, text: behMsg })
 
@@ -1541,6 +1542,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           if (eResult.sacrificed) addLog({ type: 'enemy', text: eResult.attacker + ' sacrifices itself! All allies +' + eResult.sacrificeBonus + ' STR, +2 DEF!', tier: 'crit' })
           if (eResult.slimeCoated) addLog({ type: 'enemy', text: eResult.attacker + ' coats itself in slime! +' + eResult.slimeHeal + ' HP, +' + eResult.slimeDef + ' DEF!', tier: 'hit' })
           if (eResult.hid) addLog({ type: 'enemy', text: eResult.attacker + ' burrows away and heals ' + eResult.hideHeal + ' HP!', tier: 'hit' })
+          if (eResult.matured) addLog({ type: 'enemy', text: eResult.maturedName + ' has grown up! Full strength!', tier: 'crit' })
           if (eResult.spawned) addLog({ type: 'enemy', text: eResult.attacker + ' spawns ' + eResult.spawnedName + '!', tier: 'crit' })
           setEnemyBehaviourMsg(null)
 
