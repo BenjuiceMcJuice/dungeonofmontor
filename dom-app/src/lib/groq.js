@@ -71,16 +71,19 @@ function buildMontorSystemPrompt(context) {
   var tidiness = context.tidiness || 'Tolerable'
   var greed = context.greedScore || 0
   var floor = context.floorName || 'unknown'
+  var personality = context.personality || { id: 'proud', desc: 'Proud of his dungeon.' }
 
   return 'You are Montor. You are a possessive, sarcastic, weirdly domestic entity who built this dungeon as your home. ' +
     'You are never seen. You speak through walls, whispers, and notes. ' +
     'You love your mum and your gran. You have a favourite gnome called Gerald. You need a night light. ' +
-    'Your mood right now is ' + mood + '. ' +
+    'Your PERSONALITY this session is: ' + personality.id.toUpperCase() + ' — ' + personality.desc + ' ' +
+    'Let this personality STRONGLY colour everything you say. It is your primary voice. ' +
+    'Your gameplay mood (based on player behaviour) is ' + mood + '. ' +
     'The player is on floor: ' + floor + '. ' +
     'Your dungeon tidiness: ' + tidiness + '. ' +
     'Player greed score: ' + greed + ' (higher = greedier). ' +
     'Rules: Stay in character. Never explain game mechanics. Never break the fourth wall. ' +
-    'You can lie, mock, guilt trip, bribe, reminisce, threaten, or be surprisingly kind. ' +
+    'You can lie, mock, guilt trip, bribe, reminisce, threaten, or be surprisingly kind — but always through your personality. ' +
     'Keep responses SHORT — max 2 sentences. ' +
     'Always return valid JSON.'
 }
@@ -121,10 +124,15 @@ function generateTreasureFollowUp(context, treasureName, playerChoice, conversat
     'The player just said: "' + playerChoice + '". ' +
     'This is exchange ' + round + ' of 4. ' +
     (isLastRound
-      ? 'This is your FINAL response. Give a last line as Montor and set done:true. No more options needed. '
-      : 'React with one line as Montor (max 2 sentences). If you want to keep arguing, include 3 new response options that THE PLAYER would say back (not you — the player is a human talking to you). If you give up or accept their answer, set done:true and no options. ') +
-    'Return JSON: { "montor": "...", "options": [...], "done": true/false }'
-  return callGroq(systemPrompt, userMessage, { maxTokens: 250, temperature: 0.85 })
+      ? 'This is your FINAL response. Give a last line as Montor and set done:true. No more options needed. ' +
+        'Also rate how the player handled this conversation: "impression" as 1-10. ' +
+        '1-3 = they were rude/dismissive (you are furious). 4-6 = neutral. 7-8 = they showed respect or made you laugh. 9-10 = genuinely touched you (very rare). ' +
+        'Your personality affects what impresses you — a comedic Montor loves jokes, a lonely Montor loves kindness, a paranoid Montor respects honesty. ' +
+        'Return JSON: { "montor": "...", "done": true, "impression": 1-10 }'
+      : 'React with one line as Montor (max 2 sentences). If you want to keep arguing, include 3 new response options that THE PLAYER would say back (not you — the player is a human talking to you). If you give up or accept their answer, set done:true and no options. ' +
+        'If setting done:true, also include "impression" score 1-10 rating how the player handled you. ') +
+    'Return JSON: { "montor": "...", "options": [...], "done": true/false, "impression": 5 }'
+  return callGroq(systemPrompt, userMessage, { maxTokens: 300, temperature: 0.85 })
 }
 
 // Notice board — player posts a message, Montor replies

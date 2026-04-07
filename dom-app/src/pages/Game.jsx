@@ -229,6 +229,28 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [floorDisturbance, setFloorDisturbance] = useState(0)
   var [maxFloorDisturbance, setMaxFloorDisturbance] = useState(0)
   var [greedScore, setGreedScore] = useState(0)
+  var MONTOR_PERSONALITIES = [
+    { id: 'melancholy', label: 'Melancholy', desc: 'Sad old monster missing the old days. Talks about Gran and the past.' },
+    { id: 'paranoid', label: 'Paranoid', desc: 'Convinced the player was sent by someone. Suspicious of everything.' },
+    { id: 'comedic', label: 'Comedic', desc: 'Thinks he is hilarious. He is not. Makes terrible puns and jokes.' },
+    { id: 'proud', label: 'Proud', desc: 'Insufferably proud of his dungeon. Points out architecture and craftsmanship.' },
+    { id: 'lonely', label: 'Lonely', desc: 'Just wants someone to talk to. Tries to keep the conversation going.' },
+    { id: 'vengeful', label: 'Vengeful', desc: 'Actively hostile. Holds grudges. References past destruction.' },
+    { id: 'passive_aggressive', label: 'Passive Aggressive', desc: 'Polite but seething. Says "fine" when it is not fine.' },
+    { id: 'mum_mode', label: 'Mum Mode', desc: 'Channelling his mum. Tells you to eat, wipe your feet, wear a coat.' },
+    { id: 'dramatic', label: 'Dramatic', desc: 'Everything is the worst thing ever. Theatrical gasps and declarations.' },
+    { id: 'sleepy', label: 'Sleepy', desc: 'Groggy, confused, grumpy about being woken up. Yawns mid-sentence.' },
+    { id: 'philosophical', label: 'Philosophical', desc: 'Deep thoughts. Questions existence. Ponders the meaning of gnomes.' },
+    { id: 'petty', label: 'Petty', desc: 'Fixated on tiny grievances. You moved a chair 2 inches.' },
+    { id: 'chef', label: 'Chef', desc: 'Obsessed with food and cooking. Every weapon is a kitchen utensil to him.' },
+    { id: 'estate_agent', label: 'Estate Agent', desc: 'Trying to sell you on the dungeon. Open plan, south-facing, original features.' },
+    { id: 'bureaucratic', label: 'Bureaucratic', desc: 'Treats the dungeon like an office. Wants forms filled in and procedures followed.' },
+  ]
+
+  var [montorPersonality, setMontorPersonality] = useState(function() {
+    return MONTOR_PERSONALITIES[Math.floor(Math.random() * MONTOR_PERSONALITIES.length)]
+  })
+
   var [montorTaste, setMontorTaste] = useState(function() {
     var stats = ['str', 'def', 'agi', 'int', 'lck', 'per', 'end', 'wis', 'cha', 'vit']
     var shuffled = stats.slice().sort(function() { return Math.random() - 0.5 })
@@ -507,6 +529,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       setFloorDisturbance(savedRun.floorDisturbance || 0)
       setGreedScore(savedRun.greedScore || 0)
       if (savedRun.montorTaste) setMontorTaste(savedRun.montorTaste)
+      if (savedRun.montorPersonality) setMontorPersonality(savedRun.montorPersonality)
       setGamePhase('doors')
     } else {
       var f = generateFloor('grounds', collectedTreasures)
@@ -546,6 +569,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       floorDisturbance: floorDisturbance,
       greedScore: greedScore,
       montorTaste: montorTaste,
+      montorPersonality: montorPersonality,
     })
   }, [savePending])
 
@@ -615,7 +639,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       // Try AI whisper first, fall back to static
       if (hasGroqKey()) {
         var tidySummary = getTidinessSummary()
-        generateWhisper({ mood: mood, tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }).then(function(result) {
+        generateWhisper({ mood: mood, tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }).then(function(result) {
           if (result && result.whisper) {
             setMontorWhisper(result.whisper)
           } else {
@@ -1149,6 +1173,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [negotiationOptions, setNegotiationOptions] = useState([])
   var [negotiationHistory, setNegotiationHistory] = useState([])
   var [negotiationRound, setNegotiationRound] = useState(0)
+  var [negotiationImpression, setNegotiationImpression] = useState(5) // 1-10 AI score
 
   function initSafeRoom() {
     // Check if player has any unsmashed treasures in junk bag
@@ -1160,7 +1185,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     setSafeRoomAiLine(null)
     if (hasGroqKey()) {
       var tidySummary = getTidinessSummary()
-      generateSafeRoomLine({ mood: getMontorMood(), tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }).then(function(result) {
+      generateSafeRoomLine({ mood: getMontorMood(), tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }).then(function(result) {
         if (result && result.line) setSafeRoomAiLine(result.line)
       })
     }
@@ -4078,7 +4103,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 setNegotiationStep('loading')
                 setNegotiationRound(1)
                 setNegotiationHistory([])
-                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }
+                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }
                 generateTreasureReaction(ctx, safeRoomGift.name).then(function(result) {
                   if (result && result.montor) {
                     setNegotiationMontor(result.montor)
@@ -4158,13 +4183,15 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       setNegotiationHistory(newHistory)
                       setNegotiationStep('loading')
                       setNegotiationRound(nextRound)
-                      var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }
+                      var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown', personality: montorPersonality }
                       generateTreasureFollowUp(ctx, safeRoomGift.name, opt, historyText, nextRound).then(function(result) {
                         if (result && result.montor) {
                           setNegotiationMontor(result.montor)
                           setNegotiationOptions(result.options || [])
                           setNegotiationHistory(newHistory.concat([{ role: 'montor', text: result.montor }]))
-                          setNegotiationStep(result.done || nextRound >= 4 ? 'done' : 'talking')
+                          var isDone = result.done || nextRound >= 4
+                          setNegotiationStep(isDone ? 'done' : 'talking')
+                          if (isDone && result.impression) setNegotiationImpression(result.impression)
                         } else {
                           setNegotiationStep('done')
                           setNegotiationMontor('...')
@@ -4181,15 +4208,38 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
             {/* Smash / Keep (when Montor is done arguing) */}
             {negotiationStep === 'done' && (
-              <div className="flex gap-4 mt-2">
-                <button onClick={function() { setNegotiationStep(null); handleSmashGift() }}
-                  className="py-3 px-8 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-red-400 font-display text-lg hover:border-red-400 transition-colors">
-                  Smash it
-                </button>
-                <button onClick={function() { setNegotiationStep(null); handleSafeRoomContinue() }}
-                  className="py-3 px-8 rounded-lg border border-border bg-surface text-ink-dim font-sans text-base hover:text-ink transition-colors">
-                  Keep it
-                </button>
+              <div className="flex flex-col items-center gap-3 mt-2">
+                {/* Impression feedback */}
+                {negotiationImpression >= 8 && (
+                  <p className="text-green-400 text-xs font-sans italic">Montor seems... impressed.</p>
+                )}
+                {negotiationImpression >= 5 && negotiationImpression < 8 && (
+                  <p className="text-ink-faint text-xs font-sans italic">Montor considers your words.</p>
+                )}
+                {negotiationImpression < 5 && (
+                  <p className="text-red-400 text-xs font-sans italic">Montor is not amused.</p>
+                )}
+                <div className="flex gap-4">
+                  <button onClick={function() { setNegotiationStep(null); handleSmashGift() }}
+                    className="py-3 px-8 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-red-400 font-display text-lg hover:border-red-400 transition-colors">
+                    Smash it
+                  </button>
+                  <button onClick={function() {
+                    // High impression + keep = Montor rewards restraint
+                    if (negotiationImpression >= 7) {
+                      var bonusStat = montorTaste.favours
+                      character.stats[bonusStat] = (character.stats[bonusStat] || 10) + 1
+                    }
+                    setNegotiationStep(null)
+                    handleSafeRoomContinue()
+                  }}
+                    className="py-3 px-8 rounded-lg border border-gold/40 bg-gold/10 text-gold font-sans text-base hover:border-gold transition-colors">
+                    Keep it
+                  </button>
+                </div>
+                {negotiationImpression >= 7 && (
+                  <p className="text-gold text-[10px] font-sans">Montor may reward your restraint...</p>
+                )}
               </div>
             )}
           </div>
