@@ -5,6 +5,7 @@
     "theme": "Garden, growth, nature",
     "smashText": "You snap Gerald in half. Petals spill from the crack. They dissolve into your skin.",
     "montorSmash": "You BROKE Gerald?! ...he would have wanted it this way.",
+    "montorFind": "Put that down. That's Gerald.",
     "body": [
       {
         "id": "bark_skin",
@@ -194,6 +195,7 @@
     "theme": "Earth, weight, endurance",
     "smashText": "You tip the gravy boat. The gravy pours out and never stops. The ceramic cracks and cold blue light floods out.",
     "montorSmash": "That was grandmother's. She'll haunt YOU now.",
+    "montorFind": "That's grandmother's gravy boat. She's watching you.",
     "body": [
       {
         "id": "ironhide",
@@ -343,6 +345,7 @@
     "theme": "Decay, disease, weakening",
     "smashText": "You slam the toilet lid. It cracks clean in half. Sickly yellow vapour hisses from below.",
     "montorSmash": "Do you have ANY idea how hard it is to get a plumber down here?",
+    "montorFind": "Don't touch that. You don't know where it's been. Actually, you do.",
     "body": [
       {
         "id": "toxic_presence",
@@ -481,6 +484,7 @@
     "theme": "Flesh, life, hunger",
     "smashText": "You wind the music box backwards. The melody inverts. Something red seeps from the mechanism.",
     "montorSmash": "That was the only thing that helped me sleep.",
+    "montorFind": "That music box is private. Put it back.",
     "body": [
       {
         "id": "lick_wounds",
@@ -612,6 +616,7 @@
     "theme": "Fire, metal, destruction",
     "smashText": "You bend the tongs. They snap. Orange sparks cascade and the heat rushes through your arms.",
     "montorSmash": "Those were CALIBRATED. Centuries of calibration. Gone.",
+    "montorFind": "Those tongs are calibrated. Don't even breathe on them.",
     "body": [
       {
         "id": "forge_body",
@@ -769,6 +774,7 @@
     "theme": "Chaos, shadow, entropy",
     "smashText": "You blow out the night light. The darkness rushes in and curls around your fingers. It doesn't let go.",
     "montorSmash": "...",
+    "montorFind": "No. Not that one.",
     "body": [
       {
         "id": "phase_shift",

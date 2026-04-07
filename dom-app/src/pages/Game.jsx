@@ -274,8 +274,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   // Montor mood derivation
   function getMontorMood() {
     var tidiness = maxFloorDisturbance > 0 ? 1 - (floorDisturbance / maxFloorDisturbance) : 1
-    if (tidiness >= 0.8 && greedScore < 10) return 'happy'
-    if (tidiness >= 0.8) return 'neutral'
+    if (tidiness >= 0.8) return greedScore < 10 ? 'happy' : 'happy' // pristine is always happy (greed affects tonic count, not mood)
     if (tidiness >= 0.6) return 'neutral'
     if (tidiness >= 0.4) return 'annoyed'
     return 'angry'
@@ -3933,11 +3932,11 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
           <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center gap-6">
             <h2 className="font-display text-2xl text-gold">{safeRoomGift.name}</h2>
-            <p className="text-ink text-base italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            <p className="text-ink text-base italic text-center max-w-sm">
               {safeRoomGift.description}
             </p>
-            <p className="text-gold/80 text-sm italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
-              "{giftDef ? giftDef.montorSmash.split('.')[0] + '...' : '...'}"
+            <p className="text-purple-400 text-sm font-display text-center max-w-sm">
+              "{giftDef && giftDef.montorFind ? giftDef.montorFind : 'Put that down.'}"
             </p>
             <p className="text-ink-dim text-xs text-center max-w-sm">
               Sacrifice this treasure to Montor? Its power will be bound to one of your slots — body, mind, weapon, or shield.
@@ -4066,7 +4065,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <p className="text-ink text-base italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
               {giftDef4 ? giftDef4.smashText : 'The treasure shatters.'}
             </p>
-            <p className="text-gold/80 text-sm italic text-center max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
+            <p className="text-purple-400 text-sm font-display text-center max-w-sm">
               "{giftDef4 ? giftDef4.montorSmash : '...'}"
             </p>
             {appliedSlot && (
@@ -5892,14 +5891,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       </div>
                     )}
 
-                    {searchResult.condition && (
-                      <div className="p-3 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-center">
-                        <p className="text-red-400 font-display text-xl">
-                          {searchResult.agiSaved ? 'Trap Dodged!' : 'TRAP: ' + searchResult.condition + '!'}
-                        </p>
-                        {searchResult.trapDamage > 0 && (
-                          <p className="text-red-300 font-display text-lg">-{searchResult.trapDamage} HP</p>
-                        )}
+                    {searchResult.condition && searchResult.agiSaved && (
+                      <div className="p-3 rounded-lg border-2 border-green-400/40 bg-green-400/5 text-center">
+                        <p className="text-green-400 font-display text-xl">Trap Dodged!</p>
                       </div>
                     )}
 
@@ -5953,7 +5947,15 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       </div>
                     )}
 
-                    {searchResult.narrative.slice(1).map(function(line, i) {
+                    {searchResult.narrative.slice(1).filter(function(line) {
+                      // Suppress positive flavour when there's a trap
+                      if (searchResult.condition && !searchResult.agiSaved) {
+                        if (line.indexOf('Lucky') !== -1 || line.indexOf('Almost missed') !== -1 || line.indexOf('keen eye') !== -1) return false
+                      }
+                      // Suppress trap narrative lines (already shown in card above)
+                      if (line.indexOf('TRAP!') !== -1) return false
+                      return true
+                    }).map(function(line, i) {
                       return <p key={i} className="text-ink-faint text-sm italic text-center font-sans">{line}</p>
                     })}
                   </div>

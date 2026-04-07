@@ -919,7 +919,7 @@ function resolveEnemyAttack(battleState, enemyId) {
 
   // EAT CORPSE — orcs eat dead allies for strength
   if (beh.canEatCorpse) {
-    var corpse = bs.enemies.find(function(e) { return e.isDown && e.id !== enemy.id })
+    var corpse = bs.enemies.find(function(e) { return e.isDown && !e.eaten && e.id !== enemy.id })
     if (corpse && Math.random() < 0.3) {
       enemy.stats = Object.assign({}, enemy.stats, { str: enemy.stats.str + 4 })
       enemy.currentHp = Math.min(enemy.maxHp, enemy.currentHp + 10)
