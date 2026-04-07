@@ -159,13 +159,16 @@ When two conditions combine on a target, they trigger a powerful reaction:
 
 | Combo | Reaction | Effect |
 |---|---|---|
-| WET + FROST | **INSTANT FREEZE** | Immediate stun, massive brittle damage |
-| WET + CHARGED | **STEAM** | AoE damage burst |
-| WET + BURN | **STEAM** | AoE damage burst |
-| POISON + BLEED | **SEPSIS** | 30% per-tick roll for bonus damage (not guaranteed -- still dangerous but fair) |
-| FEAR + BLOODLUST | **FRENZY** | Berserk state -- boosted damage, reduced accuracy |
-| DAZE + FEAR | **CATATONIC** | Extended stun |
-| FROST + BURN | **SHATTER** | Burst damage from thermal shock |
+| FROST + BURN | **SHATTER** | 10 damage + DEF destroyed for 2 turns |
+| WET + FROST | **INSTANT FREEZE** | 5 damage + DAZE 2 turns + -3 DEF (brittle + stunned) |
+| WET + BURN | **STEAM** | AoE BLIND all enemies (blinding cloud) |
+| WET + CHARGED | **CONDUCTANCE** | 8 damage + AoE DAZE all enemies (water conducts) |
+| POISON + BLEED | **SEPSIS** | 30% per-tick: doubles all DoT + 4 flat bonus damage |
+| FEAR + BLEED | **FRENZY** | Removes both, applies FRENZY (berserk: +STR, -DEF, attacks random) |
+| DAZE + FEAR | **CATATONIC** | DAZE 2 turns (extended stun, mind shuts down) |
+| POISON + NAUSEA | **DYSENTERY** | 3 damage + NAUSEA 3 turns (double skip chance) |
+| POISON + FEAR | **DELIRIUM** | Removes both, applies FRENZY (hallucinating) |
+| POISON + FROST | **NECROSIS** | 5 damage + permanent -2 DEF (frozen poison eats tissue) |
 
 Reactions create a tactical combo layer -- throw water then electrify, freeze a wet enemy instantly, or let bleed + poison fester into sepsis.
 

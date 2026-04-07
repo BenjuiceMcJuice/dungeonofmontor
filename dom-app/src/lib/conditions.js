@@ -381,8 +381,9 @@ function getEnemyCondition(archetypeKey) {
 
 var REACTIONS = [
   { a: 'FROST', b: 'BURN',   name: 'SHATTER',        damage: 10, removeBoth: true,  applyEffect: { defPenalty: true, defPenaltyValue: -99, turns: 2 }, narrative: 'SHATTER! Frozen enemy cracks from the heat — DEF destroyed!' },
-  { a: 'WET',   b: 'FROST',  name: 'INSTANT FREEZE',  damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'INSTANT FREEZE! Soaked enemy freezes solid!' },
+  { a: 'WET',   b: 'FROST',  name: 'INSTANT FREEZE',  damage: 5,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, applyEffect: { defPenalty: true, defPenaltyValue: -3, turns: 2 }, narrative: 'INSTANT FREEZE! Soaked enemy freezes solid — brittle and stunned!' },
   { a: 'WET',   b: 'BURN',   name: 'STEAM',           damage: 0,  removeBoth: true,  applyConditionAll: 'BLIND', narrative: 'STEAM! Fire meets water — blinding cloud fills the chamber!' },
+  { a: 'WET',   b: 'CHARGED', name: 'CONDUCTANCE',    damage: 8,  removeBoth: true,  applyConditionAll: 'DAZE', narrative: 'CONDUCTANCE! Water conducts the charge — 8 AoE damage + all enemies stunned!' },
   // SEPSIS is handled per-tick in tickConditions, not as a reaction here
   { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!' },
   { a: 'DAZE',  b: 'FEAR',   name: 'CATATONIC',       damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'CATATONIC! Mind shuts down completely!' },
