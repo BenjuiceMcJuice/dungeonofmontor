@@ -510,6 +510,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [lootingChestId, setLootingChestId] = useState(null)
   var [lootingNpcId, setLootingNpcId] = useState(null)
   var [montorWhisper, setMontorWhisper] = useState(null)
+  var whisperTimerRef = useRef(null)
   var [searchingPileId, setSearchingPileId] = useState(null)
   var [searchResult, setSearchResult] = useState(null)
   var [playerJunkBag, setPlayerJunkBag] = useState(function() {
@@ -690,6 +691,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     }
 
     // Montor whisper — 30% chance on entering a new room
+    // Clear any previous whisper timer
+    if (whisperTimerRef.current) { clearTimeout(whisperTimerRef.current); whisperTimerRef.current = null }
+
     if (Math.random() < 0.3) {
       var mood = getMontorMood()
       // Try AI whisper first, fall back to static
@@ -699,18 +703,16 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
           if (result && result.whisper) {
             setMontorWhisper(result.whisper)
           } else {
-            // Fallback to static — mix mood, room entry, and personality
             setMontorWhisper(pickStaticWhisper(mood))
           }
-          setTimeout(function() { setMontorWhisper(null) }, 6000)
+          whisperTimerRef.current = setTimeout(function() { setMontorWhisper(null); whisperTimerRef.current = null }, 6000)
         })
       } else {
         setMontorWhisper(pickStaticWhisper(mood))
-        setTimeout(function() { setMontorWhisper(null) }, 6000)
+        whisperTimerRef.current = setTimeout(function() { setMontorWhisper(null); whisperTimerRef.current = null }, 6000)
       }
-    } else {
-      setMontorWhisper(null)
     }
+    // No else — don't clear whisper immediately, let previous one finish its timer
 
     // If already cleared or has corpses (fought), just show doors (backtracking)
     if (chamber.cleared || chamber.corpses) {
