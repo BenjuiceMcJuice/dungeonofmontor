@@ -181,6 +181,7 @@ function createPile(id, size, floorId) {
   return {
     id: id,
     size: size,             // 1, 2, or 3 layers
+    totalLayers: size,      // original size — never changes (for tidiness calculation)
     layersRemaining: size,  // decremented as layers are cleaned
     depleted: false,
     floorId: floorId,
