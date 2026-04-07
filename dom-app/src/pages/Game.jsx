@@ -691,8 +691,9 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     }
 
     // Montor whisper — 30% chance on entering a new room
-    // Clear any previous whisper timer
+    // Always clear previous whisper + timer on room entry
     if (whisperTimerRef.current) { clearTimeout(whisperTimerRef.current); whisperTimerRef.current = null }
+    setMontorWhisper(null)
 
     if (Math.random() < 0.3) {
       var mood = getMontorMood()
