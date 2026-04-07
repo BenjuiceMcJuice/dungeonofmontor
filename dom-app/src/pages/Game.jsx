@@ -1167,7 +1167,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   }
 
   function getSafeRoomMontor() {
-    return safeRoomAiLine || getSafeRoomMontor()
+    return safeRoomAiLine || getMontorLine('safeRoom')
   }
 
   var [safeRoomTonic, setSafeRoomTonic] = useState(null)
