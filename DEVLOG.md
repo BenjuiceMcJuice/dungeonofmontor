@@ -165,6 +165,11 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-07 | AI whispers — 30% room entry, unique Montor lines via Groq | ✅ Done |
 | 2026-04-07 | AI safe room dialogue — mood-aware greeting via Groq | ✅ Done |
 | 2026-04-07 | AI treasure negotiation — up to 4 exchanges, Montor decides when done | ✅ Done |
+| 2026-04-07 | 15 Montor personalities — random per run or player-selected via Mood picker | ✅ Done |
+| 2026-04-07 | AI conversation scoring — impression 1-10 affects treasure keep reward | ✅ Done |
+| 2026-04-07 | Free text input in negotiations + safety guardrails in all AI prompts | ✅ Done |
+| 2026-04-07 | Floor transition fix (infinite recursion + button + guard removal) | ✅ Done |
+| 2026-04-07 | 3 new condition damage rings, Claw Pendant 1.5x, compendiums regenerated | ✅ Done |
 |            | **Next up** | |
 |            | Enemy variety + boss abilities | ⬜ |
 |            | Floor-scaled enemy conditions (deeper = nastier) | ⬜ |

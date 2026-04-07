@@ -88,10 +88,13 @@
 | 29 | Babies spawning babies infinitely | isBaby flag + canSpawn:false + 5 enemy cap |
 | 30 | WET + CHARGED reaction missing (CONDUCTANCE) | Added to REACTIONS array: 8 AoE + DAZE all |
 | 31 | INSTANT FREEZE had no damage or brittle | Added 5 damage + -3 DEF brittle effect |
+| 32 | getSafeRoomMontor() infinite recursion (called itself) | Fixed to call getMontorLine('safeRoom') |
+| 33 | Floor transition button did nothing (isGuarded blocking) | Removed guard check, added try/catch fallback |
+| 34 | AI treasure options in Montor's voice, not player's | Updated prompts to specify player perspective |
 
 ## Sign-off Log
 | Date | Tester | Build | Notes |
 |---|---|---|---|
 | 2026-04-03 | Steve | post-gift-wiring | Testing in progress |
 | 2026-04-06 | Steve | post-effects-audit | Full effects audit, persistence, mood system |
-| 2026-04-07 | Steve | post-playtest-fixes | Playtest bugs, AoE gifts, spawn, AI, inventory |
+| 2026-04-07 | Steve | post-playtest-fixes | Playtest bugs, AoE gifts, spawn, AI, inventory, personalities, free text, safety |

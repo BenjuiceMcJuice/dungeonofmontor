@@ -64,7 +64,7 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 - **Spawn system overhaul** — babies can't spawn, max 5 enemies, per-creature rules (spiders x2, moth eggs, hound pups), maturation timer, babies significantly weaker
 - **10 condition reactions** — SHATTER, INSTANT FREEZE, STEAM, CONDUCTANCE, SEPSIS, FRENZY, CATATONIC, DYSENTERY, DELIRIUM, NECROSIS
 - **Spear weapon identity** — +15% condition proc, +1 turn duration, INT synergy
-- **Groq AI integration** — AI whispers, AI safe room dialogue, AI treasure negotiation (up to 4 exchanges), key validation on landing screen
+- **Groq AI integration** — AI whispers, AI safe room dialogue, AI treasure negotiation (up to 4 exchanges with conversation scoring), 15 random personalities, free text input, personality picker on landing, key validation, family-friendly safety guardrails
 - ErrorBoundary component for crash diagnosis (iOS WebKit)
 - Firebase Auth (email + Google sign-in)
 - GitHub Pages deployment with auto-deploy from main
