@@ -596,7 +596,7 @@ var CHAMBER_ICONS = {
     ],
   },
   // Garden Tailor — gardener in green apron with straw hat, trowel, wooden stall
-  npc_tailor_garden: {
+  npc_tailor_grounds: {
     cols: 20, rows: 22, grid: [
       [_,_,_,_,_,_,'#c8a84a','#c8a84a','#c8a84a','#c8a84a','#c8a84a','#c8a84a',_,_,_,_,_,_,_,_],
       [_,_,_,_,_,'#c8a84a','#dabb55','#dabb55','#dabb55','#dabb55','#dabb55','#c8a84a',_,_,_,_,_,_,_,_],
@@ -623,7 +623,7 @@ var CHAMBER_ICONS = {
     ],
   },
   // Garden Peddler — small figure with wheelbarrow full of goods
-  npc_peddler_garden: {
+  npc_peddler_grounds: {
     cols: 22, rows: 20, grid: [
       [_,_,_,_,_,_,_,_,_,_,_,_,_,K,K,K,K,_,_,_,_,_],
       [_,_,_,_,_,_,_,_,_,_,_,_,K,'#c8a84a','#c8a84a','#c8a84a','#c8a84a',K,_,_,_,_],
