@@ -5806,11 +5806,12 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   <div className="flex flex-col items-center gap-2">
                     <button
                       onClick={handleOpenNpc}
-                      className="flex flex-col items-center gap-1 p-3 rounded-lg border border-blue/40 bg-blue/5 cursor-pointer hover:border-blue transition-all"
+                      className="flex flex-col items-center gap-1 p-3 cursor-pointer transition-all"
                     >
                       <ChamberIcon iconKey={'npc_' + (npc.vendorType || 'tailor') + '_' + (zone.floorId || 'garden')} theme={zone.doorTheme || 'garden'} scale={3} />
-                      <span className="text-blue text-[9px] font-sans font-bold">
-                        {npc.vendorType === 'tailor' ? 'TRADE' : 'BUY'}
+                      <span className="text-gold text-[10px] font-display">{npc.name}</span>
+                      <span className="text-blue text-[8px] font-sans">
+                        {npc.vendorType === 'tailor' ? 'TAP TO TRADE' : 'TAP TO BUY'}
                       </span>
                     </button>
                     <p className="text-ink-dim text-xs italic text-center max-w-xs">{npc.description}</p>

@@ -56,7 +56,7 @@
       "doorTheme": "garden",
       "enemyTypes": ["rat", "slug", "moth"], "enemyTiers": ["dust"],
       "bossType": "slug", "bossTier": "slate", "bossName": "The Overgrowth",
-      "merchantName": "The Gardener", "merchantRole": "Montor's groundskeeper",
+      "merchantName": "Keith the Groundskeeper", "merchantRole": "Montor's head gardener. Talks to the plants. They talk back.",
       "merchantGreeting": "Psst. Over here. Don't tell him I sold the shears.",
       "tailorStaples": ["montors_wellies", "montors_colander"],
       "tailorPremium": ["montors_mums_locket", "montors_chaos_blade", "montors_alarm_clock"],
