@@ -1435,7 +1435,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     var tickedBattle = tickResult.newBattle
 
     // Decay Aura (bile shield): enemies lose 1 HP at start of their turn
-    var shieldGTick = (character.equipped && character.equipped.offhand) ? giftSlots.shield : null
+    var shieldGTick = (character.equipped && character.equipped.offhand && character.equipped.offhand.slot === 'offhand') ? giftSlots.shield : null
     if (shieldGTick && shieldGTick.effect === 'enemy_dot') {
       var dotEnemy = tickedBattle.enemies.find(function(e) { return e.id === currentId })
       if (dotEnemy && !dotEnemy.isDown) {
@@ -1626,7 +1626,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     if (pState && r.damage > 0) {
       var bodyG = giftSlots.body
       var mindG = giftSlots.mind
-      var shieldG = (character.equipped && character.equipped.offhand) ? giftSlots.shield : null // shield gifts only work with offhand equipped
+      var shieldG = (character.equipped && character.equipped.offhand && character.equipped.offhand.slot === 'offhand') ? giftSlots.shield : null // shield gifts only work with offhand equipped
       var weaponGDef = giftSlots.weapon
       var attackerEnemy = updatedBattle.enemies.find(function(e) { return e.id === r.attackerId })
 
@@ -3968,6 +3968,8 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       ]
       if (hasShield) {
         slots.push({ id: 'shield', label: 'Shield', desc: giftDef2 ? giftDef2.shield.length + ' options' : '', taken: !!giftSlots.shield })
+      } else {
+        slots.push({ id: 'shield', label: 'Shield', desc: 'Equip a shield to unlock', taken: false, locked: true })
       }
       return (
         <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={safeInteractionBg}>
@@ -3985,11 +3987,11 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
               var isWeaponNoEffect = s.id === 'weapon' && giftDef2 && !giftDef2.weapon[weaponType]
               return (
                 <button key={s.id}
-                  onClick={function() { if (!s.taken && !isWeaponNoEffect) handlePickGiftSlot(s.id) }}
-                  disabled={s.taken || isWeaponNoEffect}
+                  onClick={function() { if (!s.taken && !isWeaponNoEffect && !s.locked) handlePickGiftSlot(s.id) }}
+                  disabled={s.taken || isWeaponNoEffect || s.locked}
                   className={'p-4 rounded-lg border-2 text-left transition-all ' +
                     (s.taken ? 'border-border opacity-40' :
-                     isWeaponNoEffect ? 'border-border opacity-40' :
+                     isWeaponNoEffect || s.locked ? 'border-border opacity-40' :
                      'border-gold/40 bg-gold/5 hover:border-gold cursor-pointer')}>
                   <div className="flex items-center justify-between">
                     <span className="font-display text-lg text-gold">{s.label}</span>
