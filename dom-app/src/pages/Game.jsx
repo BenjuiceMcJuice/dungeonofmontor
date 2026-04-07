@@ -5808,7 +5808,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                       onClick={handleOpenNpc}
                       className="flex flex-col items-center gap-1 p-3 cursor-pointer transition-all"
                     >
-                      <ChamberIcon iconKey={'npc_' + (npc.vendorType || 'tailor') + '_' + (zone.floorId || 'garden')} theme={zone.doorTheme || 'garden'} scale={3} />
+                      <ChamberIcon iconKey={'npc_' + (npc.vendorType || 'tailor') + '_' + (zone.floorId || 'garden')} theme={zone.doorTheme || 'garden'} scale={4} />
                       <span className="text-gold text-[10px] font-display">{npc.name}</span>
                       <span className="text-blue text-[8px] font-sans">
                         {npc.vendorType === 'tailor' ? 'TAP TO TRADE' : 'TAP TO BUY'}
@@ -5819,7 +5819,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 )
               })() : lootingNpcId && currentChamber.npc ? (
                 <div className="flex flex-col items-center gap-2">
-                  <ChamberIcon iconKey={'npc_' + (currentChamber.npc.vendorType || 'tailor') + '_' + (zone.floorId || 'garden')} theme={zone.doorTheme || 'garden'} scale={3} />
+                  <ChamberIcon iconKey={'npc_' + (currentChamber.npc.vendorType || 'tailor') + '_' + (zone.floorId || 'garden')} theme={zone.doorTheme || 'garden'} scale={4} />
                   <span className="text-ink-faint text-[10px] font-sans">{currentChamber.npc.name}</span>
                 </div>
               )
