@@ -232,7 +232,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var MONTOR_PERSONALITIES = [
     { id: 'melancholy', label: 'Melancholy', desc: 'Sad old monster missing the old days. Talks about Gran and the past.' },
     { id: 'paranoid', label: 'Paranoid', desc: 'Convinced the player was sent by someone. Suspicious of everything.' },
-    { id: 'comedic', label: 'Comedic', desc: 'Thinks he is hilarious. He is not. Makes terrible puns and jokes.' },
+    { id: 'comedic', label: 'Comedic', desc: 'Actually witty — dry humour, observational comedy, absurdist one-liners. Roasts the player affectionately. Self-deprecating about his own dungeon. Think British sitcom deadpan, not dad jokes.' },
     { id: 'proud', label: 'Proud', desc: 'Insufferably proud of his dungeon. Points out architecture and craftsmanship.' },
     { id: 'lonely', label: 'Lonely', desc: 'Just wants someone to talk to. Tries to keep the conversation going.' },
     { id: 'vengeful', label: 'Vengeful', desc: 'Actively hostile. Holds grudges. References past destruction.' },
@@ -245,6 +245,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     { id: 'chef', label: 'Chef', desc: 'Obsessed with food and cooking. Every weapon is a kitchen utensil to him.' },
     { id: 'estate_agent', label: 'Estate Agent', desc: 'Trying to sell you on the dungeon. Open plan, south-facing, original features.' },
     { id: 'bureaucratic', label: 'Bureaucratic', desc: 'Treats the dungeon like an office. Wants forms filled in and procedures followed.' },
+    { id: 'bad_montor', label: 'Bad Montor', desc: 'Evil villain mode. Monologues about his master plan. Calls himself "Lord Montor". Dramatically evil but incompetent. Think cartoon villain who keeps failing. Threatens doom but trips over his own dungeon.' },
   ]
 
   var [montorPersonality, setMontorPersonality] = useState(function() {
