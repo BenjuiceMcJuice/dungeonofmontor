@@ -16,6 +16,8 @@
 
 **You are GAZ — The Reluctant Knight.** Keith named you. You didn't argue. Sword, two health potions, and absolutely no ambitions.
 
+> 💬 **PLAYER:** *"Give me a standard build, I'm a lazy dungeon crawler"*
+
 ---
 
 ## The Garden
@@ -38,6 +40,8 @@
 
 "I don't show everyone the tree, Gaz."
 
+> 💬 **PLAYER:** *"I go and look at the big tree — looks like an oak but has a strange purple hue?"*
+
 *Up close — the bark is carved. Dozens of scratches. Words in no language you recognise. There's a hollow at the base, something glinting inside. And wrapped around a low branch: a piece of cloth. Old. Embroidered. The letter M.*
 
 **🎲 PER check (DC 11): Rolled 8. Failed.**
@@ -51,6 +55,8 @@
 ---
 
 ## The Key
+
+> 💬 **PLAYER:** *"Try and get the thingy out of the tree with my deft little armsies"*
 
 *You reach into the hollow. Cold inside. Your fingers close around something.*
 
@@ -76,7 +82,7 @@
 
 **MONTOR:** "The garden watch. Don't mind them. They're not *mine* exactly. They just... live here. And they don't like people touching things."
 
-**GAZ:** *Gets on his knees. Holds out the key. Apologises to the rats.*
+> 💬 **PLAYER:** *"I get on my knees in a submissive position and apologise if I've offended them by taking this key"*
 
 **🎲 CHA check (DC 13): Rolled 11 - 1 = 10. Failed.**
 
@@ -101,6 +107,8 @@
 ---
 
 ## The Clearing
+
+> 💬 **PLAYER:** *"Music boxes are scary. Too scary for me... I head to the clearing"*
 
 *A circular space. Flagstones in rings around a dry fountain. The stone basin is cracked, full of dead leaves.*
 
@@ -131,6 +139,8 @@ Behind the fountain — a small wooden door set into the wall. Low. No handle. J
 ---
 
 ## The Potting Shed
+
+> 💬 **PLAYER:** *"Fine... I'll do what I'm clearly being led to do... begrudgingly I enter the key into the hole, wince and turn"*
 
 *The key slides in. Perfect fit. Click. Gentle — like a locket opening.*
 
