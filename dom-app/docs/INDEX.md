@@ -26,6 +26,7 @@
 | [Junk Economy Spec](junk_economy_spec.md) | Junk offload rooms, junk-scaling items, weight, safe room 3-way choice |
 | [Narrative Mode Spec](narrative_mode_spec.md) | Text-based RPG with Montor as AI DM — async multiplayer, dice rolls, campaign chapters |
 | [Stage 2 Persistent Characters](stage2_persistent_characters_spec.md) | 3 character slots, banked gifts, tavern hub, run history |
+| [Narrative Mode Demo](narrative_mode_demo.md) | Sample campaign showing how the text RPG plays — shareable |
 
 ---
 

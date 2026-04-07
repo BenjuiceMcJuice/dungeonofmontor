@@ -82,8 +82,9 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 | WIS stat wired for gift activation rolls | Backlog |
 | Sprite polish -- junk pile sprites for all floors (Garden done) | Backlog |
 | Zone-themed trader sprites | Backlog |
+| Tavern hub — character select → door choice (Crawl or Tale) | Next — foundation for both modes |
 | AI notice boards (player posts, Montor replies next zone) | Ready (Groq foundation done) |
-| AI narrative gameplay mode (text adventure with AI DM) | Planned |
+| AI narrative gameplay mode ("The Tale" — text RPG with AI DM) | Specced + demo written |
 | Soul slot synergies -- 21 pairings for endgame depth | Backlog |
 | Combat balance pass -- dual dagger bleed still OP, other builds need parity | Backlog |
 
