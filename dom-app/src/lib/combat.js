@@ -999,8 +999,14 @@ function resolveEnemyAttack(battleState, enemyId) {
     var spawnType = enemy.archetypeKey
     var spawnEnemy = generateEnemy(spawnType, 'dust', 'novice')
     spawnEnemy.name = 'Baby ' + spawnEnemy.name
-    spawnEnemy.currentHp = Math.round(spawnEnemy.currentHp * 0.5)
+    spawnEnemy.currentHp = Math.round(spawnEnemy.currentHp * 0.4)
     spawnEnemy.maxHp = spawnEnemy.currentHp
+    spawnEnemy.stats = Object.assign({}, spawnEnemy.stats, {
+      str: Math.max(2, Math.round(spawnEnemy.stats.str * 0.4)),
+      def: Math.max(1, Math.round(spawnEnemy.stats.def * 0.3)),
+      agi: Math.max(2, Math.round(spawnEnemy.stats.agi * 0.5)),
+    })
+    spawnEnemy.weaponDie = Math.max(2, Math.round(spawnEnemy.weaponDie * 0.5))
     spawnEnemy.isBaby = true // babies cannot spawn more babies
     spawnEnemy.behaviour = Object.assign({}, spawnEnemy.behaviour || {}, { canSpawn: false })
     // Spiders: babies can't mature, stay fragile
