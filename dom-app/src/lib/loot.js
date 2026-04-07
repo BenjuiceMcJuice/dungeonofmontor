@@ -178,11 +178,10 @@ function getMerchantItems(floorId) {
 function getPeddlerItems(floorId) {
   var prefix = getFloorLootPrefix(floorId)
 
-  // Always stock 1x health potion + 2 random cheap throwables
+  // Always stock 2x health potion + 1 greater + 1 random cheap throwable
   var cheapThrowables = ['montors_watering_can', 'montors_vinegar_bottle', 'montors_rusty_nail_throw', 'montors_ice_lolly', 'montors_lighter_fluid']
   var randomThrowable1 = getItem(cheapThrowables[Math.floor(Math.random() * cheapThrowables.length)])
-  var randomThrowable2 = getItem(cheapThrowables[Math.floor(Math.random() * cheapThrowables.length)])
-  var stock = [getItem('health_potion'), randomThrowable1, randomThrowable2].filter(Boolean)
+  var stock = [getItem('health_potion'), getItem('health_potion'), getItem('greater_health_potion'), randomThrowable1].filter(Boolean)
 
   // Build pool of consumables from floor's loot tables
   var pool = []

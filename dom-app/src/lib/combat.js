@@ -629,9 +629,12 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
     // Try to apply weapon condition on hit
     if (weapon && weapon.conditionOnHit) {
       var intStat = player.combatStats.int || 10
+      // Spear identity: +15% condition chance, conditions last 1 extra turn
+      var isSpear = weapon.weaponType === 'spear'
+      var spearCondBonus = isSpear ? 0.15 : 0
       // Gift: Corrosive Strike (bile weapon) — +25% condition chance
       var condChanceBonus = (gifts.weapon && gifts.weapon.effect === 'condition_chance_bonus') ? gifts.weapon.value : 0
-      if (rollConditionApplication(attackResult.tier, intStat, Math.min(1.0, (weapon.conditionChance || 1.0) + condChanceBonus))) {
+      if (rollConditionApplication(attackResult.tier, intStat, Math.min(1.0, (weapon.conditionChance || 1.0) + condChanceBonus + spearCondBonus))) {
         var condOpts = weapon.conditionOnHit === 'BLEED' ? bleedOptions : null
         // Festering Bile: stack poison like bleed
         if (poisonStacking && weapon.conditionOnHit === 'POISON') {
@@ -651,6 +654,11 @@ function resolvePlayerAttack(battleState, playerUid, targetEnemyId, attackResult
           enemy.statusEffects = applyCondition(enemy.statusEffects || [], weapon.conditionOnHit, 'weapon', condOpts)
         }
         result.conditionApplied = weapon.conditionOnHit
+        // Spear identity: conditions last 1 extra turn
+        if (isSpear) {
+          var spearCond = enemy.statusEffects.find(function(c) { return c.id === weapon.conditionOnHit })
+          if (spearCond && spearCond.turnsRemaining) spearCond.turnsRemaining += 1
+        }
         // Gift: Virulent Mind (bile mind) — conditions last 1 extra turn
         if (gifts.mind && gifts.mind.effect === 'condition_duration_bonus') {
           var appliedCond = enemy.statusEffects.find(function(c) { return c.id === weapon.conditionOnHit })

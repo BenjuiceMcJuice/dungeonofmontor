@@ -84,7 +84,8 @@ var CLEAN_CONFIG = {
     enemyLevel: 1,
     enemyMaxCount: 1,
     conditionMul: 0.4,
-    trapDamage: 5,
+    trapDamageMin: 2,
+    trapDamageMax: 8,
     xpMul: 0.4,
     terminalReveal: false,
   },
@@ -99,7 +100,8 @@ var CLEAN_CONFIG = {
     enemyLevel: 2,
     enemyMaxCount: 1,
     conditionMul: 2.5,
-    trapDamage: 12,
+    trapDamageMin: 8,
+    trapDamageMax: 16,
     xpMul: 3.0,
     terminalReveal: false,
   },
@@ -114,7 +116,8 @@ var CLEAN_CONFIG = {
     enemyLevel: 3,
     enemyMaxCount: 2,
     conditionMul: 4.0,
-    trapDamage: 25,
+    trapDamageMin: 15,
+    trapDamageMax: 35,
     xpMul: 8.0,
     terminalReveal: true,
   },
@@ -438,7 +441,15 @@ function resolveSearch(pile, perStat, agiStat, lckStat, cleanLevel) {
     var agiSave = rollWithMod(20, agiMod)
     result.agiSaveRoll = agiSave.total
 
-    var trapDmg = config.trapDamage || 0
+    // Trap damage as random range — LCK biases toward lower end
+    var trapMin = config.trapDamageMin || 0
+    var trapMax = config.trapDamageMax || config.trapDamage || 0
+    var lckMod2 = lckStat ? getModifier(lckStat) : 0
+    var trapRoll = Math.random()
+    // LCK bias: each +1 LCK mod shifts 5% toward minimum
+    var lckBias = Math.max(0, Math.min(0.4, lckMod2 * 0.05))
+    trapRoll = Math.max(0, trapRoll - lckBias)
+    var trapDmg = trapMin + Math.round(trapRoll * (trapMax - trapMin))
     if (agiSave.total >= 13) {
       // Dodged it — clean dodge, no damage
       result.agiSaved = true
