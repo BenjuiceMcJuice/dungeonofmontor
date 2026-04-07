@@ -24,8 +24,40 @@ import ConditionIcon from '../components/ConditionIcon.jsx'
 import ChamberView from '../components/ChamberView.jsx'
 import DoorSprite from '../components/DoorSprite.jsx'
 import ChamberIcon from '../components/ChamberIcon.jsx'
+import { CHAMBER_ICONS } from '../lib/sprites.js'
 
 var MAX_LOG_ENTRIES = 6
+
+// Safe room background — cached pixel art data URL
+var _safeRoomBgCache = null
+function getSafeRoomBgStyle() {
+  if (!_safeRoomBgCache) {
+    var sprite = CHAMBER_ICONS.safe_room
+    if (sprite) {
+      var scale = 4
+      var canvas = document.createElement('canvas')
+      canvas.width = sprite.cols * scale
+      canvas.height = sprite.rows * scale
+      var ctx = canvas.getContext('2d')
+      ctx.imageSmoothingEnabled = false
+      for (var r = 0; r < sprite.rows; r++) {
+        for (var c = 0; c < sprite.cols; c++) {
+          var v = sprite.grid[r][c]
+          if (v === null) continue
+          ctx.fillStyle = v
+          ctx.fillRect(c * scale, r * scale, scale, scale)
+        }
+      }
+      _safeRoomBgCache = canvas.toDataURL()
+    }
+  }
+  return _safeRoomBgCache ? {
+    backgroundImage: 'url(' + _safeRoomBgCache + ')',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  } : { background: '#0a0a0f' }
+}
 
 // Condition ID → display name (e.g. "BLEED" → "Bleeding", "FEAR" → "Afraid")
 function condName(id) {
@@ -4090,11 +4122,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
   // --- Safe room (Montor's audience chamber) ---
   if (gamePhase === 'safe_room') {
-    // Safe room background — dark stately home vibe
-    var safeRoomBg = {
-      backgroundImage: 'repeating-conic-gradient(#1a1520 0% 25%, #16121c 0% 50%)',
-      backgroundSize: '6px 6px',
-    }
+    var safeRoomBg = getSafeRoomBgStyle()
     var safeInteractionBg = {
       backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
       backgroundSize: '8px 8px',
