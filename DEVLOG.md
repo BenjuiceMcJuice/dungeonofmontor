@@ -154,6 +154,13 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-06 | Blood/Bile gift rework: Haemorrhagic Blood, Festering Bile, Bloodrage +4 | ✅ Done |
 | 2026-04-06 | Dense Core (Stone), Montor purple pixel text, stat order consistency | ✅ Done |
 | 2026-04-06 | Inventory + junk economy + multiplayer specs written | ✅ Done |
+| 2026-04-07 | Playtest bug fixes (8 bugs from testing session) | ✅ Done |
+| 2026-04-07 | 8 new AoE gifts (Spore Burst, Pollen Storm, Aftershock, Tremor Wave, Plague Burst, Toxic Cloud, Blood Spray, Feeding Frenzy) | ✅ Done |
+| 2026-04-07 | Spawn system overhaul — babies weak, can't spawn, mature, cap 5, per-creature rules | ✅ Done |
+| 2026-04-07 | Balance — Thorn Bark 35%, Claw Pendant 1.5x, trap ranges, howl/heal once, spear identity | ✅ Done |
+| 2026-04-07 | Condition reactions — CONDUCTANCE added, INSTANT FREEZE fixed, FRENZY source check | ✅ Done |
+| 2026-04-07 | Inventory — Worn tab, empty slot comparison, merchant markers, shield gate | ✅ Done |
+| 2026-04-07 | All 126 gift effects verified 100% wired | ✅ Done |
 |            | **Next up** | |
 |            | Enemy variety + boss abilities | ⬜ |
 |            | Floor-scaled enemy conditions (deeper = nastier) | ⬜ |
