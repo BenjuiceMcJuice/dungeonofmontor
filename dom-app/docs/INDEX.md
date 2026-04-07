@@ -24,6 +24,8 @@
 | [Montor Mood & Greed Spec](montor_mood_greed_spec.md) | Tidiness, greed, taste tracking -- safe room tonics, mood-aware whispers, dialogue |
 | [Inventory Overhaul Spec](inventory_overhaul_spec.md) | Rarity display, weight/encumbrance, item comparison, tab cleanup, sort, quick actions |
 | [Junk Economy Spec](junk_economy_spec.md) | Junk offload rooms, junk-scaling items, weight, safe room 3-way choice |
+| [Narrative Mode Spec](narrative_mode_spec.md) | Text-based RPG with Montor as AI DM — async multiplayer, dice rolls, campaign chapters |
+| [Stage 2 Persistent Characters](stage2_persistent_characters_spec.md) | 3 character slots, banked gifts, tavern hub, run history |
 
 ---
 
