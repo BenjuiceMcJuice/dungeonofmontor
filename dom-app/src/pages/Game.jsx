@@ -1832,6 +1832,23 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         addLog({ type: 'player', text: 'Predator\'s Focus! Immune to FEAR!', tier: 'hit' })
       }
 
+      // Unshakeable (stone mind): immune to DAZE
+      if (mindG && mindG.effect === 'condition_immunity' && r.conditionApplied === mindG.condition) {
+        pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== r.conditionApplied })
+        r.conditionApplied = null
+        addLog({ type: 'player', text: mindG.name + '! Immune to ' + condName(mindG.condition) + '!', tier: 'hit' })
+      }
+
+      // Mountain Mind (stone mind): 50% resist FEAR/DAZE/CHARM
+      if (mindG && mindG.effect === 'mind_condition_resist' && r.conditionApplied) {
+        var mindConds = ['FEAR', 'DAZE', 'CHARM']
+        if (mindConds.indexOf(r.conditionApplied) !== -1 && rollGiftChance(mindG.value)) {
+          pState.statusEffects = (pState.statusEffects || []).filter(function(c) { return c.id !== r.conditionApplied })
+          addLog({ type: 'player', text: mindG.name + '! Resisted ' + condName(r.conditionApplied) + '!', tier: 'hit' })
+          r.conditionApplied = null
+        }
+      }
+
       // Skip immunity (Void Anchor): immune to DAZE/CHARM/NAUSEA skip effects
       if (shieldG && shieldG.effect === 'skip_immunity' && r.conditionApplied) {
         var skipConditions = ['DAZE', 'CHARM', 'NAUSEA']
