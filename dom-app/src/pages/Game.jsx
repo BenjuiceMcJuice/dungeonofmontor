@@ -14,6 +14,7 @@ import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
 import themeData from '../data/themes.json'
 import montorDialogue from '../data/montor-dialogue.json'
+import { hasGroqKey, generateWhisper, generateSafeRoomLine } from '../lib/groq.js'
 import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
@@ -609,15 +610,30 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     }
 
     // Montor whisper — 30% chance on entering a new room
-    // Mix atmospheric whispers with room entry trolling
     if (Math.random() < 0.3) {
       var mood = getMontorMood()
-      var pool = Math.random() < 0.5
-        ? (montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral)
-        : (montorDialogue.whispers[mood] || montorDialogue.whispers.neutral)
-      var whisper = pool[Math.floor(Math.random() * pool.length)]
-      setMontorWhisper(whisper)
-      setTimeout(function() { setMontorWhisper(null) }, 4000)
+      // Try AI whisper first, fall back to static
+      if (hasGroqKey()) {
+        var tidySummary = getTidinessSummary()
+        generateWhisper({ mood: mood, tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }).then(function(result) {
+          if (result && result.whisper) {
+            setMontorWhisper(result.whisper)
+          } else {
+            // Fallback to static
+            var pool = Math.random() < 0.5
+              ? (montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral)
+              : (montorDialogue.whispers[mood] || montorDialogue.whispers.neutral)
+            setMontorWhisper(pool[Math.floor(Math.random() * pool.length)])
+          }
+          setTimeout(function() { setMontorWhisper(null) }, 6000)
+        })
+      } else {
+        var pool = Math.random() < 0.5
+          ? (montorDialogue.roomEntry[mood] || montorDialogue.roomEntry.neutral)
+          : (montorDialogue.whispers[mood] || montorDialogue.whispers.neutral)
+        setMontorWhisper(pool[Math.floor(Math.random() * pool.length)])
+        setTimeout(function() { setMontorWhisper(null) }, 6000)
+      }
     } else {
       setMontorWhisper(null)
     }
@@ -1122,12 +1138,26 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   }
 
   // --- Safe room: Montor's audience chamber ---
+  var [safeRoomAiLine, setSafeRoomAiLine] = useState(null)
+
   function initSafeRoom() {
     // Check if player has any unsmashed treasures in junk bag
     var treasure = playerJunkBag.find(function(j) { return j.isTreasure })
     setSafeRoomGift(treasure || null)
     setSafeRoomStep('arrival')
     setSafeRoomSlotChoice(null)
+    // Generate AI safe room line if key available
+    setSafeRoomAiLine(null)
+    if (hasGroqKey()) {
+      var tidySummary = getTidinessSummary()
+      generateSafeRoomLine({ mood: getMontorMood(), tidiness: tidySummary.label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }).then(function(result) {
+        if (result && result.line) setSafeRoomAiLine(result.line)
+      })
+    }
+  }
+
+  function getSafeRoomMontor() {
+    return safeRoomAiLine || getSafeRoomMontor()
   }
 
   var [safeRoomTonic, setSafeRoomTonic] = useState(null)
@@ -4017,7 +4047,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
               You enter a chamber of worked stone. Torchlight flickers. The air is warm. You are safe here — for now.
             </p>
             <p className="text-purple-400 text-sm font-display">
-              "{getMontorLine('safeRoom')}"
+              "{getSafeRoomMontor()}"
             </p>
           </div>
           <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-xs text-sm text-ink-dim">
@@ -4211,7 +4241,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
           <p className="text-purple-400 text-sm font-display">
-            "{getMontorLine('safeRoom')}"
+            "{getSafeRoomMontor()}"
           </p>
           <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
             <p className={'text-xs font-sans ' + tidiness3.colour}>Floor tidiness: {tidiness3.label}</p>
@@ -4267,7 +4297,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
           <p className="text-purple-400 text-sm font-display">
-            "{getMontorLine('safeRoom')}"
+            "{getSafeRoomMontor()}"
           </p>
           <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
             <p className={'text-xs font-sans ' + tidiness.colour}>Floor tidiness: {tidiness.label}</p>
@@ -4297,7 +4327,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
           <p className="text-purple-400 text-sm font-display">
-            "{getMontorLine('safeRoom')}"
+            "{getSafeRoomMontor()}"
           </p>
           <p className="text-gold font-display text-xl">Tonic Applied</p>
           <div className="flex flex-col gap-1">
@@ -4323,7 +4353,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       return (
         <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-4 bg-raised">
           <p className="text-purple-400 text-sm font-display">
-            "{getMontorLine('safeRoom')}"
+            "{getSafeRoomMontor()}"
           </p>
           <div className="bg-surface border border-border rounded-lg p-3 w-full max-w-xs">
             <p className={'text-xs font-sans ' + tidiness2.colour}>Floor tidiness: {tidiness2.label}</p>
@@ -5406,7 +5436,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <div className="h-full flex flex-col items-center justify-center gap-3 px-2 relative" style={{ zIndex: 1 }}>
               {/* Montor whisper */}
               {montorWhisper && (
-                <p className="text-purple-400/70 text-xs text-center max-w-xs mb-2 animate-pulse font-display">
+                <p className="text-purple-400 text-sm text-center max-w-xs mb-3 font-display">
                   "{montorWhisper}"
                 </p>
               )}

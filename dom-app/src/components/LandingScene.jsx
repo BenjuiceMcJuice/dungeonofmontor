@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
+import GroqKeyInput from './GroqKeyInput.jsx'
 
 var P = 3, W = 480, H = 340
 
@@ -390,6 +391,10 @@ function LandingScene({ onEnter }) {
               </div>
             </div>
           )}
+        </div>
+        {/* AI key input — bottom corner */}
+        <div style={{ position: 'absolute', bottom: '12px', right: '12px' }}>
+          <GroqKeyInput />
         </div>
       </div>
     </div>
