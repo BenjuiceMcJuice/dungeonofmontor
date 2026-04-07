@@ -1,4 +1,5 @@
 # Montor's Mood, Greed & Safe Room Rewards
+> Status: ✅ IMPLEMENTED (2026-04-06). Tidiness tiers updated 2026-04-07.
 
 ## Overview
 Montor watches how you treat his dungeon. Search his junk piles? He notices. Loot everything? He's less generous. Show restraint? He rewards you at safe rooms. This creates per-pile decision-making: loot now vs Montor's favour later.

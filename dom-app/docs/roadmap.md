@@ -1,7 +1,7 @@
 # Development Roadmap
 
 > 5-stage plan from solo crawl to full multiplayer RPG with AI narrative.
-> Updated 2026-04-06.
+> Updated 2026-04-07.
 
 ---
 
@@ -58,8 +58,13 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 - **Montor's Mood system** — tidiness tracking, greed score, taste preferences, mood-scaled rewards
 - **Montor speaks in purple pixel font** — unique visual identity
 - **Run persistence** — localStorage + Firestore backup, resume on reload
-- **Inventory overhaul** — rarity colours, 4 tabs, sort, item comparison, weight bar, combat status card
+- **Inventory overhaul** — rarity colours, 5 tabs (Worn/Gear/Equip/Items/Junk), sort, item comparison vs equipped/empty, weight bar, combat status card, merchant upgrade markers
 - **Rarity price curve** — rare 1.5x, epic 2x, legendary 3x, heirloom 4x
+- **8 AoE gifts** — Spore Burst, Pollen Storm, Aftershock, Tremor Wave, Plague Burst, Toxic Cloud, Blood Spray, Feeding Frenzy
+- **Spawn system overhaul** — babies can't spawn, max 5 enemies, per-creature rules (spiders x2, moth eggs, hound pups), maturation timer, babies significantly weaker
+- **10 condition reactions** — SHATTER, INSTANT FREEZE, STEAM, CONDUCTANCE, SEPSIS, FRENZY, CATATONIC, DYSENTERY, DELIRIUM, NECROSIS
+- **Spear weapon identity** — +15% condition proc, +1 turn duration, INT synergy
+- **Groq AI integration** — AI whispers, AI safe room dialogue, AI treasure negotiation (up to 4 exchanges), key validation on landing screen
 - ErrorBoundary component for crash diagnosis (iOS WebKit)
 - Firebase Auth (email + Google sign-in)
 - GitHub Pages deployment with auto-deploy from main
@@ -71,12 +76,14 @@ Each stage is a shippable, playable game. Each one builds on the last without re
 | Enemy variety + boss abilities | Backlog — biggest content gap |
 | Floor-scaled enemy conditions (deeper = nastier) | Backlog |
 | Junk offload rooms + junk-scaling items | Spec written |
+| Prebuilt character roster (Knight/Glutton/Coward/Hermit/Brute) | Backlog |
 | Inventory weight penalties (bar visible, no penalty yet) | Backlog |
 | Room events -- pollen, rain, grease fires, day/night (Garden) | Backlog |
 | WIS stat wired for gift activation rolls | Backlog |
 | Sprite polish -- junk pile sprites for all floors (Garden done) | Backlog |
-| Dungeon map UI improvements -- fog of war, PER-based reveal | Backlog |
-| Firebase persistence -- save/load run state to Firestore | Backlog |
+| Zone-themed trader sprites | Backlog |
+| AI notice boards (player posts, Montor replies next zone) | Ready (Groq foundation done) |
+| AI narrative gameplay mode (text adventure with AI DM) | Planned |
 | Soul slot synergies -- 21 pairings for endgame depth | Backlog |
 | Combat balance pass -- dual dagger bleed still OP, other builds need parity | Backlog |
 

@@ -1,7 +1,7 @@
 # Multiplayer
 
 > Vision and architecture for multiplayer in Dungeon of Montor.
-> Updated 2026-04-06.
+> Updated 2026-04-07.
 > Status: All multiplayer features are **planned** (Stage 3+). The architecture is multiplayer-ready from day one.
 > **Detailed spec:** See [async_coop_spec.md](async_coop_spec.md) for the full implementation plan (Option A: shared exploration, turn-gated combat).
 

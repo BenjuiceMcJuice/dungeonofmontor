@@ -1,6 +1,6 @@
 # Dungeon of Montor -- Game Design
 
-> Master game design document. Updated 2026-04-06.
+> Master game design document. Updated 2026-04-07.
 
 ---
 

@@ -1,6 +1,6 @@
 # Technical Architecture
 
-> How Dungeon of Montor is built. Updated 2026-04-06.
+> How Dungeon of Montor is built. Updated 2026-04-07.
 
 ---
 
@@ -11,7 +11,7 @@
 | Frontend | React 18 + Vite + Tailwind v4 | Mobile-first PWA |
 | Auth | Firebase Auth | Email + Google sign-in |
 | Database | Firestore | Real-time sync for multiplayer (Spark/free plan, europe-west2) |
-| AI (future) | Groq API | AI narration; user-supplied key stored in localStorage |
+| AI | Groq API (Llama 3.3 70B) | AI whispers, safe room dialogue, treasure negotiation. User-supplied key stored in localStorage. Fallback to static text without key. |
 | Hosting | GitHub Pages | Auto-deploy from `main` via GitHub Actions |
 | Sprites | Canvas grid arrays | No image files; sprites are JS data |
 
