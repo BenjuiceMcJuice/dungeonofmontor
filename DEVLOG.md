@@ -170,7 +170,17 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-07 | Free text input in negotiations + safety guardrails in all AI prompts | ✅ Done |
 | 2026-04-07 | Floor transition fix (infinite recursion + button + guard removal) | ✅ Done |
 | 2026-04-07 | 3 new condition damage rings, Claw Pendant 1.5x, compendiums regenerated | ✅ Done |
+| 2026-04-07 | 16 Montor personalities + personality picker + AI conversation scoring | ✅ Done |
+| 2026-04-07 | Free text input in negotiations + safety guardrails + player name roasting | ✅ Done |
+| 2026-04-07 | Garden NPC sprites (Keith + Peddler) — dark themed, scale 4, named | ✅ Done |
+| 2026-04-07 | Rarity colours reworked — grey/cyan/blue/gold/amber/void purple (no green) | ✅ Done |
+| 2026-04-07 | Personality-flavoured whispers (60+ lines, 16 personalities) | ✅ Done |
+| 2026-04-07 | Narrative mode spec + demo campaign + Tavern hub concept | ✅ Done |
+| 2026-04-07 | Stage 2 persistent characters spec written | ✅ Done |
 |            | **Next up** | |
+|            | Tavern hub + Stage 2 persistent characters (foundation for both modes) | ⬜ |
+|            | Wire The Crawl (roguelike) through Tavern | ⬜ |
+|            | Wire The Tale (narrative mode) through Tavern | ⬜ |
 |            | Enemy variety + boss abilities | ⬜ |
 |            | Floor-scaled enemy conditions (deeper = nastier) | ⬜ |
 |            | Junk offload rooms + junk-scaling items (spec written) | ⬜ |

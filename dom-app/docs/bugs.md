@@ -91,6 +91,11 @@
 | 32 | getSafeRoomMontor() infinite recursion (called itself) | Fixed to call getMontorLine('safeRoom') |
 | 33 | Floor transition button did nothing (isGuarded blocking) | Removed guard check, added try/catch fallback |
 | 34 | AI treasure options in Montor's voice, not player's | Updated prompts to specify player perspective |
+| 35 | Safe room sprite grid 30 rows declared, 28 actual | Fixed row count + defensive rendering on all sprite functions |
+| 36 | getSafeRoomMontor() infinite recursion | Called itself instead of getMontorLine — one char fix |
+| 37 | Floor transition button did nothing (isGuarded blocking) | Removed guard, added try/catch fallback |
+| 38 | Whispers flashing off on room entry | Timer managed via ref, clear on entry, no instant null |
+| 39 | Safe room pixel art background unreadable behind text | Reverted to clean dark purple gradient |
 
 ## Sign-off Log
 | Date | Tester | Build | Notes |
