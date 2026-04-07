@@ -331,9 +331,95 @@ save the door. Or Keith's shoulder."
 - The text format is accessible — no graphics needed, works on any device
 - Builds on everything already built: Groq integration, personality system, mood tracking, condition reactions
 
-## Cost Considerations
-- Each player action = 1 Groq API call (~150-300 tokens)
-- A typical session might be 30-50 actions = 30-50 API calls
-- Groq free tier: generous rate limits for casual play
-- Campaign context grows over time — need to summarise and prune to keep under token limits
-- Chapter summaries serve double duty: player enjoyment + context compression
+## Cross-Mode Progression (Roguelike → Narrative)
+
+Roguelike runs feed into narrative characters:
+
+| Roguelike Achievement | Narrative Benefit |
+|---|---|
+| Banked gifts | Available to equip at terminals in narrative mode |
+| Run achievements ("100 rats killed") | Permanent stat bonuses in narrative (+1 STR etc.) |
+| Items found in roguelike | Appear in narrative loot tables (familiar items) |
+| Floors cleared | "Familiarity" bonus — Montor comments, DC reduced for known areas |
+| High greed score runs | Montor remembers across modes — "You again. The greedy one." |
+| Gift sacrifice choices | Narrative Montor references past decisions |
+
+Characters can play BOTH modes. Roguelike builds power. Narrative mode uses that power in a richer story context. Neither mode is required — but cross-play is rewarded.
+
+## Token Management — Three-Tier Memory
+
+### The Problem
+A campaign over days/weeks generates thousands of messages. Can't send full history to Groq every call — 128K context limit would be hit fast.
+
+### The Solution: Compressed Memory
+
+```
+┌─────────────────────────────────────────────────┐
+│ Tier 1: System Prompt (~500 tokens)             │
+│   Montor personality, rules, safety, mood        │
+│   Sent with EVERY call. Never changes mid-run.   │
+├─────────────────────────────────────────────────┤
+│ Tier 2: Campaign Summary (~1000 tokens)          │
+│   AI-compressed summary of everything important  │
+│   Updated after each chapter/session end          │
+│   "The party is on floor 2. Keith has a grudge   │
+│   against Montor. Steve broke Gerald. They found  │
+│   the Pruning Shears. Montor is vengeful."       │
+├─────────────────────────────────────────────────┤
+│ Tier 3: Recent Context (~2000 tokens)            │
+│   Last 10-15 messages only                       │
+│   Gives AI immediate conversation flow           │
+│   Older messages pruned automatically             │
+├─────────────────────────────────────────────────┤
+│ Total per call: ~3500 input + ~300 output        │
+│ = ~3800 tokens per action                        │
+└─────────────────────────────────────────────────┘
+```
+
+### How Summaries Work
+
+**Scene summaries (every ~20 messages):**
+- AI generates a 200-token scene summary
+- Captures: what happened, who did what, consequences, Montor's reactions
+- Stored in Firestore as scene records
+
+**Chapter summaries (session end):**
+- AI compresses ALL scene summaries into one campaign summary (~1000 tokens)
+- This REPLACES the raw history as Tier 2 context
+- Old messages archived in Firestore for History view but NOT sent to AI
+- Campaign summary is the AI's "memory" — compressed, not raw
+
+**Summary generation prompt:**
+```
+"Summarise this session for campaign memory. Include:
+- Where the party is now (floor, room)
+- Key decisions and their consequences
+- Each player's notable actions and personality
+- Montor's current feelings about each player
+- Unresolved plot threads or dangers
+- Items gained/lost, enemies defeated
+Keep under 300 words. This summary replaces all previous
+context — it must contain everything the DM needs to know."
+```
+
+### Pruning Strategy
+```
+Messages 1-20:    Summarised → Scene 1 summary
+Messages 21-40:   Summarised → Scene 2 summary  
+Messages 41-60:   Summarised → Scene 3 summary
+Session end:      Scenes 1-3 compressed → Chapter summary
+Next session:     Chapter summary = Tier 2 context
+                  Only last 15 messages = Tier 3 context
+```
+
+### Cost Estimate
+- 50 actions/session × 3800 tokens = 190K tokens/session
+- 1 scene summary × 2000 tokens = 2K tokens
+- 1 chapter summary × 3000 tokens = 3K tokens
+- **Total per session: ~195K tokens**
+- Groq free tier: handles this easily
+- 10-session campaign: ~2M tokens total — well within limits
+- 4 players × 50 actions = 200 actions, still ~760K tokens/session — manageable
+
+### Context Quality Over Time
+The compression approach means Montor's "memory" gets MORE focused over time, not less. Early sessions: raw messages, lots of noise. Later sessions: compressed summaries capture only what matters — grudges, alliances, key items, unresolved threats. Montor's narrative becomes richer as the campaign progresses because the context is cleaner.
