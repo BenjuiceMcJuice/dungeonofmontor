@@ -385,7 +385,7 @@ var REACTIONS = [
   { a: 'WET',   b: 'BURN',   name: 'STEAM',           damage: 0,  removeBoth: true,  applyConditionAll: 'BLIND', narrative: 'STEAM! Fire meets water — blinding cloud fills the chamber!' },
   { a: 'WET',   b: 'CHARGED', name: 'CONDUCTANCE',    damage: 8,  removeBoth: true,  applyConditionAll: 'DAZE', narrative: 'CONDUCTANCE! Water conducts the charge — 8 AoE damage + all enemies stunned!' },
   // SEPSIS is handled per-tick in tickConditions, not as a reaction here
-  { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!' },
+  { a: 'FEAR',  b: 'BLEED',  name: 'FRENZY',          damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'FRENZY! Bleeding and terrified — enemy goes berserk!', requireSource: { a: 'FEAR', notSource: 'bleed_panic' } },
   { a: 'DAZE',  b: 'FEAR',   name: 'CATATONIC',       damage: 0,  removeBoth: true,  applyCondition: 'DAZE', applyTurns: 2, narrative: 'CATATONIC! Mind shuts down completely!' },
   { a: 'POISON', b: 'NAUSEA', name: 'DYSENTERY',      damage: 3,  removeBoth: true,  applyCondition: 'NAUSEA', applyTurns: 3, narrative: 'DYSENTERY! Poison and nausea combine — the body gives up!' },
   { a: 'POISON', b: 'FEAR',   name: 'DELIRIUM',       damage: 0,  removeBoth: true,  applyCondition: 'FRENZY', narrative: 'DELIRIUM! Poisoned mind snaps — hallucinating and swinging wild!' },
@@ -400,6 +400,11 @@ function checkConditionReactions(statusEffects) {
     var hasA = statusEffects.some(function(c) { return c.id === r.a })
     var hasB = statusEffects.some(function(c) { return c.id === r.b })
     if (hasA && hasB) {
+      // Source check — some reactions only fire if condition came from specific source
+      if (r.requireSource) {
+        var sourceCondition = statusEffects.find(function(c) { return c.id === r.requireSource.a })
+        if (sourceCondition && sourceCondition.source === r.requireSource.notSource) continue
+      }
       // Proc chance — some reactions only trigger X% of the time
       if (r.procChance && Math.random() > r.procChance) continue
 
