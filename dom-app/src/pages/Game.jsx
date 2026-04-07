@@ -348,7 +348,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   var [combatItemPhase, setCombatItemPhase] = useState(null) // null | 'use' | 'throw'
   var [consumeResult, setConsumeResult] = useState(null) // { success, narrative, junkName }
   var [expandedJunkId, setExpandedJunkId] = useState(null)
-  var [inventoryTab, setInventoryTab] = useState('gear')
+  var [inventoryTab, setInventoryTab] = useState('equipped')
   var [inventorySort, setInventorySort] = useState('rarity') // rarity | damage | def | name
   var [selectedItemIdx, setSelectedItemIdx] = useState(null)
 
@@ -4552,6 +4552,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
         {/* Inventory panel — full screen overlay */}
         {showInventoryPanel && (function() {
           var tabs = [
+            { id: 'equipped',    label: 'Worn',    types: [] },
             { id: 'gear',        label: 'Gear',    types: ['weapon', 'armour'] },
             { id: 'accessories', label: 'Equip',   types: ['relic', 'ring', 'amulet'] },
             { id: 'consumables', label: 'Items',   types: ['consumable'] },
@@ -4679,8 +4680,106 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 </div>
               )}
 
-              {/* Currently equipped (gear tab — weapons + armour + shield) */}
-              {activeTab.id === 'gear' && character.equipped && (
+              {/* Equipped tab — all worn gear in one view */}
+              {activeTab.id === 'equipped' && (
+                <div className="flex-1 overflow-y-auto p-3">
+                  <div className="flex flex-col gap-1.5">
+                    {/* Weapon */}
+                    <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-gold uppercase">Weapon: </span>
+                        <span className={character.equipped && character.equipped.weapon ? rarityCol(character.equipped.weapon.rarity).text : 'text-ink-faint'}>{character.equipped && character.equipped.weapon ? character.equipped.weapon.name : 'Fists'}</span>
+                        {character.equipped && character.equipped.weapon && <span className="text-ink-faint text-[10px] ml-1">d{character.equipped.weapon.damageDie || character.equipped.weapon.die}</span>}
+                      </div>
+                      {canEquipNow && character.equipped && character.equipped.weapon && (
+                        <button onClick={handleUnequipWeapon} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>
+                      )}
+                    </div>
+                    {/* Offhand */}
+                    {character.equipped && character.equipped.offhand && (
+                      <div className="p-2 rounded bg-blue-500/10 border border-blue-500/20 text-sm font-sans flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-blue-400 uppercase">{character.equipped.offhand.type === 'weapon' ? 'Off-hand: ' : 'Shield: '}</span>
+                          <span className={rarityCol(character.equipped.offhand.rarity).text}>{character.equipped.offhand.name}</span>
+                        </div>
+                        {canEquipNow && <button onClick={handleUnequipOffhand} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                      </div>
+                    )}
+                    {/* Armour */}
+                    {character.equipped && character.equipped.armour && (
+                      <div className="p-2 rounded bg-surface border border-border text-sm font-sans flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-ink-dim uppercase">Armour: </span>
+                          <span className={rarityCol(character.equipped.armour.rarity).text}>{character.equipped.armour.name}</span>
+                          <span className="text-ink-faint text-[10px] ml-1">+{character.equipped.armour.defBonus || 0} DEF</span>
+                        </div>
+                        {canEquipNow && <button onClick={handleUnequipArmour} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                      </div>
+                    )}
+                    {/* Helmet */}
+                    {character.equipped && character.equipped.helmet && (
+                      <div className="p-2 rounded bg-surface border border-border text-sm font-sans flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-ink-dim uppercase">Helmet: </span>
+                          <span className={rarityCol(character.equipped.helmet.rarity).text}>{character.equipped.helmet.name}</span>
+                        </div>
+                        {canEquipNow && <button onClick={handleUnequipHelmet} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                      </div>
+                    )}
+                    {/* Boots */}
+                    {character.equipped && character.equipped.boots && (
+                      <div className="p-2 rounded bg-surface border border-border text-sm font-sans flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-ink-dim uppercase">Boots: </span>
+                          <span className={rarityCol(character.equipped.boots.rarity).text}>{character.equipped.boots.name}</span>
+                        </div>
+                        {canEquipNow && <button onClick={handleUnequipBoots} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                      </div>
+                    )}
+                    {/* Amulet */}
+                    {character.equipped && character.equipped.amulet && (
+                      <div className="p-2 rounded bg-surface border border-border text-sm font-sans flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-ink-dim uppercase">Amulet: </span>
+                          <span className={rarityCol(character.equipped.amulet.rarity).text}>{character.equipped.amulet.name}</span>
+                        </div>
+                        {canEquipNow && <button onClick={handleUnequipAmulet} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                      </div>
+                    )}
+                    {/* Rings */}
+                    {character.equipped && character.equipped.rings && character.equipped.rings.map(function(ring, ri) {
+                      return (
+                        <div key={'ring-' + ri} className="p-2 rounded bg-amber-400/5 border border-amber-400/20 text-sm font-sans flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-amber-400 uppercase">Ring: </span>
+                            <span className={rarityCol(ring.rarity).text}>{ring.name}</span>
+                          </div>
+                          {canEquipNow && <button onClick={function() { handleUnequipRing(ri) }} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                        </div>
+                      )
+                    })}
+                    {/* Relics */}
+                    {character.equipped && character.equipped.relics && character.equipped.relics.map(function(rel, rli) {
+                      return (
+                        <div key={'relic-' + rli} className="p-2 rounded bg-purple-400/5 border border-purple-400/20 text-sm font-sans flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-purple-400 uppercase">Relic: </span>
+                            <span className={rarityCol(rel.rarity).text}>{rel.name}</span>
+                          </div>
+                          {canEquipNow && <button onClick={function() { handleUnequipRelic(rli) }} className="text-[10px] text-ink-dim border border-border px-2 py-0.5 rounded hover:text-ink">Unequip</button>}
+                        </div>
+                      )
+                    })}
+                    {/* Empty slots hint */}
+                    {(!character.equipped || (!character.equipped.weapon && !character.equipped.armour && !character.equipped.offhand)) && (
+                      <p className="text-ink-faint text-xs italic text-center py-4">No equipment. Check Gear and Equip tabs.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Equipped sections moved to Worn tab */}
+              {activeTab.id === '_disabled_gear' && character.equipped && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
                     <div className="flex items-center justify-between">
@@ -4731,7 +4830,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   )}
                 </div>
               )}
-              {activeTab.id === 'gear' && (
+              {activeTab.id === '_disabled_gear2' && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.armour && (
                     <div className="p-2 rounded bg-gold/10 border border-gold/20 text-sm font-sans">
@@ -4824,7 +4923,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                   )}
                 </div>
               )}
-              {activeTab.id === 'accessories' && (
+              {activeTab.id === '_disabled_accessories' && (
                 <div className="mx-3 mt-2 flex flex-col gap-1">
                   {character.equipped && character.equipped.relics && (function() {
                     var isResist = function(r) { return r.passiveEffect === 'condition_resist' || r.passiveEffect === 'condition_immunity' || r.passiveEffect === 'condition_resist_multi' || r.passiveEffect === 'condition_resist_all' }
@@ -4884,8 +4983,8 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                 </div>
               )}
 
-              {/* Bag contents for active tab */}
-              <div className="p-3 flex-1 overflow-y-auto">
+              {/* Bag contents for active tab (not on equipped tab) */}
+              {activeTab.id !== 'equipped' && <div className="p-3 flex-1 overflow-y-auto">
                 {filteredItems.length === 0 && (
                   <p className="text-ink-faint text-xs text-center py-2">Nothing here.</p>
                 )}
@@ -5188,7 +5287,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                     )}
                   </div>
                 )}
-              </div>
+              </div>}
             </div>
           )
         })()}
