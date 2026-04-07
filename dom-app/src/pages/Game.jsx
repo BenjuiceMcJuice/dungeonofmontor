@@ -1108,33 +1108,37 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
   // --- Floor transition: move to next floor or victory ---
   function handleFloorTransitionContinue() {
-    if (isGuarded()) return
+    try {
+      // Sibling zones are optional (accessed via zone door) — always descend to next floor
+      var currentFloorDef = floor ? FLOORS[floor.floorId] : null
+      var nextFloorId = currentFloorDef ? currentFloorDef.nextFloor : null
 
-    // Sibling zones are optional (accessed via zone door) — always descend to next floor
-    var currentFloorDef = FLOORS[floor.floorId]
-    var nextFloorId = currentFloorDef ? currentFloorDef.nextFloor : null
+      if (!nextFloorId || !FLOORS[nextFloorId]) {
+        // No more floors — victory!
+        writeRunLog('victory')
+        onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length, floorsCompleted: floorsCompleted.length + 1 })
+        return
+      }
 
-    if (!nextFloorId || !FLOORS[nextFloorId]) {
-      // No more floors — victory!
-      writeRunLog('victory')
-      onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length, floorsCompleted: floorsCompleted.length + 1 })
-      return
+      // Generate next floor (floorsCompleted already updated in handleDescendStairwell)
+      var nextFloor = generateFloor(nextFloorId, collectedTreasures)
+      setFloor(nextFloor)
+      setZone(nextFloor.zones[0])
+      setHasZoneKey(false)
+      setFloorDisturbance(0)
+      setMaxFloorDisturbance(calcMaxDisturbance(nextFloor.zones[0]))
+      setPreviousPosition(null)
+      setLootingCorpseId(null)
+      setLootingChestId(null)
+      setLootingNpcId(null)
+      initSafeRoom()
+      guardedSetPhase('safe_room')
+      triggerSave()
+    } catch (e) {
+      console.error('Floor transition error:', e)
+      // Fallback: just go to safe room with current floor
+      guardedSetPhase('safe_room')
     }
-
-    // Generate next floor (floorsCompleted already updated in handleDescendStairwell)
-    var nextFloor = generateFloor(nextFloorId, collectedTreasures)
-    setFloor(nextFloor)
-    setZone(nextFloor.zones[0])
-    setHasZoneKey(false)
-    setFloorDisturbance(0)
-    setMaxFloorDisturbance(calcMaxDisturbance(nextFloor.zones[0]))
-    setPreviousPosition(null)
-    setLootingCorpseId(null)
-    setLootingChestId(null)
-    setLootingNpcId(null)
-    initSafeRoom()
-    guardedSetPhase('safe_room')
-    triggerSave()
   }
 
   // --- Safe room: Montor's audience chamber ---
