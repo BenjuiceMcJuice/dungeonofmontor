@@ -1,269 +1,90 @@
 # Weapon Compendium
 
-Complete reference for all weapons and shields in Dungeon of Montor.
+> Auto-generated from items.json. 64 weapons total. Updated 2026-04-07.
 
 ---
 
-## Weapon Classes
+## Axes (10)
 
-| Class | Hand | Base Die | Identity | Can Use Shield? |
-|---|---|---|---|---|
-| **Dagger** | Light | d4 | Speed: double strike, +initiative, dual wield | Yes |
-| **Sword** | Light | d6 | Balance: +accuracy, reliable damage | Yes |
-| **Spear** | Light | d6 | First strike: high initiative bonus | Yes |
-| **Mace** | Heavy | d6 | Armour piercing: DEF ignore, stagger | No |
-| **Battle Axe** | Heavy | d10 | Raw power: big dice, stagger | No |
-| **Fists** | Light | d4 | Unarmed: -1 accuracy, 2x STR bonus, +1 init | Yes |
-
----
-
-## Weapon Tiers
-
-| Tier | Rarity | Gift Slot? | Description |
-|---|---|---|---|
-| **Base** | Common | No | Starter shop. Cheap, no frills. |
-| **Montor's Gifted** | Uncommon/Rare | **Yes** | Condition on hit + giftPower slot. Upgradeable with Gifts later. |
-| **Montor's Hardened** | Rare/Epic | No | Best raw stats. Powerful standalone, but can't be upgraded. |
-| **Unique** | Legendary | No | Rule-breaking. Extremely rare. |
-
----
-
-## Daggers
-
-*Identity: Speed. d4 damage, but double strike chance + initiative bonus. Can dual wield.*
-
-### Base
-
-| Name | Die | Perks | Price | Description |
-|---|---|---|---|---|
-| Rusty Dagger | d4 | 25% double strike, +1 init | 8g | Left behind by someone who didn't make it. |
-
-### Gifted (has giftPower)
-
-| Name | Die | Condition | Chance | Gift | Rarity | Perks | Price |
+| Name | Rarity | Die | Acc | Condition | Chance | Special | Price |
 |---|---|---|---|---|---|---|---|
-| Peeling Knife | d4 | POISON | 100% | bile | Uncommon | 25% double strike, +1 init | 22g |
-| Pruning Shears | d4 | BLEED | 100% | blood | Uncommon | 25% double strike, +1 init | 24g |
-| Nail File | d4 | FEAR | 50% | void | Uncommon | 30% double strike, +2 init | 26g |
-| Candle Snuffer | d4 | BURN | 80% | ember | Rare | 25% double strike, +1 init | 32g |
-| Icicle | d4 | FROST | 100% | stone | Rare | 25% double strike, +1 init | 30g |
-| Cheese Wire | d4 | DAZE | 70% | stone | Rare | 25% double strike, +1 init | 35g |
+| Battle Axe | common | d10 | -1 | - | - | 20% stagger, Heavy | 44g |
+| Montor's Woodsman's Axe | uncommon | d10 | -1 | POISON | 70% | 20% stagger, Gift: petal, Heavy | 60g |
+| Montor's Cleaver | uncommon | d10 | -1 | BLEED | 100% | 20% stagger, Gift: blood, Heavy | 64g |
+| Montor's Boomerang | uncommon | d6 | -1 | - | - | Heavy | 50g |
+| Montor's Coal Shovel | rare | d10 | -1 | BURN | 100% | 25% stagger, Gift: ember, Heavy | 126g |
+| Montor's Pickaxe | rare | d10 | -1 | FROST | 80% | 15% DEF ignore, 20% stagger, Gift: stone, Heavy | 120g |
+| Montor's Executioner's Hatchet | rare | d10 | -1 | FEAR | 80% | 25% stagger, Gift: void, Heavy | 135g |
+| Montor's Sledgehammer | rare | d10 | -1 | DAZE | 100% | 10% DEF ignore, 35% stagger, Gift: stone, Heavy | 144g |
+| Montor's Hardened Cleaver | rare | d12 | -1 | - | - | 15% DEF ignore, 25% stagger, Heavy | 210g |
+| Montor's Grandfather Clock Hand | epic | d12 | -1 | - | - | 20% DEF ignore, 30% stagger, Heavy | 400g |
+## Daggers (14)
 
-### Hardened (no gift, strong stats)
-
-| Name | Die | Rarity | Perks | Price |
-|---|---|---|---|---|
-| Letter Knife | d4 | Rare | 35% double strike, +2 init | 50g |
-| Skeleton Key | d4 | Epic | 40% double strike, 30% DEF ignore, +3 init | 90g |
-
----
-
-## Swords
-
-*Identity: Balance. d6 damage with accuracy bonus. The reliable choice.*
-
-### Base
-
-| Name | Die | Perks | Price | Description |
-|---|---|---|---|---|
-| Sword | d6 | +1 accuracy | 15g | Reliable. Dull. Like its previous owner. |
-
-### Gifted (has giftPower)
-
-| Name | Die | Condition | Chance | Gift | Rarity | Perks | Price |
+| Name | Rarity | Die | Acc | Condition | Chance | Special | Price |
 |---|---|---|---|---|---|---|---|
-| Umbrella | d6 | POISON | 80% | bile | Uncommon | +1 accuracy | 25g |
-| Letter Opener | d6 | BLEED | 100% | blood | Uncommon | +2 accuracy | 28g |
-| Sabatier | d6 | DAZE | 60% | stone | Uncommon | +2 accuracy | 30g |
-| Fireplace Poker | d6 | BURN | 100% | ember | Rare | +1 accuracy | 40g |
-| Ice Pick | d6 | FROST | 100% | stone | Rare | +1 accuracy | 38g |
-| Mum's Bread Knife | d6 | FEAR | 70% | blood | Rare | +1 accuracy | 42g |
+| Rusty Dagger | common | d4 | - | - | - | 25% double, +1 init | 16g |
+| Montor's Butter Knife | common | d4 | +2 | - | - | +1 init | 16g |
+| Montor's Corkscrew | common | d4 | - | BLEED | 15% | 15% double, +1 init | 20g |
+| Montor's Broken Bottle | common | d4 | -1 | BLEED | 40% | 20% double, +1 init | 12g |
+| Montor's Peeling Knife | uncommon | d4 | - | POISON | 100% | 25% double, +1 init, Gift: bile | 44g |
+| Montor's Pruning Shears | uncommon | d4 | - | BLEED | 100% | 25% double, +1 init, Gift: blood | 48g |
+| Montor's Nail File | uncommon | d4 | - | FEAR | 50% | 30% double, +2 init, Gift: void | 52g |
+| Montor's Cheese Grater | uncommon | d4 | - | BLEED | 30% | 25% double, 15% DEF ignore, +1 init | 40g |
+| Montor's Candle Snuffer | rare | d4 | - | BURN | 80% | 25% double, +1 init, Gift: ember | 96g |
+| Montor's Icicle | rare | d4 | - | FROST | 100% | 25% double, +1 init, Gift: stone | 90g |
+| Montor's Cheese Wire | rare | d4 | - | DAZE | 70% | 25% double, +1 init, Gift: stone | 105g |
+| Montor's Letter Knife | rare | d4 | - | - | - | 35% double, +2 init | 150g |
+| Montor's Loaded Weapon | rare | d4 | - | - | - | 25% double, +1 init | 165g |
+| Montor's Skeleton Key | epic | d4 | - | - | - | 40% double, 30% DEF ignore, +3 init | 360g |
+## Maces (13)
 
-### Hardened (no gift, strong stats)
-
-| Name | Die | Rarity | Perks | Price |
-|---|---|---|---|---|
-| Hardened Sabatier | d8 | Rare | +3 accuracy, 15% DEF ignore | 60g |
-| Family Heirloom | d8 | Epic | +3 accuracy, 15% double strike, 20% DEF ignore | 120g |
-
-### Unique
-
-| Name | Die | Rarity | Perks | Price |
-|---|---|---|---|---|
-| Family Sword | d10 | Legendary | +3 accuracy, 20% double strike, 25% DEF ignore | 250g |
-
----
-
-## Spears
-
-*Identity: First strike. d6 damage with high initiative bonus. Strike before they can react.*
-
-### Base
-
-| Name | Die | Perks | Price | Description |
-|---|---|---|---|---|
-| Spear | d6 | +2 init | 15g | Long reach. Strike first, ask questions never. |
-
-### Gifted (has giftPower)
-
-| Name | Die | Condition | Chance | Gift | Rarity | Perks | Price |
+| Name | Rarity | Die | Acc | Condition | Chance | Special | Price |
 |---|---|---|---|---|---|---|---|
-| Garden Fork | d6 | POISON | 100% | petal | Uncommon | +2 init | 24g |
-| Fishing Spear | d6 | BLEED | 100% | blood | Uncommon | +2 init | 26g |
-| Curtain Rod | d6 | FROST | 80% | stone | Uncommon | +3 init | 28g |
-| Broom Handle | d6 | FEAR | 50% | void | Uncommon | +2 init | 22g |
-| Toasting Fork | d6 | BURN | 80% | ember | Rare | +2 init | 35g |
-| Weathervane | d6 | DAZE | 70% | stone | Rare | +2 init | 34g |
+| Mace | common | d6 | - | - | - | 25% DEF ignore, 15% stagger, Heavy | 36g |
+| Montor's Hammer | common | d6 | - | - | - | 20% DEF ignore, 25% stagger, Heavy | 30g |
+| Montor's Mum's Ladle | uncommon | d6 | - | POISON | 80% | 25% DEF ignore, 15% stagger, Gift: bile, Heavy | 48g |
+| Montor's Tenderiser | uncommon | d6 | - | BLEED | 100% | 30% DEF ignore, 20% stagger, Gift: blood, Heavy | 56g |
+| Montor's Mum's Rolling Pin | uncommon | d6 | - | FEAR | 70% | 25% DEF ignore, 25% stagger, Gift: blood, Heavy | 60g |
+| Montor's Mum's Frying Pan | uncommon | d6 | - | DAZE | 30% | 15% DEF ignore, 30% stagger, Heavy | 44g |
+| Montor's Mum's Soup Ladle | uncommon | d6 | - | BURN | 20% | 20% DEF ignore, 15% stagger, Heavy | 40g |
+| Montor's Candlestick | rare | d6 | - | BURN | 100% | 30% DEF ignore, 15% stagger, Gift: ember, Heavy | 114g |
+| Montor's Pestle | rare | d6 | - | FROST | 100% | 35% DEF ignore, 20% stagger, Gift: stone, Heavy | 108g |
+| Montor's Door Knocker | rare | d6 | - | DAZE | 100% | 30% DEF ignore, 30% stagger, Gift: stone, Heavy | 120g |
+| Montor's Hardened Pestle | rare | d8 | - | - | - | 45% DEF ignore, 25% stagger, Heavy | 195g |
+| Montor's Void Cleaver | epic | d8 | - | - | - | 50% DEF ignore, 30% stagger, Heavy | 440g |
+| Montor's Mum's Slipper | legendary | d8 | - | FEAR | 100% | 50% DEF ignore, 50% stagger, Heavy | 1200g |
+## Spears (13)
 
-### Hardened (no gift, strong stats)
-
-| Name | Die | Rarity | Perks | Price |
-|---|---|---|---|---|
-| Flagpole | d8 | Rare | +4 init, 10% DEF ignore | 55g |
-| Lightning Rod | d8 | Epic | +3 init, +1 accuracy, 20% DEF ignore | 100g |
-
----
-
-## Maces
-
-*Identity: Armour piercing. d6 damage with DEF ignore + stagger chance. Heavy hand — no shield.*
-
-### Base
-
-| Name | Die | Perks | Price | Description |
-|---|---|---|---|---|
-| Mace | d6 | 25% DEF ignore, 15% stagger, -1 AGI | 18g | Blunt. Heavy. Punches through armour. |
-
-### Gifted (has giftPower)
-
-| Name | Die | Condition | Chance | Gift | Rarity | Perks | Price |
+| Name | Rarity | Die | Acc | Condition | Chance | Special | Price |
 |---|---|---|---|---|---|---|---|
-| Mum's Ladle | d6 | POISON | 80% | bile | Uncommon | 25% DEF ignore, 15% stagger, -1 AGI | 24g |
-| Tenderiser | d6 | BLEED | 100% | blood | Uncommon | 30% DEF ignore, 20% stagger, -1 AGI | 28g |
-| Mum's Rolling Pin | d6 | FEAR | 70% | blood | Uncommon | 25% DEF ignore, 25% stagger, -1 AGI | 30g |
-| Candlestick | d6 | BURN | 100% | ember | Rare | 30% DEF ignore, 15% stagger, -1 AGI | 38g |
-| Pestle | d6 | FROST | 100% | stone | Rare | 35% DEF ignore, 20% stagger, -1 AGI | 36g |
-| Door Knocker | d6 | DAZE | 100% | stone | Rare | 30% DEF ignore, 30% stagger, -1 AGI | 40g |
+| Spear | common | d6 | - | - | - | +2 init | 30g |
+| Montor's Mum's Knitting Needle | common | d6 | - | BLEED | 25% | +2 init | 24g |
+| Montor's Feather Duster | common | d4 | - | BLIND | 30% | +2 init | 16g |
+| Montor's Garden Hose | common | d4 | - | WET | 100% | +1 init | 20g |
+| Montor's Garden Fork | uncommon | d6 | - | POISON | 100% | +2 init, Gift: petal | 48g |
+| Montor's Fishing Spear | uncommon | d6 | - | BLEED | 100% | +2 init, Gift: blood | 52g |
+| Montor's Curtain Rod | uncommon | d6 | - | FROST | 80% | +3 init, Gift: stone | 56g |
+| Montor's Broom Handle | uncommon | d6 | - | FEAR | 50% | +2 init, Gift: void | 44g |
+| Montor's Mop | uncommon | d6 | - | WET | 100% | +2 init | 36g |
+| Montor's Toasting Fork | rare | d6 | - | BURN | 80% | +2 init, Gift: ember | 105g |
+| Montor's Weathervane | rare | d6 | - | DAZE | 70% | +2 init, Gift: stone | 102g |
+| Montor's Flagpole | rare | d8 | - | - | - | 10% DEF ignore, +4 init | 165g |
+| Montor's Lightning Rod | epic | d8 | +1 | - | - | 20% DEF ignore, +3 init | 400g |
+## Swords (14)
 
-### Hardened (no gift, strong stats)
-
-| Name | Die | Rarity | Perks | Price |
-|---|---|---|---|---|
-| Hardened Pestle | d8 | Rare | 45% DEF ignore, 25% stagger, -2 AGI | 65g |
-| Void Cleaver | d8 | Epic | 50% DEF ignore, 30% stagger, -1 AGI | 110g |
-
-### Unique
-
-| Name | Die | Rarity | Perks | Condition | Price |
-|---|---|---|---|---|---|
-| Mum's Slipper | d8 | Legendary | 50% DEF ignore, 50% stagger, 0 AGI penalty | FEAR 100% | 200g |
-
----
-
-## Battle Axes
-
-*Identity: Raw power. d10 base damage, stagger chance. Heavy hand — no shield. Slow but devastating.*
-
-### Base
-
-| Name | Die | Perks | Price | Description |
-|---|---|---|---|---|
-| Battle Axe | d10 | 20% stagger, -1 AGI, -1 accuracy | 22g | Big. Slow. Hits like a falling tree. |
-
-### Gifted (has giftPower)
-
-| Name | Die | Condition | Chance | Gift | Rarity | Perks | Price |
+| Name | Rarity | Die | Acc | Condition | Chance | Special | Price |
 |---|---|---|---|---|---|---|---|
-| Woodsman's Axe | d10 | POISON | 70% | petal | Uncommon | 20% stagger, -1 AGI, -1 accuracy | 30g |
-| Cleaver | d10 | BLEED | 100% | blood | Uncommon | 20% stagger, -1 AGI, -1 accuracy | 32g |
-| Coal Shovel | d10 | BURN | 100% | ember | Rare | 25% stagger, -1 AGI, -1 accuracy | 42g |
-| Pickaxe | d10 | FROST | 80% | stone | Rare | 20% stagger, 15% DEF ignore, -1 AGI, -1 accuracy | 40g |
-| Executioner's Hatchet | d10 | FEAR | 80% | void | Rare | 25% stagger, -1 AGI, -1 accuracy | 45g |
-| Sledgehammer | d10 | DAZE | 100% | stone | Rare | 35% stagger, 10% DEF ignore, -2 AGI, -1 accuracy | 48g |
-
-### Hardened (no gift, strong stats)
-
-| Name | Die | Rarity | Perks | Price |
-|---|---|---|---|---|
-| Hardened Cleaver | d12 | Rare | 25% stagger, 15% DEF ignore, -1 AGI, -1 accuracy | 70g |
-| Grandfather Clock Hand | d12 | Epic | 30% stagger, 20% DEF ignore, -2 AGI, -1 accuracy | 100g |
-
----
-
-## Shields
-
-*Light weapons only. Heavy weapons (mace, axe) cannot equip shields.*
-
-| Name | DEF | Block % | Rarity | Condition on Block | Gift | Price |
-|---|---|---|---|---|---|---|
-| Shield | +1 | 10% | Common | — | — | 6g |
-| Bit of Wood | +2 | 15% | Common | — | — | 10g |
-| Chopping Board | +2 | 15% | Uncommon | BLEED | blood | 22g |
-| Pot Lid | +3 | 20% | Uncommon | — | stone | 25g |
-| Frying Pan | +3 | 20% | Uncommon | BURN | ember | 28g |
-| Hand Mirror | +2 | 15% | Rare | DAZE | void | 35g |
-| Dinner Tray | +4 | 25% | Rare | — | stone, ember | 45g |
-| Reinforced Tray | +5 | 30% | Epic | — | — | 80g |
-
----
-
-## Unarmed (Fists)
-
-No weapon equipped. Available from the start at zero cost.
-
-| Stat | Value |
-|---|---|
-| Damage | d4 |
-| Hand | Light (can use shield) |
-| Accuracy | -1 |
-| Initiative | +1 |
-| Special | STR modifier counts double for damage |
-
-Viable as a budget build: spend nothing on weapons, invest in STR + shield + armour + potions.
-
----
-
-## Condition Reference
-
-*Conditions applied by Gifted weapons on hit. Chance modified by INT and attack tier.*
-
-| Condition | Slot | Effect | Duration |
-|---|---|---|---|
-| **POISON** | Body | 2 dmg/turn, drains STR→AGI→DEF each tick, -2 INT | 3 turns |
-| **BLEED** | Body | 1 dmg/turn per stack (max 5). Triggers FEAR at 3+ stacks | Permanent |
-| **BURN** | Body | 5 burst damage + 3 AoE. 30% skip turn | 1 turn |
-| **FROST** | Body | -3 AGI, -3 DEF, -2 INT. **Take 50% more damage (brittle)** | 2 turns |
-| **FEAR** | Mind | -2 all rolls. Below 50% HP: 40% paralysed / 60% adrenaline | 2 turns |
-| **DAZE** | Mind | **Guaranteed skip turn (stun)**. -2 AGI | 1 turn |
-
----
-
-## Gift Alignment
-
-*Which Gift types align with which conditions. Gifted weapons have a giftPower slot matching their theme.*
-
-| Gift | Floor | Theme | Conditions | Colour |
-|---|---|---|---|---|
-| **Petal** | 0 — Grounds | Nature | Poison | Green |
-| **Stone** | -1 — Underground | Earth | Frost, Daze | Blue-grey |
-| **Bile** | -2 — Underbelly | Decay | Poison | Sickly yellow |
-| **Blood** | -3 — Quarters | Flesh | Bleed, Fear | Crimson |
-| **Ember** | -4 — Works | Fire | Burn | Orange |
-| **Void** | -5 — Deep | Chaos | Fear, any | Black |
-
----
-
-## Stat Summary
-
-**47 weapons** + **8 shields** across 4 tiers.
-
-| Tier | Count | Die Range | Rarity |
-|---|---|---|---|
-| Base | 5 | d4–d10 | Common |
-| Gifted | 30 | d4–d10 | Uncommon–Rare |
-| Hardened | 10 | d4–d12 | Rare–Epic |
-| Unique | 2 | d8–d10 | Legendary |
-
----
-
-*Last updated: 2026-04-02*
+| Sword | common | d6 | +1 | - | - | - | 30g |
+| Montor's Carving Knife | common | d6 | +1 | BLEED | 20% | - | 24g |
+| Montor's Umbrella | uncommon | d6 | +1 | POISON | 80% | Gift: bile | 50g |
+| Montor's Letter Opener | uncommon | d6 | +2 | BLEED | 100% | Gift: blood | 56g |
+| Montor's Sabatier | uncommon | d6 | +2 | DAZE | 60% | Gift: stone | 60g |
+| Montor's Cattle Prod | uncommon | d6 | +1 | CHARGED | 25% | - | 40g |
+| Montor's Hot Poker | uncommon | d6 | +1 | BURN | 30% | - | 44g |
+| Montor's Fireplace Poker | rare | d6 | +1 | BURN | 100% | Gift: ember | 120g |
+| Montor's Ice Pick | rare | d6 | +1 | FROST | 100% | Gift: stone | 114g |
+| Montor's Mum's Bread Knife | rare | d6 | +1 | FEAR | 70% | Gift: blood | 126g |
+| Montor's Hardened Sabatier | rare | d8 | +3 | - | - | 15% DEF ignore | 180g |
+| Montor's Family Heirloom | epic | d8 | +3 | - | - | 15% double, 20% DEF ignore | 480g |
+| Montor's Family Sword | legendary | d10 | +3 | - | - | 20% double, 25% DEF ignore | 1500g |
+| Montor's Chaos Blade | legendary | d8 | - | - | - | Chaos | 900g |

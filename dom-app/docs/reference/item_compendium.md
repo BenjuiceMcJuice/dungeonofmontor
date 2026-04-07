@@ -1,348 +1,226 @@
 # Item Compendium
 
-Complete reference for all non-weapon items in Dungeon of Montor. For weapons and shields, see the [Weapon Compendium](weapon_compendium.md).
+> Auto-generated from items.json. 183 non-weapon items. Updated 2026-04-07.
+
+---
+
+## Armour & Shields (36)
+
+| Name | Slot | Rarity | DEF | Special | Price |
+|---|---|---|---|---|---|
+| Shield | offhand | common | +1 | 10% block | 12g |
+| Bit of Wood | offhand | common | +2 | 15% block | 20g |
+| Tatty Leather | armour | common | +2 | - | 24g |
+| Clanky Armour | armour | common | +4 | -1 AGI | 60g |
+| Leather Cap | helmet | common | +1 | - | 12g |
+| Montor's Colander | helmet | common | +1 | - | 16g |
+| Montor's Saucepan | helmet | common | +2 | -1 AGI | 20g |
+| Worn Boots | boots | common | - | +1 AGI | 12g |
+| Montor's Wellies | boots | common | - | +1 AGI | 16g |
+| Montor's Slippers | boots | common | - | +1 init, Set: sunday_best | 16g |
+| Montor's Apron | armour | common | +1 | - | 16g |
+| Montor's Pot Lid | offhand | uncommon | +3 | -1 AGI, 20% block | 50g |
+| Montor's Chopping Board | offhand | uncommon | +2 | 15% block | 44g |
+| Montor's Frying Pan | offhand | uncommon | +3 | -1 AGI, 20% block | 56g |
+| Montor's Tin Foil Hat | helmet | uncommon | +-1 | - | 30g |
+| Montor's Bowler Hat | helmet | uncommon | +1 | Set: sunday_best | 44g |
+| Montor's Cricket Helmet | helmet | uncommon | +2 | - | 56g |
+| Montor's Mum's Heels | boots | uncommon | - | +1 AGI | 44g |
+| Montor's Hiking Boots | boots | uncommon | +1 | +1 AGI | 50g |
+| Montor's Duffel Coat | armour | uncommon | +3 | -1 AGI | 60g |
+| Montor's Sunday Shirt | armour | uncommon | +2 | Set: sunday_best | 50g |
+| Montor's Dinner Tray | offhand | rare | +4 | -1 AGI, 25% block | 135g |
+| Montor's Hand Mirror | offhand | rare | +2 | 15% block | 105g |
+| Montor's Welcome Mat | armour | rare | +5 | -2 AGI | 180g |
+| Montor's Dressing Gown | armour | rare | +1 | - | 150g |
+| Montor's Mum's Hair Dryer Hood | helmet | rare | +2 | - | 135g |
+| Montor's Dancing Shoes | boots | rare | - | +2 AGI | 135g |
+| Montor's Mum's Fur Coat | armour | rare | +3 | - | 165g |
+| Montor's Boxing Boots | boots | rare | - | +2 AGI | 135g |
+| Montor's Newsboy Cap | helmet | rare | +2 | +1 init, Set: peaky | 135g |
+| Montor's Tweed Overcoat | armour | rare | +3 | Set: peaky | 150g |
+| Montor's Hobnail Boots | boots | rare | +1 | +1 AGI, +1 init, Set: peaky | 135g |
+| Montor's Reinforced Tray | offhand | epic | +5 | -1 AGI, 30% block | 320g |
+| Montor's Knight Helm | helmet | epic | +3 | - | 280g |
+| Montor's Iron Boots | boots | epic | +3 | -1 AGI | 260g |
+| Montor's Suit of Armour | armour | epic | +6 | -2 AGI | 320g |
+
+## Consumable (62)
+
+| Name | Rarity | Effect | Value | Price |
+|---|---|---|---|---|
+| Dodgy Red Liquid | common | heal | 15 | 20g |
+| Montor's Marvellous Medicine | common | random_effect | - | 10g |
+| Stink Pellet | common | flee_guaranteed | 1 | 24g |
+| Chalky Tablet | common | cure_body | 1 | 16g |
+| Nasty Sniff | common | cure_mind | 1 | 16g |
+| Montor's Bucket of Water | common | cure_all_conditions | 1 | 16g |
+| Montor's Watering Can | common | condition_all_enemies | - | 10g |
+| Montor's Vinegar Bottle | common | condition_one_enemy | - | 12g |
+| Montor's Lighter Fluid | common | condition_one_enemy | - | 16g |
+| Montor's Rusty Nail | common | condition_one_enemy | - | 10g |
+| Montor's Ice Lolly | common | condition_one_enemy | - | 12g |
+| Montor's Bag of Marbles | common | damage_multi_enemies | 3 | 16g |
+| Montor's Handful of Gravel | common | damage_multi_enemies | 2 | 10g |
+| Montor's Cherry Bomb | common | timed_bomb | - | 20g |
+| Montor's Whoopee Cushion | common | debuff_all_enemies | -2 | 12g |
+| Montor's Banana Peel | common | condition_one_enemy | - | 10g |
+| Montor's Expired Yoghurt | common | risky_throw | - | 6g |
+| Suspiciously Good Red Liquid | uncommon | heal | 30 | 50g |
+| Angry Juice | uncommon | stat_buff | 4 | 36g |
+| Montor's Bath Bomb | uncommon | damage_all_enemies | 8 | 48g |
+| Montor's Mum's Smelling Salts | uncommon | cure_mind | 1 | 24g |
+| Thick Gloop | uncommon | stat_buff | 4 | 36g |
+| Montor's Beef Broth | uncommon | stat_buff | 3 | 40g |
+| Montor's Nettle Tea | uncommon | stat_buff | 3 | 40g |
+| Montor's Eye Drops | uncommon | stat_buff | 3 | 40g |
+| Montor's Brain Tonic | uncommon | stat_buff | 3 | 40g |
+| Montor's Pepper Pot | uncommon | condition_all_enemies | - | 36g |
+| Montor's Stink Bomb | uncommon | condition_all_enemies | - | 30g |
+| Montor's Mum's Cooking Wine | uncommon | heal_and_buff | 2 | 44g |
+| Montor's Firecracker | uncommon | damage_all_enemies | 6 | 30g |
+| Montor's Spark Plug | uncommon | condition_one_enemy | - | 24g |
+| Montor's Chilli Powder | uncommon | condition_one_enemy | 2 | 20g |
+| Montor's Mum's Potpourri | uncommon | condition_multi_enemies | - | 30g |
+| Montor's Chain | uncommon | damage_multi_enemies | 4 | 24g |
+| Montor's Nail Bomb | uncommon | timed_bomb | - | 36g |
+| Montor's Gas Canister | uncommon | timed_bomb | - | 30g |
+| Montor's Rubber Duck | uncommon | wet_all_and_heal | 5 | 24g |
+| Montor's Mirror | uncommon | reflect_next_attack | - | 30g |
+| Montor's Party Popper | uncommon | damage_and_condition_one | 5 | 30g |
+| Montor's Homebrew | rare | heal | 45 | 150g |
+| Montor's Adrenaline Shot | rare | apply_condition | - | 120g |
+| Montor's Gran's Cordial | rare | stat_buff | 3 | 90g |
+| Montor's Gran's Perfume | rare | damage_all_enemies | 12 | 105g |
+| Montor's Flash Powder | rare | condition_all_enemies | - | 90g |
+| Montor's Ice Cube Tray | rare | condition_all_enemies | - | 96g |
+| Montor's Mustard Jar | rare | condition_all_enemies | - | 84g |
+| Montor's Glitter Bomb | rare | damage_and_condition_all | 3 | 75g |
+| Montor's Protein Shake | rare | permanent_stat | 1 | 180g |
+| Montor's Yoga Mat | rare | permanent_stat | 1 | 180g |
+| Montor's Multivitamin | rare | permanent_stat | 1 | 180g |
+| Montor's Reading Glasses | rare | permanent_stat | 1 | 180g |
+| Montor's Sudoku Book | rare | permanent_stat | 1 | 180g |
+| Montor's Lucky Horseshoe | rare | permanent_stat | 1 | 180g |
+| Montor's Shield Polish | rare | permanent_stat | 1 | 180g |
+| Montor's Mum's Slow Cooker | rare | timed_bomb | - | 90g |
+| Montor's Ticking Parcel | rare | timed_bomb | - | 75g |
+| Montor's Mum's Perfume | rare | condition_all_enemies | - | 90g |
+| Montor's Cat | rare | summon_ally | - | 105g |
+| Montor's Mum's Sunday Roast | epic | stat_buff_all | 2 | 240g |
+| Montor's Mum's Hairspray | epic | damage_and_condition_all | 8 | 200g |
+| Montor's Mum's Recipe Book | epic | permanent_stat_multi | 1 | 480g |
+| Montor's Gran's Wisdom | epic | permanent_stat_multi | 1 | 480g |
+
+## Relic (56)
+
+| Name | Rarity | Effect | Value | Price |
+|---|---|---|---|---|
+| Montor's Plaster | common | condition_resist | 0.25 | 24g |
+| Montor's Herb Sachet | common | condition_resist | 0.25 | 24g |
+| Montor's Spark Guard | common | condition_resist | 0.25 | 24g |
+| Montor's Woolly Hat | common | condition_resist | 0.25 | 24g |
+| Montor's Comfort Blanket | common | condition_resist | 0.25 | 24g |
+| Montor's Mum's Egg Timer | common | egg_timer | 3 | 24g |
+| Montor's Rubber Gloves | common | condition_resist_all | 0.1 | 20g |
+| Montor's Lego Brick | common | damage_reflect | 3 | 20g |
+| Montor's Signet Ring | uncommon | hp_bonus | 15 | 70g |
+| Montor's Garden Charm | uncommon | regen_per_chamber | 2 | 60g |
+| Montor's Lucky Penny | uncommon | lck_bonus | 2 | 60g |
+| Montor's Compass | uncommon | per_bonus | 2 | 60g |
+| Montor's Mum's Apron | uncommon | search_bonus | 2 | 50g |
+| Montor's Coin Purse | uncommon | gold_bonus | 0.25 | 50g |
+| Montor's Mum's Bandage | uncommon | condition_resist | 0.5 | 50g |
+| Montor's Herb Pouch | uncommon | condition_resist | 0.5 | 50g |
+| Montor's Oven Mitt | uncommon | condition_resist | 0.5 | 50g |
+| Montor's Thermal Vest | uncommon | condition_resist | 0.5 | 50g |
+| Montor's Nightlight | uncommon | condition_resist | 0.5 | 50g |
+| Montor's First Aid Kit | uncommon | condition_resist_multi | 0.25 | 60g |
+| Montor's Metronome | uncommon | metronome | 4 | 70g |
+| Montor's Magic 8-Ball | uncommon | magic_8_ball | - | 80g |
+| Montor's Coin Flip | uncommon | coin_flip | - | 40g |
+| Montor's Alarm Clock | uncommon | init_bonus | 2 | 40g |
+| Montor's Greenhouse Key | rare | regen_per_chamber | 4 | 165g |
+| Montor's Thimble | rare | crit_bonus | 1 | 165g |
+| Montor's Loaded Dice | rare | reroll_ones | 1 | 180g |
+| Montor's Magnifying Glass | rare | double_condition | 1 | 165g |
+| Montor's Last Stand Brooch | rare | last_stand | 1 | 150g |
+| Montor's Nudge | rare | d20_nudge | 1 | 165g |
+| Montor's Pocket Watch | rare | init_bonus | 2 | 135g |
+| Montor's Tourniquette | rare | condition_resist | 0.75 | 120g |
+| Montor's Antivenom Vial | rare | condition_resist | 0.75 | 120g |
+| Montor's Fire Blanket | rare | condition_resist | 0.75 | 120g |
+| Montor's Hot Water Bottle | rare | condition_resist | 0.75 | 120g |
+| Montor's Teddy Bear | rare | condition_resist | 0.75 | 120g |
+| Montor's Hazmat Gloves | rare | condition_resist_multi | 0.5 | 135g |
+| Montor's Winter Coat | rare | condition_resist_multi | 0.5 | 135g |
+| Montor's Anxiety Blanket | rare | condition_resist_multi | 0.5 | 135g |
+| Montor's Gran's Pressure Cooker | rare | pressure_cooker | 5 | 165g |
+| Montor's Double or Nothing | rare | double_or_nothing | - | 150g |
+| Montor's Gremlin Bell | rare | gremlin_bell | - | 135g |
+| Montor's Petrol Can | rare | burn_linger | 1 | 150g |
+| Montor's Mum's Wedding Ring | epic | lifesteal | 0.1 | 320g |
+| Montor's Gran's Lottery Ticket | epic | lottery | - | 400g |
+| Montor's Monocle | epic | see_enemy_hp_exact | 1 | 280g |
+| Montor's Chaos Marble | epic | chaos_shift | 2 | 300g |
+| Montor's Blood Ward | epic | condition_immunity | - | 280g |
+| Montor's Bile Ward | epic | condition_immunity | - | 280g |
+| Montor's Ember Ward | epic | condition_immunity | - | 280g |
+| Montor's Frost Ward | epic | condition_immunity | - | 280g |
+| Montor's Void Ward | epic | condition_immunity | - | 280g |
+| Montor's Mum's Medicine Cabinet | epic | condition_resist_multi | 0.5 | 320g |
+| Montor's Countdown Timer | epic | countdown | 10 | 320g |
+| Montor's Hazard Suit | legendary | condition_resist_all | 0.35 | 900g |
+| Montor's Big Red Button | legendary | nuke | - | 1200g |
+
+## Ring (14)
+
+| Name | Rarity | Effect | Value | Price |
+|---|---|---|---|---|
+| Montor's Curtain Ring | common | init_bonus | 1 | 16g |
+| Montor's Washer | common | def_bonus | 1 | 16g |
+| Montor's Mum's Thimble Ring | common | hp_bonus | 5 | 20g |
+| Montor's Mum's Costume Ring | common | Unarmed: +1 damage, 30% BLEED. Fake gold. The gem fell out. The prong draws blood. | - | 16g |
+| Montor's Rubber Band | uncommon | dodge_chance | 0.05 | 40g |
+| Montor's Key Ring | uncommon | lck_bonus | 1 | 44g |
+| Montor's Knuckleduster Ring | uncommon | Unarmed: +2 damage, crit 19+. Brass curtain fitting. Makes a fist feel like a mace. | - | 44g |
+| Montor's Venom Band | uncommon | condition_dot_multiplier | 1.5 | 48g |
+| Montor's Bleed Band | uncommon | bleed_enhanced_damage | 1 | 44g |
+| Montor's Pipe Ring | rare | regen_per_chamber | 2 | 135g |
+| Montor's Gran's Ring | rare | crit_bonus | 1 | 150g |
+| Montor's Sovereign Ring | rare | str_bonus | 1 | 150g |
+| Montor's Ember Ring | rare | condition_dot_multiplier | 2 | 120g |
+| Montor's Engagement Ring | epic | lifesteal | 0.05 | 300g |
+
+## Amulet (15)
+
+| Name | Rarity | Effect | Value | Price |
+|---|---|---|---|---|
+| Montor's Dog Tag | common | str_bonus | 1 | 20g |
+| Montor's Tooth Necklace | common | flat_damage_bonus | 1 | 20g |
+| Montor's Mum's Locket | uncommon | Grants Twin Fangs: dual-wield bleed on double-connect. She kept a photo inside. Of the dog. | - | 70g |
+| Montor's Bifocals | uncommon | see_enemy_hp_exact | 1 | 60g |
+| Montor's Claw Pendant | uncommon | damage_multiplier | 1.5 | 60g |
+| Montor's Fever Stone | uncommon | condition_dot_multiplier | 1.5 | 56g |
+| Montor's Mum's Sovereign | uncommon | Unarmed damage d4 to d6. She wore it on a chain. Swung it once at a burglar. | - | 50g |
+| Montor's Rabbit's Foot | rare | reroll_ones | 1 | 150g |
+| Montor's Mum's Crucifix | rare | condition_resist_all | 0.15 | 135g |
+| Montor's Blood Bead | rare | damage_multiplier_low_hp | 1.5 | 150g |
+| Montor's Rusty Nail Chain | rare | poison_enhanced_drain | 2 | 135g |
+| Montor's Barbed Wire Twist | rare | bleed_enhanced_damage | 1 | 135g |
+| Montor's Mum's Hairpin | rare | Unarmed: 25% double strike. She'd jab you with it. Quick. Precise. Twice. | - | 135g |
+| Montor's Lodestone | epic | d20_nudge | 2 | 320g |
+| Montor's Executioner's Coin | epic | first_hit_multiplier | 2 | 320g |
 
 ---
 
 ## Summary
 
-| Category | Count |
+| Type | Count |
 |---|---|
-| Consumables | 28 |
-| Armour | 4 |
-| Relics -- Utility | 16 |
-| Relics -- Condition Resistance (single) | 20 |
-| Relics -- Combo Resistance | 6 |
-| Consumable Junk (per-floor) | 29 |
-| Useless Junk (per-floor) | 46 |
-| **Total items** | **149** |
-
----
-
-## Armour
-
-| Name | Rarity | DEF | AGI | Passive | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|---|
-| Tatty Leather | Common | +2 | 0 | -- | -- | 12g | 5g | Smells. Barely holds together. Better than nothing. |
-| Clanky Armour | Common | +4 | -1 | -- | -- | 30g | 12g | Loud. Heavy. Announces you to everything. |
-| Montor's Welcome Mat | Rare | +5 | -2 | Reflect 2 damage | ember | 60g | 24g | Wipe your feet. Or bleed on them. |
-| Montor's Dressing Gown | Rare | +1 | 0 | 15% dodge | void | 50g | 20g | Threadbare. Smells of pipe smoke. Somehow invisible. |
-
----
-
-## Consumables
-
-### Healing
-
-| Name | Rarity | Effect | Value | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|
-| Dodgy Red Liquid | Common | Heal | 15 HP | -- | 10g | 4g | Found in a cupboard. Unlabelled. Heals 15 HP somehow. |
-| Suspiciously Good Red Liquid | Uncommon | Heal | 30 HP | -- | 25g | 10g | Thicker. Warmer. Heals 30 HP. Don't think about it. |
-| Montor's Homebrew | Rare | Heal | 45 HP | bile | 50g | 20g | Brewed in the cellar. Don't ask what's in it. Heals everything. |
-| Montor's Mum's Cooking Wine | Uncommon | Heal + buff | 20 HP, +2 STR / 3 turns | blood | 22g | 9g | She put it in everything. |
-
-### Stat Buffs
-
-| Name | Rarity | Stat | Bonus | Duration | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|---|
-| Angry Juice | Uncommon | STR | +4 | 3 turns | -- | 18g | 7g | Thick. Red. Tastes of iron. |
-| Thick Gloop | Uncommon | DEF | +4 | 3 turns | -- | 18g | 7g | Skin hardens. Try not to think about the texture. |
-
-### Stat Tonics
-
-| Name | Rarity | Stat | Bonus | Duration | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|---|
-| Montor's Beef Broth | Uncommon | STR | +3 | 4 turns | -- | 20g | 8g | Thick. Meaty. Made from something. |
-| Montor's Nettle Tea | Uncommon | AGI | +3 | 4 turns | -- | 20g | 8g | Stings the tongue. Move faster, think faster. |
-| Montor's Eye Drops | Uncommon | PER | +3 | 4 turns | -- | 20g | 8g | Burns. Then everything sharpens. |
-| Montor's Brain Tonic | Uncommon | INT | +3 | 4 turns | -- | 20g | 8g | Fizzy. Tastes of metal. Conditions land harder. |
-| Montor's Gran's Cordial | Rare | LCK | +3 | 4 turns | -- | 30g | 12g | Gran's secret recipe. Everything goes your way. |
-| Montor's Mum's Sunday Roast | Epic | ALL | +2 | 3 turns | -- | 60g | 24g | Somehow still warm. She'd be proud. |
-
-### Throwables & AoE
-
-| Name | Rarity | Effect | Value | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|
-| Montor's Firecracker | Uncommon | Damage all enemies | 6 dmg | ember | 15g | 6g | Left over from bonfire night. Small but loud. |
-| Montor's Bath Bomb | Uncommon | Damage all enemies | 8 dmg | ember | 24g | 10g | Fizzy. Floral. Explosive. Not for baths. |
-| Montor's Gran's Perfume | Rare | Damage all enemies | 12 dmg | bile | 35g | 14g | One spray clears the room. She wore it to church. |
-| Montor's Mum's Hairspray | Epic | Damage + BURN all enemies | 8 dmg + BURN | ember | 50g | 20g | Flammable. Very flammable. Don't use near candles. |
-| Montor's Stink Bomb | Uncommon | NAUSEA all enemies | -- | bile | 15g | 6g | Found under his bed. Even you feel a bit off. |
-| Montor's Pepper Pot | Uncommon | BLIND all enemies | -- | petal | 18g | 7g | Shake vigorously. Everyone sneezes. |
-| Montor's Mustard Jar | Rare | POISON all enemies | -- | bile | 28g | 11g | English mustard. Industrial strength. |
-| Montor's Flash Powder | Rare | DAZE all enemies | -- | ember | 30g | 12g | From the workshop. BANG. Your ears ring. |
-| Montor's Ice Cube Tray | Rare | FROST all enemies | -- | stone | 32g | 13g | Throw the whole tray. Brittle and slow. |
-
-### Cures
-
-| Name | Rarity | Effect | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|
-| Chalky Tablet | Common | Cure body conditions | -- | 8g | 3g | Found in the bathroom cabinet. |
-| Nasty Sniff | Common | Cure mind conditions | -- | 8g | 3g | One whiff and your head clears. Violently. |
-| Montor's Mum's Smelling Salts | Uncommon | Cure mind conditions | petal | 12g | 5g | Industrial strength. She used them on Montor as a boy. |
-| Montor's Bucket of Water | Common | Cure ALL conditions | -- | 8g | 3g | Splash. Cold. Refreshing. Undignified. |
-
-### Utility
-
-| Name | Rarity | Effect | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|
-| Stink Pellet | Common | Guaranteed flee | -- | 12g | 5g | Smells like the Cook's socks. Guaranteed escape. |
-| Montor's Adrenaline Shot | Rare | Apply ADRENALINE (guaranteed crit + 3 STR) | blood | 40g | 16g | Syringe from the medicine cabinet. Then the crash. |
-| Montor's Marvellous Medicine | Common | Random effect | -- | 5g | 2g | Unlabelled bottle. Could be anything. Montor swears it's fine. |
-
----
-
-## Relics -- Utility
-
-Passive items equipped in the relic slot. Always active once equipped.
-
-| Name | Rarity | Passive Effect | Value | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|
-| Montor's Signet Ring | Uncommon | +max HP | +15 HP | stone | 35g | 14g | His seal. Worn smooth. |
-| Montor's Garden Charm | Uncommon | Regen per chamber | +2 HP/chamber | petal | 30g | 12g | A pressed flower in resin. |
-| Montor's Greenhouse Key | Rare | Regen per chamber | +4 HP/chamber | petal, stone | 55g | 22g | The vines still grow around it. |
-| Montor's Lucky Penny | Uncommon | +LCK | +2 LCK | petal | 30g | 12g | Better loot and crits. Found in the fountain. |
-| Montor's Compass | Uncommon | +PER | +2 PER | void | 30g | 12g | Points somewhere. Not north. Better searches. |
-| Montor's Mum's Apron | Uncommon | Search bonus | +2 search rolls | petal | 25g | 10g | She could find anything. |
-| Montor's Coin Purse | Uncommon | Gold bonus | +25% gold | petal | 25g | 10g | Jingles suspiciously. |
-| Montor's Pocket Watch | Rare | +initiative | +2 init | void | 45g | 18g | Always ahead. Ticks backwards. |
-| Montor's Thimble | Rare | Crit range expand | Crits on 19+ | blood | 55g | 22g | His mum used it for sewing. And threats. |
-| Montor's Magnifying Glass | Rare | Double condition | Conditions apply 2x | bile | 55g | 22g | Weapon conditions apply twice on hit. |
-| Montor's Last Stand Brooch | Rare | Scaling DEF | +1 DEF per 20% HP missing | blood, stone | 50g | 20g | Pinned to his coat the day he built the dungeon. |
-| Montor's Loaded Dice | Rare | Reroll ones | 1s become 2s | void | 60g | 24g | He cheats at everything. |
-| Montor's Mum's Wedding Ring | Epic | Lifesteal | 10% lifesteal | blood, void | 80g | 32g | She never took it off. The ring remembers. |
-| Montor's Monocle | Epic | See exact enemy HP | -- | void | 70g | 28g | Knowledge is half the battle. |
-| Montor's Gran's Lottery Ticket | Epic | Lottery (d20 match) | Win rare item | void | 100g | 1g | If any d20 matches your numbers, you win something rare. |
-
----
-
-## Relics -- Condition Resistance
-
-Tiered resistance relics for each of the five core combat conditions. Each condition has a 4-tier progression from 25% resist up to full immunity.
-
-### BLEED
-
-| Tier | Name | Rarity | Resist | Gift | Buy | Sell |
-|---|---|---|---|---|---|---|
-| 1 | Montor's Plaster | Common | 25% | blood | 12g | 5g |
-| 2 | Montor's Mum's Bandage | Uncommon | 50% | blood | 25g | 10g |
-| 3 | Montor's Tourniquette | Rare | 75% | blood | 40g | 16g |
-| 4 | Montor's Blood Ward | Epic | **Immune** | blood | 70g | 28g |
-
-### POISON
-
-| Tier | Name | Rarity | Resist | Gift | Buy | Sell |
-|---|---|---|---|---|---|---|
-| 1 | Montor's Herb Sachet | Common | 25% | bile | 12g | 5g |
-| 2 | Montor's Herb Pouch | Uncommon | 50% | bile | 25g | 10g |
-| 3 | Montor's Antivenom Vial | Rare | 75% | bile | 40g | 16g |
-| 4 | Montor's Bile Ward | Epic | **Immune** | bile | 70g | 28g |
-
-### BURN
-
-| Tier | Name | Rarity | Resist | Gift | Buy | Sell |
-|---|---|---|---|---|---|---|
-| 1 | Montor's Spark Guard | Common | 25% | ember | 12g | 5g |
-| 2 | Montor's Oven Mitt | Uncommon | 50% | ember | 25g | 10g |
-| 3 | Montor's Fire Blanket | Rare | 75% | ember | 40g | 16g |
-| 4 | Montor's Ember Ward | Epic | **Immune** | ember | 70g | 28g |
-
-### FROST
-
-| Tier | Name | Rarity | Resist | Gift | Buy | Sell |
-|---|---|---|---|---|---|---|
-| 1 | Montor's Woolly Hat | Common | 25% | stone | 12g | 5g |
-| 2 | Montor's Thermal Vest | Uncommon | 50% | stone | 25g | 10g |
-| 3 | Montor's Hot Water Bottle | Rare | 75% | stone | 40g | 16g |
-| 4 | Montor's Frost Ward | Epic | **Immune** | stone | 70g | 28g |
-
-### FEAR
-
-| Tier | Name | Rarity | Resist | Gift | Buy | Sell |
-|---|---|---|---|---|---|---|
-| 1 | Montor's Comfort Blanket | Common | 25% | void | 12g | 5g |
-| 2 | Montor's Nightlight | Uncommon | 50% | void | 25g | 10g |
-| 3 | Montor's Teddy Bear | Rare | 75% | void | 40g | 16g |
-| 4 | Montor's Void Ward | Epic | **Immune** | void | 70g | 28g |
-
----
-
-## Relics -- Combo Resistance
-
-Multi-condition resistance relics. Cover broader threats at the cost of lower individual resist values.
-
-| Name | Rarity | Conditions | Resist | Gift | Buy | Sell | Description |
-|---|---|---|---|---|---|---|---|
-| Montor's First Aid Kit | Uncommon | BLEED, POISON | 25% | blood, bile | 30g | 12g | Plasters, herbs, and hope. |
-| Montor's Hazmat Gloves | Rare | POISON, BURN | 50% | bile, ember | 45g | 18g | From the workshop. Yellow rubber. |
-| Montor's Winter Coat | Rare | FROST, FEAR | 50% | stone, void | 45g | 18g | Warm and reassuring. Smells of pipe smoke. |
-| Montor's Anxiety Blanket | Rare | FEAR, DAZE, CHARM | 50% | void | 45g | 18g | All mind conditions. Weighted. |
-| Montor's Mum's Medicine Cabinet | Epic | BLEED, POISON, BURN | 50% | blood, bile, ember | 80g | 32g | She was prepared for everything. |
-| Montor's Hazard Suit | Legendary | **ALL conditions** | 35% | -- | 150g | 60g | Sealed. Uncomfortable. Extremely effective. |
-
----
-
-## Consumable Junk
-
-Found in junk piles on each floor. Eating consumable junk is a gamble -- each has a **risk level** (1-5) that determines the chance of a good vs. bad outcome.
-
-| Risk | Good Chance | Label |
-|---|---|---|
-| 1 | 90% | Almost certainly fine |
-| 2 | 70% | Probably fine |
-| 3 | 50% | Coin flip |
-| 4 | 30% | Probably bad |
-| 5 | 15% | Almost certainly bad |
-
-### Grounds
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Strange Mushroom | 3 | +2 PER / 3 turns | POISON | 2g |
-| Dried Flowers | 1 | Heal 5 HP | NAUSEA | 1g |
-| Worm | 2 | Heal 8 HP | NAUSEA | 1g |
-| Garden Berry | 3 | +2 AGI / 3 turns | POISON | 2g |
-
-### Underground
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Mouldy Sock | 4 | +3 DEF / 3 turns | POISON | 1g |
-| Cracked Bottle | 3 | Heal 12 HP | DAZE | 1g |
-| Cellar Wine | 2 | +2 STR / 3 turns | DAZE | 3g |
-| Rat Jerky | 2 | Heal 10 HP | NAUSEA | 1g |
-
-### Underbelly
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Clump of Slime | 4 | +3 DEF / 3 turns | SLUGGISH | 1g |
-| Fungal Growth | 4 | +3 PER / 3 turns | BLIND | 1g |
-| Mould Scraping | 3 | Heal 15 HP | POISON | 1g |
-| Bin Juice | 5 | +4 STR / 3 turns | POISON | 1g |
-
-### Quarters
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Dusty Book | 1 | +2 INT / 3 turns | BORED | 2g |
-| Candle Stub | 2 | +2 PER / 3 turns | BLIND | 1g |
-| Chipped Teacup | 2 | Heal 12 HP | NAUSEA | 2g |
-| Dusty Wine | 2 | Heal 20 HP | DAZE | 3g |
-
-### Works
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Handful of Coal Dust | 3 | +3 DEF / 2 turns | BLIND | 1g |
-| Burnt Leather Strip | 3 | +2 END / 3 turns | NAUSEA | 1g |
-| Iron Filings | 4 | +3 STR / 3 turns | BLEED | 2g |
-| Molten Drip | 5 | +5 STR / 2 turns | BURN | 2g |
-
-### Deep
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Cave Crystal | 3 | +3 INT / 3 turns | DAZE | 3g |
-| Strange Fossil | 3 | +3 DEF / 3 turns | SLUGGISH | 3g |
-| Shadow Dust | 4 | +4 AGI / 2 turns | BLIND | 2g |
-| Glowing Lichen | 3 | Heal 25 HP | BURN | 2g |
-| Void Pebble | 5 | +2 ALL stats / 2 turns | FEAR + BLIND | 2g |
-
-### Domain
-
-| Name | Risk | Good Effect | Bad Effect | Sell |
-|---|---|---|---|---|
-| Crown Fragment | 4 | +4 CHA / 3 turns | CHARM | 3g |
-| Empty Vial | 3 | Heal 20 HP | POISON | 2g |
-| Broken Sceptre Tip | 4 | +3 WIS / 3 turns | FRENZY | 3g |
-| Void Shard Sliver | 5 | +3 ALL stats / 2 turns | FEAR + SAD | 3g |
-| Montor's Crumpled Note | 1 | +2 INT / 3 turns | SAD | 2g |
-
----
-
-## Useless Junk
-
-Vendor trash found in junk piles. No use except selling.
-
-### Grounds
-
-| Name | Sell |
-|---|---|
-| Broken Gnome | 1g |
-| Rusty Trowel | 1g |
-| Empty Seed Packet | 1g |
-| Cracked Pot | 2g |
-| Tangled Hose | 1g |
-| Faded Plant Label | 1g |
-| Snapped Rake Handle | 1g |
-| Bird Bath Fragment | 2g |
-
-### Underground
-
-| Name | Sell |
-|---|---|
-| Loose Brick | 1g |
-| Rusty Chain | 2g |
-| Rat Droppings | 1g |
-| Damp Rag | 1g |
-| Bent Nail | 1g |
-| Ball of Cobwebs | 1g |
-| Broken Lantern | 2g |
-| Single Boot | 1g |
-
-### Underbelly
-
-| Name | Sell |
-|---|---|
-| Cracked Pipe | 1g |
-| Rusty Valve | 2g |
-| Rotting Plank | 1g |
-| Broken Grate | 2g |
-| Dead Rat | 1g |
-| Soggy Paper | 1g |
-| Drain Cover | 2g |
-
-### Quarters
-
-| Name | Sell |
-|---|---|
-| Torn Curtain | 1g |
-| Broken Mirror Shard | 2g |
-| Moth-Eaten Sock | 1g |
-| Snapped Quill | 1g |
-| Tarnished Button | 1g |
-| Cracked Inkwell | 2g |
-| Hair Ribbon | 1g |
-
-### Works
-
-| Name | Sell |
-|---|---|
-| Bent Gear | 2g |
-| Lump of Slag | 1g |
-| Broken Bellows | 2g |
-| Twisted Wire | 1g |
-| Cracked Crucible | 2g |
-| Snapped Tong | 1g |
-| Melted Screw | 1g |
-
-### Deep
-
-| Name | Sell |
-|---|---|
-| Bone Fragment | 1g |
-| Petrified Wood | 2g |
-| Dried Stalactite | 2g |
-| Ancient Coin | 3g |
-| Cracked Geode | 3g |
-
-### Domain
-
-| Name | Sell |
-|---|---|
-| Throne Splinter | 3g |
-| Montor's Hair | 1g |
-| Ripped Tapestry | 2g |
-| Scorched Fabric | 1g |
-| Dust of Ages | 2g |
+| armour | 36 |
+| consumable | 62 |
+| relic | 56 |
+| ring | 14 |
+| amulet | 15 |
+| **Total** | **183** |
