@@ -95,24 +95,33 @@ function generateWhisper(context) {
 }
 
 // Treasure negotiation — Montor reacts to player holding his treasure
+// Returns { montor, options, done }
 function generateTreasureReaction(context, treasureName) {
   var systemPrompt = buildMontorSystemPrompt(context)
   var userMessage = 'The player has found ' + treasureName + '. ' +
     'You want them NOT to smash it. Try to convince them. ' +
-    'Generate one opening line from you, and three short player response options. ' +
-    'Return JSON: { "montor": "...", "options": ["...", "...", "..."] }'
-  return callGroq(systemPrompt, userMessage, { maxTokens: 200, temperature: 0.8 })
+    'This is exchange 1 of up to 4. You can keep arguing or give up. ' +
+    'Generate one opening line from you (max 2 sentences), three short player response options (max 8 words each), ' +
+    'and a "done" flag (true if you give up, false to keep arguing). ' +
+    'Return JSON: { "montor": "...", "options": ["...", "...", "..."], "done": false }'
+  return callGroq(systemPrompt, userMessage, { maxTokens: 250, temperature: 0.85 })
 }
 
 // Treasure negotiation follow-up — player responded, Montor reacts
-function generateTreasureFollowUp(context, treasureName, playerChoice, previousExchange) {
+// round: current round number (2-4). At round 4, must include done:true.
+// Returns { montor, options, done }
+function generateTreasureFollowUp(context, treasureName, playerChoice, conversationHistory, round) {
   var systemPrompt = buildMontorSystemPrompt(context)
-  var userMessage = 'You are discussing ' + treasureName + ' with the player. ' +
-    'Previous exchange: ' + previousExchange + '. ' +
-    'The player said: "' + playerChoice + '". ' +
-    'React and give one final line. The player will then choose to Smash or Keep. ' +
-    'Return JSON: { "montor": "..." }'
-  return callGroq(systemPrompt, userMessage, { maxTokens: 100, temperature: 0.8 })
+  var isLastRound = round >= 4
+  var userMessage = 'You are arguing about ' + treasureName + ' with the player. ' +
+    'Conversation so far: ' + conversationHistory + '. ' +
+    'The player just said: "' + playerChoice + '". ' +
+    'This is exchange ' + round + ' of 4. ' +
+    (isLastRound
+      ? 'This is your FINAL response. Give a last line and set done:true. No more options needed. '
+      : 'React with one line (max 2 sentences). If you want to keep arguing, include 3 new response options and done:false. If you give up or accept their answer, set done:true and no options. ') +
+    'Return JSON: { "montor": "...", "options": [...], "done": true/false }'
+  return callGroq(systemPrompt, userMessage, { maxTokens: 250, temperature: 0.85 })
 }
 
 // Notice board — player posts a message, Montor replies

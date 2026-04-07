@@ -14,7 +14,7 @@ import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
 import themeData from '../data/themes.json'
 import montorDialogue from '../data/montor-dialogue.json'
-import { hasGroqKey, generateWhisper, generateSafeRoomLine } from '../lib/groq.js'
+import { hasGroqKey, generateWhisper, generateSafeRoomLine, generateTreasureReaction, generateTreasureFollowUp } from '../lib/groq.js'
 import progressionData from '../data/progression.json'
 import SpriteRenderer from '../components/SpriteRenderer.jsx'
 import PlayerSprite from '../components/PlayerSprite.jsx'
@@ -1139,6 +1139,12 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
   // --- Safe room: Montor's audience chamber ---
   var [safeRoomAiLine, setSafeRoomAiLine] = useState(null)
+  // Treasure negotiation state (AI-driven conversation with Montor)
+  var [negotiationStep, setNegotiationStep] = useState(null) // null | 'loading' | 'talking' | 'done'
+  var [negotiationMontor, setNegotiationMontor] = useState('')
+  var [negotiationOptions, setNegotiationOptions] = useState([])
+  var [negotiationHistory, setNegotiationHistory] = useState([])
+  var [negotiationRound, setNegotiationRound] = useState(0)
 
   function initSafeRoom() {
     // Check if player has any unsmashed treasures in junk bag
@@ -4058,7 +4064,30 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <p>XP: <span className="text-ink">{totalXp}</span></p>
           </div>
           {safeRoomGift ? (
-            <button onClick={function() { setSafeRoomStep('offering') }}
+            <button onClick={function() {
+              if (hasGroqKey() && safeRoomGift) {
+                // Start AI negotiation
+                setSafeRoomStep('negotiate')
+                setNegotiationStep('loading')
+                setNegotiationRound(1)
+                setNegotiationHistory([])
+                var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }
+                generateTreasureReaction(ctx, safeRoomGift.name).then(function(result) {
+                  if (result && result.montor) {
+                    setNegotiationMontor(result.montor)
+                    setNegotiationOptions(result.options || [])
+                    setNegotiationStep(result.done ? 'done' : 'talking')
+                    setNegotiationHistory([{ role: 'montor', text: result.montor }])
+                  } else {
+                    // API failed — fall back to static
+                    setSafeRoomStep('offering')
+                    setNegotiationStep(null)
+                  }
+                })
+              } else {
+                setSafeRoomStep('offering')
+              }
+            }}
               className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
               Montor eyes your bag...
             </button>
@@ -4073,6 +4102,94 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     }
 
     // Offering — Montor reacts to the treasure, offer smash or keep
+    // AI Treasure negotiation — Montor argues with the player
+    if (safeRoomStep === 'negotiate' && safeRoomGift) {
+      return (
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={safeInteractionBg}>
+          <div className="fixed inset-0 bg-bg/90" style={{ zIndex: -1 }} />
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center gap-5">
+            <h2 className="font-display text-2xl text-gold">{safeRoomGift.name}</h2>
+
+            {/* Loading state */}
+            {negotiationStep === 'loading' && (
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-purple-400 text-sm font-display animate-pulse">Montor stirs...</p>
+              </div>
+            )}
+
+            {/* Montor's line */}
+            {(negotiationStep === 'talking' || negotiationStep === 'done') && (
+              <div className="max-w-sm">
+                <p className="text-purple-400 text-base font-display text-center">
+                  "{negotiationMontor}"
+                </p>
+              </div>
+            )}
+
+            {/* Conversation history (faded) */}
+            {negotiationHistory.length > 1 && (
+              <div className="max-w-sm space-y-1">
+                {negotiationHistory.slice(0, -1).map(function(entry, hi) {
+                  return (
+                    <p key={hi} className={'text-[10px] text-center ' + (entry.role === 'montor' ? 'text-purple-400/40 font-display' : 'text-ink-faint font-sans italic')}>
+                      {entry.role === 'montor' ? '"' + entry.text + '"' : '> ' + entry.text}
+                    </p>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Player options (if Montor still arguing) */}
+            {negotiationStep === 'talking' && negotiationOptions.length > 0 && (
+              <div className="flex flex-col gap-2 w-full max-w-xs">
+                {negotiationOptions.map(function(opt, oi) {
+                  return (
+                    <button key={oi} onClick={function() {
+                      var nextRound = negotiationRound + 1
+                      var historyText = negotiationHistory.map(function(h) { return (h.role === 'montor' ? 'Montor: ' : 'Player: ') + h.text }).join(' | ')
+                      var newHistory = negotiationHistory.concat([{ role: 'player', text: opt }])
+                      setNegotiationHistory(newHistory)
+                      setNegotiationStep('loading')
+                      setNegotiationRound(nextRound)
+                      var ctx = { mood: getMontorMood(), tidiness: getTidinessSummary().label, greedScore: greedScore, floorName: floor ? floor.floorName : 'unknown' }
+                      generateTreasureFollowUp(ctx, safeRoomGift.name, opt, historyText, nextRound).then(function(result) {
+                        if (result && result.montor) {
+                          setNegotiationMontor(result.montor)
+                          setNegotiationOptions(result.options || [])
+                          setNegotiationHistory(newHistory.concat([{ role: 'montor', text: result.montor }]))
+                          setNegotiationStep(result.done || nextRound >= 4 ? 'done' : 'talking')
+                        } else {
+                          setNegotiationStep('done')
+                          setNegotiationMontor('...')
+                        }
+                      })
+                    }}
+                      className="py-2.5 px-4 rounded-lg bg-surface border border-border text-ink text-sm font-sans hover:border-gold hover:text-gold transition-colors text-left">
+                      "{opt}"
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Smash / Keep (when Montor is done arguing) */}
+            {negotiationStep === 'done' && (
+              <div className="flex gap-4 mt-2">
+                <button onClick={function() { setNegotiationStep(null); handleSmashGift() }}
+                  className="py-3 px-8 rounded-lg border-2 border-red-400/50 bg-red-400/5 text-red-400 font-display text-lg hover:border-red-400 transition-colors">
+                  Smash it
+                </button>
+                <button onClick={function() { setNegotiationStep(null); handleSafeRoomContinue() }}
+                  className="py-3 px-8 rounded-lg border border-border bg-surface text-ink-dim font-sans text-base hover:text-ink transition-colors">
+                  Keep it
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    }
+
     if (safeRoomStep === 'offering' && safeRoomGift) {
       var giftDef = getGiftDef(safeRoomGift.gift)
       return (
