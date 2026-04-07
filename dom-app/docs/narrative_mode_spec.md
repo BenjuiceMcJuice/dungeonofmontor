@@ -159,7 +159,90 @@ Return JSON: {
 }"
 ```
 
-#### Action Resolution Prompt:
+#### Dice Rules (in Lore Bible, every call)
+```
+DICE RULES:
+- d20 + stat modifier vs DC (difficulty class)
+- DC 8 = easy, DC 11 = normal, DC 14 = hard, DC 17 = very hard
+- Stat modifiers: (stat - 10) / 2, rounded down
+  e.g. STR 12 = +1, AGI 8 = -1, INT 14 = +2
+- Roll 1 = critical fail (something goes wrong)
+- Roll 20 = critical success (something extra happens)
+
+WHEN TO CALL FOR A ROLL:
+- Physical action with risk: STR, AGI, DEF
+- Noticing something hidden: PER
+- Knowing/remembering something: INT, WIS
+- Persuading/deceiving: CHA
+- Lucky breaks: LCK
+
+WHEN NOT TO ROLL:
+- Walking through a door, picking up visible items, talking (unless
+  persuading), looking at something obvious, making a choice
+
+COMBAT:
+- Attack: d20 + STR mod vs enemy DEF
+- Damage: weapon die + STR mod
+- Tiers: 20+ = crit (2x), 11-19 = hit, 6-10 = glancing (0.5x), <6 = miss
+```
+
+### Key Design: Groq Decides IF, App Rolls Dice
+Groq NEVER rolls dice or calculates maths. It decides whether a roll is needed, which stat, and the DC. The app handles all random number generation and modifier calculation. Then sends the result back for narration.
+
+**Two-call flow (actions needing dice):**
+```
+Call 1: Player action → Groq assesses
+  Input: action + scene + player stats
+  Output: { needsRoll, stat, dc, narrateBefore }
+
+  [App rolls d20 + modifier, shows dice animation]
+
+Call 2: Roll result → Groq narrates outcome
+  Input: roll result + success/fail + context
+  Output: { narration, consequence, loreDiscovery }
+```
+
+**One-call flow (no dice needed):**
+```
+Call 1: Player action → Groq narrates directly
+  Input: action + scene
+  Output: { needsRoll: false, narration, loreDiscovery }
+```
+
+### JSON Contracts
+
+**Call 1 — Action Assessment:**
+```json
+{
+  "needsRoll": true,
+  "stat": "agi",
+  "dc": 12,
+  "narrateBefore": "You eye the shelves. Old. Possibly load-bearing. Possibly not.",
+  "combat": false
+}
+```
+
+**Call 2 — Outcome Narration (only if needsRoll):**
+```json
+{
+  "narration": "You scramble up like a spider in armour. On the top shelf: a dusty envelope.",
+  "consequence": null,
+  "loreDiscovery": "Sealed envelope with wax stamp — letter M"
+}
+```
+
+**No-roll action:**
+```json
+{
+  "needsRoll": false,
+  "narration": "It's a portrait of a woman. Kind. The paint is cracked but someone has touched up the eyes recently. Green eyes.",
+  "loreDiscovery": "Portrait has green eyes — same glow as tree hollow"
+}
+```
+
+The `loreDiscovery` field is critical — Groq flags what's narratively important so the campaign summary system knows what to preserve. The AI tells us what to remember.
+
+### Action Resolution Prompt:
 ```
 System: [Campaign context + Montor personality]
 
