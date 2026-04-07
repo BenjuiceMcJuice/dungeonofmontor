@@ -105,7 +105,7 @@
   "personalityWhispers": {
     "melancholy": ["Gran used to love this room.", "It was better before.", "Everything fades.", "I miss the quiet."],
     "paranoid": ["Who sent you? The rats?", "I'm watching. Always.", "You're not alone down here.", "Trust nothing."],
-    "comedic": ["Why did the knight cross the dungeon?", "I've got a million of these.", "Knock knock. No really. Knock.", "That's what she said. My mum. About the gravy."],
+    "comedic": ["You fight like my gran. She was blind.", "I've seen better armour on a sandwich.", "Bold strategy. Wrong, but bold.", "You look lost. Emotionally, I mean."],
     "proud": ["Notice the cornicing.", "I built this corridor myself.", "Original features throughout.", "Not many dungeons have underfloor heating."],
     "lonely": ["Stay a while?", "It's been so quiet.", "Nobody visits anymore.", "I just want someone to talk to."],
     "vengeful": ["I remember what you did.", "Payback is coming.", "Every step is noted.", "You'll regret this."],
@@ -117,7 +117,8 @@
     "petty": ["You moved that chair.", "That was 2 inches to the left.", "I JUST tidied that.", "Was that scratch there before?"],
     "chef": ["That's not a weapon. It's a PEELER.", "The roast needs turning.", "Season it properly.", "My kitchen. My rules."],
     "estate_agent": ["Open plan. Loads of character.", "South-facing. Very desirable.", "Scope for improvement.", "Would suit first-time dungeon crawler."],
-    "bureaucratic": ["Have you filled in a form?", "That's not procedure.", "I'll need that in triplicate.", "There should be a form for this."]
+    "bureaucratic": ["Have you filled in a form?", "That's not procedure.", "I'll need that in triplicate.", "There should be a form for this."],
+    "bad_montor": ["FOOLS! You walk into LORD MONTOR'S domain!", "My master plan is nearly complete!", "You cannot stop what is coming!", "I would monologue but I'm busy."]
   },
   "tonicReward": {
     "twoChoice": "Montor offers two tonics. Choose wisely.",

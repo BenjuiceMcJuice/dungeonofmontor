@@ -18,6 +18,7 @@ var PERSONALITIES = [
   { id: 'chef', label: 'Chef' },
   { id: 'estate_agent', label: 'Estate Agent' },
   { id: 'bureaucratic', label: 'Bureaucratic' },
+  { id: 'bad_montor', label: 'Bad Montor' },
 ]
 
 var LS_KEY = 'dom_montor_personality'
