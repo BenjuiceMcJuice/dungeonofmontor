@@ -422,9 +422,10 @@ function drawDoorSprite(canvas, theme, scale, open) {
   ctx.imageSmoothingEnabled = false
 
   for (var r = 0; r < sprite.rows; r++) {
+    if (!sprite.grid[r]) continue
     for (var c = 0; c < sprite.cols; c++) {
       var v = sprite.grid[r][c]
-      if (v === null) continue
+      if (v === null || v === undefined) continue
       if (v === K) ctx.fillStyle = '#000000'
       else if (v === W) ctx.fillStyle = colours.wall
       else if (v === H) ctx.fillStyle = colours.wallHi
@@ -579,7 +580,7 @@ var CHAMBER_ICONS = {
   },
   // Safe room — Montor's parlour: dark purple walls, portrait, candelabra, bookshelf, armchair
   safe_room: {
-    cols: 40, rows: 30, grid: [
+    cols: 40, rows: 28, grid: [
       [K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K],
       ['#1a1520','#1a1520','#1a1520','#2a1a20','#1a1520','#1a1520','#1a1520','#1a1520','#2a1a20','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#2a1a20','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#2a1a20','#1a1520','#1a1520','#1a1520','#1a1520','#2a1a20','#1a1520','#1a1520','#1a1520','#1a1520','#1a1520','#2a1a20','#1a1520','#1a1520','#1a1520','#1a1520'],
       ['#1e1428','#1e1428','#221630','#1e1428','#1e1428','#1e1428','#221630','#1e1428','#1e1428','#1e1428','#1e1428','#221630','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#221630','#1e1428','#1e1428','#1e1428','#1e1428','#1e1428','#221630','#1e1428','#1e1428','#1e1428','#1e1428','#221630','#1e1428','#1e1428'],
@@ -822,9 +823,10 @@ function drawChamberIcon(canvas, iconKey, theme, scale) {
   ctx.imageSmoothingEnabled = false
 
   for (var r = 0; r < sprite.rows; r++) {
+    if (!sprite.grid[r]) continue
     for (var c = 0; c < sprite.cols; c++) {
       var v = sprite.grid[r][c]
-      if (v === null) continue
+      if (v === null || v === undefined) continue
       if (v === K) ctx.fillStyle = '#000000'
       else if (v === W) ctx.fillStyle = colours.wall
       else if (v === H) ctx.fillStyle = colours.wallHi

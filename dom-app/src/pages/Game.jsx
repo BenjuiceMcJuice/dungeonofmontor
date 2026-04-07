@@ -41,9 +41,10 @@ function getSafeRoomBgStyle() {
       var ctx = canvas.getContext('2d')
       ctx.imageSmoothingEnabled = false
       for (var r = 0; r < sprite.rows; r++) {
+        if (!sprite.grid[r]) continue
         for (var c = 0; c < sprite.cols; c++) {
           var v = sprite.grid[r][c]
-          if (v === null) continue
+          if (v === null || v === undefined) continue
           ctx.fillStyle = v
           ctx.fillRect(c * scale, r * scale, scale, scale)
         }
