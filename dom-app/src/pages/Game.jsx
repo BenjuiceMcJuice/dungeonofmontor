@@ -5042,16 +5042,16 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                         })()}
                         {detailItem.buyPrice && <span>Value: {detailItem.sellPrice || Math.round(detailItem.buyPrice * 0.4)}g</span>}
                       </div>
-                      {/* Comparison to equipped */}
-                      {detailItem.type === 'weapon' && character.equipped && character.equipped.weapon && (function() {
-                        var eq = character.equipped.weapon
+                      {/* Comparison to equipped (or empty slot) */}
+                      {detailItem.type === 'weapon' && (function() {
+                        var eq = character.equipped && character.equipped.weapon
                         var newDie = detailItem.damageDie || detailItem.die || 0
-                        var eqDie = eq.damageDie || eq.die || 0
+                        var eqDie = eq ? (eq.damageDie || eq.die || 0) : 4 // fists = d4
                         var newAcc = detailItem.accuracyBonus || 0
-                        var eqAcc = eq.accuracyBonus || 0
+                        var eqAcc = eq ? (eq.accuracyBonus || 0) : -1 // fists = -1
                         return (
                           <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
-                            <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
+                            <p className="text-ink-faint mb-1">vs {eq ? '' : 'empty: '}<span className={eq ? rarityCol(eq.rarity).text : 'text-ink-faint'}>{eq ? eq.name : 'Fists'}</span></p>
                             <div className="flex gap-3">
                               <span className={newDie > eqDie ? 'text-green-400' : newDie < eqDie ? 'text-red-400' : 'text-ink-dim'}>DMG d{newDie} {newDie > eqDie ? '\u25B2' : newDie < eqDie ? '\u25BC' : '='}</span>
                               <span className={newAcc > eqAcc ? 'text-green-400' : newAcc < eqAcc ? 'text-red-400' : 'text-ink-dim'}>ACC {newAcc >= 0 ? '+' : ''}{newAcc} {newAcc > eqAcc ? '\u25B2' : newAcc < eqAcc ? '\u25BC' : '='}</span>
@@ -5059,18 +5059,18 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                           </div>
                         )
                       })()}
-                      {detailItem.type === 'armour' && detailItem.slot !== 'offhand' && character.equipped && (function() {
+                      {detailItem.type === 'armour' && detailItem.slot !== 'offhand' && (function() {
                         var slotMap = { armour: 'armour', helmet: 'helmet', boots: 'boots' }
+                        var slotLabels = { armour: 'Armour', helmet: 'Helmet', boots: 'Boots' }
                         var eqSlot = slotMap[detailItem.slot] || 'armour'
-                        var eq = character.equipped[eqSlot]
-                        if (!eq) return null
+                        var eq = character.equipped && character.equipped[eqSlot]
                         var newDef = detailItem.defBonus || 0
-                        var eqDef = eq.defBonus || 0
+                        var eqDef = eq ? (eq.defBonus || 0) : 0
                         var newAgi = (detailItem.agiBonus || 0) + (detailItem.agiPenalty || 0)
-                        var eqAgi = (eq.agiBonus || 0) + (eq.agiPenalty || 0)
+                        var eqAgi = eq ? ((eq.agiBonus || 0) + (eq.agiPenalty || 0)) : 0
                         return (
                           <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
-                            <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
+                            <p className="text-ink-faint mb-1">vs {eq ? '' : 'empty: '}<span className={eq ? rarityCol(eq.rarity).text : 'text-ink-faint'}>{eq ? eq.name : 'No ' + (slotLabels[eqSlot] || 'item')}</span></p>
                             <div className="flex gap-3">
                               <span className={newDef > eqDef ? 'text-green-400' : newDef < eqDef ? 'text-red-400' : 'text-ink-dim'}>DEF +{newDef} {newDef > eqDef ? '\u25B2' : newDef < eqDef ? '\u25BC' : '='}</span>
                               {(newAgi !== 0 || eqAgi !== 0) && <span className={newAgi > eqAgi ? 'text-green-400' : newAgi < eqAgi ? 'text-red-400' : 'text-ink-dim'}>AGI {newAgi >= 0 ? '+' : ''}{newAgi} {newAgi > eqAgi ? '\u25B2' : newAgi < eqAgi ? '\u25BC' : '='}</span>}
@@ -5078,15 +5078,15 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                           </div>
                         )
                       })()}
-                      {detailItem.type === 'armour' && detailItem.slot === 'offhand' && character.equipped && character.equipped.offhand && (function() {
-                        var eq = character.equipped.offhand
+                      {detailItem.type === 'armour' && detailItem.slot === 'offhand' && (function() {
+                        var eq = character.equipped && character.equipped.offhand
                         var newDef = detailItem.defBonus || 0
-                        var eqDef = eq.defBonus || 0
+                        var eqDef = eq ? (eq.defBonus || 0) : 0
                         var newBlock = Math.round((detailItem.passiveValue || 0) * 100)
-                        var eqBlock = Math.round((eq.passiveValue || 0) * 100)
+                        var eqBlock = eq ? Math.round((eq.passiveValue || 0) * 100) : 0
                         return (
                           <div className="mb-3 p-2 rounded bg-bg border border-border text-[10px] font-sans">
-                            <p className="text-ink-faint mb-1">vs equipped: <span className={rarityCol(eq.rarity).text}>{eq.name}</span></p>
+                            <p className="text-ink-faint mb-1">vs {eq ? '' : 'empty: '}<span className={eq ? rarityCol(eq.rarity).text : 'text-ink-faint'}>{eq ? eq.name : 'No shield'}</span></p>
                             <div className="flex gap-3">
                               <span className={newDef > eqDef ? 'text-green-400' : newDef < eqDef ? 'text-red-400' : 'text-ink-dim'}>DEF +{newDef} {newDef > eqDef ? '\u25B2' : newDef < eqDef ? '\u25BC' : '='}</span>
                               <span className={newBlock > eqBlock ? 'text-green-400' : newBlock < eqBlock ? 'text-red-400' : 'text-ink-dim'}>Block {newBlock}% {newBlock > eqBlock ? '\u25B2' : newBlock < eqBlock ? '\u25BC' : '='}</span>
@@ -5674,6 +5674,25 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                            item.description || item.type}
                         </span>
                         {item.description && (item.type === 'weapon' || item.type === 'armour') && <span className="text-ink-faint text-[10px] italic mt-0.5">{item.description}</span>}
+                        {(function() {
+                          // Quick upgrade/downgrade marker vs equipped
+                          var eq = character.equipped || {}
+                          if (item.type === 'weapon') {
+                            var eqDie = eq.weapon ? (eq.weapon.damageDie || eq.weapon.die || 4) : 4
+                            var newDie = item.damageDie || item.die || 0
+                            if (newDie > eqDie) return <span className="text-green-400 text-[10px]">{'\u25B2'} upgrade</span>
+                            if (newDie < eqDie) return <span className="text-red-400 text-[10px]">{'\u25BC'} downgrade</span>
+                          }
+                          if (item.type === 'armour') {
+                            var slotKey = item.slot === 'offhand' ? 'offhand' : item.slot === 'helmet' ? 'helmet' : item.slot === 'boots' ? 'boots' : 'armour'
+                            var eqItem = eq[slotKey]
+                            var eqDef = eqItem ? (eqItem.defBonus || 0) : 0
+                            var newDef = item.defBonus || 0
+                            if (newDef > eqDef) return <span className="text-green-400 text-[10px]">{'\u25B2'} upgrade</span>
+                            if (newDef < eqDef) return <span className="text-red-400 text-[10px]">{'\u25BC'} downgrade</span>
+                          }
+                          return null
+                        })()}
                       </div>
                       {chaLocked ? (
                         <span className="text-amber-400/60 text-[10px] font-sans text-right leading-tight">Requires<br/>CHA 12+</span>
