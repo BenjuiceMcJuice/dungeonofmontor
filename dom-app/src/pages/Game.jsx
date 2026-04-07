@@ -4027,11 +4027,14 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   // --- Floor transition ---
   if (gamePhase === 'floor_transition') {
     return (
-      <div onClick={handleFloorTransitionContinue} className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
+      <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
         <p className="text-ink text-lg italic max-w-sm" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
           {floor ? floor.transitionText : 'You descend deeper...'}
         </p>
-        <p className="text-ink-faint text-xs font-sans">Tap anywhere to continue</p>
+        <button onClick={handleFloorTransitionContinue}
+          className="py-3 px-8 rounded-lg bg-gold/20 border border-gold/40 text-gold font-display text-base hover:border-gold transition-colors">
+          Continue
+        </button>
       </div>
     )
   }
