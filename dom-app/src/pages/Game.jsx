@@ -4090,6 +4090,11 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
 
   // --- Safe room (Montor's audience chamber) ---
   if (gamePhase === 'safe_room') {
+    // Safe room background — dark stately home vibe
+    var safeRoomBg = {
+      backgroundImage: 'repeating-conic-gradient(#1a1520 0% 25%, #16121c 0% 50%)',
+      backgroundSize: '6px 6px',
+    }
     var safeInteractionBg = {
       backgroundImage: 'repeating-conic-gradient(' + floorBorderColor + '18 0% 25%, transparent 0% 50%)',
       backgroundSize: '8px 8px',
@@ -4098,7 +4103,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     // Arrival — base screen with stats and Montor quote
     if (safeRoomStep === 'arrival') {
       return (
-        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised">
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center gap-6" style={safeRoomBg}>
           <h2 className="font-display text-2xl text-gold">{floor ? floor.floorName : 'Unknown Depth'}</h2>
           <div className="max-w-sm">
             <p className="text-ink text-base italic mb-4" style={{ fontFamily: "'Sorts Mill Goudy', serif" }}>
@@ -4115,6 +4120,16 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
             <p>Chambers cleared: <span className="text-ink">{chambersCleared}</span></p>
             <p>XP: <span className="text-ink">{totalXp}</span></p>
           </div>
+          {(function() {
+            var tidy = getTidinessSummary()
+            return (
+              <div className="flex items-center gap-4 text-[10px] font-sans">
+                <span className={tidy.colour}>Tidiness: {tidy.label}</span>
+                <span className={greedScore < 5 ? 'text-green-400' : greedScore < 15 ? 'text-ink-faint' : 'text-amber-400'}>Greed: {greedScore}</span>
+                <span className="text-purple-400">{montorPersonality.label}</span>
+              </div>
+            )
+          })()}
           {safeRoomGift ? (
             <button onClick={function() {
               if (hasGroqKey() && safeRoomGift) {
