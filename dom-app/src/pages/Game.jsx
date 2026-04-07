@@ -73,12 +73,12 @@ var MONTOR_WHISPERS = dialogueData.montorWhispers
 
 // Rarity colour system
 var RARITY_COLOURS = {
-  common: { text: 'text-ink', border: 'border-border', bg: 'bg-surface', label: '' },
-  uncommon: { text: 'text-green-400', border: 'border-green-500/40', bg: 'bg-green-500/5', label: 'Uncommon' },
+  common: { text: 'text-ink-dim', border: 'border-border', bg: 'bg-surface', label: '' },
+  uncommon: { text: 'text-cyan-400', border: 'border-cyan-500/40', bg: 'bg-cyan-500/5', label: 'Uncommon' },
   rare: { text: 'text-blue-400', border: 'border-blue-500/40', bg: 'bg-blue-500/5', label: 'Rare' },
-  epic: { text: 'text-purple-400', border: 'border-purple-500/40', bg: 'bg-purple-500/5', label: 'Epic' },
-  legendary: { text: 'text-gold', border: 'border-gold/60', bg: 'bg-gold/5', label: 'Legendary' },
-  heirloom: { text: 'text-crimson', border: 'border-crimson/60', bg: 'bg-crimson/5', label: 'Heirloom' },
+  epic: { text: 'text-gold', border: 'border-gold/60', bg: 'bg-gold/5', label: 'Epic' },
+  legendary: { text: 'text-amber-400', border: 'border-amber-500/60', bg: 'bg-amber-500/5', label: 'Legendary' },
+  heirloom: { text: 'text-purple-400', border: 'border-purple-500/60', bg: 'bg-purple-500/5', label: 'Heirloom' },
 }
 function rarityCol(rarity) { return RARITY_COLOURS[rarity] || RARITY_COLOURS.common }
 
