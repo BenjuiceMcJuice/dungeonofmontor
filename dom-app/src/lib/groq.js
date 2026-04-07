@@ -101,8 +101,11 @@ function generateTreasureReaction(context, treasureName) {
   var userMessage = 'The player has found ' + treasureName + '. ' +
     'You want them NOT to smash it. Try to convince them. ' +
     'This is exchange 1 of up to 4. You can keep arguing or give up. ' +
-    'Generate one opening line from you (max 2 sentences), three short player response options (max 8 words each), ' +
-    'and a "done" flag (true if you give up, false to keep arguing). ' +
+    'Generate one opening line from YOU, Montor (max 2 sentences). ' +
+    'Then generate three short response options that THE PLAYER would say back to you (max 8 words each). ' +
+    'The player is a dungeon explorer — they might be sympathetic, pragmatic, or defiant. ' +
+    'Player options should sound like a human talking TO you, not like you talking. ' +
+    'Include a "done" flag (true if you give up, false to keep arguing). ' +
     'Return JSON: { "montor": "...", "options": ["...", "...", "..."], "done": false }'
   return callGroq(systemPrompt, userMessage, { maxTokens: 250, temperature: 0.85 })
 }
@@ -118,8 +121,8 @@ function generateTreasureFollowUp(context, treasureName, playerChoice, conversat
     'The player just said: "' + playerChoice + '". ' +
     'This is exchange ' + round + ' of 4. ' +
     (isLastRound
-      ? 'This is your FINAL response. Give a last line and set done:true. No more options needed. '
-      : 'React with one line (max 2 sentences). If you want to keep arguing, include 3 new response options and done:false. If you give up or accept their answer, set done:true and no options. ') +
+      ? 'This is your FINAL response. Give a last line as Montor and set done:true. No more options needed. '
+      : 'React with one line as Montor (max 2 sentences). If you want to keep arguing, include 3 new response options that THE PLAYER would say back (not you — the player is a human talking to you). If you give up or accept their answer, set done:true and no options. ') +
     'Return JSON: { "montor": "...", "options": [...], "done": true/false }'
   return callGroq(systemPrompt, userMessage, { maxTokens: 250, temperature: 0.85 })
 }
