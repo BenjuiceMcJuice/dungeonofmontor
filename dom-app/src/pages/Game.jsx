@@ -3040,6 +3040,10 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     var nextBattle = advanceTurn(updatedBattle)
     setBattle(nextBattle)
 
+    // Sync player HP from battle state (lifesteal, Blood Tithe, etc. modify it in combat.js)
+    var playerInBattle = nextBattle.players[user.uid]
+    if (playerInBattle) setPlayerHp(playerInBattle.currentHp)
+
     // Keep target if still alive, otherwise clear
     var targetStillAlive = updatedBattle.enemies.some(function(e) { return e.id === selectedTarget && !e.isDown })
     if (!targetStillAlive) setSelectedTarget(null)
