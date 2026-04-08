@@ -298,7 +298,12 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
   var [phoenixSparkUsed, setPhoenixSparkUsed] = useState(false) // Phoenix Spark: once per combat threshold heal
   var [tremorWaveUsed, setTremorWaveUsed] = useState(false) // Tremor Wave: once per combat AoE
 
-  // Calculate max possible disturbance for a zone (sum of all pile layers × deep clean cost)
+  // Calculate max possible disturbance for a zone
+  // Each pile can be searched multiple times. Max disturbance = every pile deep-cleaned.
+  // A deep clean (level 3) costs 3 layers and adds 6 disturbance.
+  // A thorough clean (level 2) costs 2 layers and adds 3 disturbance.
+  // A careful clean (level 1) costs 1 layer and adds 1 disturbance.
+  // Worst case: deep clean as many times as possible, then thorough/careful for remainder.
   function calcMaxDisturbance(z) {
     if (!z || !z.chambers) return 0
     var total = 0
@@ -306,11 +311,18 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
       var piles = z.chambers[ci].junkPiles
       if (piles) {
         for (var pi = 0; pi < piles.length; pi++) {
-          total += (piles[pi].totalLayers || piles[pi].layersRemaining || 0)
+          var layers = piles[pi].totalLayers || piles[pi].layersRemaining || 0
+          // Deep clean (3 layers → 6 disturbance) as many times as possible
+          var deepCleans = Math.floor(layers / 3)
+          var remainder = layers % 3
+          total += deepCleans * 6
+          // Thorough (2 layers → 3) then careful (1 layer → 1) for remainder
+          if (remainder >= 2) { total += 3; remainder -= 2 }
+          if (remainder >= 1) { total += 1 }
         }
       }
     }
-    return total * 6 // 6 = max disturbance per layer (deep clean)
+    return total
   }
 
   // Montor mood derivation
@@ -544,7 +556,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
         setZone(f.zones[0])
       }
       setFloor(f)
-      setMaxFloorDisturbance(calcMaxDisturbance(savedRun.zone || f.zones[0]))
+      var totalMax = 0; for (var zi = 0; zi < f.zones.length; zi++) totalMax += calcMaxDisturbance(f.zones[zi])
+      setMaxFloorDisturbance(totalMax)
       setFloorDisturbance(savedRun.floorDisturbance || 0)
       setGreedScore(savedRun.greedScore || 0)
       if (savedRun.montorTaste) setMontorTaste(savedRun.montorTaste)
@@ -555,7 +568,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
       setFloor(f)
       setZone(f.zones[0])
       setHasZoneKey(false)
-      setMaxFloorDisturbance(calcMaxDisturbance(f.zones[0]))
+      var totalMax2 = 0; for (var zi2 = 0; zi2 < f.zones.length; zi2++) totalMax2 += calcMaxDisturbance(f.zones[zi2])
+      setMaxFloorDisturbance(totalMax2)
       setFloorDisturbance(0)
       setGamePhase('doors')
     }
@@ -1180,7 +1194,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
       setZone(nextFloor.zones[0])
       setHasZoneKey(false)
       setFloorDisturbance(0)
-      setMaxFloorDisturbance(calcMaxDisturbance(nextFloor.zones[0]))
+      var totalMax3 = 0; for (var zi3 = 0; zi3 < nextFloor.zones.length; zi3++) totalMax3 += calcMaxDisturbance(nextFloor.zones[zi3])
+      setMaxFloorDisturbance(totalMax3)
       setPreviousPosition(null)
       setLootingCorpseId(null)
       setLootingChestId(null)

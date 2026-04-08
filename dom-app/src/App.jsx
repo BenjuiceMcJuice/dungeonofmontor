@@ -25,6 +25,7 @@ function App() {
   var [savedRun, setSavedRun] = useState(null)
   var [activeRuns, setActiveRuns] = useState({}) // { charId: saveData }
   var [charsLoading, setCharsLoading] = useState(false)
+  var [returnContext, setReturnContext] = useState('fresh') // fresh | fromRun | fromVictory | fromDefeat
 
   // Run save hook — per character
   var runSave = useRunSave(user ? user.uid : null, selectedCharId)
@@ -136,6 +137,8 @@ function App() {
   }
 
   function handleReturnToTavern() {
+    var ctx = runResult && runResult.victory ? 'fromVictory' : runResult ? 'fromDefeat' : 'fromRun'
+    setReturnContext(ctx)
     setCharacter(null)
     setRunResult(null)
     setSelectedCharId(null)
@@ -194,6 +197,7 @@ function App() {
         user={user}
         characters={characters}
         activeRuns={activeRuns}
+        returnContext={returnContext}
         onCreateCharacter={handleCreateCharacter}
         onSelectCharacter={handleSelectCharacter}
         onResumeRun={handleResumeRun}
@@ -249,6 +253,7 @@ function App() {
       user={user}
       characters={characters}
       activeRuns={activeRuns}
+      returnContext={returnContext}
       onCreateCharacter={handleCreateCharacter}
       onSelectCharacter={handleSelectCharacter}
       onResumeRun={handleResumeRun}
