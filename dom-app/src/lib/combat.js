@@ -198,7 +198,7 @@ function getActor(battleState, actorId) {
 }
 
 // Calculate damage for a given tier — returns breakdown object
-// Order: raw damage (weapon + STR) → tier multiplier → DEF reduction
+// Order: raw damage (weapon + STR) → tier multiplier → percentage DEF reduction
 function calculateTierDamage(weaponRoll, strMod, tier, defStat, critMultiplier) {
   if (tier === 4) return { final: 0, weaponRoll: weaponRoll, strMod: strMod, raw: 0, tierMul: 'miss', afterTier: 0, defReduction: 0 }
 
@@ -208,8 +208,10 @@ function calculateTierDamage(weaponRoll, strMod, tier, defStat, critMultiplier) 
   if (tier === 1) { afterTier = Math.round(raw * (critMultiplier || 2.0)); tierMul = 'x' + (critMultiplier || 2.0) }
   if (tier === 3) { afterTier = Math.max(Math.round(raw / 2), 1); tierMul = 'x0.5' }
 
-  var defReduction = Math.floor(defStat / 2)
-  var final_ = Math.max(afterTier - defReduction, 2)
+  // Percentage-based DEF: each point = 2% reduction, capped at 50%
+  var defPct = Math.min(defStat * 2, 50) / 100
+  var defReduction = Math.floor(afterTier * defPct)
+  var final_ = Math.max(afterTier - defReduction, 1)
 
   return {
     final: final_,

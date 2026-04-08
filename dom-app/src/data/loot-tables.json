@@ -787,11 +787,11 @@
       "id": "underground_standard",
       "goldMin": 4,
       "goldMax": 12,
-      "itemDropChance": 0.35,
+      "itemDropChance": 0.4,
       "entries": [
         {
           "itemId": "health_potion",
-          "weight": 8,
+          "weight": 14,
           "minRarity": "common"
         },
         {
@@ -955,11 +955,11 @@
       "id": "underground_elite",
       "goldMin": 8,
       "goldMax": 20,
-      "itemDropChance": 0.55,
+      "itemDropChance": 0.6,
       "entries": [
         {
           "itemId": "greater_health_potion",
-          "weight": 6,
+          "weight": 10,
           "minRarity": "common"
         },
         {

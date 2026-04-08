@@ -3147,7 +3147,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     // Permanent stat boosts — handle directly, not through applyConsumable
     if (item.effect === 'permanent_stat') {
       character.stats[item.effectStat] = (character.stats[item.effectStat] || 10) + (item.effectValue || 1)
-      if (item.effectStat === 'vit') { character.maxHp = 20 + ((character.stats.vit || 8) * 5); setPlayerHp(function(hp) { return Math.min(hp + 5, character.maxHp) }) }
+      if (item.effectStat === 'vit') { character.maxHp = 25 + ((character.stats.vit || 8) * 5); setPlayerHp(function(hp) { return Math.min(hp + 5, character.maxHp) }) }
       addLog({ type: 'player', text: item.name + ': permanently +' + item.effectValue + ' ' + item.effectStat.toUpperCase() + '!', tier: 'crit' })
       setPlayerInventory(function(prev) { var n = prev.slice(); n.splice(itemIndex, 1); return n })
       return
@@ -3157,7 +3157,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       for (var psi = 0; psi < stats.length; psi++) {
         character.stats[stats[psi]] = (character.stats[stats[psi]] || 10) + (item.effectValue || 1)
       }
-      if (stats.indexOf('vit') !== -1) { character.maxHp = 20 + ((character.stats.vit || 8) * 5); setPlayerHp(function(hp) { return Math.min(hp + 5, character.maxHp) }) }
+      if (stats.indexOf('vit') !== -1) { character.maxHp = 25 + ((character.stats.vit || 8) * 5); setPlayerHp(function(hp) { return Math.min(hp + 5, character.maxHp) }) }
       addLog({ type: 'player', text: item.name + ': permanently +' + item.effectValue + ' ' + stats.map(function(s) { return s.toUpperCase() }).join(', ') + '!', tier: 'crit' })
       setPlayerInventory(function(prev) { var n = prev.slice(); n.splice(itemIndex, 1); return n })
       return
@@ -3584,6 +3584,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     var visitedCount = zone ? zone.chambers.filter(function(ch) { return ch.visited }).length : 0
     var logDoc = {
       userId: user.uid,
+      characterName: character.name || 'Unnamed Knight',
       timestamp: serverTimestamp(),
       outcome: outcome,
       floorReached: zone ? zone.floorId : 'grounds',

@@ -94,7 +94,7 @@
       "tailorPremium": ["montors_claw_pendant", "montors_mums_frying_pan", "montors_pressure_cooker"],
       "merchantGreeting": "Master Montor won't notice one less goblet. Probably.",
       "encounterPools": {
-        "1": { "types": ["rat", "orc", "hound"], "tiers": ["dust"], "count": [1, 2] },
+        "1": { "types": ["rat", "hound"], "tiers": ["dust"], "count": [1, 2] },
         "2": { "types": ["rat", "orc", "hound"], "tiers": ["dust", "slate"], "count": [2, 3] },
         "3": { "types": ["orc", "hound"], "tiers": ["slate"], "count": [1, 2] }
       },
