@@ -1,16 +1,18 @@
 // Run persistence — localStorage (instant) + Firestore (debounced backup)
 // Saves at room boundaries only. Combat state is NOT saved.
+// Path: /users/{uid}/characters/{charId}/activeRun/current
 
 import { db } from './firebase.js'
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore'
 
-var SAVE_VERSION = 1
+var SAVE_VERSION = 2
 var LS_PREFIX = 'dom_activeRun_'
 
 // Build the save payload from game state
-function buildSavePayload(state) {
+function buildSavePayload(state, charId) {
   return {
     version: SAVE_VERSION,
+    charId: charId || null,
     savedAt: Date.now(),
     character: state.character,
     playerHp: state.playerHp,
@@ -37,9 +39,13 @@ function buildSavePayload(state) {
 
 // --- localStorage ---
 
-function saveToLocalStorage(uid, payload) {
+function lsKey(uid, charId) {
+  return LS_PREFIX + uid + '_' + charId
+}
+
+function saveToLocalStorage(uid, charId, payload) {
   try {
-    localStorage.setItem(LS_PREFIX + uid, JSON.stringify(payload))
+    localStorage.setItem(lsKey(uid, charId), JSON.stringify(payload))
     return true
   } catch (e) {
     console.warn('runSave: localStorage write failed', e)
@@ -47,12 +53,12 @@ function saveToLocalStorage(uid, payload) {
   }
 }
 
-function loadFromLocalStorage(uid) {
+function loadFromLocalStorage(uid, charId) {
   try {
-    var raw = localStorage.getItem(LS_PREFIX + uid)
+    var raw = localStorage.getItem(lsKey(uid, charId))
     if (!raw) return null
     var data = JSON.parse(raw)
-    if (!data || data.version !== SAVE_VERSION) return null
+    if (!data || (data.version !== SAVE_VERSION && data.version !== 1)) return null
     return data
   } catch (e) {
     console.warn('runSave: localStorage read failed', e)
@@ -60,27 +66,27 @@ function loadFromLocalStorage(uid) {
   }
 }
 
-function clearLocalStorage(uid) {
-  try { localStorage.removeItem(LS_PREFIX + uid) } catch (e) { /* ignore */ }
+function clearLocalStorage(uid, charId) {
+  try { localStorage.removeItem(lsKey(uid, charId)) } catch (e) { /* ignore */ }
 }
 
 // --- Firestore ---
 
-function getDocRef(uid) {
-  return doc(db, 'users', uid, 'activeRun', 'current')
+function getDocRef(uid, charId) {
+  return doc(db, 'users', uid, 'characters', charId, 'activeRun', 'current')
 }
 
-function saveToFirestore(uid, payload) {
-  return setDoc(getDocRef(uid), payload).catch(function(e) {
+function saveToFirestore(uid, charId, payload) {
+  return setDoc(getDocRef(uid, charId), payload).catch(function(e) {
     console.warn('runSave: Firestore write failed', e)
   })
 }
 
-function loadFromFirestore(uid) {
-  return getDoc(getDocRef(uid)).then(function(snap) {
+function loadFromFirestore(uid, charId) {
+  return getDoc(getDocRef(uid, charId)).then(function(snap) {
     if (!snap.exists()) return null
     var data = snap.data()
-    if (!data || data.version !== SAVE_VERSION) return null
+    if (!data || (data.version !== SAVE_VERSION && data.version !== 1)) return null
     return data
   }).catch(function(e) {
     console.warn('runSave: Firestore read failed', e)
@@ -88,21 +94,21 @@ function loadFromFirestore(uid) {
   })
 }
 
-function clearFirestore(uid) {
-  return deleteDoc(getDocRef(uid)).catch(function(e) {
+function clearFirestore(uid, charId) {
+  return deleteDoc(getDocRef(uid, charId)).catch(function(e) {
     console.warn('runSave: Firestore delete failed', e)
   })
 }
 
 // --- Debounced Firestore saver ---
 
-function createDebouncedFirestoreSave(uid, delayMs) {
+function createDebouncedFirestoreSave(uid, charId, delayMs) {
   var timer = null
   return {
     save: function(payload) {
       if (timer) clearTimeout(timer)
       timer = setTimeout(function() {
-        saveToFirestore(uid, payload)
+        saveToFirestore(uid, charId, payload)
         timer = null
       }, delayMs || 4000)
     },
