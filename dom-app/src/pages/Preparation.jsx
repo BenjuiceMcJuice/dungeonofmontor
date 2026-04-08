@@ -201,7 +201,7 @@ function Preparation({ character, onReady }) {
               <p className="text-gold font-display text-base mb-2">Stats</p>
               <div className="flex flex-col gap-1.5 text-xs">
                 <p><span className="text-green-400">STR</span> — attack rolls + damage. The hitting stat.</p>
-                <p><span className="text-green-400">DEF</span> — reduces incoming damage. Shield block scales with DEF.</p>
+                <p><span className="text-green-400">DEF</span> — reduces incoming damage by 2% per point (max 50%). Shield block scales with DEF.</p>
                 <p><span className="text-green-400">AGI</span> — go first, dodge attacks (+2%/point), dagger double strike (+5%/point), flee success.</p>
                 <p><span className="text-green-400">VIT</span> — max HP. Each point = +5 HP.</p>
                 <p><span className="text-green-400">INT</span> — enchanted weapon bonus damage + condition application chance.</p>
