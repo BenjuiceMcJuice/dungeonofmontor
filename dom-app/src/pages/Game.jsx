@@ -9,7 +9,7 @@ import { resolveSearch, applySearch, inspectPile, getAvailableCleanLevels, inspe
 import { createBattleState, getCurrentTurnId, getActor, tickTurnStart, resolvePlayerAttack, resolveEnemyAttack, advanceTurn, checkBattleEnd, calculateXp } from '../lib/combat.js'
 import { generateCombatEnemies } from '../lib/enemies.js'
 import { getGiftDef, getGiftEffect, getWeaponGiftEffect, rollGiftChance } from '../lib/gifts.js'
-import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects, checkConditionReactions } from '../lib/conditions.js'
+import { isFleeBlocked, areItemsBlocked, applyCondition as applyConditionToEffects, checkConditionReactions, getConditionStatMod } from '../lib/conditions.js'
 import conditionsData from '../data/conditions.json'
 import dialogueData from '../data/dialogue.json'
 import themeData from '../data/themes.json'
@@ -7036,8 +7036,18 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
                         </div>
                         <span className="text-ink text-xs font-sans">{enemy.currentHp}/{enemy.maxHp}</span>
                         <div className="flex gap-2 text-[10px] font-sans">
-                          <span className={enemy._baseStats && enemy.stats.str > enemy._baseStats.str ? 'text-green-400' : enemy._baseStats && enemy.stats.str < enemy._baseStats.str ? 'text-red-400' : 'text-ink-dim'}>STR {enemy.stats.str}</span>
-                          <span className={enemy._baseStats && enemy.stats.def > enemy._baseStats.def ? 'text-green-400' : enemy._baseStats && enemy.stats.def < enemy._baseStats.def ? 'text-red-400' : 'text-ink-dim'}>DEF {enemy.stats.def}</span>
+                          {(function() {
+                            var condStr = getConditionStatMod(enemy.statusEffects || [], 'str')
+                            var condDef = getConditionStatMod(enemy.statusEffects || [], 'def')
+                            var effectiveStr = enemy.stats.str + condStr
+                            var effectiveDef = enemy.stats.def + condDef
+                            var baseStr = enemy._baseStats ? enemy._baseStats.str : enemy.stats.str
+                            var baseDef = enemy._baseStats ? enemy._baseStats.def : enemy.stats.def
+                            return <>
+                              <span className={effectiveStr > baseStr ? 'text-green-400' : effectiveStr < baseStr ? 'text-red-400' : 'text-ink-dim'}>STR {effectiveStr}</span>
+                              <span className={effectiveDef > baseDef ? 'text-green-400' : effectiveDef < baseDef ? 'text-red-400' : 'text-ink-dim'}>DEF {effectiveDef}</span>
+                            </>
+                          })()}
                         </div>
                         {enemy.statusEffects && enemy.statusEffects.length > 0 && (
                           <div className="flex gap-1 flex-wrap mt-0.5 items-center">
