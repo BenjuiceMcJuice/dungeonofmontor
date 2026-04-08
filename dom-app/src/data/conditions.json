@@ -89,9 +89,9 @@
     },
     "BLIND": {
       "id": "BLIND", "slot": "mind", "name": "Blind",
-      "turns": 2, "missChance": 0.5,
+      "turns": 2, "missChance": 0.75,
       "defPenalty": -1,
-      "description": "50% miss chance. -1 DEF — can't see attacks coming."
+      "description": "75% miss chance. -1 DEF — can't see attacks coming."
     },
     "ADRENALINE": {
       "id": "ADRENALINE", "slot": "body", "name": "Adrenaline",
