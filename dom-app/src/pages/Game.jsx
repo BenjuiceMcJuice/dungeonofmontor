@@ -213,7 +213,7 @@ function formatAttackLog(r, type) {
 // Game — first-person dungeon crawl + combat
 // ============================================================
 
-function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
+function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
   // --- Dungeon state ---
   var [floor, setFloor] = useState(null)
   var [zone, setZone] = useState(null)
@@ -1170,7 +1170,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
       if (!nextFloorId || !FLOORS[nextFloorId]) {
         // No more floors — victory!
         writeRunLog('victory')
-        onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length, floorsCompleted: floorsCompleted.length + 1 })
+        onEndRun({ victory: true, chambersCleared: chambersCleared, xp: totalXp, gold: playerGold, itemsFound: playerInventory.length, floorsCompleted: floorsCompleted.length + 1, floorReached: zone ? zone.floorId : 'domain', zoneReached: zone ? zone.zoneId : null, collectedTreasures: collectedTreasures, enemiesDefeated: runStats.enemiesDefeated, killedBy: null })
         return
       }
 
@@ -3584,6 +3584,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
     var visitedCount = zone ? zone.chambers.filter(function(ch) { return ch.visited }).length : 0
     var logDoc = {
       userId: user.uid,
+      charId: charId || null,
       characterName: character.name || 'Unnamed Knight',
       timestamp: serverTimestamp(),
       outcome: outcome,
@@ -4649,7 +4650,7 @@ function Game({ character, user, onEndRun, savedRun, onSaveRun }) {
   // --- Defeat ---
   if (gamePhase === 'defeat') {
     return (
-      <div onClick={function() { if (isGuarded()) return; writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0 }) }}
+      <div onClick={function() { if (isGuarded()) return; writeRunLog('defeat'); onEndRun({ victory: false, chambersCleared: chambersCleared, xp: Math.round(totalXp * 0.5), gold: 0, floorReached: zone ? zone.floorId : 'grounds', zoneReached: zone ? zone.zoneId : null, collectedTreasures: collectedTreasures, enemiesDefeated: runStats.enemiesDefeated, killedBy: runStats.killedBy || null }) }}
         className="h-full flex flex-col items-center justify-center px-6 text-center gap-6 bg-raised cursor-pointer">
         <h1 className="font-display text-4xl text-red-400">Defeated</h1>
         <p className="text-ink text-lg italic">Darkness swallows you whole.</p>
