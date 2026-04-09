@@ -277,7 +277,7 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
 
   // Gift system — Montor's sacrificed treasures, one per slot
   var [giftSlots, setGiftSlots] = useState({ body: null, mind: null, weapon: null, shield: null })
-  var [unlockedGifts, setUnlockedGifts] = useState(character.godAllGifts ? ['petal', 'stone', 'bile', 'blood', 'ember', 'void'] : [])
+  var [unlockedGifts, setUnlockedGifts] = useState(character.godAllGifts ? ['petal', 'stone', 'bile', 'blood', 'ember', 'void'] : (character.bankedGifts || []).slice())
   var [showGiftPicker, setShowGiftPicker] = useState(false)
   var [giftPickerSlot, setGiftPickerSlot] = useState(null) // which slot is being configured
   var [giftPickerGift, setGiftPickerGift] = useState(null) // which gift is selected for slot
