@@ -2599,6 +2599,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
           addLog({ type: 'condition', text: weaponG.name + '! ' + hitTarget.name + ' DAZED!', tier: 'hit' })
         }
         if (eff === 'kill_heal_and_buff' && r.enemyDefeated) {
+          var khpb = giftBattle.players[user.uid]
+          if (khpb) khpb.currentHp = Math.min(khpb.currentHp + weaponG.healValue, khpb.maxHp)
           setPlayerHp(function(hp) { return Math.min(hp + weaponG.healValue, character.maxHp) })
           setHarvestBuff(weaponG.buffDamage)
           addLog({ type: 'player', text: weaponG.name + '! Heal ' + weaponG.healValue + ' HP + next hit +' + weaponG.buffDamage + ' damage!', tier: 'crit' })
@@ -2699,11 +2701,15 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
         // === BLOOD ===
         // Crimson Flurry (dagger): double strikes heal
         if (eff === 'double_strike_heal' && r.doubleStrike) {
+          var dshpb = giftBattle.players[user.uid]
+          if (dshpb) dshpb.currentHp = Math.min(dshpb.currentHp + weaponG.value, dshpb.maxHp)
           setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
           addLog({ type: 'player', text: weaponG.name + '! Healed ' + weaponG.value + ' HP from double strike!', tier: 'hit' })
         }
         // Blood Tithe (sword): each hit heals 1
         if (eff === 'hit_heal') {
+          var hhpb = giftBattle.players[user.uid]
+          if (hhpb) hhpb.currentHp = Math.min(hhpb.currentHp + weaponG.value, hhpb.maxHp)
           setPlayerHp(function(hp) { return Math.min(hp + weaponG.value, character.maxHp) })
           addLog({ type: 'player', text: weaponG.name + '! Healed ' + weaponG.value + ' HP.', tier: 'hit' })
         }
@@ -2732,6 +2738,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
         }
         // Butcher (axe): kill heals + bleed stacks → STR buff
         if (eff === 'kill_heal_and_bleed_buff' && r.enemyDefeated) {
+          var bchpb = giftBattle.players[user.uid]
+          if (bchpb) bchpb.currentHp = Math.min(bchpb.currentHp + weaponG.healValue, bchpb.maxHp)
           setPlayerHp(function(hp) { return Math.min(hp + weaponG.healValue, character.maxHp) })
           var deadBleedStacks = 0
           if (hitTarget.statusEffects) {
@@ -2751,7 +2759,11 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
           for (var bki = 0; bki < hitTarget.statusEffects.length; bki++) {
             if (hitTarget.statusEffects[bki].id === 'BLEED') bkStacks += (hitTarget.statusEffects[bki].stacks || 1)
           }
-          if (bkStacks > 0) setPlayerHp(function(hp) { return Math.min(hp + bkStacks, character.maxHp) })
+          if (bkStacks > 0) {
+            var bkhpb = giftBattle.players[user.uid]
+            if (bkhpb) bkhpb.currentHp = Math.min(bkhpb.currentHp + bkStacks, bkhpb.maxHp)
+            setPlayerHp(function(hp) { return Math.min(hp + bkStacks, character.maxHp) })
+          }
           addLog({ type: 'condition', text: weaponG.name + '! BLEED + healed ' + bkStacks + ' HP!', tier: 'hit' })
         }
 
@@ -2859,6 +2871,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
         var deadTarget = giftBattle.enemies.find(function(e) { return e.id === (r.targetId || selectedTarget) })
         var wasBurning = deadTarget && deadTarget.statusEffects && deadTarget.statusEffects.some(function(c) { return c.id === 'BURN' })
         if (wasBurning) {
+          var cthpb = giftBattle.players[user.uid]
+          if (cthpb) cthpb.currentHp = Math.min(cthpb.currentHp + bodyG2Pre.value, cthpb.maxHp)
           setPlayerHp(function(hp) { return Math.min(hp + bodyG2Pre.value, character.maxHp) })
           addLog({ type: 'player', text: 'Cauterise! Healed ' + bodyG2Pre.value + ' HP from burning kill!', tier: 'crit' })
         }
@@ -2994,6 +3008,8 @@ function Game({ character, user, charId, onEndRun, savedRun, onSaveRun }) {
     // Body gift: lifesteal (Bloodpact)
     if (bodyG2 && bodyG2.effect === 'lifesteal' && r.damage > 0) {
       var giftLifesteal = Math.max(1, Math.round(r.damage * bodyG2.value))
+      var blpb = giftBattle.players[user.uid]
+      if (blpb) blpb.currentHp = Math.min(blpb.currentHp + giftLifesteal, blpb.maxHp)
       setPlayerHp(function(hp) { return Math.min(hp + giftLifesteal, character.maxHp) })
       addLog({ type: 'player', text: bodyG2.name + ': healed ' + giftLifesteal + ' HP!', tier: 'hit' })
     }
