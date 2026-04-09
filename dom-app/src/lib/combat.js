@@ -1222,10 +1222,18 @@ function checkBattleEnd(battleState) {
 
 function calculateXp(battleState) {
   var xp = 0
+  var hasBoss = false
+  var killedCount = 0
   battleState.enemies.forEach(function(e) {
-    if (e.isDown) xp += e.xp
+    if (e.isDown) {
+      xp += e.xp
+      killedCount++
+      if (e.isBoss) hasBoss = true
+    }
   })
-  xp += 25
+  // Combat bonus: 15 per enemy killed, +75 boss bonus
+  xp += killedCount * 15
+  if (hasBoss) xp += 75
   return xp
 }
 

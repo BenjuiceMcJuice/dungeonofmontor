@@ -82,7 +82,7 @@ function generateBoss(difficulty, archetypeKey, tierKey, bossName) {
   boss.stats.str = boss.stats.str + 2
   boss.stats.def = boss.stats.def + 2
   boss.name = bossName || 'The Unbroken'
-  boss.xp = tier === 'dust' ? 40 : tier === 'slate' ? 60 : tier === 'iron' ? 80 : 100
+  boss.xp = tier === 'dust' ? 80 : tier === 'slate' ? 120 : tier === 'iron' ? 160 : 200
   boss.isBoss = true
   return boss
 }
