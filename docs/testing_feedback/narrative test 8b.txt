@@ -1,0 +1,140 @@
+The wooden creak of the gate echoes through the stillness as you step onto the estate's crumbling driveway. A chill sets in as the grand facade looms above you, its windows like empty eyes staring back.
+MONTOR
+I've been waiting. You're just in time for the garden party.
+Your boots scuff the worn gravel as you look up at the mansion, and the front door creaks ominously open by itself, inviting you in.
+FUCKER
+“Run swiftly into the buildng”
+You burst through the front door, the heavy oak creaking in protest as you leave the chill of the evening behind. You find yourself in a grand foyer, the walls lined with faded portraits of stern-looking ancestors. A chandelier hangs precariously above, its crystals dulled by a thick layer of dust.
+MONTOR
+You're going to need a moment to catch your breath. Don't bother looking for the garden party.
+A faint humming noise begins to vibrate through the floorboards, the sound echoing through the foyer like the reverberation of a distant harp string.
+FUCKER
+“Head towards the humming sound tentatively.”
+As you move cautiously towards the noise, the hum grows louder, weaving a subtle tapestry of vibrations in the stillness.
+d20 — PER
+7 + 1 = 8
+vs DC 11
+FAIL
+You trip on a loose floorboard, stumbling towards the console table with a muffled thud. The box remains stationary, its humming growing louder in your disoriented state.
+MONTOR
+Stupid. You really should watch where you're walking.
+The floorboards beneath you give way to a slight incline, as if the very foundations of the house are shifting, ever so subtly.
+FUCKER
+“Pull the floor board up to try and look underneath.”
+The air is thick with dust as you lift the floorboard, the hinges creaking in protest.
+d20 — AGI
+13 + 1 = 14
+vs DC 11
+SUCCESS
+The dusty space beneath the floorboard is dimly lit, and you notice a tangle of wires and what looks like a forgotten circuit board.
+MONTOR
+You were wondering where the humming noise was coming from.
+A faint smell of burnt electronics wafts up from the depths of the floorboard.
+FUCKER
+“Get my sword and try to cut the wires”
+You grasp the hilt of your sword, the worn leather a reassuring feel in your hand as you prepare to cut through the tangled wires.
+d20 — AGI
+15 + 1 = 16
+vs DC 11
+SUCCESS
+You slice through the wires with a clean, precise motion, and the humming noise begins to falter. The console table's surface begins to glow with a soft, blue light.
+MONTOR
+Maybe now you'll see the garden party.
+A small, almost imperceptible message flickers across the table's surface, reading: ' Warning: containment breach imminent'.
+FUCKER
+“Ignore the warning and walk into garden to look for the party”
+As you step onto the flagstones, the creaking beneath your feet seems to whisper a gentle warning.
+d20 — PER
+10 + 1 = 11
+vs DC 14
+FAIL
+The flagstones beneath your feet give a sudden, jarring lurch, sending you stumbling forward.
+MONTOR
+You really should be more careful where you step.
+A section of nearby hedge bursts into sudden, frantic motion, its tangled branches thrashing wildly.
+FUCKER
+“Draw my sword”
+The silence surrounding your drawn sword is oppressive, the only sound the faint hum of unknown machinery.
+MONTOR
+You think you're prepared, but you have no idea what's waiting for you.
+A faint scratching noise comes from the direction of the pond, as if something is trying to get your attention.
+FUCKER
+“Keep focus on the hedge”
+The sunlight filtering through the hedge seems to grow more hazy, as if the very fabric of reality is beginning to blur.
+d20 — PER
+17 + 1 = 18
+vs DC 11
+SUCCESS
+The hedges appear to be shifting, ever so slightly, as if trying to move away from you.
+MONTOR
+Perhaps now you'll see the garden party for what it truly is.
+A faint, sweet scent wafts from the hedge, drawing your attention to the party.
+FUCKER
+“Head towards the smell”
+The air thickens with the scent, a mix of overripe flowers and decaying leaves.
+d20 — PER
+4 + 1 = 5
+vs DC 11
+FAIL
+The smell hits you like a wave, but instead of beauty, you're overwhelmed by the stench of rot and decay.
+MONTOR
+You really should be more careful what you seek.
+A faint buzzing sound starts to build, like the hum of a swarm of insects.
+FUCKER
+“Ignore and continue to look at hedge”
+The hedge's hazy veil begins to clear, revealing a few inches of withered branches and leaves, which seem to be... watching you.
+MONTOR
+Your gaze is a curiosity, but don't think you'll find any answers here.
+A faint buzzing noise starts to build in intensity, barely audible, but it's definitely getting louder.
+FUCKER
+“Shout ‘hello’ very loudly”
+The air is heavy with anticipation as you prepare to shout.
+d20 — STR
+18 + 1 = 19
+vs DC 11
+SUCCESS
+Your voice echoes through the garden, but instead of silence, it's met with a faint, mocking laugh that seems to come from all directions.
+MONTOR
+Perhaps you'll get a reaction from the real guests.
+A nearby flowerpot suddenly tips over, spilling its contents onto the ground.
+FUCKER
+“Shout hello again”
+The mocking laugh seems to grow louder, echoing off the withered hedges.
+d20 — STR
+11 + 1 = 12
+vs DC 11
+SUCCESS
+Your second shout echoes through the garden, but this time, it's met with an unsettling silence.
+MONTOR
+Perhaps you'll start to realize the garden party is more than just a gathering of guests.
+A faint, flickering candlelight appears on the other side of the hedge, casting eerie shadows on the ground.
+FUCKER
+“Walk through the hedge”
+As you push through the overgrown hedge, the branches seem to writhe and twist around you like living vines.
+d20 — PER
+13 + 1 = 14
+vs DC 14
+SUCCESS
+You find yourself in a small clearing, surrounded by a ring of twisted, dead flowers. The air is heavy with the scent of decay and rot.
+MONTOR
+You're getting close to the heart of the garden's secrets.
+A small, gnarled hand reaches out from the center of the clearing and grasps a nearby flower, pulling it towards you.
+FUCKER
+“Go closer”
+The air seems to thicken around you as you take another step closer.
+d20 — AGI
+2 + 1 = 3
+vs DC 14
+FAIL
+The ground beneath you gives a violent lurch, sending you tumbling to the ground.
+MONTOR
+Foolish knight, trying to rush into the heart of the garden without paying attention.
+A shard of bone sticks out of the earth nearby, pulsing with a faint, eerie glow.
+FUCKER
+“Pick it up”
+The ground beneath you is slick with dew, and your fingers struggle to find purchase as you try to stand.
+MONTOR
+Your clumsiness is almost... predictable.
+A faint humming noise starts to build in the air, like the quiet buzzing of a thousand bees.
+FUCKER
+“More Bees again"?

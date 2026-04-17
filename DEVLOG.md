@@ -177,10 +177,21 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-04-07 | Personality-flavoured whispers (60+ lines, 16 personalities) | ✅ Done |
 | 2026-04-07 | Narrative mode spec + demo campaign + Tavern hub concept | ✅ Done |
 | 2026-04-07 | Stage 2 persistent characters spec written | ✅ Done |
-|            | **Next up** | |
+| 2026-04-09 | **Narrative Mode PoC v1 — Montor's Tale wired through Tavern** — three-tier memory, two-call Groq flow, scene-driven (no grid), 16 personalities, localStorage, free-text input, dice cards, status bar | ✅ Done |
+| 2026-04-09 | **Narrative Mode PoC v2 — scene/montor split + DM proactivity rules + pacing intelligence** — playtest revealed tour-guide problem; rebuilt with required `hook` field, app-side `computePacingState` (quietStreak/pressureTarget/activeThread), Montor locked to `bad_montor` voice, forbidden phrases enforcement, mood-driven escalation flavour | ✅ Done |
+| 2026-04-09 | **Single-call dice flow refactor** — collapsed two-call (assess + narrate) into one `assessAndNarrate` returning both success/fail branches; halves Groq requests, ~33% fewer tokens, halves latency. System prompt trimmed from ~2300 → ~1100 tokens (collapsed voice/DM/dice/safety into unified `MONTOR_CORE_RULES`) | ✅ Done |
+| 2026-04-09 | **Narrative infra hardening** — retry-with-backoff on 429 (max 8s), 25s fetch timeout via AbortController, real error reporting (`getLastGroqError`), in-modal AI key manager, model toggle (70B vs 8B), live error display during busy state | ✅ Done |
+| 2026-04-09 | **PoC v2 playtest verdict** — 70B Montor lands the proactivity rules well but free-tier rate limits are unsustainable for stress testing; 8B is too weak to execute the proactivity rules with depth (hook templates loop, no HP damage, no thread tracking, no mask slips); confirmed model quality matters more than prompt cleverness for narrative games. Logged in `logs/2026-04-09.md` with full diagnosis. | ✅ Done |
+|            | **Next up — pick one (see logs/2026-04-09.md for full options)** | |
+|            | **Option A — wait, continue Groq 70B free tier next day** (zero spend, zero work, fragile to stress testing) | ⬜ |
+|            | **Option B — integrate Anthropic provider (Claude Haiku 4.5) — RECOMMENDED.** $5 spend, ~30-45 min code, much better fit for narrative game | ⬜ |
+|            | Option C — wait for Groq dev tier (currently waitlisted) and pay Groq $5 | ⬜ |
+|            | Option D — skip ahead to multiplayer architecture (shared keys = scaling answer) | ⬜ |
+|            | Option E — stop and rethink the design (e.g. scene-pack hybrid, GM-assist mode) | ⬜ |
 |            | Tavern hub + Stage 2 persistent characters (foundation for both modes) | ⬜ |
 |            | Wire The Crawl (roguelike) through Tavern | ⬜ |
-|            | Wire The Tale (narrative mode) through Tavern | ⬜ |
+|            | Narrative Mode Phase 1 polish — chapter summaries, structured combat, item tables | ⬜ |
+|            | Narrative Mode Phase 2 — multiplayer with shared keys (the genuine scaling answer) | ⬜ |
 |            | Enemy variety + boss abilities | ⬜ |
 |            | Floor-scaled enemy conditions (deeper = nastier) | ⬜ |
 |            | Junk offload rooms + junk-scaling items (spec written) | ⬜ |

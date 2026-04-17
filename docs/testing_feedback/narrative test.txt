@@ -1,0 +1,33 @@
+MONTOR: Ah, welcome, welcome, welcome to our little estate, a real gem, if I do say so myself. You see, as you step through these gorgeous, old gates, you can't help but notice the charm that permeates every inch of this place. The garden, a bit overgrown, perhaps, but that just adds to its character, don't you think? The smell of old soil and blooming flowers hits you right away, and on a day like today, with the sun shining down, it's just perfect. 
+MONTOR: As you look around, you notice the mansion in the distance, a beautiful, sprawling affair with ivy crawling up its walls and windows that seem to stare out like empty eyes. You can hear the distant sounds of birds chirping and the faint rustling of leaves in the gentle breeze. It's all so peaceful, so serene. 
+MONTOR: But, if you listen closely, beneath the peaceful sounds, you might just catch the faint whisper of... squeaking? Yes, squeaking, like the sound of small wheels turning or perhaps a tiny, unseen door creaking open and shut. It's faint, almost imperceptible, but it's there, lingering just beneath the surface of this serene scene. 
+MONTOR: And now, as you stand here, taking it all in, the question becomes, what do you do next? The gates are open, the path unwinds before you, and the house waits, its doors slightly ajar, as if expecting you. The estate, full of secrets and stories, stretches out before you like an open book, ready to be explored.
+ASHSLUG
+“I wanna sit down and contemplate where I am for 5mins”
+MONTOR: As you sit, the silence begins to reveal its own rhythms, and you might just catch the faint sound of... running water? Yes, there's a small pond not too far from here, a lovely spot, really. My sister used to spend hours by that pond, just sitting and... well, doing whatever it is she does.
+ASHSLUG
+“Wander nonchalantly over to the pond to have a look”
+MONTOR: Ah, the pond, yes, a lovely spot, really. You wander nonchalantly over, and as you approach, you notice the water's edge is lined with large stones, some of which have moss growing on them, and a few have little patches of colorful flowers. The sound of running water grows louder, and you see that the pond is fed by a small, babbling brook that winds its way through the garden.
+ASHSLUG
+“Pick up a stone and throw into the water.”
+You pick up a stone and throw it into the water, watching as the ripples spread out across the pond's surface. _The sunlight catches the tiny waves, creating a dazzling display of light and color._ The sound of the stone hitting the water is almost musical, a sharp crack that echoes through the air.
+ASHSLUG
+“Ok”
+You stand there, taking in the serenity of the pond, the sound of the brook, and the gentle rustle of the leaves in the breeze. _The atmosphere is peaceful, with the warm sunlight casting a comforting glow over the entire scene._ As you breathe in, you notice the air is filled with the sweet scent of blooming flowers and the earthy smell of the pond's edge.
+ASHSLUG
+“That’s nice”
+MONTOR: Ah, yes, isn't it just? The pond has a way of soothing the soul, and I'm glad you're appreciating its tranquility. You see, my sister used to come here to think, to clear her mind, and I must say, it seems to have the same effect on you.
+ASHSLUG
+“And what of it?”
+MONTOR: Ah, yes, well, my sister's activities by the pond are a bit of a mystery, even to me. You see, she'd often come here to, as I said, clear her mind, but I think she was also searching for something, or perhaps waiting for something. The pond seems to have a calming effect on those who visit it, but I've always felt there's something more to it, something just beneath the surface.
+ASHSLUG
+“Jumps into pond”
+You leap into the air, and for a moment, you're suspended above the pond's surface, the water's edge rushing up to meet you. The sunlight catches your descent, casting a brief, shimmering glow across the ripples.
+d20 — AGI
+9 + 1 = 10
+vs DC 11
+FAIL
+MONTOR: Ah, well, I suppose that was one way to get a closer look at the pond's depths. I do hope you're not planning on making a habit of this sort of thing. _The sound of your splashing has disturbed the peaceful atmosphere, and the birds have stopped singing._
+ASHSLUG
+“That’s a shame”
+MONTOR: Ah, yes, the serenity of the pond is quite fragile, isn't it? Your sudden jump into the water has indeed disturbed the peaceful atmosphere, and the birds have stopped singing. You see, my family has always been a bit... eccentric, and I'm starting to think that perhaps we've all been a bit too reckless with the estate's natural beauty

@@ -33,7 +33,7 @@ var ARRIVE_LINES = {
   ],
 }
 
-function Tavern({ user, characters, onCreateCharacter, onSelectCharacter, onResumeRun, onDeleteCharacter, onSignOut, activeRuns, returnContext }) {
+function Tavern({ user, characters, onCreateCharacter, onSelectCharacter, onResumeRun, onDeleteCharacter, onSignOut, activeRuns, returnContext, onEnterNarrative }) {
   var [phase, setPhase] = useState(returnContext ? 'arrive' : 'characters') // arrive | characters | gameMode
   var [selectedCharId, setSelectedCharId] = useState(null)
   var [creating, setCreating] = useState(false)
@@ -148,27 +148,28 @@ function Tavern({ user, characters, onCreateCharacter, onSelectCharacter, onResu
             </span>
           </button>
 
-          {/* Montor's Tale — coming soon */}
-          <div style={{
-            background: '#0a0812', border: '2px dashed #2a1a30', borderRadius: '8px',
-            padding: '20px', opacity: 0.4, position: 'relative',
-          }}>
-            <span style={{ fontFamily: pixelFont, fontSize: '13px', color: '#8b7b60', display: 'block', marginBottom: '8px' }}>
+          {/* Montor's Tale — narrative mode (PoC) */}
+          <button onClick={function() { if (onEnterNarrative) onEnterNarrative() }}
+            style={{
+              background: '#0a0812', border: '2px solid #7a3a9a', borderRadius: '8px',
+              padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%', position: 'relative',
+            }}>
+            <span style={{ fontFamily: pixelFont, fontSize: '13px', color: '#d4a017', display: 'block', marginBottom: '8px' }}>
               Montor's Tale
             </span>
-            <span style={{ fontFamily: displayFont, fontSize: '14px', color: '#8b7b60', fontStyle: 'italic', display: 'block', marginBottom: '6px' }}>
+            <span style={{ fontFamily: displayFont, fontSize: '14px', color: '#d4c8a0', fontStyle: 'italic', display: 'block', marginBottom: '6px' }}>
               Montor narrates your story. You make the choices.
             </span>
-            <span style={{ fontFamily: uiFont, fontSize: '11px', color: '#5a4a50' }}>
-              D&D-style campaign — level, gear, and gold persist between sessions
+            <span style={{ fontFamily: uiFont, fontSize: '11px', color: '#8b7b60' }}>
+              D&D-style campaign — Montor is your DM. Type any action. The dice fall.
             </span>
             <span style={{
-              fontFamily: uiFont, fontSize: '9px', color: '#5a4a60', textTransform: 'uppercase',
+              fontFamily: uiFont, fontSize: '9px', color: '#c06ee0', textTransform: 'uppercase',
               letterSpacing: '2px', position: 'absolute', top: '12px', right: '12px',
             }}>
-              COMING SOON
+              WORK IN PROGRESS
             </span>
-          </div>
+          </button>
 
           {/* Montor's Party — coming soon */}
           <div style={{
