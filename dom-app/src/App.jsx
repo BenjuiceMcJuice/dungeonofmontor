@@ -9,6 +9,7 @@ import Tavern from './pages/Tavern.jsx'
 import Game from './pages/Game.jsx'
 import Results from './pages/Results.jsx'
 import Preparation from './pages/Preparation.jsx'
+import Narrative from './pages/Narrative.jsx'
 import LandingScene from './components/LandingScene.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './App.css'
@@ -17,7 +18,7 @@ import './App.css'
 function App() {
   var { user, loading, error, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } = useAuth()
 
-  var [screen, setScreen] = useState('loading') // loading | landing | tavern | prep | game | results
+  var [screen, setScreen] = useState('loading') // loading | landing | tavern | prep | game | results | narrative
   var [characters, setCharacters] = useState([])
   var [selectedCharId, setSelectedCharId] = useState(null)
   var [character, setCharacter] = useState(null)
@@ -151,6 +152,14 @@ function App() {
     handleCreateCharacter(name, 'knight')
   }
 
+  function handleEnterNarrative() {
+    setScreen('narrative')
+  }
+
+  function handleExitNarrative() {
+    setScreen('tavern')
+  }
+
   function handleSignOut() {
     setScreen('loading')
     setCharacters([])
@@ -164,7 +173,7 @@ function App() {
 
   // --- Rendering ---
 
-  if (loading || screen === 'loading' || charsLoading) {
+  if (loading || (user && (screen === 'loading' || charsLoading))) {
     return (
       <div className="min-h-svh flex items-center justify-center">
         <span className="text-ink-faint text-sm">Loading...</span>
@@ -203,8 +212,14 @@ function App() {
         onResumeRun={handleResumeRun}
         onDeleteCharacter={handleDeleteCharacter}
         onSignOut={handleSignOut}
+        onEnterNarrative={handleEnterNarrative}
       />
     )
+  }
+
+  // Narrative Mode — Montor's Tale (PoC)
+  if (screen === 'narrative') {
+    return <Narrative onExit={handleExitNarrative} />
   }
 
   // Preparation
@@ -259,6 +274,7 @@ function App() {
       onResumeRun={handleResumeRun}
       onDeleteCharacter={handleDeleteCharacter}
       onSignOut={handleSignOut}
+      onEnterNarrative={handleEnterNarrative}
     />
   )
 }

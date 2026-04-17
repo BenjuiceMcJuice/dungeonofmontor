@@ -1,5 +1,84 @@
 # Narrative Mode — Montor as Dungeon Master
 
+> **Status (2026-04-09):** PoC v2 built and playtested. Architecture validated. Blocked on Groq free-tier rate limits for further testing. Pick-up options in `logs/2026-04-09.md` and DEVLOG. See "PoC v1/v2 Implementation Notes" section below for what changed since this spec was first written.
+
+## PoC v1/v2 Implementation Notes (2026-04-09)
+
+This section captures the architectural decisions made during the first build and playtest. The original spec below is still the vision; this section is what's actually implemented and what we learned.
+
+### What's built and working
+- **Three-tier memory** — Tier 1 (~1100 hard-coded tokens: theme, voice, DM rules, dice, safety), Tier 2 (campaign summary growing as the campaign evolves), Tier 3 (last 12 messages raw).
+- **Single-call action flow** (replaced the originally specced two-call): one Groq call per player action returning either `{ needsRoll: false, scene, montor, hook, ...consequence }` or `{ needsRoll: true, stat, dc, narrateBefore, success: {...}, fail: {...} }`. App rolls dice locally and picks the matching pre-generated branch. Half the requests, half the latency, ~33% fewer total tokens vs the originally specced two-call.
+- **Scene/Montor/Hook contract** — every narration response is split into three structurally enforced fields:
+  - `scene` (REQUIRED) — DM-mode atmospheric description, present tense, second person, italic Goudy in the UI, no label
+  - `montor` (OPTIONAL) — first-person Montor speech, only when he speaks, labelled MONTOR in pixel-purple, soft purple body
+  - `hook` (REQUIRED) — one concrete event/change that demands a reaction, gold-accent italic block, the lever that prevents tour-guide drift
+- **App-side pacing intelligence** — `computePacingState(campaign)` walks recent messages to derive `quietStreak` (consecutive low-stakes turns), `pressureTarget` (low/medium/high), `activeThread` (which open thread the player is touching), `playerEngagement` (active/passive). `buildPacingDirective(pacing)` injects a dynamic instruction at the END of every Groq user message. Key insight: **app does the deciding, LLM does the generating.**
+- **Required-field consequence tracking** — each narration message stores `{ scene, montor, hook, consequence }` so pacing logic can read history. Consequences applied: `hpChange`, `itemGained`, `moodShift`, `feelingsShift`, `newThreads`, `loreDiscovery`.
+- **Forbidden phrases enforcement** — hard list in Tier 1: "what do you do", "the choice is yours", "the path stretches before you", "what next", "the question becomes", "as you stand there", "ready to be explored", "isn't it lovely". Replace with a hook.
+- **Dice flow** — d20 + stat mod vs DC. Stats: STR/AGI/DEF/END/INT/WIS/PER/LCK/CHA/VIT. DCs: 8/11/14/17. App rolls, never the AI. Branches pre-generated for success/fail. Crit success/crit fail handled by the dice card label, not by separate branches (good enough for PoC; can split into 4 branches later if needed).
+
+### What's NOT built yet (deferred)
+- **Personality picker — locked to `bad_montor`.** Other 16 personalities marked DEPRECATED in `PERSONALITY_DESCS`. The picker re-enables when we have time to write proper escalation flavours per personality.
+- **No 4×4 grid, no tile navigation, no "go north".** Scenes are theme-driven, not tile-driven. The 7 acts (Grounds → Domain) advance when the story earns it, not when a tile is exited. **The dungeon is a *theme*, not a grid.** This is a permanent design decision, not a deferral.
+- **No structured combat.** Combat is currently freeform narrated rolls — Groq calls for STR/AGI/etc and damage is via the consequence fields. Initiative system, turn order, enemy turns deferred to Phase 1 polish.
+- **No chapter summary auto-generation.** `generateChapterSummary()` is wired but not auto-triggered. PoC sessions are short enough Tier 2 doesn't grow unmanageably yet. Will need to be wired before sessions get longer.
+- **No `items.json` integration.** Groq invents items rather than pulling from real loot tables. Phase 1 polish.
+- **No act-progression triggers.** Groq is told about the 7 acts but no mechanism advances them yet. Phase 1 polish.
+- **No multiplayer or Firestore campaigns.** Solo localStorage only. See "Phase 2 architecture revision" below.
+- **No structured combat scaling, no boss fights, no party-side initiative.** All deferred.
+
+### Model selection
+The PoC supports a user-toggleable model (`getNarrativeModel()` / `setNarrativeModel()` in localStorage). Currently two options:
+- `llama-3.3-70b-versatile` (Groq) — default, best quality, tight free-tier rate limits
+- `llama-3.1-8b-instant` (Groq) — rate-limit escape hatch, **confirmed too weak to execute the proactivity rules with depth**
+
+**Playtest finding (8b):** structurally correct (scene/montor/hook all rendered, dice flow worked) but content-shallow (hook templates looped, no HP damage despite explicit instructions, no thread tracking, no mask slips, repetitive mockery). 8b can hit the form but not the substance.
+
+**Strong recommendation for the next phase:** add **Anthropic Claude Haiku 4.5** as a third provider option. Claude is significantly better at:
+- Following complex layered instructions (DM proactivity rules, forbidden phrases, mask-slip mechanics)
+- Narrative depth and character voice
+- Tracking open story threads across long contexts
+- Generating varied prose under structural constraints
+
+Lift to integrate: ~30-45 minutes. Wrap the Anthropic API call alongside the Groq call, switch on provider in `callLLM()`, update the model picker UI to be a `provider × model` picker. Each provider has its own API key in localStorage. The user pays Anthropic separately (~$5 starter credit lasts weeks of testing).
+
+### Phase 2 architecture revision — multiplayer with shared keys
+The original spec described multiplayer as "campaign creation, async message feed, multiple players in same story". This is correct but understated.
+
+**Key insight from the PoC:** the shared-keys multiplayer model is not just a feature, it's the **scaling answer** for the entire game economy.
+
+- Each player brings their own LLM API key (Groq or Anthropic)
+- The expensive 70b/Haiku model becomes viable for parties on free tier because rate limits are distributed across N accounts
+- The AI response is computed once by whoever's turn it is and written to Firestore
+- All players read from the shared message stream — they all see the same Montor response regardless of who paid the token cost
+- Solo play stays cheap (~$5 covers hundreds of sessions on either provider)
+- A 4-player party effectively gets 4× the rate-limit budget for free
+
+This should be the official Phase 2 architecture. The original spec's `participants: [{uid, name, character}]` model is correct; the **per-player API key distribution** is the load-balancing layer that makes it sustainable.
+
+### Lessons learned (write these into Phase 1 polish work)
+1. **Voice rules without proactivity rules produce a tour guide, not a DM.** The model defaults to "describe a peaceful place and wait" unless explicitly told to make things happen TO the player.
+2. **App-side state, LLM-side generation.** Pacing decisions belong in deterministic app code, not in the model.
+3. **Required JSON fields shape output more than instructions do.** The `hook` field is the single biggest lever in the entire system.
+4. **Model quality matters more than prompt cleverness for narrative games.** Strong prompts on a weak model lose to mediocre prompts on a strong model.
+5. **Single-call beats two-call.** Less latency, fewer requests, simpler architecture. Two-call was an over-cautious early choice.
+6. **Rate limits are per-account not per-key.** Different keys/projects on the same provider account share the same pool.
+7. **Free tier ≠ stress-test tier.** Free is fine for actual play (where the player reads/thinks between actions); it's not fine for rapid testing.
+8. **Failed rolls must have CONCRETE consequences** (HP, items, threads, mood) not aesthetic ones. Aesthetic-only failures train the player that nothing matters.
+
+### Files implemented
+- `dom-app/src/lib/narrative.js` — engine (prompts, pacing, single-call flow, error handling, model toggle)
+- `dom-app/src/lib/narrativeStorage.js` — localStorage persistence
+- `dom-app/src/hooks/useNarrativeCampaign.js` — campaign state hook
+- `dom-app/src/components/narrative/NarrativeFeed.jsx` — message feed
+- `dom-app/src/components/narrative/NarrativeInput.jsx` — action input
+- `dom-app/src/components/narrative/NarrativeStatusBar.jsx` — top status bar
+- `dom-app/src/pages/Narrative.jsx` — page (setup screen + active campaign + AI manager modal)
+- Wired through `dom-app/src/App.jsx` and `dom-app/src/pages/Tavern.jsx` ("Montor's Tale" tile)
+
+---
+
 ## Concept
 A text-based RPG campaign played asynchronously by 1-4 friends over days/weeks. Montor IS the dungeon master — he narrates, reacts, sets scenes, controls enemies, and judges dice rolls. Same dungeon, same items, same lore — but experienced through rich AI-generated narrative instead of the combat grid.
 
