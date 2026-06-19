@@ -62,6 +62,7 @@ function ModelPicker() {
 
 function SetupScreen({ onStart, busy, error, defaultName }) {
   var [name, setName] = useState(defaultName || '')
+  var [brief, setBrief] = useState('')
   var hasKey = hasGroqKey()
 
   return (
@@ -85,7 +86,7 @@ function SetupScreen({ onStart, busy, error, defaultName }) {
         marginBottom: '14px',
       }}>
         <p style={{ fontFamily: uiFont, fontSize: '12px', color: hasKey ? '#8b7b60' : '#d4a847', marginBottom: '10px' }}>
-          {hasKey ? 'Groq API key is set. Tap to manage.' : 'Narrative Mode needs a Groq API key.'}
+          {hasKey ? 'Claude API key is set. Tap to manage.' : 'Narrative Mode needs a Claude API key.'}
         </p>
         <GroqKeyInput />
       </div>
@@ -113,12 +114,32 @@ function SetupScreen({ onStart, busy, error, defaultName }) {
           }}
         />
 
+        <p style={{ fontFamily: displayFont, fontSize: '14px', color: '#8b5e3c', fontStyle: 'italic', marginBottom: '8px' }}>
+          What kind of story?
+        </p>
+        <p style={{ fontFamily: uiFont, fontSize: '10px', color: '#5a4a60', marginBottom: '8px', lineHeight: '1.5' }}>
+          Set a tone, a goal, a backstory. Montor will honour this throughout.
+        </p>
+        <textarea
+          value={brief}
+          onChange={function(e) { setBrief(e.target.value) }}
+          placeholder="e.g. Gothic horror — I want to find out what happened to the castle family. Or: fast and brutal, no mercy."
+          rows={3}
+          style={{
+            fontFamily: uiFont, fontSize: '13px', background: '#060410',
+            border: '2px solid #2a1a30', borderBottom: '2px solid #7a3a9a',
+            color: '#d4c8a0', padding: '10px 12px', outline: 'none',
+            borderRadius: '4px', width: '100%', boxSizing: 'border-box',
+            marginBottom: '16px', resize: 'none', lineHeight: '1.5',
+          }}
+        />
+
         <p style={{ fontFamily: uiFont, fontSize: '11px', color: '#5a4a60', marginBottom: '14px', lineHeight: '1.5' }}>
           Montor is the dungeon lord — theatrical, dangerous, and watching. He is not your friend.
         </p>
 
         <button
-          onClick={function() { onStart(name) }}
+          onClick={function() { onStart(name, brief) }}
           disabled={busy || !hasKey}
           style={{
             fontFamily: uiFont, fontSize: '13px',
@@ -140,7 +161,7 @@ function SetupScreen({ onStart, busy, error, defaultName }) {
         )}
         {busy && !error && (
           <p style={{ fontFamily: uiFont, fontSize: '10px', color: '#5a4a60', marginTop: '10px', textAlign: 'center' }}>
-            Sending request to Groq... if this hangs, check the browser console.
+            Sending request to Claude... if this hangs, check the browser console.
           </p>
         )}
       </div>
@@ -263,7 +284,7 @@ function Narrative({ onExit }) {
               MONTOR AI
             </p>
             <p style={{ fontFamily: uiFont, fontSize: '11px', color: '#8b7b60', marginBottom: '14px', lineHeight: '1.5' }}>
-              Manage your Groq API key and pick a model. If you're rate limited on 70B, switch to 8B.
+              Manage your Claude API key and pick a model. Switch to Haiku for speed, Opus for depth.
             </p>
             <GroqKeyInput />
             <div style={{ marginTop: '14px' }}>

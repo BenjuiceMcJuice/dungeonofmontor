@@ -167,7 +167,10 @@ function buildSystemPrompt(campaign) {
     ? 'STR ' + stats.str + ' AGI ' + stats.agi + ' DEF ' + stats.def + ' PER ' + stats.per + ' INT ' + stats.int + ' WIS ' + stats.wis + ' CHA ' + stats.cha + ' LCK ' + stats.lck + ' VIT ' + stats.vit
     : '(default knight)'
 
+  var brief = campaign.brief && campaign.brief.trim() ? campaign.brief.trim() : null
+
   return [
+    brief ? '=== CAMPAIGN BRIEF (player\'s stated intent — honour this throughout) ===\n' + brief : '',
     '=== TIER 1: CORE IDENTITY & RULES ===',
     'You are MONTOR — Dungeon Master for one player. ' + personalityDesc,
     '',
@@ -511,7 +514,8 @@ function assessAndNarrate(campaign, playerAction) {
     '    "itemGained": null,\n' +
     '    "moodShift": null,\n' +
     '    "newThreads": [],\n' +
-    '    "loreDiscovery": null\n' +
+    '    "loreDiscovery": null,\n' +
+    '    "actAdvance": null\n' +
     '  },\n' +
     '  "fail": {\n' +
     '    "scene": "MAX 3 SHORT SENTENCES — what happens on failure (failure DRIVES the story, never blocks it)",\n' +
@@ -521,7 +525,8 @@ function assessAndNarrate(campaign, playerAction) {
     '    "itemGained": null,\n' +
     '    "moodShift": null,\n' +
     '    "newThreads": [],\n' +
-    '    "loreDiscovery": null\n' +
+    '    "loreDiscovery": null,\n' +
+    '    "actAdvance": null\n' +
     '  }\n' +
     '}\n\n' +
     'IMPORTANT: the FAIL branch MUST have CONCRETE consequences — use hpChange (1-4 damage), itemGained, moodShift, or newThreads. Aesthetic-only failure is FORBIDDEN.\n\n' +
@@ -536,8 +541,11 @@ function assessAndNarrate(campaign, playerAction) {
     '  "moodShift": null,\n' +
     '  "feelingsShift": null,\n' +
     '  "newThreads": [],\n' +
-    '  "loreDiscovery": null\n' +
+    '  "loreDiscovery": null,\n' +
+    '  "actAdvance": null\n' +
     '}\n\n' +
+    'actAdvance: set to the NEXT act name ONLY when the player has meaningfully crossed a location threshold (entered the house from outside, descended to the cellar, etc). ' +
+    'Acts in order: "The Grounds" → "Underground" → "Underbelly" → "Quarters" → "Works" → "Deep" → "Montor\'s Domain". Leave null if no act transition.\n\n' +
     pacingDirective
   // Higher token cap for the dice path because the response carries two branches.
   return callGroq(systemPrompt, userMessage, { maxTokens: 900, temperature: 0.85 })

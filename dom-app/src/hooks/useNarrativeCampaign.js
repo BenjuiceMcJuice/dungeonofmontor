@@ -4,7 +4,7 @@
 // Wraps the two-call Groq flow so components only call takeAction(text).
 
 import { useState, useEffect, useRef } from 'react'
-import { generateOpeningScene, assessAndNarrate, getLastGroqError } from '../lib/narrative.js'
+import { generateOpeningScene, assessAndNarrate, generateChapterSummary, getLastGroqError } from '../lib/narrative.js'
 import { saveCampaign, loadCampaign, clearCampaign } from '../lib/narrativeStorage.js'
 import { d20Check } from '../lib/dice.js'
 import { getModifier } from '../lib/classes.js'
@@ -110,16 +110,42 @@ function useNarrativeCampaign() {
       next.keyDecisions = (c.keyDecisions || []).concat([payload.loreDiscovery]).slice(-20)
       changed = true
     }
+    if (payload.actAdvance) {
+      next.currentAct = payload.actAdvance
+      changed = true
+    }
 
     if (changed) next.character = character
     return next
+  }
+
+  // After every 12 player actions, compress history: summarise, trim messages to last 6.
+  // Fires async in the background — campaign is already persisted; we update again when done.
+  function maybeCompressCampaign(c) {
+    var playerCount = (c.messages || []).filter(function(m) { return m.type === 'player_action' }).length
+    if (playerCount === 0 || playerCount % 12 !== 0) return
+
+    generateChapterSummary(c).then(function(summary) {
+      if (!summary) return
+      setCampaign(function(prev) {
+        if (!prev) return prev
+        var trimmed = (prev.messages || []).slice(-6)
+        return Object.assign({}, prev, {
+          chapterSummaries: (prev.chapterSummaries || []).concat([summary]),
+          messages: trimmed,
+          updatedAt: Date.now(),
+        })
+      })
+    }).catch(function(e) {
+      console.warn('[useNarrativeCampaign] chapter summary failed:', e)
+    })
   }
 
   // ── Public API ──
 
   // Start a brand new campaign. Wipes any existing one.
   // PoC v1 — personality is locked to bad_montor regardless of input.
-  function startCampaign(characterName /*, personalityId — ignored in PoC v1 */) {
+  function startCampaign(characterName, brief /*, personalityId — ignored in PoC v1 */) {
     setError(null)
     setBusy(true)
 
@@ -135,6 +161,7 @@ function useNarrativeCampaign() {
         maxHp: maxHp,
       },
       personality: { id: 'bad_montor' },
+      brief: (brief && brief.trim()) || '',
       mood: 'neutral',
       feelingsAboutPlayer: 'curious — a new visitor has arrived',
       currentAct: 'The Grounds',
@@ -214,6 +241,7 @@ function useNarrativeCampaign() {
         ])
         c1 = applyConsequences(c1, result)
         setCampaign(c1)
+        maybeCompressCampaign(c1)
         setBusy(false)
         return c1
       }
@@ -286,6 +314,7 @@ function useNarrativeCampaign() {
     withRoll = appendMessages(withRoll, [outcomeMsg])
     var c2 = applyConsequences(withRoll, branch)
     setCampaign(c2)
+    maybeCompressCampaign(c2)
     setPendingRoll(null)
   }
 
