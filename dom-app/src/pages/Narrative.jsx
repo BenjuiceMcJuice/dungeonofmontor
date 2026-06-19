@@ -8,6 +8,7 @@ import { hasClaudeKey as hasGroqKey } from '../lib/claude.js'
 import GroqKeyInput from '../components/GroqKeyInput.jsx'
 import NarrativeFeed from '../components/narrative/NarrativeFeed.jsx'
 import NarrativeInput from '../components/narrative/NarrativeInput.jsx'
+import NarrativeDiceCard from '../components/narrative/NarrativeDiceCard.jsx'
 import NarrativeStatusBar from '../components/narrative/NarrativeStatusBar.jsx'
 import { MODEL_OPTIONS, getNarrativeModel, setNarrativeModel } from '../lib/narrative.js'
 
@@ -236,6 +237,13 @@ function Narrative({ onExit }) {
             Begin Again
           </button>
         </div>
+      ) : nc.pendingRoll ? (
+        <NarrativeDiceCard
+          stat={nc.pendingRoll.stat}
+          dc={nc.pendingRoll.dc}
+          modifier={nc.pendingRoll.modifier}
+          onCommit={nc.commitRoll}
+        />
       ) : (
         <NarrativeInput onSubmit={nc.takeAction} disabled={nc.busy} />
       )}

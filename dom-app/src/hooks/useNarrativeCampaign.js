@@ -50,7 +50,11 @@ function useNarrativeCampaign() {
   var [campaign, setCampaign] = useState(null)
   var [busy, setBusy] = useState(false)
   var [error, setError] = useState(null)
+  var [pendingRoll, setPendingRoll] = useState(null) // { stat, dc, modifier, successBranch, failBranch, baseState }
   var campaignRef = useRef(null)
+  var pendingRollRef = useRef(null)
+
+  useEffect(function() { pendingRollRef.current = pendingRoll }, [pendingRoll])
 
   // Keep ref synced for async callbacks that need the latest state.
   useEffect(function() { campaignRef.current = campaign }, [campaign])
@@ -214,54 +218,36 @@ function useNarrativeCampaign() {
         return c1
       }
 
-      // === Dice path — app rolls locally and picks the matching pre-generated branch ===
+      // === Dice path — pause and wait for player to tap the die ===
       var stat = (result.stat || 'lck').toLowerCase()
       var dc = Math.max(5, Math.min(20, parseInt(result.dc, 10) || 11))
       var statValue = (current.character.stats && current.character.stats[stat]) || 10
       var modifier = getModifier(statValue)
-      var rollRes = d20Check(modifier, dc)
-      var rollDetails = {
-        stat: stat,
-        roll: rollRes.roll,
-        modifier: modifier,
-        total: rollRes.total,
-        dc: dc,
-        success: rollRes.success,
-        crit: rollRes.crit,
-        fumble: rollRes.fumble,
-      }
 
-      // Pick the branch matching the dice result.
-      var branch = rollRes.success ? result.success : result.fail
-      if (!branch || (!branch.scene && !branch.montor)) {
+      if (!result.success || !result.fail) {
         setError('Montor returned a roll without proper branches. Try again.')
         setBusy(false)
         return null
       }
 
-      var withRoll = withAction
-      // Pre-roll atmosphere (no consequences).
+      // Show narrateBefore in the feed, then surface the interactive dice card.
+      var withBefore = withAction
       if (result.narrateBefore) {
-        withRoll = appendMessages(withRoll, [
+        withBefore = appendMessages(withBefore, [
           makeMessage('narration', '', { scene: result.narrateBefore, montor: '', hook: '', consequence: null }),
         ])
       }
-      // Dice card.
-      withRoll = appendMessages(withRoll, [
-        makeMessage('dice_roll', '', { dice: rollDetails }),
-      ])
-      // Outcome narration from the chosen branch.
-      var outcomeMsg = makeMessage('narration', '', {
-        scene: branch.scene || '',
-        montor: branch.montor || '',
-        hook: branch.hook || '',
-        consequence: extractConsequence(branch),
+      setCampaign(withBefore)
+      setPendingRoll({
+        stat: stat,
+        dc: dc,
+        modifier: modifier,
+        successBranch: result.success,
+        failBranch: result.fail,
+        baseState: withBefore,
       })
-      withRoll = appendMessages(withRoll, [outcomeMsg])
-      var c2 = applyConsequences(withRoll, branch)
-      setCampaign(c2)
       setBusy(false)
-      return c2
+      return null
     }).catch(function(e) {
       console.warn('[useNarrativeCampaign] takeAction failed:', e)
       setError('Action failed. ' + (e && e.message ? e.message : ''))
@@ -270,9 +256,43 @@ function useNarrativeCampaign() {
     })
   }
 
+  // Called by NarrativeDiceCard after the player taps and the animation completes.
+  // rollRes is the result from d20Check() computed in the UI.
+  function commitRoll(rollRes) {
+    var pending = pendingRollRef.current
+    if (!pending || !rollRes) return
+
+    var rollDetails = {
+      stat: pending.stat,
+      roll: rollRes.roll,
+      modifier: pending.modifier,
+      total: rollRes.total,
+      dc: pending.dc,
+      success: rollRes.success,
+      crit: rollRes.crit,
+      fumble: rollRes.fumble,
+    }
+
+    var branch = rollRes.success ? pending.successBranch : pending.failBranch
+    var withRoll = appendMessages(pending.baseState, [
+      makeMessage('dice_roll', '', { dice: rollDetails }),
+    ])
+    var outcomeMsg = makeMessage('narration', '', {
+      scene: branch.scene || '',
+      montor: branch.montor || '',
+      hook: branch.hook || '',
+      consequence: extractConsequence(branch),
+    })
+    withRoll = appendMessages(withRoll, [outcomeMsg])
+    var c2 = applyConsequences(withRoll, branch)
+    setCampaign(c2)
+    setPendingRoll(null)
+  }
+
   function endCampaign() {
     clearCampaign()
     setCampaign(null)
+    setPendingRoll(null)
     setError(null)
   }
 
@@ -280,8 +300,10 @@ function useNarrativeCampaign() {
     campaign: campaign,
     busy: busy,
     error: error,
+    pendingRoll: pendingRoll,
     startCampaign: startCampaign,
     takeAction: takeAction,
+    commitRoll: commitRoll,
     endCampaign: endCampaign,
   }
 }
