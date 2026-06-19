@@ -150,6 +150,17 @@ function getPersonalityDesc(id) {
   return PERSONALITY_DESCS[id] || PERSONALITY_DESCS.estate_agent
 }
 
+var NARRATIVE_ARC =
+  '=== NARRATIVE ARC ===\n' +
+  'The estate hides 6 family objects of deep sentimental significance to Montor, scattered across the acts. ' +
+  'Each one contains something he can sense but cannot name — a wrongness, a presence that got in. He does not know how or why.\n' +
+  'The objects: a gnome called Gerald (The Grounds), a gravy boat (Underground), a toilet seat (Underbelly), ' +
+  'a music box (Quarters), a pair of tongs (Works), a night light (Deep).\n' +
+  'Gerald is in The Grounds and must NEVER be touched — Montor\'s rule is absolute.\n' +
+  'The player\'s journey is discovery: what these objects are, what the family was, what Montor is, ' +
+  'and what the power inside the objects means. There is no predetermined ending — let the story find its own resolution.\n' +
+  'Do not reveal all objects at once. Introduce them naturally as the player moves deeper.'
+
 // === SYSTEM PROMPT BUILDER (Tier 1 + Tier 2) ===
 
 function buildSystemPrompt(campaign) {
@@ -172,10 +183,8 @@ function buildSystemPrompt(campaign) {
     ? 'STR ' + stats.str + ' AGI ' + stats.agi + ' DEF ' + stats.def + ' PER ' + stats.per + ' INT ' + stats.int + ' WIS ' + stats.wis + ' CHA ' + stats.cha + ' LCK ' + stats.lck + ' VIT ' + stats.vit
     : '(default knight)'
 
-  var brief = campaign.brief && campaign.brief.trim() ? campaign.brief.trim() : null
-
   return [
-    brief ? '=== CAMPAIGN BRIEF (player\'s stated intent — honour this throughout) ===\n' + brief : '',
+    NARRATIVE_ARC,
     '=== TIER 1: CORE IDENTITY & RULES ===',
     'You are MONTOR — Dungeon Master for one player. ' + personalityDesc,
     '',

@@ -60,7 +60,6 @@ function ModelPicker() {
 
 function SetupScreen({ onStart, busy, error, defaultName }) {
   var [name, setName] = useState(defaultName || '')
-  var [brief, setBrief] = useState('')
   var hasKey = hasGroqKey()
 
   return (
@@ -110,32 +109,12 @@ function SetupScreen({ onStart, busy, error, defaultName }) {
           }}
         />
 
-        <p style={{ fontFamily: displayFont, fontSize: '14px', color: '#9a8a68', fontStyle: 'italic', marginBottom: '8px' }}>
-          What kind of story?
-        </p>
-        <p style={{ fontFamily: uiFont, fontSize: '10px', color: '#6a5e48', marginBottom: '8px', lineHeight: '1.5' }}>
-          Set a tone, a goal, a backstory. Montor will honour this throughout.
-        </p>
-        <textarea
-          value={brief}
-          onChange={function(e) { setBrief(e.target.value) }}
-          placeholder="e.g. Gothic horror — I want to find out what happened to the castle family. Or: fast and brutal, no mercy."
-          rows={3}
-          style={{
-            fontFamily: uiFont, fontSize: '13px', background: '#110f09',
-            border: '2px solid #2e2818', borderBottom: '2px solid #5a4820',
-            color: '#c8ba90', padding: '10px 12px', outline: 'none',
-            borderRadius: '4px', width: '100%', boxSizing: 'border-box',
-            marginBottom: '16px', resize: 'none', lineHeight: '1.5',
-          }}
-        />
-
         <p style={{ fontFamily: uiFont, fontSize: '11px', color: '#6a5e48', marginBottom: '14px', lineHeight: '1.5' }}>
           Montor is the house. He is in the walls, the smell, the space between things left behind. You will not see him.
         </p>
 
         <button
-          onClick={function() { onStart(name, brief) }}
+          onClick={function() { onStart(name) }}
           disabled={busy || !hasKey}
           style={{
             fontFamily: uiFont, fontSize: '13px',

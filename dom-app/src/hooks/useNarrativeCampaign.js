@@ -145,7 +145,7 @@ function useNarrativeCampaign() {
 
   // Start a brand new campaign. Wipes any existing one.
   // PoC v1 — personality is locked to bad_montor regardless of input.
-  function startCampaign(characterName, brief /*, personalityId — ignored in PoC v1 */) {
+  function startCampaign(characterName) {
     setError(null)
     setBusy(true)
 
@@ -161,7 +161,6 @@ function useNarrativeCampaign() {
         maxHp: maxHp,
       },
       personality: { id: 'bad_montor' },
-      brief: (brief && brief.trim()) || '',
       mood: 'neutral',
       feelingsAboutPlayer: 'curious — a new visitor has arrived',
       currentAct: 'The Grounds',
