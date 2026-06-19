@@ -24,8 +24,8 @@ function NarrativeInput({ onSubmit, disabled, placeholder }) {
 
   return (
     <div style={{
-      borderTop: '1px solid #2a1a30',
-      background: '#060410',
+      borderTop: '1px solid #2e2818',
+      background: '#110f09',
       padding: '10px 12px',
       paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
     }}>
@@ -39,11 +39,11 @@ function NarrativeInput({ onSubmit, disabled, placeholder }) {
           disabled={disabled}
           style={{
             flex: 1,
-            background: '#0a0812',
-            border: '1px solid #2a1a30',
+            background: '#1a1510',
+            border: '1px solid #2e2818',
             borderRadius: '6px',
             padding: '10px 12px',
-            color: '#ede5f8',
+            color: '#c8ba90',
             fontFamily: displayFont,
             fontSize: '14px',
             outline: 'none',
@@ -55,10 +55,10 @@ function NarrativeInput({ onSubmit, disabled, placeholder }) {
           onClick={handleSubmit}
           disabled={disabled || !text.trim()}
           style={{
-            background: disabled || !text.trim() ? '#1a1020' : '#0e0818',
-            border: '2px solid ' + (disabled || !text.trim() ? '#2a1a30' : '#7a3a9a'),
+            background: disabled || !text.trim() ? '#211c14' : '#1a1510',
+            border: '2px solid ' + (disabled || !text.trim() ? '#2e2818' : '#5a4820'),
             borderRadius: '6px',
-            color: disabled || !text.trim() ? '#5a4a60' : '#c06ee0',
+            color: disabled || !text.trim() ? '#6a5e48' : '#9a8a68',
             padding: '10px 16px',
             fontFamily: uiFont,
             fontSize: '12px',

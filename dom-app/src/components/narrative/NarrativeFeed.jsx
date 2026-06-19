@@ -7,10 +7,10 @@ var uiFont = "system-ui, -apple-system, sans-serif"
 
 function DiceRollCard({ dice }) {
   var color =
-    dice.crit ? '#d4a847' :
-    dice.fumble ? '#c0392b' :
-    dice.success ? '#5b8dd9' :
-    '#9d94b0'
+    dice.crit ? '#9a8020' :
+    dice.fumble ? '#7a2818' :
+    dice.success ? '#5a7830' :
+    '#6a5840'
 
   var label =
     dice.crit ? 'CRIT' :
@@ -23,18 +23,18 @@ function DiceRollCard({ dice }) {
         border: '2px solid ' + color,
         borderRadius: '8px',
         padding: '10px 16px',
-        background: '#0a0812',
+        background: '#1a1510',
         textAlign: 'center',
         minWidth: '180px',
-        boxShadow: '0 0 20px ' + color + '22',
+        boxShadow: '0 0 16px ' + color + '22',
       }}>
         <div style={{ fontFamily: pixelFont, fontSize: '11px', color: color, letterSpacing: '2px', marginBottom: '4px' }}>
           d20 — {dice.stat.toUpperCase()}
         </div>
-        <div style={{ fontFamily: displayFont, fontSize: '20px', color: '#ede5f8', fontWeight: 'bold' }}>
+        <div style={{ fontFamily: displayFont, fontSize: '20px', color: '#c8ba90', fontWeight: 'bold' }}>
           {dice.roll} {dice.modifier >= 0 ? '+' : '−'} {Math.abs(dice.modifier)} = {dice.total}
         </div>
-        <div style={{ fontFamily: uiFont, fontSize: '10px', color: '#9d94b0', marginTop: '2px' }}>
+        <div style={{ fontFamily: uiFont, fontSize: '10px', color: '#6a5e48', marginTop: '2px' }}>
           vs DC {dice.dc}
         </div>
         <div style={{ fontFamily: pixelFont, fontSize: '10px', color: color, marginTop: '6px', letterSpacing: '1px' }}>
@@ -46,7 +46,7 @@ function DiceRollCard({ dice }) {
 }
 
 // Renders a scene block (DM-mode atmospheric, italic, no label),
-// an optional Montor speech block (first-person, labelled, Montor purple),
+// an optional Montor speech block (first-person, labelled, ashen),
 // and the hook (the concrete event that demands a reaction — emphasised).
 // Backward compat: legacy messages with `content` and no `scene` render as scene-only.
 function NarrationBlock({ msg }) {
@@ -58,12 +58,12 @@ function NarrationBlock({ msg }) {
 
   return (
     <div style={{ padding: '14px 6px 18px 6px', margin: '6px 0' }}>
-      {/* SCENE — DM-mode, italic Goudy, soft cream, no label */}
+      {/* SCENE — DM-mode, italic Goudy, aged paper, no label */}
       {scene && (
         <div style={{
           fontFamily: displayFont,
           fontSize: '16px',
-          color: '#d4c8a0',
+          color: '#c8ba90',
           lineHeight: '1.75',
           fontStyle: 'italic',
           whiteSpace: 'pre-wrap',
@@ -72,46 +72,45 @@ function NarrationBlock({ msg }) {
         </div>
       )}
 
-      {/* MONTOR — labelled speech block, purple. Only when he speaks. */}
+      {/* MONTOR — labelled speech block, ashen. Only when he speaks. */}
       {montor && (
         <div style={{ marginTop: scene ? '18px' : '0' }}>
           <div style={{
             fontFamily: pixelFont,
             fontSize: '10px',
-            color: '#c06ee0',
+            color: '#a0a898',
             letterSpacing: '3px',
             marginBottom: '10px',
-            textShadow: '0 0 12px rgba(192, 110, 224, 0.35)',
+            textShadow: '0 0 12px rgba(160,168,152,0.2)',
           }}>
             MONTOR
           </div>
           <div style={{
             fontFamily: displayFont,
             fontSize: '16px',
-            color: '#d8b8e8',
+            color: '#b8b4a8',
             lineHeight: '1.7',
             whiteSpace: 'pre-wrap',
             paddingLeft: '12px',
-            borderLeft: '2px solid rgba(192, 110, 224, 0.4)',
+            borderLeft: '2px solid rgba(160,168,152,0.25)',
           }}>
             {montor}
           </div>
         </div>
       )}
 
-      {/* HOOK — the concrete event. Emphasised, slight visual punctuation. */}
+      {/* HOOK — the concrete event. Amber, slight left rule. */}
       {hook && (
         <div style={{
           marginTop: (scene || montor) ? '18px' : '0',
           fontFamily: displayFont,
           fontSize: '15px',
-          color: '#e8c8a0',
+          color: '#c0a040',
           lineHeight: '1.6',
           fontStyle: 'italic',
           fontWeight: 600,
           paddingLeft: '14px',
-          borderLeft: '2px solid #d4a847',
-          textShadow: '0 0 14px rgba(212, 168, 71, 0.18)',
+          borderLeft: '2px solid #5a4820',
         }}>
           {hook}
         </div>
@@ -125,16 +124,16 @@ function PlayerActionBlock({ author, content }) {
     <div style={{
       margin: '12px 0 8px 0',
       padding: '10px 14px',
-      background: '#0e0818',
-      border: '1px solid #2a1a30',
+      background: '#1a1510',
+      border: '1px solid #2e2818',
       borderRadius: '6px',
-      borderLeft: '3px solid #c06ee0',
+      borderLeft: '3px solid #7a6430',
     }}>
-      <div style={{ fontFamily: pixelFont, fontSize: '9px', color: '#c06ee0', letterSpacing: '1px', marginBottom: '4px' }}>
+      <div style={{ fontFamily: pixelFont, fontSize: '9px', color: '#9a8a68', letterSpacing: '1px', marginBottom: '4px' }}>
         {(author || 'PLAYER').toUpperCase()}
       </div>
-      <div style={{ fontFamily: displayFont, fontSize: '14px', color: '#ede5f8', fontStyle: 'italic' }}>
-        “{content}”
+      <div style={{ fontFamily: displayFont, fontSize: '14px', color: '#c8ba90', fontStyle: 'italic' }}>
+        "{content}"
       </div>
     </div>
   )
@@ -149,8 +148,8 @@ function NarrativeFeed({ messages, busy }) {
 
   if (!messages || messages.length === 0) {
     return (
-      <div style={{ fontFamily: displayFont, color: '#5a4a60', fontStyle: 'italic', textAlign: 'center', padding: '40px 20px' }}>
-        Montor is preparing the scene...
+      <div style={{ fontFamily: displayFont, color: '#6a5e48', fontStyle: 'italic', textAlign: 'center', padding: '40px 20px' }}>
+        The house is settling...
       </div>
     )
   }
@@ -163,7 +162,7 @@ function NarrativeFeed({ messages, busy }) {
         if (m.type === 'dice_roll') return <DiceRollCard key={m.id} dice={m.dice} />
         if (m.type === 'system') {
           return (
-            <div key={m.id} style={{ fontFamily: uiFont, fontSize: '11px', color: '#5a4a60', textAlign: 'center', margin: '8px 0', fontStyle: 'italic' }}>
+            <div key={m.id} style={{ fontFamily: uiFont, fontSize: '11px', color: '#6a5e48', textAlign: 'center', margin: '8px 0', fontStyle: 'italic' }}>
               — {m.content} —
             </div>
           )
@@ -171,8 +170,8 @@ function NarrativeFeed({ messages, busy }) {
         return null
       })}
       {busy && (
-        <div style={{ fontFamily: displayFont, color: '#c06ee0', fontStyle: 'italic', textAlign: 'center', padding: '12px', fontSize: '13px' }}>
-          Montor is thinking...
+        <div style={{ fontFamily: displayFont, color: '#a0a898', fontStyle: 'italic', textAlign: 'center', padding: '12px', fontSize: '13px' }}>
+          Something shifts...
         </div>
       )}
       <div ref={endRef} />

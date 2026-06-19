@@ -37,13 +37,13 @@ function NarrativeDiceCard({ stat, dc, modifier, onCommit }) {
   }
 
   // Colours and labels by outcome
-  var color = '#9d94b0' // default: fail purple
+  var color = '#6a5840' // default: fail brown
   var label = 'ROLL'
   if (rollRes) {
-    if (rollRes.crit)        { color = '#d4a847'; label = 'CRITICAL!' }
-    else if (rollRes.fumble) { color = '#c0392b'; label = 'FUMBLE'    }
-    else if (rollRes.success){ color = '#5b8dd9'; label = 'SUCCESS'   }
-    else                     { color = '#9d94b0'; label = 'FAIL'      }
+    if (rollRes.crit)        { color = '#9a8020'; label = 'CRITICAL!' }
+    else if (rollRes.fumble) { color = '#7a2818'; label = 'FUMBLE'    }
+    else if (rollRes.success){ color = '#5a7830'; label = 'SUCCESS'   }
+    else                     { color = '#6a5840'; label = 'FAIL'      }
   }
 
   var modSign = modifier >= 0 ? '+' : '−'
@@ -56,11 +56,11 @@ function NarrativeDiceCard({ stat, dc, modifier, onCommit }) {
       alignItems: 'center',
       gap: '12px',
       padding: '20px 16px',
-      background: '#07050f',
-      borderTop: '1px solid #1a1020',
+      background: '#110f09',
+      borderTop: '1px solid #2e2818',
     }}>
       {/* Stat + DC label */}
-      <div style={{ fontFamily: pixelFont, fontSize: '10px', color: '#9d94b0', letterSpacing: '2px' }}>
+      <div style={{ fontFamily: pixelFont, fontSize: '10px', color: '#9a8a68', letterSpacing: '2px' }}>
         d20 — {stat.toUpperCase()} vs DC {dc}
       </div>
 
@@ -71,14 +71,14 @@ function NarrativeDiceCard({ stat, dc, modifier, onCommit }) {
           width: '80px',
           height: '80px',
           borderRadius: '12px',
-          border: '2px solid ' + (phase === 'idle' ? '#3a2a4a' : color),
-          background: phase === 'rolling' ? 'rgba(212,168,71,0.08)' : phase === 'result' ? 'rgba(0,0,0,0.4)' : '#0e0818',
+          border: '2px solid ' + (phase === 'idle' ? '#3a3020' : color),
+          background: phase === 'rolling' ? 'rgba(154,128,32,0.08)' : phase === 'result' ? 'rgba(0,0,0,0.4)' : '#211c14',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontFamily: displayFont,
           fontSize: '32px',
-          color: phase === 'idle' ? '#3a2a4a' : color,
+          color: phase === 'idle' ? '#3a3020' : color,
           cursor: phase === 'idle' ? 'pointer' : 'default',
           transform: phase === 'rolling' ? 'scale(1.1)' : phase === 'result' ? 'scale(1.08)' : 'scale(1)',
           transition: 'all 0.15s ease',
@@ -95,10 +95,10 @@ function NarrativeDiceCard({ stat, dc, modifier, onCommit }) {
           <div style={{ fontFamily: pixelFont, fontSize: '11px', color: color, letterSpacing: '2px', marginBottom: '6px' }}>
             {label}
           </div>
-          <div style={{ fontFamily: displayFont, fontSize: '18px', color: '#ede5f8' }}>
+          <div style={{ fontFamily: displayFont, fontSize: '18px', color: '#c8ba90' }}>
             {rollRes.roll} {modSign} {modAbs} = {rollRes.total}
           </div>
-          <div style={{ fontFamily: uiFont, fontSize: '10px', color: '#6a5a70', marginTop: '2px' }}>
+          <div style={{ fontFamily: uiFont, fontSize: '10px', color: '#6a5e48', marginTop: '2px' }}>
             vs DC {dc}
           </div>
         </div>
@@ -111,9 +111,9 @@ function NarrativeDiceCard({ stat, dc, modifier, onCommit }) {
           style={{
             fontFamily: pixelFont,
             fontSize: '9px',
-            color: '#c06ee0',
+            color: '#9a8a68',
             background: 'transparent',
-            border: '1px solid #3a1a4a',
+            border: '1px solid #3a3020',
             borderRadius: '6px',
             padding: '10px 20px',
             cursor: 'pointer',
@@ -131,9 +131,9 @@ function NarrativeDiceCard({ stat, dc, modifier, onCommit }) {
           style={{
             fontFamily: uiFont,
             fontSize: '14px',
-            color: '#ede5f8',
-            background: '#0e0818',
-            border: '1px solid #3a2a4a',
+            color: '#c8ba90',
+            background: '#211c14',
+            border: '1px solid #3a3020',
             borderRadius: '8px',
             padding: '10px 28px',
             cursor: 'pointer',
