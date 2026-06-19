@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import useNarrativeCampaign from '../hooks/useNarrativeCampaign.js'
-import { hasGroqKey } from '../lib/groq.js'
+import { hasClaudeKey as hasGroqKey } from '../lib/claude.js'
 import GroqKeyInput from '../components/GroqKeyInput.jsx'
 import NarrativeFeed from '../components/narrative/NarrativeFeed.jsx'
 import NarrativeInput from '../components/narrative/NarrativeInput.jsx'

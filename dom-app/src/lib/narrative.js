@@ -13,22 +13,23 @@
 //
 // Groq NEVER rolls dice or does maths. App handles all randomness.
 
-import { getGroqKey } from './groq.js'
+import { getClaudeKey } from './claude.js'
 
-var GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+var CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
+var CLAUDE_API_VERSION = '2023-06-01'
 
-// Model selection — user-switchable. 70b is the default for quality; 8b is the
-// rate-limit escape hatch (much higher per-minute limits, lower prose quality).
+// Model selection — user-switchable. Haiku is the default (fast, affordable, very capable);
+// Opus is the premium option for the best narrative depth.
 var MODEL_OPTIONS = [
   {
-    id: 'llama-3.3-70b-versatile',
-    label: '70B (quality)',
-    desc: 'Higher quality prose. Tighter rate limits on free tier.',
+    id: 'claude-haiku-4-5-20251001',
+    label: 'Haiku (fast)',
+    desc: 'Fast, affordable, excellent quality. Great for most sessions.',
   },
   {
-    id: 'llama-3.1-8b-instant',
-    label: '8B (fast / high limits)',
-    desc: 'Much higher rate limits. Lower prose quality, less reliable proactivity.',
+    id: 'claude-opus-4-8',
+    label: 'Opus 4.8 (best)',
+    desc: 'Maximum intelligence and narrative depth. Higher cost per session.',
   },
 ]
 var MODEL_LS_KEY = 'dom_narrative_model'
@@ -315,66 +316,57 @@ function buildRecentContext(messages) {
 
 // === LOW-LEVEL GROQ CALLER ===
 
-// Last error from a Groq call — exposed so the UI can surface meaningful messages.
+// Last error from an AI call — exposed so the UI can surface meaningful messages.
 var lastGroqError = null
 function getLastGroqError() { return lastGroqError }
 
-// Parse the wait time out of a 429 error message if Groq tells us how long to wait.
-// Groq error messages often look like "Please try again in 5.2s".
-function parseRetryDelay(errorMsg, defaultMs) {
-  if (!errorMsg) return defaultMs
-  var match = errorMsg.match(/try again in ([\d.]+)s/i)
-  if (match) {
-    var secs = parseFloat(match[1])
-    if (!isNaN(secs) && secs > 0 && secs < 60) {
-      return Math.ceil(secs * 1000) + 500 // small buffer
-    }
-  }
-  return defaultMs
+// Strip markdown code fences Claude may wrap around JSON.
+function extractJson(text) {
+  if (!text) return text
+  var match = text.match(/```(?:json)?\s*([\s\S]+?)\s*```/)
+  return match ? match[1] : text.trim()
 }
 
 function delay(ms) {
   return new Promise(function(resolve) { setTimeout(resolve, ms) })
 }
 
-// Maximum time we'll wait for any single Groq fetch before aborting.
-var FETCH_TIMEOUT_MS = 25000
-// Maximum delay we'll silently retry after. Anything bigger fails fast so the user can see it.
-var MAX_RETRY_WAIT_MS = 8000
+// Maximum time we'll wait for a fetch before aborting.
+var FETCH_TIMEOUT_MS = 30000
 
 // Single attempt — does NOT retry. Internal helper.
-function callGroqOnce(systemPrompt, userMessage, options) {
-  var key = getGroqKey()
+function callClaudeOnce(systemPrompt, userMessage, options) {
+  var key = getClaudeKey()
   if (!key) {
-    lastGroqError = 'No Groq API key set. Tap AI to add one.'
+    lastGroqError = 'No Claude API key set. Tap AI to add one.'
     return Promise.resolve({ data: null, retryAfterMs: 0 })
   }
 
   var maxTokens = (options && options.maxTokens) || 500
   var temperature = (options && options.temperature) || 0.85
 
-  // Hard timeout — abort the fetch if it takes too long.
   var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null
   var timeoutId = null
   if (controller) {
     timeoutId = setTimeout(function() { controller.abort() }, FETCH_TIMEOUT_MS)
   }
 
-  return fetch(GROQ_API_URL, {
+  return fetch(CLAUDE_API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer ' + key,
+      'x-api-key': key,
+      'anthropic-version': CLAUDE_API_VERSION,
+      'anthropic-dangerous-direct-browser-access': 'true',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       model: getNarrativeModel(),
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
       max_tokens: maxTokens,
       temperature: temperature,
-      response_format: { type: 'json_object' },
+      system: systemPrompt,
+      messages: [
+        { role: 'user', content: userMessage },
+      ],
     }),
     signal: controller ? controller.signal : undefined,
   }).then(function(res) {
@@ -388,48 +380,42 @@ function callGroqOnce(systemPrompt, userMessage, options) {
       return res.json().then(function(err) {
         var msg = (err && err.error && err.error.message) || ('HTTP ' + res.status)
         if (res.status === 401) {
-          lastGroqError = 'Groq rejected the API key (401). Tap AI to update it.'
+          lastGroqError = 'Claude rejected the API key (401). Tap AI to update it.'
           return { data: null, retryAfterMs: 0 }
         }
         if (res.status === 429) {
-          var waitMs = parseRetryDelay(msg, 5000)
-          if (waitMs > MAX_RETRY_WAIT_MS) {
-            // Long wait — likely daily limit hit. Fail fast so the user can see it.
-            lastGroqError = 'Groq rate limit hit (429): ' + msg + ' — too long to retry, try again in a bit.'
-            return { data: null, retryAfterMs: 0 }
-          }
-          lastGroqError = 'Groq rate limit hit (429). Retrying in ' + Math.round(waitMs / 1000) + 's...'
-          return { data: null, retryAfterMs: waitMs }
+          lastGroqError = 'Claude rate limit hit (429). Retrying in 5s...'
+          return { data: null, retryAfterMs: 5000 }
         }
         if (res.status >= 500) {
-          lastGroqError = 'Groq server error (' + res.status + '). Try again shortly.'
+          lastGroqError = 'Claude server error (' + res.status + '). Try again shortly.'
           return { data: null, retryAfterMs: 3000 }
         }
-        lastGroqError = 'Groq error: ' + msg
-        console.warn('[narrative] Groq API error:', res.status, msg)
+        lastGroqError = 'Claude error: ' + msg
+        console.warn('[narrative] Claude API error:', res.status, msg)
         return { data: null, retryAfterMs: 0 }
       }).catch(function() {
-        lastGroqError = 'Groq error: HTTP ' + res.status
+        lastGroqError = 'Claude error: HTTP ' + res.status
         return { data: null, retryAfterMs: 0 }
       })
     }
     return res.json().then(function(data) {
-      if (!data || !data.choices || !data.choices[0]) {
-        lastGroqError = 'Groq returned no choices.'
+      if (!data || !data.content || !data.content[0]) {
+        lastGroqError = 'Claude returned no content.'
         return { data: null, retryAfterMs: 0 }
       }
       try {
-        return { data: JSON.parse(data.choices[0].message.content), retryAfterMs: 0 }
+        return { data: JSON.parse(extractJson(data.content[0].text)), retryAfterMs: 0 }
       } catch (e) {
-        lastGroqError = 'Groq returned malformed JSON. Try again.'
-        console.warn('[narrative] JSON parse error:', e, data.choices[0].message.content)
+        lastGroqError = 'Claude returned malformed JSON. Try again.'
+        console.warn('[narrative] JSON parse error:', e, data.content[0].text)
         return { data: null, retryAfterMs: 0 }
       }
     })
   }).catch(function(e) {
     if (timeoutId) clearTimeout(timeoutId)
     if (e && e.name === 'AbortError') {
-      lastGroqError = 'Groq request timed out after ' + (FETCH_TIMEOUT_MS / 1000) + 's. Check your connection and try again.'
+      lastGroqError = 'Claude request timed out after ' + (FETCH_TIMEOUT_MS / 1000) + 's. Check your connection and try again.'
     } else {
       lastGroqError = 'Network error: ' + (e && e.message ? e.message : 'unknown')
     }
@@ -441,19 +427,18 @@ function callGroqOnce(systemPrompt, userMessage, options) {
 // Public — retries ONCE on rate limit / server error after the suggested delay.
 function callGroq(systemPrompt, userMessage, options) {
   lastGroqError = null
-  return callGroqOnce(systemPrompt, userMessage, options).then(function(first) {
+  return callClaudeOnce(systemPrompt, userMessage, options).then(function(first) {
     if (first.data) return first.data
     if (first.retryAfterMs > 0) {
       console.info('[narrative] retrying after', first.retryAfterMs, 'ms')
       return delay(first.retryAfterMs).then(function() {
-        return callGroqOnce(systemPrompt, userMessage, options).then(function(second) {
+        return callClaudeOnce(systemPrompt, userMessage, options).then(function(second) {
           if (second.data) {
             lastGroqError = null
             return second.data
           }
-          // Surface a clean message after the retry also fails.
           if (!lastGroqError || lastGroqError.indexOf('Retrying') !== -1) {
-            lastGroqError = 'Groq still rate limited after retry. Wait ~30s and try again.'
+            lastGroqError = 'Claude still unavailable after retry. Try again in a moment.'
           }
           return null
         })

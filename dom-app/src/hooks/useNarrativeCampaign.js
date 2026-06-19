@@ -145,7 +145,7 @@ function useNarrativeCampaign() {
 
     return generateOpeningScene(fresh).then(function(result) {
       if (!result || (!result.scene && !result.narration)) {
-        setError(getLastGroqError() || 'Montor said nothing. Check your Groq API key.')
+        setError(getLastGroqError() || 'Montor said nothing. Check your Claude API key.')
         setBusy(false)
         return null
       }
@@ -187,7 +187,7 @@ function useNarrativeCampaign() {
 
     return assessAndNarrate(withAction, actionText).then(function(result) {
       if (!result) {
-        setError(getLastGroqError() || 'Montor did not respond. Check your Groq key or try again.')
+        setError(getLastGroqError() || 'Montor did not respond. Check your Claude API key or try again.')
         setBusy(false)
         return null
       }
