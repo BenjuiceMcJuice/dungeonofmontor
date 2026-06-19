@@ -78,7 +78,7 @@ function NarrativeStatusBar({ campaign, onExit }) {
         <div className="max-w-2xl mx-auto" style={{ marginTop: '8px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           {c.inventory && c.inventory.length > 0 && (
             <span style={{ fontFamily: uiFont, fontSize: '10px', color: '#8b7b60' }}>
-              <span style={{ color: '#5a4a60' }}>Carrying:</span> {c.inventory.join(', ')}
+              <span style={{ color: '#5a4a60' }}>Carrying:</span> {c.inventory.map(function(item) { return typeof item === 'string' ? item : (item && item.name) || JSON.stringify(item) }).join(', ')}
             </span>
           )}
         </div>

@@ -154,7 +154,9 @@ function buildSystemPrompt(campaign) {
   var act = campaign.currentAct || 'The Grounds'
   var threads = (campaign.openThreads && campaign.openThreads.length) ? campaign.openThreads.join('; ') : '(none yet)'
   var decisions = (campaign.keyDecisions && campaign.keyDecisions.length) ? campaign.keyDecisions.join('; ') : '(none yet)'
-  var inventory = (campaign.inventory && campaign.inventory.length) ? campaign.inventory.join(', ') : '(empty)'
+  var inventory = (campaign.inventory && campaign.inventory.length)
+    ? campaign.inventory.map(function(item) { return typeof item === 'string' ? item : (item && item.name) || JSON.stringify(item) }).join(', ')
+    : '(empty)'
   var feelings = campaign.feelingsAboutPlayer || 'curious, watching closely'
   var summaries = (campaign.chapterSummaries && campaign.chapterSummaries.length)
     ? campaign.chapterSummaries.join('\n---\n')
