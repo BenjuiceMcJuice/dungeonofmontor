@@ -72,27 +72,27 @@ function NarrationBlock({ msg }) {
         </div>
       )}
 
-      {/* MONTOR — labelled speech block, ashen. Only when he speaks. */}
+      {/* MONTOR — labelled speech block, muted purple. Only when he speaks. */}
       {montor && (
         <div style={{ marginTop: scene ? '18px' : '0' }}>
           <div style={{
             fontFamily: pixelFont,
             fontSize: '10px',
-            color: '#a0a898',
+            color: '#9b5bbd',
             letterSpacing: '3px',
             marginBottom: '10px',
-            textShadow: '0 0 12px rgba(160,168,152,0.2)',
+            textShadow: '0 0 12px rgba(155,91,189,0.3)',
           }}>
             MONTOR
           </div>
           <div style={{
             fontFamily: displayFont,
             fontSize: '16px',
-            color: '#b8b4a8',
+            color: '#c4aad4',
             lineHeight: '1.7',
             whiteSpace: 'pre-wrap',
             paddingLeft: '12px',
-            borderLeft: '2px solid rgba(160,168,152,0.25)',
+            borderLeft: '2px solid rgba(155,91,189,0.35)',
           }}>
             {montor}
           </div>
@@ -170,7 +170,7 @@ function NarrativeFeed({ messages, busy }) {
         return null
       })}
       {busy && (
-        <div style={{ fontFamily: displayFont, color: '#a0a898', fontStyle: 'italic', textAlign: 'center', padding: '12px', fontSize: '13px' }}>
+        <div style={{ fontFamily: displayFont, color: '#9b5bbd', fontStyle: 'italic', textAlign: 'center', padding: '12px', fontSize: '13px' }}>
           Something shifts...
         </div>
       )}

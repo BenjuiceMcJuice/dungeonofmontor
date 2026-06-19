@@ -31,8 +31,8 @@ function NarrativeStatusBar({ campaign, onExit }) {
       padding: '10px 14px',
       paddingTop: 'max(10px, env(safe-area-inset-top))',
     }}>
-      <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-        {/* Character + HP */}
+      <div className="max-w-2xl mx-auto flex items-center justify-between gap-3" style={{ paddingRight: '80px' }}>
+        {/* Character + HP + Mood */}
         <div className="flex flex-col">
           <span style={{ fontFamily: pixelFont, fontSize: '10px', color: '#c0a030', letterSpacing: '1px' }}>
             {character.name || 'Knight'}
@@ -50,6 +50,9 @@ function NarrativeStatusBar({ campaign, onExit }) {
               {hp}/{maxHp}
             </span>
           </div>
+          <span style={{ fontFamily: uiFont, fontSize: '9px', color: moodColor, marginTop: '3px', letterSpacing: '1px' }}>
+            {c.mood || 'neutral'}
+          </span>
         </div>
 
         {/* Act */}
@@ -59,16 +62,6 @@ function NarrativeStatusBar({ campaign, onExit }) {
           </span>
           <span style={{ fontFamily: displayFont, fontSize: '12px', color: '#c8ba90', fontStyle: 'italic' }}>
             {c.currentAct || 'The Grounds'}
-          </span>
-        </div>
-
-        {/* Mood */}
-        <div className="flex flex-col items-end">
-          <span style={{ fontFamily: uiFont, fontSize: '8px', color: '#3a3428', letterSpacing: '2px', textTransform: 'uppercase' }}>
-            Mood
-          </span>
-          <span style={{ fontFamily: displayFont, fontSize: '12px', color: moodColor, fontStyle: 'italic' }}>
-            {c.mood || 'neutral'}
           </span>
         </div>
       </div>
