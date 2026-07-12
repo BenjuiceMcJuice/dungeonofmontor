@@ -5,6 +5,16 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 
 ---
 
+## Feedback: shared Benjuicey Apps standard
+
+Feedback across all of Ben's apps follows one standard — see the central docs in `benjuicey-apps/docs/`: **feedback-standard.md** (the standard) and **feedback-how-it-works.md** (end-to-end flow + how Claude triages submissions). Submissions from every app land in one shared backend, each stamped with the app's trigram.
+
+- **This app's trigram:** `DOM`
+- **Status:** ❌ **not yet wired up** — to adopt.
+- **How to adopt:** add Dungeon of Montor's GitHub Pages origin to the Worker's `ALLOWED_ORIGINS`, then drop in the shared widget (`<script defer src=".../widget.js" data-app-id="dungeonofmontor" data-accent="#RRGGBB">`). Uniform schema + canonical categories (`bug`/`content`/`request`/`general`) come for free. This app's own Firebase project is for game state/multiplayer — feedback is separate and goes to the shared Worker, not a local collection.
+
+---
+
 ## Milestones
 
 | Date       | Milestone                          | Status |
