@@ -74,3 +74,16 @@ All docs live in `dom-app/docs/`. See [dom-app/docs/INDEX.md](dom-app/docs/INDEX
 | **Archive** | Conditions v0.1 draft, sprite/conditions HTML viewers |
 
 Legacy docs in `docs/` (root) are the originals — `dom-app/docs/` has the reorganised, current versions.
+
+
+## Backlog
+
+**Status lives in exactly one file: `BACKLOG.md`.** Everywhere else — this file, any doc index,
+every spec — describes what a thing *is*, never what state it is in.
+
+**Update `BACKLOG.md` in the same commit as the work:** close the row you finished, open a row for
+anything you found and are not fixing. That is the whole enforcement mechanism.
+
+Read `BACKLOG.md` first at the start of a session, then `DEVLOG.md`, then the most recent daily log.
+
+Standard: [`Benjuicey-apps/docs/backlog-standard.md`](https://github.com/BenjuiceMcJuice/Benjuicey-apps/blob/main/docs/backlog-standard.md)
