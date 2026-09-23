@@ -203,6 +203,7 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 |            | **Montor's Descent — platformer mode (new version)** — room-by-room side-view platformer, same data/mechanics/sprites. Spec: `dom-app/docs/platformer_mode_spec.md` | |
 | 2026-09-23 | Platformer mode spec written (v0.1) | ✅ Done |
 | 2026-09-23 | Platformer example room mockup — "The Potting Shed" (Garden B2), real sprite grids, annotated + mechanics explainer | ✅ Done |
+| 2026-09-23 | Platformer design options — junk as physical puzzle objects, 9 directions (stack / contraptions / wear-the-house / cleaning / dig / chain-reaction / memory / greed / co-op), recommended C+E+D+H+G loop, 6-step prototype order | ✅ Done |
 |            | P0 — Feel prototype: one Garden room, knight run/jump/sword, one rat, hidden d20 hit tiers | ⬜ |
 |            | P1 — One zone: Garden 4x4 maze as rooms, doors/ladders/drops, map, loot pickups, death | ⬜ |
 |            | P2 — Full systems: junk piles, terminal/gifts, merchants, all weapon movesets, throwables, conditions on Montor tick, levelling, Garden boss | ⬜ |

@@ -3,6 +3,7 @@
 > Design + technical spec for a side-scrolling, room-by-room platformer version of Dungeon of Montor.
 > Written 2026-09-23. Status: **spec only -- nothing built yet.**
 > Example room mockup (real sprites, annotated): [platformer_room_mockup.html](platformer_room_mockup.html) -- open in a browser.
+> Alternative direction (junk as the game, fewer Crawl mechanics): [platformer_design_options.md](platformer_design_options.md).
 
 ---
 
