@@ -1,0 +1,466 @@
+<title>Montor's Descent Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sorts+Mill+Goudy:ital@0;1&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #0d0b12;
+    --panel: #16131d;
+    --panel-2: #1e1a27;
+    --line: #2e2838;
+    --cream: #d4c8a0;
+    --muted: #8b7b60;
+    --gold: #d4a017;
+    --purple: #c06ee0;
+    --crit: #f0c040;
+    --hit: #e8e2cc;
+    --glance: #8f8a7a;
+    --miss: #c05050;
+    --pixel: 'Press Start 2P', ui-monospace, monospace;
+    --display: 'Sorts Mill Goudy', Georgia, serif;
+    --ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  body { background: var(--ground); color: var(--cream); font-family: var(--ui); font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 44px; }
+  .eyebrow { font-family: var(--pixel); font-size: 10px; letter-spacing: 1px; color: var(--purple); text-transform: uppercase; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 5vw, 46px); line-height: 1.1; margin: 10px 0 8px; color: var(--cream); text-wrap: balance; }
+  h2 { font-family: var(--pixel); font-size: 13px; line-height: 1.6; color: var(--gold); margin: 0 0 14px; text-wrap: balance; }
+  h3 { font-family: var(--display); font-weight: 400; font-size: 21px; margin: 0 0 6px; color: var(--cream); }
+  p { margin: 0; max-width: 66ch; }
+  .lede { font-family: var(--display); font-style: italic; font-size: 19px; color: var(--cream); opacity: .9; }
+  .small { font-size: 13px; color: var(--muted); }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; color: var(--gold); }
+
+  /* ---- The screen ---- */
+  .stage { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+  .bezel { background: #050407; border: 3px solid #000; box-shadow: 0 0 0 2px var(--line); border-radius: 6px; padding: 10px; }
+  .hud { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; font-family: var(--pixel); font-size: 8px; color: var(--cream); padding: 2px 2px 10px; }
+  .bar { display: inline-flex; align-items: center; gap: 6px; }
+  .bar i { display: block; width: 70px; height: 7px; background: #2a0c0c; border: 1px solid #000; position: relative; }
+  .bar i::after { content: ''; position: absolute; inset: 0; width: var(--v); background: var(--c); }
+  .hud .zone { margin-left: auto; color: var(--muted); }
+  .hud canvas { width: 12px; height: 12px; image-rendering: pixelated; vertical-align: middle; }
+  .screen { position: relative; width: 100%; aspect-ratio: 320 / 192; max-width: 100%; }
+  .screen canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+  .pin { position: absolute; transform: translate(-50%, -50%); width: 18px; height: 18px; border-radius: 50%; background: var(--gold); color: #000; font-family: var(--pixel); font-size: 7px; display: grid; place-items: center; border: 2px solid #000; box-shadow: 0 0 0 1px var(--gold); cursor: pointer; padding: 0; }
+  .pin:focus-visible, .pin.on { background: #fff; box-shadow: 0 0 0 2px var(--purple); outline: none; }
+  .pad { display: flex; justify-content: space-between; align-items: center; padding: 12px 6px 2px; gap: 12px; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 26px); grid-template-rows: repeat(3, 26px); }
+  .dpad span { background: #231f2c; border: 2px solid #000; }
+  .dpad span:nth-child(odd) { visibility: hidden; }
+  .dpad span:nth-child(5) { visibility: visible; background: #1a1720; }
+  .btns { display: flex; gap: 10px; align-items: flex-end; }
+  .btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #000; display: grid; place-items: center; font-family: var(--pixel); font-size: 7px; color: #000; text-align: center; line-height: 1.3; }
+  .btn.a { background: var(--gold); transform: translateY(-14px); }
+  .btn.b { background: #b0463a; color: #fff; }
+  .btn.r { background: #3a6ab0; color: #fff; width: 36px; height: 36px; }
+  .btn.i { background: #4a3a5a; color: var(--cream); width: 36px; height: 36px; border-radius: 8px; }
+  .caption { font-size: 12px; color: var(--muted); padding: 8px 4px 0; }
+
+  .legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: none; }
+  .legend li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 8px 8px; border-radius: 4px; cursor: default; }
+  .legend li.on { background: var(--panel-2); }
+  .legend b { font-weight: 600; color: var(--cream); }
+  .legend .n { width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #000; font-family: var(--pixel); font-size: 8px; display: grid; place-items: center; border: 2px solid #000; }
+  .legend span.t { font-size: 13.5px; color: #bdb391; }
+
+  /* ---- Sections ---- */
+  section { display: grid; gap: 18px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: grid; gap: 10px; align-content: start; }
+  .flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .flow li { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+  .flow .k { font-family: var(--pixel); font-size: 9px; color: var(--purple); }
+  .flow p { font-size: 13.5px; color: #bdb391; }
+
+  /* dice demo */
+  .dice { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 720px) { .dice { grid-template-columns: 1fr; } }
+  .roll-out { display: grid; gap: 10px; }
+  .die { font-family: var(--pixel); font-size: 28px; color: var(--cream); display: flex; align-items: baseline; gap: 12px; font-variant-numeric: tabular-nums; }
+  .die small { font-size: 9px; color: var(--muted); }
+  .tier { font-family: var(--pixel); font-size: 11px; padding: 6px 8px; border: 2px solid #000; display: inline-block; justify-self: start; }
+  .tier.crit { background: var(--crit); color: #000; }
+  .tier.hit { background: var(--hit); color: #000; }
+  .tier.glance { background: var(--glance); color: #000; }
+  .tier.miss { background: var(--miss); color: #fff; }
+  .math { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; color: #bdb391; white-space: pre-wrap; line-height: 1.7; }
+  .rollbtn { font-family: var(--pixel); font-size: 10px; background: var(--gold); color: #000; border: 2px solid #000; padding: 12px 14px; cursor: pointer; justify-self: start; }
+  .rollbtn:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+  .ratbar { display: flex; align-items: center; gap: 8px; font-family: var(--pixel); font-size: 8px; color: var(--muted); }
+  .ratbar i { flex: 1; height: 8px; background: #2a0c0c; border: 1px solid #000; position: relative; max-width: 180px; }
+  .ratbar i::after { content: ''; position: absolute; inset: 0; width: var(--v); background: #cc3a2a; transition: width .25s; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: var(--pixel); font-size: 8px; color: var(--muted); font-weight: 400; letter-spacing: .5px; }
+  td:first-child { font-family: var(--pixel); font-size: 9px; color: var(--gold); white-space: nowrap; }
+  .tablewrap { overflow-x: auto; }
+
+  /* tick strip */
+  .ticks { display: grid; grid-template-columns: 90px repeat(6, minmax(34px, 1fr)); gap: 3px; font-family: var(--pixel); font-size: 8px; }
+  .ticks div { padding: 7px 4px; text-align: center; background: var(--panel-2); color: var(--muted); }
+  .ticks .lab { text-align: left; background: none; color: var(--cream); }
+  .ticks .b { background: #5a1414; color: #ffb0a0; }
+  .ticks .w { background: #173a5a; color: #a8d0ff; }
+  .ticks .x { background: var(--crit); color: #000; }
+  .tickwrap { overflow-x: auto; }
+
+  .map { display: grid; grid-template-columns: repeat(4, 34px); gap: 4px; }
+  .map div { height: 26px; background: var(--panel-2); border: 1px solid var(--line); font-family: var(--pixel); font-size: 7px; display: grid; place-items: center; color: var(--muted); }
+  .map .seen { background: #2a2433; color: var(--cream); }
+  .map .here { background: var(--gold); color: #000; border-color: #000; }
+  @media (prefers-reduced-motion: reduce) { .ratbar i::after { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Montor's Descent · platformer mode · room mockup</div>
+    <h1>The Potting Shed</h1>
+    <p class="lede">Garden, chamber B2. One chamber from the 4x4 zone maze, drawn side-on as a single screen. Every sprite below is the real grid from <code>lib/sprites.js</code>, at its real size and tier colour.</p>
+  </header>
+
+  <div class="stage">
+    <div>
+      <div class="bezel">
+        <div class="hud" aria-label="Heads-up display">
+          <span class="bar">HP <i style="--v:72%;--c:#cc3a2a"></i> 29/40</span>
+          <span class="bar">STA <i style="--v:55%;--c:#4aa05a"></i></span>
+          <span style="color:var(--gold)">37g</span>
+          <span><canvas id="hudWet" width="6" height="6" aria-label="WET condition"></canvas> WET</span>
+          <span class="zone">GROUNDS · B2</span>
+        </div>
+        <div class="screen" id="screen">
+          <canvas id="room" width="320" height="192" aria-label="Side-view mockup of the Potting Shed room"></canvas>
+        </div>
+        <div class="pad" aria-hidden="true">
+          <div class="dpad"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="btns">
+            <div class="btn i">ITEM</div>
+            <div class="btn r">ROLL</div>
+            <div class="btn b">HIT</div>
+            <div class="btn a">JUMP</div>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Portrait phone layout: the room on top, touch controls underneath. The game renders at 320x192 (20x12 tiles of 16px) and scales up in whole pixels. Tap a number to find it in the list.</p>
+    </div>
+
+    <ol class="legend" id="legend"></ol>
+  </div>
+
+  <section>
+    <h2>A run through this room</h2>
+    <ol class="flow">
+      <li><span class="k">ENTER</span><h3>Doors seal</h3><p>You come in from B1 on the left. It's a combat chamber, so the right door locks and a Dust Rat, a bat and a Slate Slug wake up. AGI decides how long they take to react.</p></li>
+      <li><span class="k">FIGHT</span><h3>Aim, then the dice</h3><p>Your sword swing has to touch the rat. When it does, the game rolls the same d20 the Crawl uses and shows the tier as a floating number.</p></li>
+      <li><span class="k">HAZARDS</span><h3>Use the room</h3><p>The puddle makes anything standing in it WET. Hit a wet rat with the Cattle Prod and CONDUCTANCE chains across the water.</p></li>
+      <li><span class="k">SEARCH</span><h3>Dig the junk</h3><p>With the room clear, hold interact on a pile, pick Quick Rummage, Thorough or Deep Clean, and roll d20 + PER. The terminal might be in the big mound.</p></li>
+      <li><span class="k">LEAVE</span><h3>Pick an exit</h3><p>The right door unlocks. Or climb the ladder to the hatch and go up to A2. The room remembers what you killed, opened and searched.</p></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>The hidden dice</h2>
+    <p>Skill decides whether you connect. The d20 decides how well. These are the Crawl's own numbers: sword <code>d6</code>, STR 12 (+1), the +4 bonus for a hit that physically lands, against a Dust Rat with 8 HP and DEF 5.</p>
+    <div class="dice">
+      <div class="card roll-out">
+        <div class="die"><span id="dieFace">14</span><small>d20</small></div>
+        <span class="tier hit" id="tier">HIT</span>
+        <div class="math" id="math">14 + 1 STR + 4 connected = 19 → HIT
+damage: d6 (4) + 1 STR − floor(5 DEF / 2) = 3</div>
+        <div class="ratbar">RAT <i id="ratHp" style="--v:62.5%"></i> <span id="ratTxt">5/8</span></div>
+        <button class="rollbtn" id="swing" type="button">Swing at the rat</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>TOTAL</th><th>RESULT IN THE ROOM</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--crit)">NAT 20</td><td>Crit. 1.5x damage, screen shake, a short freeze-frame, 80% chance to apply the weapon's condition.</td></tr>
+            <tr><td>11+</td><td>Hit. Full damage and knockback, 40% condition chance.</td></tr>
+            <tr><td style="color:var(--glance)">5-10</td><td>Glancing blow. Grey number, half damage, 5% condition chance.</td></tr>
+            <tr><td style="color:var(--miss)">1-4</td><td>Miss. A "MISS" puff even though the blade touched. With the +4 bonus this only happens on a natural 1 or 2 for most builds.</td></tr>
+          </tbody>
+        </table>
+        <p class="small">Enemies roll the same way when they touch you. A dodge-roll through an attack is a guaranteed avoid. It costs stamina, which END pays for.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The Montor tick</h2>
+    <p>Anything the Crawl counts in turns now counts in one-second ticks. The existing <code>tickConditions</code> runs once per tick for you and for every enemy, so bleed, poison, burn and reactions keep their numbers. Here's the rat after a Bread Knife crit, standing in the puddle:</p>
+    <div class="tickwrap">
+      <div class="ticks" role="table" aria-label="Condition ticks over six seconds">
+        <div class="lab">SECOND</div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
+        <div class="lab">BLEED</div><div class="b">−1</div><div class="b">−2</div><div class="b">−2</div><div>·</div><div>·</div><div>·</div>
+        <div class="lab">WET</div><div class="w">wet</div><div class="w">wet</div><div class="w">wet</div><div class="w">wet</div><div>·</div><div>·</div>
+        <div class="lab">CHARGED</div><div>·</div><div>·</div><div class="x">ZAP</div><div>·</div><div>·</div><div>·</div>
+      </div>
+    </div>
+    <p class="small">Second 3: a Cattle Prod hit adds CHARGED to a WET target, and CONDUCTANCE fires for 8 damage and dazes every enemy in the water. Bombs use the same clock: a 2-turn fuse becomes 3 seconds.</p>
+  </section>
+
+  <section>
+    <h2>What your stats do here</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>STAT</th><th>SAME AS THE CRAWL</th><th>ALSO, IN THE ROOM</th></tr></thead>
+        <tbody>
+          <tr><td>STR</td><td>+hit, +damage</td><td>More knockback. Lift and throw heavier junk.</td></tr>
+          <tr><td>AGI</td><td>Double strike, dodge</td><td>Run speed, attack speed, longer dodge-roll invulnerability, slower enemy reactions on entry.</td></tr>
+          <tr><td>DEF</td><td>Damage reduction, block</td><td>Less knockback and shorter stagger when hit.</td></tr>
+          <tr><td>END</td><td>Regen per room, carry weight</td><td>Stamina for roll, sprint and block. Carrying over your limit lowers your jump.</td></tr>
+          <tr><td>PER</td><td>Junk search roll</td><td>Shows trap tiles and cracked walls near you, like the dotted trap in this room.</td></tr>
+          <tr><td>VIT · LCK · INT · CHA</td><td>HP, crits and loot, condition chance, prices</td><td>Unchanged.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Where this room sits</h2>
+    <div class="cols">
+      <div class="card">
+        <div class="map" aria-label="Garden zone map">
+          <div class="seen">A1</div><div class="seen">A2</div><div>A3</div><div>A4</div>
+          <div class="seen">B1</div><div class="here">B2</div><div>B3</div><div>B4</div>
+          <div>C1</div><div>C2</div><div>C3</div><div>C4</div>
+          <div>D1</div><div>D2</div><div>D3</div><div>D4</div>
+        </div>
+        <p class="small">The Crawl's maze generator is unchanged. B2 connects left to B1 (door), right to B3 (door) and up to A2 (ladder and hatch). A connection downwards would be a drop hole in the floor.</p>
+      </div>
+      <div class="card">
+        <h3>Weapons change your moves</h3>
+        <p class="small">Sword: a medium arc and a downward stab in the air. Dagger: a fast three-hit combo, and you can attack mid-roll. Spear: a long poke, and bouncing on enemies with a down-attack. Mace: a slow overhead that stuns on stagger. Axe: a huge arc that steps you forward. Fists: grab a rat and throw it.</p>
+      </div>
+      <div class="card">
+        <h3>Still to draw</h3>
+        <p class="small">The knight has one front-facing pose, so it needs side-on run, jump, attack and roll frames. Doors need side-view versions. Tiles are placeholders drawn in the same black-outline flat style. Everything else is ready.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var SPR = {"knight":{"w":18,"h":24,"pal":["#000000","#9ca3af","#6b7280"],"rows":["......aaaaaa......",".....abbbbbba.....","....abbbbbbbba....","....abccccccba....","....abbbbbbbba....",".....abccccba.....","......abbbba......","..aaaaabbbbaaaaa..",".acbbabbbbbbabbca.",".abbbacbbbbcabbba.",".abbbabbccbbabbba.",".abbbabcbbcbabbba.","..abbabbbbbbabba..","..aba.acccca.aba..","..aba.abbbba.aba..","..aaa.abbbba.aaa..","......abbbba......",".....abbaabba.....",".....abcaacba.....",".....abbaabba.....",".....abbaabba.....","....abcbaabcba....","...aabba..abbaa...","...aaaaa..aaaaa..."]},"rat":{"w":16,"h":14,"pal":["#000000","#d4c8a0","#9a8e6a"],"rows":["..aa.......aa...",".abba.....abba..",".abbaaaaaaabba..","..abbbbbbbbba...",".abbbbbbbbbbba..",".abcabbccbbabaa.",".abbbbbbbbbbbaba","abbbaabbbbaabbaa","abbbbbbbbbbbbba.","abbcbbbbbbbbcba.","abbbbbbbbbbbbba.",".abbbbbbbbbbba..","..abaa....aaba..","..aaa......aaa.."]},"slug":{"w":22,"h":12,"pal":["#000000","#5b8dd9","#2e5a9a"],"rows":["..aa..................",".abbaa................",".aababa...............","..abba................",".abbbbaaaaaaaaaaaaa...","abbcbbbbcbbcbbcbbcbba.","abbbbbbbbbbbbbbbbbbba.","abcbbbbcbbbbcbbbcbbaa.","abbbbbbbbbbbbbbbbba...",".abbbbbbbbbbbbbbba....","..aabbbbbbbbbbaa......","....aaaaaaaaaa........"]},"bat":{"w":22,"h":12,"pal":["#000000","#d4c8a0","#9a8e6a"],"rows":[".........aaaa.........","aa......abccba......aa","aba....abbaabba....aba","abba..abbbbbbbba..abba","abcbaabbcbbbbcbbaabcba",".abbbbbbbbbbbbbbbbbba.","..abbbcbbbbbbbbcbbba..","...abbbbbccccbbbbba...","....abbbabbbbabbba....",".....aba.abba.aba.....","......a...aa...a......","......................"]},"corpse_rat":{"w":10,"h":6,"pal":["#000000","#8b2020","#aa3030","#cc4040","#661515"],"rows":["..........","..aa......",".abcbaa...","acdcdbca..",".abecebaa.","..aaaaaa.."]},"junk_garden_1":{"w":20,"h":10,"pal":["#000000","#4a6a2a","#5a3a1e","#7a9a4a","#5a7a3a","#6b4e2e","#8b6639","#c47a3a","#d4854a","#aa6633","#8b4513","#3d2b1a"],"rows":["aa...........bb.....","acaa........bdeb....","afgcaa....aahhada...","agcfgcaaaahijheeba..","acfgckfgjhihgfgeba..","afkcfgcjhgfjcgfcea..","acfgcfkfcfgcfcgfcba.","alcflcflfclfclclfca.","allcllclllcllcllclla","aaaaaaaaaaaaaaaaaaaa"]},"junk_garden_2":{"w":14,"h":23,"pal":["#8b4513","#9b7653","#000000","#5a7a3a","#7a9a4a","#4a6a2a","#aa6633","#c47a3a","#d4854a","#8b6639","#6b4e2e","#666","#888","#5a3a1e","#3d2b1a"],"rows":["..a...........","..a...........","..a.....b.....","..c.....b.....","..c....ba.....","ccdc...ac.....","cdefc.ac......","cghdecc.......","chighc........","cjghjc........","ckjlmlc.......","cakmlmdc......","cnakjkfc......","cknhgjdfc.....","cjknagkdc.....","cnjkjnakfc....","cknankjndc....","cnkjknkjkfc...","conknknnjnc...","cononokonknc..","coononononoc.","cooooonooonoc","ccccccccccccc"]},"junk_garden_3":{"w":22,"h":18,"pal":["#000000","#4a6a2a","#7a9a4a","#5a7a3a","#c47a3a","#aa6633","#888","#d4854a","#8b6639","#666","#6b4e2e","#9b7653","#8b4513","#5a3a1e","#3d2b1a"],"rows":["aaa............bc.....","adbaa........bcdb.....","acdefaa.....agacda....","aehfeiaa.gjgjaga......","afeihdkaaj.ga.........","aikfeidbga............","aklifkeda.............","amklifikba............","alikelkmda............","akemikflkca...........","anlkfineida...........","amnikemkfkba..........","akinmklinmda..........","ankiknkniknba.........","aonknmnknikna.........","aoononkonknkna........","aononononoknona.......","aaaaaaaaaaaaaaa......."]},"chest":{"w":10,"h":8,"pal":["#000000","#6b4e2e","#7a9060"],"rows":[".aaaaaaaa.","abbbbbbbba","abbbccbbba","aaaaaaaaaa","abbbbbbbba","abbbbbbbba","abbbbbbbba","aaaaaaaaaa"]},"trap":{"w":10,"h":6,"pal":["#000000","#7a9060"],"rows":[".a..aa..a.","..a....a..","aaaaaaaaaa","ababaababa","aaaaaaaaaa",".........."]},"stairs_down":{"w":10,"h":10,"pal":["#000000","#5a6e4a","#7a9060"],"rows":["aaaaaaaaaa","abbbbbbbba",".abbbbbba.",".acccccca.","..abbbba..","..acccca..","...abba...","...acca...","....aa....","....aa...."]},"door":{"w":12,"h":14,"pal":["#7a9060","#000000","#5a6e4a","#6b4e2e"],"rows":["...a.aa.a...",".bbbbbbbbbb.","bccbdbdbdccb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bdadbd.cb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bbbbbb.cb","bccccccccccb","bcacccccaccb","bbbbbbbbbbbb"]},"door_open":{"w":12,"h":14,"pal":["#7a9060","#000000","#5a6e4a","#6b4e2e"],"rows":["...a....a...",".bbbbbbbbbb.","bcc.....bdcb","bc......bdcb","bc......bdcb","bc......bacb","bc......bdcb","bc......bdcb","bc......bdcb","bc......bdcb","bc......bbcb","bccccccccccb","bcacccccaccb","bbbbbbbbbbbb"]},"cond_BLEED":{"w":6,"h":6,"pal":["#cc2222","#ff4444"],"rows":["..a...",".aba..",".aba..","..aba.","...aa.","....a."]},"cond_POISON":{"w":6,"h":6,"pal":["#000000","#44aa44","#66cc66"],"rows":["..aa..",".abba.","abcbba","abbcba",".abba.","..aa.."]},"cond_WET":{"w":6,"h":6,"pal":["#4488cc","#66aaee"],"rows":["..a...",".aba..","..a...",".a.a..","ababa.",".a.a.."]}};
+
+  var PINS = [
+    { x: 12,  y: 150, t: 'Door in (open)', d: 'Back to B1. Existing gate sprite at 2x; needs a side-view version.' },
+    { x: 308, y: 150, t: 'Sealed door', d: 'Locks while enemies are alive. Force it with an AGI check and pay the Crawl\'s flee cost in HP and gold.' },
+    { x: 147, y: 141, t: 'The knight, mid-swing', d: 'The sword arc is the hitbox. Touch the rat and the d20 rolls.' },
+    { x: 199, y: 162, t: 'Dust Rat', d: 'Rat grid in Dust colour. Runs at you, flees at 30% HP, can call more rats from the walls.' },
+    { x: 66,  y: 160, t: 'Rat corpse', d: 'Corpses stay on the floor. Another rat or a hound can eat one to heal.' },
+    { x: 112, y: 182, t: 'Puddle', d: 'Standing in it makes you WET. Set up CONDUCTANCE or INSTANT FREEZE.' },
+    { x: 74,  y: 116, t: 'One-way plank', d: 'Jump up through it. Press down and jump to drop through.' },
+    { x: 57,  y: 81,  t: 'Junk heap', d: 'Hold interact to search. Harder to reach, so a better loot table.' },
+    { x: 200, y: 60,  t: 'Ladder to the hatch', d: 'The up exit to A2 in the maze.' },
+    { x: 170, y: 22,  t: 'Bat', d: 'Hangs from the ceiling, then swoops in a wave pattern. Very fast, dies in one hit.' },
+    { x: 283, y: 62,  t: 'Slate Slug', d: 'Crawls on ledges and ceilings and leaves a POISON trail. Slime Coat raises its DEF.' },
+    { x: 238, y: 66,  t: 'Chest', d: 'On the high ledge. Climb the ladder and jump across. Loot uses d100 + LCK.' },
+    { x: 231, y: 166, t: 'Spotted trap', d: 'The dotted outline means PER found it. Step on it and dodge-roll the spring blade, or take the hit and get the trap-loot bonus.' },
+    { x: 262, y: 150, t: 'Junk mound', d: 'The biggest pile. One pile per zone hides the terminal, which unlocks the stairs and your gifts.' }
+  ];
+
+  function blit(ctx, key, x, y, scale, flip) {
+    var s = SPR[key]; scale = scale || 1;
+    for (var r = 0; r < s.h; r++) {
+      var row = s.rows[r];
+      for (var c = 0; c < s.w; c++) {
+        var ch = row.charAt(c);
+        if (ch === '.' || ch === '') continue;
+        var i = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.indexOf(ch);
+        ctx.fillStyle = s.pal[i];
+        var cx = flip ? (s.w - 1 - c) : c;
+        ctx.fillRect(x + cx * scale, y + r * scale, scale, scale);
+      }
+    }
+  }
+
+  // Garden palette (doorThemes.garden + junk sprite browns)
+  var P = { sky: '#141a14', back: '#1c241a', backLine: '#232d20', wall: '#5a6e4a', wallHi: '#7a9060', dirt: '#6b4e2e', dirtDk: '#3d2b1a', grass: '#5a7a3a', grassHi: '#7a9a4a', plank: '#8b6639', plankDk: '#5a3a1e', water: '#2e5a9a', waterHi: '#5b8dd9', K: '#000000' };
+
+  function tiles(ctx) {
+    var T = 16, x, y;
+    ctx.fillStyle = P.sky; ctx.fillRect(0, 0, 320, 192);
+    // back wall: brick courses
+    ctx.fillStyle = P.back; ctx.fillRect(16, 16, 288, 160);
+    ctx.fillStyle = P.backLine;
+    for (y = 16; y < 176; y += 8) {
+      ctx.fillRect(16, y, 288, 1);
+      for (x = 16 + ((y / 8) % 2) * 8; x < 304; x += 16) ctx.fillRect(x, y, 1, 8);
+    }
+    // hanging vines on the back wall
+    ctx.fillStyle = '#2f4424';
+    [[40, 16, 30], [120, 16, 22], [270, 16, 18], [96, 16, 12]].forEach(function (v) {
+      for (var k = 0; k < v[2]; k += 2) ctx.fillRect(v[0] + (k % 6 === 0 ? 1 : 0), v[1] + k, 2, 2);
+    });
+    // stone block helper
+    function stone(sx, sy) {
+      ctx.fillStyle = P.K; ctx.fillRect(sx, sy, T, T);
+      ctx.fillStyle = P.wall; ctx.fillRect(sx + 1, sy + 1, T - 2, T - 2);
+      ctx.fillStyle = P.wallHi; ctx.fillRect(sx + 1, sy + 1, T - 2, 2); ctx.fillRect(sx + 1, sy + 1, 2, T - 2);
+    }
+    // ceiling with hatch gap at col 12
+    for (x = 0; x < 20; x++) if (x !== 12) stone(x * T, 0);
+    // hatch: trapdoor planks
+    ctx.fillStyle = P.K; ctx.fillRect(192, 0, 16, 16);
+    ctx.fillStyle = P.plankDk; ctx.fillRect(193, 1, 14, 14);
+    ctx.fillStyle = P.plank; ctx.fillRect(193, 4, 14, 2); ctx.fillRect(193, 10, 14, 2);
+    // side walls with door openings rows 9-10
+    for (y = 1; y < 11; y++) {
+      if (y < 9) { stone(0, y * T); stone(304, y * T); }
+    }
+    // floor: dirt with grass lip, puddle dip cols 6-7
+    for (x = 0; x < 20; x++) {
+      var fx = x * T;
+      if (x === 6 || x === 7) {
+        ctx.fillStyle = P.dirtDk; ctx.fillRect(fx, 184, T, 8);
+        ctx.fillStyle = P.water; ctx.fillRect(fx, 179, T, 5);
+        ctx.fillStyle = P.waterHi; ctx.fillRect(fx + 2 + (x % 2) * 6, 179, 5, 1);
+        continue;
+      }
+      ctx.fillStyle = P.K; ctx.fillRect(fx, 176, T, 16);
+      ctx.fillStyle = P.dirt; ctx.fillRect(fx, 178, T, 14);
+      ctx.fillStyle = P.dirtDk; ctx.fillRect(fx + 3 + (x * 5) % 8, 184 + (x % 3) * 2, 2, 2);
+      ctx.fillStyle = P.grass; ctx.fillRect(fx, 177, T, 3);
+      ctx.fillStyle = P.grassHi; ctx.fillRect(fx + (x * 3) % 12, 176, 2, 2);
+    }
+    // puddle edges
+    ctx.fillStyle = P.K; ctx.fillRect(95, 176, 1, 16); ctx.fillRect(128, 176, 1, 16);
+    // one-way plank, cols 2-6 at y=112
+    ctx.fillStyle = P.K; ctx.fillRect(32, 112, 80, 5);
+    ctx.fillStyle = P.plank; ctx.fillRect(32, 113, 80, 3);
+    ctx.fillStyle = P.plankDk; for (x = 32; x < 112; x += 16) ctx.fillRect(x, 113, 1, 3);
+    ctx.fillStyle = P.K; ctx.fillRect(40, 117, 2, 8); ctx.fillRect(102, 117, 2, 8); // brackets
+    // stone ledge right, cols 14-18 at y=80
+    for (x = 14; x < 19; x++) stone(x * T, 80);
+    // ladder col 12 from y=16 to 176
+    ctx.fillStyle = P.K; ctx.fillRect(194, 16, 3, 160); ctx.fillRect(203, 16, 3, 160);
+    ctx.fillStyle = P.plank; ctx.fillRect(195, 16, 1, 160); ctx.fillRect(204, 16, 1, 160);
+    for (y = 20; y < 176; y += 8) { ctx.fillStyle = P.K; ctx.fillRect(196, y, 7, 2); ctx.fillStyle = P.plank; ctx.fillRect(196, y, 7, 1); }
+  }
+
+  function dottedRect(ctx, x, y, w, h, col) {
+    ctx.fillStyle = col;
+    for (var i = 0; i < w; i += 2) { ctx.fillRect(x + i, y, 1, 1); ctx.fillRect(x + i, y + h - 1, 1, 1); }
+    for (var j = 0; j < h; j += 2) { ctx.fillRect(x, y + j, 1, 1); ctx.fillRect(x + w - 1, y + j, 1, 1); }
+  }
+
+  // tiny 3x5 pixel digits for floating numbers
+  var DIG = { '0': '111101101101111', '1': '010110010010111', '2': '111001111100111', '3': '111001111001111', '4': '101101111001001', '5': '111100111001111', '6': '111100111101111', '7': '111001001001001', '8': '111101111101111', '9': '111101111001111', 'M': '101111111101101', 'I': '111010010010111', 'S': '111100111001111', '!': '010010010000010' };
+  function pxText(ctx, str, x, y, col) {
+    for (var n = 0; n < str.length; n++) {
+      var g = DIG[str.charAt(n)]; if (!g) { x += 2; continue; }
+      for (var k = 0; k < 15; k++) if (g.charAt(k) === '1') {
+        var gx = x + (k % 3) * 1, gy = y + Math.floor(k / 3);
+        ctx.fillStyle = P.K; ctx.fillRect(gx - 1, gy - 1, 3, 3);
+      }
+      for (k = 0; k < 15; k++) if (g.charAt(k) === '1') { ctx.fillStyle = col; ctx.fillRect(x + (k % 3), y + Math.floor(k / 3), 1, 1); }
+      x += 5;
+    }
+  }
+
+  var canvas = document.getElementById('room');
+  var ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  var last = { dmg: '3', col: '#e8e2cc' };
+
+  function draw(phase) {
+    tiles(ctx);
+    blit(ctx, 'door_open', 0, 148, 2);
+    blit(ctx, 'door', 296, 148, 2);
+    // seal: red bars across the right door
+    ctx.fillStyle = '#cc2222'; ctx.fillRect(298, 158, 20, 2); ctx.fillRect(298, 166, 20, 2);
+    blit(ctx, 'junk_garden_2', 50, 89);
+    blit(ctx, 'chest', 232, 72);
+    blit(ctx, 'slug', 272, 68, 1, true);
+    blit(ctx, 'bat', 139, 17);
+    blit(ctx, 'junk_garden_3', 251, 158);
+    blit(ctx, 'trap', 226, 170);
+    dottedRect(ctx, 223, 167, 16, 11, '#f0c040');
+    blit(ctx, 'corpse_rat', 60, 170);
+    var bob = phase ? Math.round(Math.sin(phase * 6.283) * 1) : 0;
+    blit(ctx, 'rat', 176, 162 + (bob > 0 ? 0 : bob));
+    blit(ctx, 'knight', 138, 152);
+    // sword arc (swing effect), right of the knight
+    ctx.fillStyle = '#e8e2cc';
+    var arc = [[158, 150], [162, 151], [165, 153], [168, 156], [170, 160], [171, 164], [170, 168]];
+    arc.forEach(function (p, i) { ctx.fillRect(p[0], p[1], 3 - (i > 4 ? 1 : 0), 2); });
+    ctx.fillStyle = '#9ca3af'; ctx.fillRect(156, 162, 12, 2); ctx.fillStyle = P.K; ctx.fillRect(154, 161, 2, 4);
+    // floating number above the rat
+    var rise = phase ? Math.round(phase * 6) : 0;
+    pxText(ctx, last.dmg, 184, 146 - rise, last.col);
+  }
+
+  // legend + pins
+  var legend = document.getElementById('legend');
+  var screen = document.getElementById('screen');
+  PINS.forEach(function (p, i) {
+    var li = document.createElement('li');
+    li.id = 'lg' + (i + 1);
+    li.innerHTML = '<span class="n">' + (i + 1) + '</span><span class="t"><b></b> <span></span></span>';
+    li.querySelector('b').textContent = p.t + '.';
+    li.querySelector('.t > span').textContent = p.d;
+    legend.appendChild(li);
+    var b = document.createElement('button');
+    b.className = 'pin'; b.type = 'button'; b.textContent = i + 1;
+    b.setAttribute('aria-label', (i + 1) + ': ' + p.t);
+    b.style.left = (p.x / 320 * 100) + '%'; b.style.top = (p.y / 192 * 100) + '%';
+    function on() {
+      screen.querySelectorAll('.pin.on').forEach(function (e) { e.classList.remove('on'); });
+      legend.querySelectorAll('li.on').forEach(function (e) { e.classList.remove('on'); });
+      b.classList.add('on'); li.classList.add('on');
+    }
+    b.addEventListener('click', function () { on(); if (window.innerWidth < 820) li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+    li.addEventListener('mouseenter', on);
+    screen.appendChild(b);
+  });
+
+  // HUD condition icon
+  var hw = document.getElementById('hudWet').getContext('2d');
+  blit(hw, 'cond_WET', 0, 0);
+
+  // dice demo
+  var ratHp = 8;
+  var TIERCOL = { crit: '#f0c040', hit: '#e8e2cc', glance: '#8f8a7a', miss: '#c05050' };
+  function d(n) { return 1 + Math.floor(Math.random() * n); }
+  document.getElementById('swing').addEventListener('click', function () {
+    if (ratHp <= 0) ratHp = 8;
+    var nat = d(20), total = nat + 1 + 4, tier, dmgRoll = d(6), dmg = 0, line2;
+    if (nat === 20) tier = 'crit';
+    else if (nat === 1) tier = 'miss';
+    else if (total >= 11) tier = 'hit';
+    else if (total >= 5) tier = 'glance';
+    else tier = 'miss';
+    var base = Math.max(1, dmgRoll + 1 - 2);
+    if (tier === 'crit') { dmg = Math.floor(base * 1.5); line2 = 'damage: (d6 (' + dmgRoll + ') + 1 STR − 2 DEF) × 1.5 crit = ' + dmg; }
+    else if (tier === 'hit') { dmg = base; line2 = 'damage: d6 (' + dmgRoll + ') + 1 STR − floor(5 DEF / 2) = ' + dmg; }
+    else if (tier === 'glance') { dmg = Math.max(1, Math.floor(base / 2)); line2 = 'damage: half of ' + base + ' = ' + dmg; }
+    else { line2 = nat === 1 ? 'natural 1: always a miss' : 'no damage'; }
+    ratHp = Math.max(0, ratHp - dmg);
+    var labels = { crit: 'CRITICAL HIT', hit: 'HIT', glance: 'GLANCING BLOW', miss: 'MISS' };
+    document.getElementById('dieFace').textContent = nat;
+    var t = document.getElementById('tier'); t.className = 'tier ' + tier; t.textContent = labels[tier];
+    document.getElementById('math').textContent = nat + ' + 1 STR + 4 connected = ' + total + ' → ' + labels[tier] + '\n' + line2 + (ratHp === 0 ? '\nThe rat is dead. Swing again for a fresh one.' : '');
+    document.getElementById('ratHp').style.setProperty('--v', (ratHp / 8 * 100) + '%');
+    document.getElementById('ratTxt').textContent = ratHp + '/8';
+    last = { dmg: tier === 'miss' ? 'MISS' : String(dmg) + (tier === 'crit' ? '!' : ''), col: TIERCOL[tier] };
+    if (reduce) draw(0);
+  });
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  draw(0);
+  if (!reduce) {
+    var start = null;
+    (function loop(ts) {
+      if (start === null) start = ts;
+      var ph = ((ts - start) / 1400) % 1;
+      draw(ph);
+      requestAnimationFrame(loop);
+    })(performance.now());
+  }
+})();
+</script>
