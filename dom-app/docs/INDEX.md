@@ -27,6 +27,7 @@
 | [Narrative Mode Spec](narrative_mode_spec.md) | Text-based RPG with Montor as AI DM — async multiplayer, dice rolls, campaign chapters |
 | [Stage 2 Persistent Characters](stage2_persistent_characters_spec.md) | 3 character slots, banked gifts, tavern hub, run history |
 | [Narrative Mode Demo](narrative_mode_demo.md) | Sample campaign showing how the text RPG plays — shareable |
+| [Platformer Mode Spec](platformer_mode_spec.md) | Montor's Descent — room-by-room side-view platformer version using the same mechanics, data and sprites |
 
 ---
 

@@ -200,6 +200,13 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
 |            | Gift leveling (Hades-style) + mono-gift synergy bonuses | ⬜ |
 |            | The Dump — pre-run junk trade hub for permanent unlocks | ⬜ |
+|            | **Montor's Descent — platformer mode (new version)** — room-by-room side-view platformer, same data/mechanics/sprites. Spec: `dom-app/docs/platformer_mode_spec.md` | |
+| 2026-09-23 | Platformer mode spec written (v0.1) | ✅ Done |
+|            | P0 — Feel prototype: one Garden room, knight run/jump/sword, one rat, hidden d20 hit tiers | ⬜ |
+|            | P1 — One zone: Garden 4x4 maze as rooms, doors/ladders/drops, map, loot pickups, death | ⬜ |
+|            | P2 — Full systems: junk piles, terminal/gifts, merchants, all weapon movesets, throwables, conditions on Montor tick, levelling, Garden boss | ⬜ |
+|            | P3 — Whole dungeon: 7 floors / 13 zones, tilesets, all archetype AI, bosses, safe rooms, Montor mood | ⬜ |
+|            | P4 — Polish + Tavern tile live (gear overlays, particles, gamepad, balance) | ⬜ |
 
 ---
 
@@ -213,6 +220,9 @@ Stage 2 — The Tavern        Persistent character. Multi-class. Levelling. Pre-
 Stage 3 — The Party         Multiplayer. Friends join. Async turns.
 Stage 4 — Montor Awakens    AI narrative layer. Mood system. Offers and Curses.
 Stage 5 — The Long Game     Factions, deities, legacy, embuing.
+
+Parallel version:
+Montor's Descent            Side-view platformer. Same dungeon, same mechanics, real-time.
 ```
 
 Each stage is a shippable, playable game. Currently working on **Stage 1**.
