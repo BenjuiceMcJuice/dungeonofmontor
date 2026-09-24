@@ -4,6 +4,7 @@
 > Written 2026-09-23. Status: **spec only -- nothing built yet.**
 > Example room mockup (real sprites, annotated): [platformer_room_mockup.html](platformer_room_mockup.html) -- open in a browser.
 > Alternative direction (junk as the game, fewer Crawl mechanics): [platformer_design_options.md](platformer_design_options.md).
+> **Superseded on mechanics by [platformer_descent_spec.md](platformer_descent_spec.md) (v1).** Sections 5, 7, 8, 10 here (rooms, sprites, controls, architecture) still apply.
 
 ---
 

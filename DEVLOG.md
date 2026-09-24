@@ -200,15 +200,18 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 |            | Room events — pollen, rain, grease fires, day/night (Garden) | ⬜ |
 |            | Gift leveling (Hades-style) + mono-gift synergy bonuses | ⬜ |
 |            | The Dump — pre-run junk trade hub for permanent unlocks | ⬜ |
-|            | **Montor's Descent — platformer mode (new version)** — room-by-room side-view platformer, same data/mechanics/sprites. Spec: `dom-app/docs/platformer_mode_spec.md` | |
-| 2026-09-23 | Platformer mode spec written (v0.1) | ✅ Done |
+|            | **Montor's Descent — junk platformer (new version)** — snap-to-grid, 3 stats, fixed Montor lines. Spec: `dom-app/docs/platformer_descent_spec.md` | |
+| 2026-09-23 | Platformer mode spec v0.1 (faithful Crawl port) — superseded on mechanics, tech notes still apply | ✅ Done |
 | 2026-09-23 | Platformer example room mockup — "The Potting Shed" (Garden B2), real sprite grids, annotated + mechanics explainer | ✅ Done |
-| 2026-09-23 | Platformer design options — junk as physical puzzle objects, 9 directions (stack / contraptions / wear-the-house / cleaning / dig / chain-reaction / memory / greed / co-op), recommended C+E+D+H+G loop, 6-step prototype order | ✅ Done |
-|            | P0 — Feel prototype: one Garden room, knight run/jump/sword, one rat, hidden d20 hit tiers | ⬜ |
-|            | P1 — One zone: Garden 4x4 maze as rooms, doors/ladders/drops, map, loot pickups, death | ⬜ |
-|            | P2 — Full systems: junk piles, terminal/gifts, merchants, all weapon movesets, throwables, conditions on Montor tick, levelling, Garden boss | ⬜ |
-|            | P3 — Whole dungeon: 7 floors / 13 zones, tilesets, all archetype AI, bosses, safe rooms, Montor mood | ⬜ |
-|            | P4 — Polish + Tavern tile live (gear overlays, particles, gamepad, balance) | ⬜ |
+| 2026-09-23 | Platformer design options — junk as physical puzzle objects, 9 directions, recommended C+E+D+H+G loop | ✅ Done |
+| 2026-09-24 | **Montor's Descent spec v1** — grid rules, MIGHT/NIMBLE/EYE, junk objects (size/weight/material/use/hits), no-dice combat + 5 material rules, layered piles, bins + tidy/trash exits, the sack, 3-fragment treasures → Gifts, fixed Montor line events + mood, 12 enemy junk rules, one new rule per floor, data/code layout | ✅ Done |
+|            | P0 — One Garden room: grid move, pick up / throw / swing / put down, pot + rake + gnome, one rat | ⬜ |
+|            | P1 — Piles with layers + spill, EYE silhouettes, one trap, stacking to reach a ledge | ⬜ |
+|            | P2 — Bins + tidy door + trash hole, mess meter, mood, 10 Montor events | ⬜ |
+|            | P3 — The sack, weight tiers, creaking floors, safe room (sell / dump / give) | ⬜ |
+|            | P4 — Full Garden: 4x4 maze from templates, 4 enemies, fragments + plinth + Gift, boss, stairs, death, Tavern tile | ⬜ |
+|            | P5 — Floors -1 to -3 with their rules, 8 more enemies, food-as-progression | ⬜ |
+|            | P6 — Floors -4 to -6, both endings, polish, ship to main | ⬜ |
 
 ---
 
@@ -224,7 +227,7 @@ Stage 4 — Montor Awakens    AI narrative layer. Mood system. Offers and Curses
 Stage 5 — The Long Game     Factions, deities, legacy, embuing.
 
 Parallel version:
-Montor's Descent            Side-view platformer. Same dungeon, same mechanics, real-time.
+Montor's Descent            Snap-to-grid junk platformer. Same house, same sprites, its own rules.
 ```
 
 Each stage is a shippable, playable game. Currently working on **Stage 1**.
