@@ -10,8 +10,15 @@ var root = path.join(here, '..')
 // The engine is a plain ES module; strip its export line so it runs as a classic script.
 var engine = fs.readFileSync(path.join(root, 'src/descent/engine.js'), 'utf8').replace(/\nexport \{[^}]*\}\n?/, '\n')
 
-// Assets: load lib/sprites.js through the same encoder the app uses (assets.js) via a dynamic import.
-var assets = await import(path.join(root, 'src/descent/assets.js')).then(function(m) { return m.buildDescentAssets('garden') })
+// Assets: run the app's own encoder (assets.js → lib/sprites.js). Node needs an import attribute for the
+// JSON theme file that Vite doesn't, so import patched copies from a temp dir rather than the sources.
+import os from 'os'
+var tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'descent-'))
+fs.writeFileSync(path.join(tmp, 'themes.json'), fs.readFileSync(path.join(root, 'src/data/themes.json')))
+fs.writeFileSync(path.join(tmp, 'sprites.js'), fs.readFileSync(path.join(root, 'src/lib/sprites.js'), 'utf8').replace("from '../data/themes.json'", "from './themes.json' with { type: 'json' }"))
+fs.writeFileSync(path.join(tmp, 'assets.js'), fs.readFileSync(path.join(root, 'src/descent/assets.js'), 'utf8').replace("from '../lib/sprites.js'", "from './sprites.js'"))
+var assets = await import(path.join(tmp, 'assets.js')).then(function(m) { return m.buildDescentAssets('garden') })
+fs.rmSync(tmp, { recursive: true, force: true })
 
 var html = `<title>Montor's Descent</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
