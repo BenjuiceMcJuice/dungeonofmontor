@@ -1,0 +1,930 @@
+<title>Montor's Descent</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+  :root { color-scheme: dark; --bg:#050407; --gold:#d4a017; --muted:#8b7b60; }
+  body { background: var(--bg); margin: 0; color: #d4c8a0; font-family: system-ui, sans-serif; }
+  .wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 16px 24px; gap: 8px; }
+  h1 { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--gold); margin: 6px 0 0; }
+  canvas { width: 100%; max-width: 720px; aspect-ratio: 360 / 300; image-rendering: pixelated; touch-action: none; display: block; }
+  p { font-size: 12px; color: var(--muted); max-width: 60ch; text-align: center; margin: 0; line-height: 1.5; }
+</style>
+<div class="wrap">
+  <h1>MONTOR'S DESCENT · P0</h1>
+  <canvas id="game" width="360" height="300"></canvas>
+  <p>Keyboard: arrows or WASD to move, <b>Z</b> jump, <b>X</b> act (pick up / throw / swing / dig), <b>C</b> roll. Down+X puts a thing down, Up+X puts it in the sack. On a phone use the pad and buttons.</p>
+  <p>Fill the three bins (wood, metal, Montor's) to open the door. Or take the hole. Dig the pile with anything. Throw the pipe into the water while the slug's in it.</p>
+</div>
+<script>
+var DESCENT_ASSETS = {"knight":{"w":18,"h":24,"pal":["#000000","#9ca3af","#6b7280"],"rows":["......aaaaaa......",".....abbbbbba.....","....abbbbbbbba....","....abccccccba....","....abbbbbbbba....",".....abccccba.....","......abbbba......","..aaaaabbbbaaaaa..",".acbbabbbbbbabbca.",".abbbacbbbbcabbba.",".abbbabbccbbabbba.",".abbbabcbbcbabbba.","..abbabbbbbbabba..","..aba.acccca.aba..","..aba.abbbba.aba..","..aaa.abbbba.aaa..","......abbbba......",".....abbaabba.....",".....abcaacba.....",".....abbaabba.....",".....abbaabba.....","....abcbaabcba....","...aabba..abbaa...","...aaaaa..aaaaa..."]},"rat":{"w":16,"h":14,"pal":["#000000","#d4c8a0","#9a8e6a"],"rows":["..aa.......aa...",".abba.....abba..",".abbaaaaaaabba..","..abbbbbbbbba...",".abbbbbbbbbbba..",".abcabbccbbabaa.",".abbbbbbbbbbbaba","abbbaabbbbaabbaa","abbbbbbbbbbbbba.","abbcbbbbbbbbcba.","abbbbbbbbbbbbba.",".abbbbbbbbbbba..","..abaa....aaba..","..aaa......aaa.."]},"slug":{"w":22,"h":12,"pal":["#000000","#5b8dd9","#2e5a9a"],"rows":["..aa..................",".abbaa................",".aababa...............","..abba................",".abbbbaaaaaaaaaaaaa...","abbcbbbbcbbcbbcbbcbba.","abbbbbbbbbbbbbbbbbbba.","abcbbbbcbbbbcbbbcbbaa.","abbbbbbbbbbbbbbbbba...",".abbbbbbbbbbbbbbba....","..aabbbbbbbbbbaa......","....aaaaaaaaaa........"]},"bat":{"w":22,"h":12,"pal":["#000000","#d4c8a0","#9a8e6a"],"rows":[".........aaaa.........","aa......abccba......aa","aba....abbaabba....aba","abba..abbbbbbbba..abba","abcbaabbcbbbbcbbaabcba",".abbbbbbbbbbbbbbbbbba.","..abbbcbbbbbbbbcbbba..","...abbbbbccccbbbbba...","....abbbabbbbabbba....",".....aba.abba.aba.....","......a...aa...a......","......................"]},"corpse_rat":{"w":10,"h":6,"pal":["#000000","#8b2020","#aa3030","#cc4040","#661515"],"rows":["..........","..aa......",".abcbaa...","acdcdbca..",".abecebaa.","..aaaaaa.."]},"junk_garden_1":{"w":20,"h":10,"pal":["#000000","#4a6a2a","#5a3a1e","#7a9a4a","#5a7a3a","#6b4e2e","#8b6639","#c47a3a","#d4854a","#aa6633","#8b4513","#3d2b1a"],"rows":["aa...........bb.....","acaa........bdeb....","afgcaa....aahhada...","agcfgcaaaahijheeba..","acfgckfgjhihgfgeba..","afkcfgcjhgfjcgfcea..","acfgcfkfcfgcfcgfcba.","alcflcflfclfclclfca.","allcllclllcllcllclla","aaaaaaaaaaaaaaaaaaaa"]},"junk_garden_2":{"w":14,"h":23,"pal":["#8b4513","#9b7653","#000000","#5a7a3a","#7a9a4a","#4a6a2a","#aa6633","#c47a3a","#d4854a","#8b6639","#6b4e2e","#666","#888","#5a3a1e","#3d2b1a"],"rows":["..a...........","..a...........","..a.....b.....","..c.....b.....","..c....ba.....","ccdc...ac.....","cdefc.ac......","cghdecc.......","chighc........","cjghjc........","ckjlmlc.......","cakmlmdc......","cnakjkfc......","cknhgjdfc.....","cjknagkdc.....","cnjkjnakfc....","cknankjndc....","cnkjknkjkfc...","conknknnjnc...","cononokonknc..","coononononoc.","cooooonooonoc","ccccccccccccc"]},"junk_garden_3":{"w":22,"h":18,"pal":["#000000","#4a6a2a","#7a9a4a","#5a7a3a","#c47a3a","#aa6633","#888","#d4854a","#8b6639","#666","#6b4e2e","#9b7653","#8b4513","#5a3a1e","#3d2b1a"],"rows":["aaa............bc.....","adbaa........bcdb.....","acdefaa.....agacda....","aehfeiaa.gjgjaga......","afeihdkaaj.ga.........","aikfeidbga............","aklifkeda.............","amklifikba............","alikelkmda............","akemikflkca...........","anlkfineida...........","amnikemkfkba..........","akinmklinmda..........","ankiknkniknba.........","aonknmnknikna.........","aoononkonknkna........","aononononoknona.......","aaaaaaaaaaaaaaa......."]},"chest":{"w":10,"h":8,"pal":["#000000","#6b4e2e","#7a9060"],"rows":[".aaaaaaaa.","abbbbbbbba","abbbccbbba","aaaaaaaaaa","abbbbbbbba","abbbbbbbba","abbbbbbbba","aaaaaaaaaa"]},"trap":{"w":10,"h":6,"pal":["#000000","#7a9060"],"rows":[".a..aa..a.","..a....a..","aaaaaaaaaa","ababaababa","aaaaaaaaaa",".........."]},"stairs_down":{"w":10,"h":10,"pal":["#000000","#5a6e4a","#7a9060"],"rows":["aaaaaaaaaa","abbbbbbbba",".abbbbbba.",".acccccca.","..abbbba..","..acccca..","...abba...","...acca...","....aa....","....aa...."]},"door":{"w":12,"h":14,"pal":["#7a9060","#000000","#5a6e4a","#6b4e2e"],"rows":["...a.aa.a...",".bbbbbbbbbb.","bccbdbdbdccb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bdadbd.cb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bdbdbd.cb","bc.bbbbbb.cb","bccccccccccb","bcacccccaccb","bbbbbbbbbbbb"]},"door_open":{"w":12,"h":14,"pal":["#7a9060","#000000","#5a6e4a","#6b4e2e"],"rows":["...a....a...",".bbbbbbbbbb.","bcc.....bdcb","bc......bdcb","bc......bdcb","bc......bacb","bc......bdcb","bc......bdcb","bc......bdcb","bc......bdcb","bc......bbcb","bccccccccccb","bcacccccaccb","bbbbbbbbbbbb"]},"cond_BLEED":{"w":6,"h":6,"pal":["#cc2222","#ff4444"],"rows":["..a...",".aba..",".aba..","..aba.","...aa.","....a."]},"cond_POISON":{"w":6,"h":6,"pal":["#000000","#44aa44","#66cc66"],"rows":["..aa..",".abba.","abcbba","abbcba",".abba.","..aa.."]},"cond_WET":{"w":6,"h":6,"pal":["#4488cc","#66aaee"],"rows":["..a...",".aba..","..a...",".a.a..","ababa.",".a.a.."]}};
+// Montor's Descent — P0 engine. One Garden room, snap-to-grid junk platformer.
+// Framework-free canvas game. Spec: docs/platformer_descent_spec.md
+//
+// createDescentGame(canvas, assets, opts) → { destroy }
+//   assets: { key: { w, h, pal, rows } }  (see assets.js — palette-encoded sprite grids)
+//   opts:   { onExit(reason) }
+
+var T = 16            // tile size
+var COLS = 20, ROWS = 12
+var ROOM_W = COLS * T, ROOM_H = ROWS * T       // 320 x 192
+var HUD_H = 20, MONTOR_H = 22, PAD_H = 66
+var VIEW_W = ROOM_W + 40, VIEW_H = HUD_H + ROOM_H + MONTOR_H + PAD_H   // 360 x 300
+var ROOM_X = 20, ROOM_Y = HUD_H
+
+// Tiles
+var EMPTY = 0, SOLID = 1, PLANK = 2, LADDER = 3, WATER = 4, HOLE = 5, DOOR = 6, CRACK = 7
+
+var GRAVITY = 0.32, JUMP_V = -4.55, JUMP_V_HEAVY = -3.8, WALK = 1.35, MAX_FALL = 5
+
+var ALPHA = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+// ---------- Object catalogue (P0 subset of descent-objects.json) ----------
+var OBJ = {
+  cracked_pot:   { name: 'Cracked Pot',         weight: 1, material: 'ceramic', use: 'throw', hits: 1, dmg: 1 },
+  snapped_rake:  { name: 'Snapped Rake Handle', weight: 1, material: 'wood',    use: 'swing', hits: 4, dmg: 1, reach: 2 },
+  broken_gnome:  { name: 'Broken Gnome',        weight: 2, material: 'ceramic', use: 'throw', hits: 99, dmg: 2, montors: true },
+  rusty_pipe:    { name: 'Rusty Pipe',          weight: 2, material: 'metal',   use: 'swing', hits: 6, dmg: 2, reach: 1 },
+  broken_plank:  { name: 'Broken Plank',        weight: 1, material: 'wood',    use: 'swing', hits: 3, dmg: 1, reach: 1 },
+  shard:         { name: 'Pot Shard',           weight: 1, material: 'ceramic', use: 'throw', hits: 1, dmg: 1, noShatter: true },
+  faded_label:   { name: 'Faded Plant Label',   weight: 1, material: 'paper',   use: 'none',  hits: 1, dmg: 0 },
+  gnome_hat:     { name: "Gerald's Hat",        weight: 1, material: 'ceramic', use: 'none',  hits: 1, dmg: 0, fragment: true, montors: true },
+  tangled_hose:  { name: 'Tangled Hose',        weight: 1, material: 'rubber',  use: 'whip',  hits: 8, dmg: 1, reach: 3 },
+}
+
+var MONTOR_LINES = {
+  enter:        ['Every door you open was already open. I left them that way.', "You're still here? Interesting.", 'Take your time. I have forever.'],
+  first_pickup: ["Put that down. ...No, actually. Let's see what you do with it."],
+  break_object: ['That was load-bearing.', 'Fine. I have nine more.', 'Was that necessary?'],
+  break_montors:["That was my gran's.", "I'm going to remember this."],
+  spill:        ['Careful. Things live in there.', 'You could just ask.'],
+  trap:         ['Told you.', 'Ha.'],
+  fragment:     ["Don't drop that. *Don't.*"],
+  fragment_crack: ['...'],
+  bin_good:     ['...Thank you. Don\'t tell anyone.', 'Hm. Neat.'],
+  bin_wrong:    ['That doesn\'t go there.', 'Wrong bin. Obviously.'],
+  tidy_exit:    ['...Thank you. Don\'t tell anyone.'],
+  trash_exit:   ["Leave it. Leave all of it. I'll do it myself. As usual."],
+  sack_heavy:   ['You look ridiculous.'],
+  sack_huge:    ['The floor has opinions about you.'],
+  collapse:     ['Told you.'],
+  zap:          ['Oh. Oh, that\'s clever. I hate it.'],
+  hurt:         ['Adequate.', 'The rats are winning.'],
+  death:        ['Leave your sack on the way out.', "I'll put you with the others."],
+  door_locked:  ['Bins first. I\'m not an animal.'],
+}
+
+// ---------- Room layout ----------
+// Legend: # solid  = plank(one-way)  H ladder  ~ water  o hole  D door  c cracked floor  . empty
+var ROOM = [
+  '####################',
+  '#..................#',
+  '#..................#',
+  '#..................#',
+  '#..................#',
+  '#..............H###',
+  '#..............H...#',
+  '#..............H...#',
+  '#.....====.....H...#',
+  '#..............H...D',
+  '#..............H...D',
+  '###oo####c##~~######',
+]
+// row 11: cols 3-4 hole, col 9 cracked, cols 12-13 water. Ledge cols 15-18 at row 5 (with ladder at col 15 running rows 5-10)
+
+function tileAt(map, tx, ty) {
+  if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return SOLID
+  return map[ty][tx]
+}
+
+function makeMap() {
+  var map = []
+  for (var y = 0; y < ROWS; y++) {
+    var row = []
+    for (var x = 0; x < COLS; x++) {
+      var ch = ROOM[y].charAt(x)
+      row.push(ch === '#' ? SOLID : ch === '=' ? PLANK : ch === 'H' ? LADDER : ch === '~' ? WATER : ch === 'o' ? HOLE : ch === 'D' ? DOOR : ch === 'c' ? CRACK : EMPTY)
+    }
+    map.push(row)
+  }
+  return map
+}
+
+// ---------- Font (3x5) ----------
+var FONT = {'0':'111101101101111','1':'010110010010111','2':'111001111100111','3':'111001111001111','4':'101101111001001','5':'111100111001111','6':'111100111101111','7':'111001001001001','8':'111101111101111','9':'111101111001111','A':'010101111101101','B':'110101110101110','C':'111100100100111','D':'110101101101110','E':'111100110100111','F':'111100110100100','G':'111100101101111','H':'101101111101101','I':'111010010010111','J':'001001001101111','K':'101110100110101','L':'100100100100111','M':'101111111101101','N':'110101101101101','O':'111101101101111','P':'111101111100100','Q':'111101101111001','R':'111101110101101','S':'111100111001111','T':'111010010010010','U':'101101101101111','V':'101101101101010','W':'101101111111101','X':'101101010101101','Y':'101101111010010','Z':'111001010100111','/':'001001010100100',':':'000010000010000','.':'000000000000010',"'":'010010000000000','"':'101101000000000','-':'000000111000000',',':'000000000010100','!':'010010010000010','?':'111001010000010','*':'000101010101000','+':'000010111010000'}
+
+function createDescentGame(canvas, assets, opts) {
+  opts = opts || {}
+  var ctx = canvas.getContext('2d')
+  canvas.width = VIEW_W
+  canvas.height = VIEW_H
+  ctx.imageSmoothingEnabled = false
+
+  // ---- sprite cache ----
+  var cache = {}
+  function sprite(key, flip) {
+    var ck = key + (flip ? '|f' : '')
+    if (cache[ck]) return cache[ck]
+    var s = assets[key]
+    if (!s) return null
+    var c = document.createElement('canvas')
+    c.width = s.w; c.height = s.h
+    var cx = c.getContext('2d')
+    for (var r = 0; r < s.h; r++) for (var col = 0; col < s.w; col++) {
+      var ch = s.rows[r].charAt(col)
+      if (ch === '.' || ch === '') continue
+      cx.fillStyle = s.pal[ALPHA.indexOf(ch)]
+      cx.fillRect(flip ? s.w - 1 - col : col, r, 1, 1)
+    }
+    cache[ck] = c
+    return c
+  }
+  function blit(key, x, y, flip) { var c = sprite(key, flip); if (c) ctx.drawImage(c, Math.round(x), Math.round(y)) }
+  function silhouette(key, x, y, col) {
+    var s = assets[key]; if (!s) return
+    ctx.fillStyle = col
+    for (var r = 0; r < s.h; r++) for (var c = 0; c < s.w; c++) { var ch = s.rows[r].charAt(c); if (ch !== '.' && ch !== '') ctx.fillRect(x + c, y + r, 1, 1) }
+  }
+  function text(str, x, y, col, outline) {
+    str = String(str).toUpperCase()
+    for (var i = 0; i < str.length; i++) {
+      var g = FONT[str.charAt(i)]
+      if (!g) { x += 4; continue }
+      var k
+      if (outline) { ctx.fillStyle = '#000'; for (k = 0; k < 15; k++) if (g.charAt(k) === '1') ctx.fillRect(x + (k % 3) - 1, y + Math.floor(k / 3) - 1, 3, 3) }
+      ctx.fillStyle = col
+      for (k = 0; k < 15; k++) if (g.charAt(k) === '1') ctx.fillRect(x + (k % 3), y + Math.floor(k / 3), 1, 1)
+      x += 4
+    }
+    return x
+  }
+
+  // ---- palette ----
+  var P = { sky: '#141a14', back: '#1c241a', line: '#232d20', wall: '#5a6e4a', wallHi: '#7a9060', dirt: '#6b4e2e', dirtDk: '#3d2b1a', grass: '#5a7a3a', grassHi: '#7a9a4a', plank: '#8b6639', plankDk: '#5a3a1e', water: '#2e5a9a', waterHi: '#5b8dd9', K: '#000', gold: '#d4a017', purple: '#c06ee0', cream: '#d4c8a0', muted: '#8b7b60', red: '#cc3a2a' }
+
+  // ---- state ----
+  var map, player, objects, enemies, pile, bins, quota, doorOpen, sack, mood, montor, montorTimer, particles, floats, shake, stunWater, tick, gameOver, exitState, seenPickup, hudFlash
+  var input = { left: false, right: false, up: false, down: false, jump: false, act: false, roll: false, jumpPressed: false, actPressed: false, actHeld: 0, actReleased: false, actHeldAtRelease: 0, rollPressed: false }
+
+  function say(key) {
+    var pool = MONTOR_LINES[key]; if (!pool) return
+    var line = pool[Math.floor(Math.random() * pool.length)]
+    if (line === montor && pool.length > 1) line = pool[(pool.indexOf(line) + 1) % pool.length]
+    montor = line; montorTimer = 170
+  }
+
+  function makeObject(type, tx, ty) {
+    var def = OBJ[type]
+    return { type: type, def: def, tx: tx, ty: ty, x: tx * T, y: ty * T, hits: def.hits, state: 'rest', vx: 0, vy: 0, cracks: 0 }
+  }
+
+  function reset() {
+    map = makeMap()
+    player = { x: 5 * T + 2, y: 9 * T, w: 12, h: 30, vx: 0, vy: 0, dir: 1, onGround: false, onLadder: false, hp: 6, inv: 0, held: null, swing: 0, roll: 0, rollDir: 1, aim: false, coyote: 0, jumpBuf: 0, might: 2, nimble: 2, eye: 3 }
+    objects = []
+    objects.push(makeObject('cracked_pot', 1, 10))
+    objects.push(makeObject('cracked_pot', 1, 9))
+    objects.push(makeObject('broken_gnome', 1, 8))
+    objects.push(makeObject('snapped_rake', 9, 10))
+    objects.push(makeObject('rusty_pipe', 11, 10))
+    objects.push(makeObject('cracked_pot', 16, 4))
+    objects.push(makeObject('tangled_hose', 17, 4))
+    pile = { tx: 7, ty: 10, layers: [
+      [ 'cracked_pot', 'faded_label' ],
+      [ 'trap' ],
+      [ 'gnome_hat', 'broken_plank' ],
+    ], hitFlash: 0 }
+    enemies = [
+      { kind: 'rat', x: 12 * T, y: 10 * T + 2, w: 14, h: 12, vx: 0, vy: 0, dir: -1, hp: 1, hurt: 0, stun: 0, onGround: false, think: 0 },
+      { kind: 'rat', x: 17 * T, y: 4 * T + 2, w: 14, h: 12, vx: 0, vy: 0, dir: 1, hp: 1, hurt: 0, stun: 0, onGround: false, think: 0 },
+      { kind: 'slug', x: 12 * T + 4, y: 10 * T + 4, w: 20, h: 12, vx: 0, vy: 0, dir: 1, hp: 2, hurt: 0, stun: 0, water: true, think: 0 },
+    ]
+    bins = [ { tx: 16, ty: 10, mat: 'wood', label: 'W', col: '#8b6639' }, { tx: 17, ty: 10, mat: 'metal', label: 'M', col: '#6a7078' }, { tx: 18, ty: 10, mat: 'montors', label: "M'", col: '#7a3a9a' } ]
+    quota = { wood: [0, 1], metal: [0, 1], montors: [0, 1] }
+    doorOpen = false
+    sack = { items: [], weight: 0 }
+    mood = 0
+    montor = null; montorTimer = 0
+    particles = []; floats = []; shake = 0; stunWater = 0; tick = 0
+    gameOver = false; exitState = null; seenPickup = false; hudFlash = 0
+    say('enter')
+  }
+
+  // ---- helpers ----
+  function solidAt(px, py, forEntity) {
+    var t = tileAt(map, Math.floor(px / T), Math.floor(py / T))
+    if (t === SOLID || t === CRACK) return true
+    if (t === DOOR) return !doorOpen || !forEntity
+    return false
+  }
+  function objectAt(tx, ty) {
+    for (var i = 0; i < objects.length; i++) { var o = objects[i]; if (o.state === 'rest' && !o.def.corpse && o.tx === tx && o.ty === ty) return o }
+    return null
+  }
+  function binAt(tx, ty) { for (var i = 0; i < bins.length; i++) if (bins[i].tx === tx && bins[i].ty === ty) return bins[i]; return null }
+  function supportedTile(tx, ty) {
+    // a tile is a valid resting place if the tile below is solid/plank/an object/bin, and itself empty of solids
+    var here = tileAt(map, tx, ty)
+    if (here === SOLID || here === CRACK || here === DOOR || here === HOLE) return false
+    if (objectAt(tx, ty) || binAt(tx, ty)) return false
+    var below = tileAt(map, tx, ty + 1)
+    if (below === SOLID || below === PLANK || below === CRACK || below === WATER) return true
+    if (objectAt(tx, ty + 1) || binAt(tx, ty + 1)) return true
+    return false
+  }
+  function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y }
+  function addFloat(x, y, s, col) { floats.push({ x: x, y: y, s: s, col: col, t: 40 }) }
+  function burst(x, y, col, n) { for (var i = 0; i < n; i++) particles.push({ x: x, y: y, vx: (Math.random() - 0.5) * 3, vy: -Math.random() * 3, col: col, t: 25 + Math.random() * 15 }) }
+  function sackWeight() { return sack.weight }
+  function jumpVel() { return sackWeight() >= 5 ? JUMP_V_HEAVY : JUMP_V }
+
+  // ---- object physics (thrown / falling) ----
+  function landObject(o) {
+    var tx = Math.floor((o.x + 8) / T), ty = Math.floor((o.y + 8) / T)
+    // find nearest resting tile downwards
+    for (var y = ty; y < ROWS; y++) {
+      var here = tileAt(map, tx, y)
+      if (here === SOLID || here === CRACK || here === DOOR) break
+      if (here === HOLE) { removeObject(o); addFloat(o.x, o.y, 'GONE', P.muted); return }
+      if (binAt(tx, y)) { dropInBin(o, binAt(tx, y)); return }
+      if (here === WATER) { // metal in water zaps; everything else sinks to rest on the water tile
+        if (o.def.material === 'metal') zap(tx)
+        o.tx = tx; o.ty = y; o.x = tx * T; o.y = y * T; o.state = 'rest'; o.vx = 0; o.vy = 0; return
+      }
+      if (supportedTile(tx, y)) { o.tx = tx; o.ty = y; o.x = tx * T; o.y = y * T; o.state = 'rest'; o.vx = 0; o.vy = 0; if (o.def.fragment && o.fell) crackFragment(o); return }
+    }
+    // no room: shatter or drop where it is
+    o.tx = tx; o.ty = ty; o.x = tx * T; o.y = ty * T; o.state = 'rest'; o.vx = 0; o.vy = 0
+  }
+  function removeObject(o) { var i = objects.indexOf(o); if (i >= 0) objects.splice(i, 1) }
+  function breakObject(o, atX, atY) {
+    burst(atX + 8, atY + 8, o.def.material === 'ceramic' ? '#c47a3a' : o.def.material === 'metal' ? '#c0c4ca' : '#8b4513', 8)
+    say(o.def.montors ? 'break_montors' : 'break_object')
+    if (o.def.montors) mood -= 2
+    removeObject(o)
+    if (o.def.material === 'ceramic' && !o.def.noShatter) {
+      // shatter: 1 damage to enemies on 8 neighbouring tiles, plus leave a shard
+      var tx = Math.floor((atX + 8) / T), ty = Math.floor((atY + 8) / T)
+      enemies.forEach(function(e) {
+        var ex = Math.floor((e.x + e.w / 2) / T), ey = Math.floor((e.y + e.h / 2) / T)
+        if (Math.abs(ex - tx) <= 1 && Math.abs(ey - ty) <= 1) hurtEnemy(e, 1, tx < ex ? 1 : -1)
+      })
+      var sh = makeObject('shard', tx, ty); sh.state = 'fly'; sh.x = atX; sh.y = atY; sh.vx = (Math.random() - 0.5) * 2; sh.vy = -2
+      objects.push(sh)
+    }
+  }
+  function crackFragment(o) {
+    o.cracks++
+    say('fragment_crack')
+    addFloat(o.x, o.y - 6, 'CRACK', P.red)
+    if (o.cracks >= 3) { o.def = OBJ.shard; o.type = 'shard'; addFloat(o.x, o.y - 12, 'RUINED', P.red); mood -= 2 }
+  }
+  function zap(tx) {
+    // metal object entered water at column tx: 3 damage + stun everything in the connected water
+    var cols = []
+    for (var x = tx; x >= 0 && tileAt(map, x, ROWS - 1) === WATER; x--) cols.push(x)
+    for (x = tx + 1; x < COLS && tileAt(map, x, ROWS - 1) === WATER; x++) cols.push(x)
+    stunWater = 30; shake = 8
+    say('zap')
+    enemies.forEach(function(e) {
+      var ex = Math.floor((e.x + e.w / 2) / T)
+      if (cols.indexOf(ex) >= 0 && e.y + e.h > (ROWS - 1) * T - 4) { hurtEnemy(e, 3, 0); e.stun = 120 }
+    })
+    var pw = { x: player.x, y: player.y, w: player.w, h: player.h }
+    var px = Math.floor((player.x + player.w / 2) / T)
+    if (cols.indexOf(px) >= 0 && player.y + player.h > (ROWS - 1) * T - 4) hurtPlayer(1, 0)
+  }
+  function dropInBin(o, bin) {
+    var mat = o.def.montors ? 'montors' : o.def.material
+    if (o.def.fragment) { mood -= 3; say('break_montors'); addFloat(bin.tx * T, bin.ty * T - 10, 'GERALD!', P.red); removeObject(o); return }
+    if (mat === bin.mat && quota[mat][0] < quota[mat][1]) {
+      quota[mat][0]++
+      addFloat(bin.tx * T, bin.ty * T - 10, 'TIDY', P.gold)
+      burst(bin.tx * T + 8, bin.ty * T + 4, P.gold, 5)
+      mood += 1
+      say('bin_good')
+      removeObject(o)
+      checkDoor()
+    } else if (mat === bin.mat) {
+      addFloat(bin.tx * T, bin.ty * T - 10, 'FULL', P.muted)
+      o.tx = bin.tx; o.ty = bin.ty - 1; o.x = o.tx * T; o.y = o.ty * T; o.state = 'rest'; o.vx = 0; o.vy = 0
+    } else {
+      // wrong bin: it goes in anyway, Montor tuts, no quota credit
+      addFloat(bin.tx * T, bin.ty * T - 10, 'WRONG', P.red)
+      mood -= 1
+      say('bin_wrong')
+      removeObject(o)
+    }
+  }
+  function checkDoor() {
+    var done = true
+    for (var k in quota) if (quota[k][0] < quota[k][1]) done = false
+    if (done && !doorOpen) { doorOpen = true; addFloat(18 * T, 8 * T, 'DOOR OPEN', P.gold); burst(19 * T, 9 * T + 8, P.gold, 10) }
+  }
+
+  // ---- combat ----
+  function hurtEnemy(e, dmg, kdir) {
+    if (e.hurt > 0) return
+    e.hp -= dmg; e.hurt = 14; e.vx = kdir * 2.2; e.vy = -1.5
+    addFloat(e.x + 2, e.y - 8, dmg, dmg >= 3 ? P.gold : '#e8e2cc')
+    burst(e.x + e.w / 2, e.y + e.h / 2, '#e8e2cc', 4)
+    if (e.hp <= 0) { e.dead = true; shake = Math.max(shake, 3) }
+  }
+  function hurtPlayer(dmg, kdir) {
+    if (player.inv > 0 || player.roll > 0) return
+    player.hp -= dmg; player.inv = 60; player.vx = kdir * 2.5; player.vy = -2; shake = 5; hudFlash = 12
+    say('hurt')
+    if (player.hp <= 0) { gameOver = true; say('death') }
+  }
+
+  // ---- player actions ----
+  function facingTile(dist) { return { tx: Math.floor((player.x + player.w / 2) / T) + player.dir * (dist || 1), ty: Math.floor((player.y + player.h - 1) / T) } }
+  function tryPickup() {
+    var f = facingTile(1), under = { tx: Math.floor((player.x + player.w / 2) / T), ty: Math.floor((player.y + player.h - 1) / T) }
+    // pile first
+    if (pile && ((pile.tx === f.tx && pile.ty === f.ty) || (pile.tx === under.tx && pile.ty === under.ty))) { spillPile(); return true }
+    var o = objectAt(f.tx, f.ty) || objectAt(f.tx, f.ty - 1) || objectAt(under.tx, under.ty)
+    if (o) {
+      var need = o.def.weight
+      if (player.might < need) { addFloat(o.x, o.y - 8, 'TOO HEAVY', P.red); return true }
+      removeObject(o); o.state = 'held'; player.held = o
+      if (!seenPickup) { seenPickup = true; say('first_pickup') }
+      if (o.def.fragment) say('fragment')
+      return true
+    }
+    return false
+  }
+  function putDown() {
+    var o = player.held
+    var under = { tx: Math.floor((player.x + player.w / 2) / T), ty: Math.floor((player.y + player.h - 1) / T) }
+    var f = facingTile(1)
+    var spots = [f, under, { tx: f.tx, ty: f.ty - 1 }]
+    for (var i = 0; i < spots.length; i++) {
+      var s = spots[i]
+      if (binAt(s.tx, s.ty)) { player.held = null; dropInBin(o, binAt(s.tx, s.ty)); return }
+      if (supportedTile(s.tx, s.ty)) { o.tx = s.tx; o.ty = s.ty; o.x = s.tx * T; o.y = s.ty * T; o.state = 'rest'; o.fell = false; objects.push(o); player.held = null; return }
+      // stack: find top of column at f
+      var top = s.ty
+      while (top > 0 && (objectAt(s.tx, top) || binAt(s.tx, top))) top--
+      if (top !== s.ty && supportedTile(s.tx, top)) {
+        var below = objectAt(s.tx, top + 1)
+        if (below && o.def.weight > below.def.weight) { // heavy crushes light
+          breakObject(below, below.x, below.y); addFloat(below.x, below.y - 8, 'CRUSH', P.red)
+          top = top + 1
+        }
+        o.tx = s.tx; o.ty = top; o.x = s.tx * T; o.y = top * T; o.state = 'rest'; o.fell = false; objects.push(o); player.held = null; return
+      }
+    }
+    addFloat(player.x, player.y - 8, 'NO ROOM', P.muted)
+  }
+  function throwHeld() {
+    var o = player.held; player.held = null
+    var range = 3 + player.might
+    o.state = 'fly'; o.x = player.x + (player.dir > 0 ? player.w : -16); o.y = player.y + 4
+    o.vx = player.dir * (range * 0.55); o.vy = -2.6; o.fell = true; o.thrower = 'player'
+    objects.push(o)
+  }
+  function toSack() {
+    var o = player.held; player.held = null
+    var before = sack.weight
+    sack.items.push(o.type); sack.weight += o.def.weight
+    addFloat(player.x, player.y - 8, 'SACKED', P.cream)
+    if (before < 10 && sack.weight >= 10) say('sack_huge')
+    else if (before < 5 && sack.weight >= 5) say('sack_heavy')
+  }
+  function swing() {
+    var o = player.held, reach = o ? (o.def.reach || 1) : 1, dmg = o ? o.def.dmg : 1
+    if (player.might >= 4) dmg = Math.ceil(dmg * 1.5)
+    player.swing = 12
+    var hit = false
+    var box = { x: player.dir > 0 ? player.x + player.w : player.x - reach * T, y: player.y, w: reach * T, h: player.h }
+    enemies.forEach(function(e) { if (!e.dead && overlap(box, e)) { hurtEnemy(e, dmg, player.dir); hit = true } })
+    // pile in reach
+    if (pile) { var pb = { x: pile.tx * T, y: pile.ty * T - 8, w: T, h: T + 8 }; if (overlap(box, pb)) { spillPile(); hit = true } }
+    if (o && hit) { o.hits--; if (o.hits <= 0) { breakObject(o, player.x, player.y + 8); player.held = null } }
+  }
+  function spillPile() {
+    if (!pile) return
+    pile.hitFlash = 8
+    var layer = pile.layers.shift()
+    shake = 2
+    if (layer[0] === 'trap') {
+      // spring blade: hurts unless rolling
+      burst(pile.tx * T + 8, pile.ty * T, '#c0c4ca', 10)
+      addFloat(pile.tx * T - 4, pile.ty * T - 20, 'TRAP!', P.red)
+      var pb = { x: pile.tx * T - 12, y: pile.ty * T - 24, w: T + 24, h: T + 24 }
+      if (overlap(pb, player) && player.roll <= 0) { hurtPlayer(1, player.x < pile.tx * T ? -1 : 1); say('trap') }
+      else addFloat(player.x, player.y - 8, 'DODGED', P.gold)
+    } else {
+      say('spill')
+      layer.forEach(function(type, i) {
+        var o = makeObject(type, pile.tx, pile.ty)
+        o.state = 'fly'; o.x = pile.tx * T; o.y = pile.ty * T - 8; o.vx = (i === 0 ? -1 : 1) * (1 + Math.random()); o.vy = -2.5 - Math.random()
+        objects.push(o)
+      })
+      burst(pile.tx * T + 8, pile.ty * T + 4, '#8b6639', 8)
+    }
+    if (pile.layers.length === 0) pile = null
+  }
+
+  // ---- physics ----
+  function moveEntity(e, isPlayer) {
+    // horizontal
+    e.x += e.vx
+    var top = e.y, bot = e.y + e.h - 1
+    if (e.vx > 0) { var rx = e.x + e.w - 1; if (solidAt(rx, top, isPlayer) || solidAt(rx, bot, isPlayer) || solidAt(rx, (top + bot) / 2, isPlayer)) { e.x = Math.floor(rx / T) * T - e.w; e.vx = 0; e.wall = true } else e.wall = false }
+    else if (e.vx < 0) { var lx = e.x; if (solidAt(lx, top, isPlayer) || solidAt(lx, bot, isPlayer) || solidAt(lx, (top + bot) / 2, isPlayer)) { e.x = Math.floor(lx / T) * T + T; e.vx = 0; e.wall = true } else e.wall = false }
+    // objects as walls (resting objects block sideways for player only if stacked 2+? keep simple: objects are solid to walk into, so you can stand on them)
+    // vertical
+    e.onGround = false
+    e.y += e.vy
+    var l = e.x + 1, r = e.x + e.w - 2
+    if (e.vy > 0) {
+      var fy = e.y + e.h - 1
+      var ty = Math.floor(fy / T)
+      var landed = false
+      if (solidAt(l, fy, isPlayer) || solidAt(r, fy, isPlayer)) landed = true
+      else {
+        // one-way plank / object tops: only when crossing the top edge
+        var prevBottom = fy - e.vy
+        var edge = ty * T
+        if (prevBottom <= edge + 0.01 && !(isPlayer && input.down && e.dropTimer > 0)) {
+          var tl = tileAt(map, Math.floor(l / T), ty), tr = tileAt(map, Math.floor(r / T), ty)
+          if (tl === PLANK || tr === PLANK) landed = true
+          if (tl === WATER || tr === PLANK) { /* water: sink a little */ }
+          if (objectAt(Math.floor(l / T), ty) || objectAt(Math.floor(r / T), ty) || binAt(Math.floor(l / T), ty) || binAt(Math.floor(r / T), ty)) landed = true
+          if (pile && ((pile.tx === Math.floor(l / T) || pile.tx === Math.floor(r / T)) && pile.ty === ty)) landed = true
+          if (isPlayer && (tl === WATER || tr === WATER)) { landed = true; e.y = ty * T + 4 - e.h + 1 }
+        }
+      }
+      if (landed) { e.y = ty * T - e.h; e.vy = 0; e.onGround = true }
+    } else if (e.vy < 0) {
+      var hy = e.y
+      if (solidAt(l, hy, isPlayer) || solidAt(r, hy, isPlayer)) { e.y = Math.floor(hy / T) * T + T; e.vy = 0 }
+    }
+  }
+
+  function updatePlayer() {
+    var p = player
+    if (p.inv > 0) p.inv--
+    if (p.swing > 0) p.swing--
+    if (p.dropTimer > 0) p.dropTimer--
+    var speed = WALK * (sackWeight() >= 10 ? 0.7 : 1) * (p.nimble >= 4 ? 1.2 : 1)
+    // ladder
+    var cx = Math.floor((p.x + p.w / 2) / T), cyTop = Math.floor(p.y / T), cyBot = Math.floor((p.y + p.h - 1) / T)
+    var onLadderTile = tileAt(map, cx, cyBot) === LADDER || tileAt(map, cx, cyTop) === LADDER
+    if (onLadderTile && (input.up || (input.down && !p.onGround)) && p.roll <= 0) p.onLadder = true
+    if (!onLadderTile || p.onGround && !input.up) p.onLadder = false
+    if (p.roll > 0) {
+      p.roll--
+      p.vx = p.rollDir * 2.6
+      p.vy += GRAVITY
+    } else if (p.onLadder) {
+      p.vx = input.left ? -0.8 : input.right ? 0.8 : 0
+      p.vy = input.up ? -1.2 : input.down ? 1.2 : 0
+      p.x += (cx * T + T / 2 - p.w / 2 - p.x) * 0.3
+      if (input.jumpPressed) { p.onLadder = false; p.vy = jumpVel() * 0.8 }
+    } else {
+      if (input.left) { p.vx = -speed; p.dir = -1 } else if (input.right) { p.vx = speed; p.dir = 1 } else p.vx = 0
+      p.vy += GRAVITY; if (p.vy > MAX_FALL) p.vy = MAX_FALL
+      if (p.onGround) p.coyote = 6; else if (p.coyote > 0) p.coyote--
+      if (input.jumpPressed) p.jumpBuf = 6; else if (p.jumpBuf > 0) p.jumpBuf--
+      if (p.jumpBuf > 0 && p.coyote > 0 && sackWeight() < 16) {
+        if (input.down && p.onGround) { p.dropTimer = 8; p.y += 2 } else { p.vy = jumpVel(); p.coyote = 0 }
+        p.jumpBuf = 0
+      }
+      if (!input.jump && p.vy < -1.5) p.vy = -1.5   // variable jump height
+      if (input.rollPressed && p.nimble >= 2 && p.onGround) { p.roll = 14; p.rollDir = p.dir; if (p.held && p.held.def.weight >= 2) putDown() }
+    }
+    moveEntity(p, true)
+    // side collisions against resting objects and the pile (so stacks are walls)
+    var cyMid = Math.floor((p.y + p.h / 2) / T)
+    var fb = { tx: Math.floor((p.x + (p.dir > 0 ? p.w : 0)) / T), ty: cyBot }
+    // hole: fall through
+    var underT = tileAt(map, cx, Math.floor((p.y + p.h + 1) / T))
+    if (underT === HOLE && p.y + p.h >= (ROWS - 1) * T + 6) { exitRoom('trash'); return }
+    // cracked floor: heavy sack collapses it
+    if (underT === CRACK && p.onGround && sackWeight() >= 10) {
+      map[ROWS - 1][cx] = HOLE; say('collapse'); shake = 6; burst(cx * T + 8, (ROWS - 1) * T, '#6b4e2e', 10)
+    }
+    // door
+    if (tileAt(map, Math.floor((p.x + p.w + 1) / T), cyMid) === DOOR && p.dir > 0 && input.right) {
+      if (doorOpen) { exitRoom('tidy'); return } else if (tick % 40 === 0) say('door_locked')
+    }
+    // actions
+    // ACT: tap = use, hold + release = throw (for swing/whip items). Down/Up modifiers put down / sack.
+    if (input.actPressed) {
+      if (p.held) {
+        if (input.down) putDown()
+        else if (input.up) toSack()
+        else if (p.held.def.use === 'throw' || p.held.def.use === 'none') throwHeld()
+        else p.pendingSwing = true
+      } else {
+        if (!tryPickup()) swing()
+      }
+    }
+    if (input.actReleased && p.pendingSwing) {
+      p.pendingSwing = false
+      if (p.held) { if (input.actHeldAtRelease >= 15) throwHeld(); else swing() }
+    }
+    // enemy contact
+    enemies.forEach(function(e) { if (!e.dead && e.stun <= 0 && overlap(p, e)) hurtPlayer(1, p.x < e.x ? -1 : 1) })
+    if (p.y > ROOM_H + 20) { exitRoom('trash') }
+  }
+
+  function updateEnemy(e) {
+    if (e.dead) return
+    if (e.hurt > 0) e.hurt--
+    if (e.stun > 0) { e.stun--; e.vx = 0; return }
+    if (e.kind === 'rat') {
+      e.think--
+      if (e.hurt > 0) { e.vy += GRAVITY; moveEntity(e, false); e.vx *= 0.85; return }
+      var dx = player.x - e.x, near = Math.abs(dx) < 80 && Math.abs(player.y - e.y) < 40
+      if (near) e.dir = dx > 0 ? 1 : -1
+      var sp = near ? 1.1 : 0.55
+      e.vx = e.dir * sp
+      e.vy += GRAVITY; if (e.vy > MAX_FALL) e.vy = MAX_FALL
+      moveEntity(e, false)
+      // edge / wall turn (rats climb objects: they can step up 1 tile)
+      var ahead = e.x + (e.dir > 0 ? e.w + 1 : -1)
+      var footTy = Math.floor((e.y + e.h + 1) / T), aheadTx = Math.floor(ahead / T)
+      var groundAhead = tileAt(map, aheadTx, footTy) === SOLID || tileAt(map, aheadTx, footTy) === PLANK || tileAt(map, aheadTx, footTy) === CRACK || objectAt(aheadTx, footTy) || binAt(aheadTx, footTy)
+      if (e.wall) { if (e.onGround && near) e.vy = -2.8; else e.dir = -e.dir }
+      else if (e.onGround && !groundAhead && !near) e.dir = -e.dir
+      // rats drag things out of bins: if adjacent to a bin with quota, occasionally undo one
+      bins.forEach(function(b) { if (Math.abs(e.x - b.tx * T) < 10 && Math.abs(e.y - b.ty * T) < 12 && Math.random() < 0.004 && quota[b.mat][0] > 0) { quota[b.mat][0]--; doorOpen = false; addFloat(b.tx * T, b.ty * T - 10, 'RAT!', P.red); var o = makeObject(b.mat === 'wood' ? 'snapped_rake' : b.mat === 'metal' ? 'rusty_pipe' : 'broken_gnome', b.tx, b.ty - 1); o.state = 'fly'; o.x = b.tx * T; o.y = b.ty * T - 10; o.vx = -1.5; o.vy = -2; objects.push(o) } })
+    } else if (e.kind === 'slug') {
+      // patrols the water tiles
+      e.vx = e.dir * 0.25
+      e.x += e.vx
+      var lx = Math.floor(e.x / T), rx = Math.floor((e.x + e.w) / T)
+      if (tileAt(map, lx, ROWS - 1) !== WATER || tileAt(map, rx, ROWS - 1) !== WATER) { e.dir = -e.dir; e.x += e.dir * 0.5 }
+    }
+  }
+
+  function updateObjects() {
+    for (var i = objects.length - 1; i >= 0; i--) {
+      var o = objects[i]
+      if (o.state !== 'fly') {
+        // resting objects: fall if unsupported (stack collapsed)
+        if (o.state === 'rest' && !supportedTileForResting(o)) { o.state = 'fly'; o.vx = 0; o.vy = 0; o.fell = true }
+        continue
+      }
+      o.vy += GRAVITY; if (o.vy > MAX_FALL) o.vy = MAX_FALL
+      o.x += o.vx; o.y += o.vy
+      // hit walls
+      var cx = o.x + 8, cy = o.y + 8
+      if (solidAt(cx + (o.vx > 0 ? 7 : -7), cy, false)) { o.vx = -o.vx * 0.3; o.x += o.vx * 2; if (o.def.material === 'ceramic' && o.thrower) { breakObject(o, o.x, o.y); continue } }
+      // hit enemies (thrown by player only)
+      if (o.thrower === 'player') {
+        var hitE = null
+        for (var j = 0; j < enemies.length; j++) { var e = enemies[j]; if (!e.dead && overlap({ x: o.x + 2, y: o.y + 2, w: 12, h: 12 }, e)) { hitE = e; break } }
+        if (hitE) {
+          hurtEnemy(hitE, o.def.dmg, o.vx > 0 ? 1 : -1)
+          if (o.def.material === 'ceramic') { breakObject(o, o.x, o.y); continue }
+          o.vx = -o.vx * 0.2; o.thrower = null
+        }
+      }
+      // land
+      if (o.vy > 0) {
+        var footY = o.y + 15, tx = Math.floor(cx / T), ty = Math.floor(footY / T)
+        var below = tileAt(map, tx, ty)
+        var onSomething = below === SOLID || below === CRACK || below === PLANK || below === WATER || below === HOLE || below === DOOR || objectAt(tx, ty) || binAt(tx, ty) || (pile && pile.tx === tx && pile.ty === ty)
+        if (onSomething) {
+          if (below === HOLE) { removeObject(o); addFloat(o.x, o.y - 8, 'GONE', P.muted); continue }
+          if (binAt(tx, ty)) { removeObject(o); dropInBin(o, binAt(tx, ty)); continue }
+          if (o.def.material === 'ceramic' && o.thrower === 'player' && !o.def.noShatter) { breakObject(o, o.x, o.y); continue }
+          if (below === WATER && o.def.material === 'metal') { zap(tx); o.tx = tx; o.ty = ty; o.x = tx * T; o.y = ty * T; o.state = 'rest'; o.vx = 0; o.vy = 0; continue }
+          // rest on the tile above the thing we landed on
+          var restTy = below === WATER ? ty : ty - 1
+          var restTx = tx
+          if (objectAt(restTx, restTy) || (pile && pile.tx === restTx && pile.ty === restTy)) { // try sideways
+            if (supportedTile(restTx - 1, restTy)) restTx--; else if (supportedTile(restTx + 1, restTy)) restTx++
+            else { restTy--; }
+          }
+          // heavy landing on a lighter object crushes it
+          var under = objectAt(restTx, restTy + 1)
+          if (under && o.def.weight > under.def.weight && o.fell) { breakObject(under, under.x, under.y); addFloat(under.x, under.y - 8, 'CRUSH', P.red); restTy++ }
+          o.tx = restTx; o.ty = restTy; o.x = restTx * T; o.y = restTy * T; o.state = 'rest'; o.vx = 0; o.vy = 0; o.thrower = null
+          if (o.def.fragment && o.fell) crackFragment(o)
+          o.fell = false
+        }
+      }
+      if (o.y > ROOM_H + 16) removeObject(o)
+    }
+  }
+  function supportedTileForResting(o) {
+    var below = tileAt(map, o.tx, o.ty + 1)
+    if (below === SOLID || below === PLANK || below === CRACK || below === WATER || below === DOOR) return true
+    if (tileAt(map, o.tx, o.ty) === WATER) return true
+    if (objectAt(o.tx, o.ty + 1) || binAt(o.tx, o.ty + 1)) return true
+    if (pile && pile.tx === o.tx && pile.ty === o.ty + 1) return true
+    return false
+  }
+
+  function exitRoom(kind) {
+    if (exitState) return
+    exitState = { kind: kind, t: 0 }
+    if (kind === 'tidy') { mood += 1; say('tidy_exit') } else { mood -= 1; say('trash_exit') }
+  }
+
+  // ---- update ----
+  function update() {
+    tick++
+    if (montorTimer > 0) montorTimer--
+    if (shake > 0) shake--
+    if (stunWater > 0) stunWater--
+    if (hudFlash > 0) hudFlash--
+    if (pile && pile.hitFlash > 0) pile.hitFlash--
+    if (gameOver || exitState) {
+      if (exitState) exitState.t++
+      if ((input.actPressed || input.jumpPressed) && (gameOver || exitState.t > 30)) reset()
+      clearPressed(); return
+    }
+    updatePlayer()
+    enemies.forEach(updateEnemy)
+    for (var i = enemies.length - 1; i >= 0; i--) if (enemies[i].dead) { var e = enemies[i]; objects.push(corpse(e)); enemies.splice(i, 1) }
+    updateObjects()
+    particles.forEach(function(pt) { pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.15; pt.t-- })
+    particles = particles.filter(function(pt) { return pt.t > 0 })
+    floats.forEach(function(f) { f.y -= 0.35; f.t-- })
+    floats = floats.filter(function(f) { return f.t > 0 })
+    clearPressed()
+  }
+  function corpse(e) {
+    // corpse is a decoration object: rests, can't be picked up in P0
+    var o = { type: 'corpse_' + e.kind, def: { name: 'corpse', weight: 9, material: 'organic', use: 'none', hits: 99, dmg: 0, corpse: true }, tx: Math.floor((e.x + e.w / 2) / T), ty: Math.floor((e.y + e.h - 1) / T), state: 'rest', vx: 0, vy: 0, hits: 99 }
+    o.x = o.tx * T; o.y = o.ty * T
+    return o
+  }
+  function clearPressed() { input.jumpPressed = false; input.actPressed = false; input.rollPressed = false; input.actReleased = false }
+
+  // ---- render ----
+  function stone(sx, sy) {
+    ctx.fillStyle = P.K; ctx.fillRect(sx, sy, T, T)
+    ctx.fillStyle = P.wall; ctx.fillRect(sx + 1, sy + 1, T - 2, T - 2)
+    ctx.fillStyle = P.wallHi; ctx.fillRect(sx + 1, sy + 1, T - 2, 2); ctx.fillRect(sx + 1, sy + 1, 2, T - 2)
+  }
+  function floorTile(x, y, cracked) {
+    ctx.fillStyle = P.K; ctx.fillRect(x, y, T, T)
+    ctx.fillStyle = P.dirt; ctx.fillRect(x, y + 2, T, 14)
+    ctx.fillStyle = P.dirtDk; ctx.fillRect(x + 3 + (x / 16 * 5) % 8, y + 8 + (x / 16 % 3) * 2, 2, 2)
+    ctx.fillStyle = P.grass; ctx.fillRect(x, y + 1, T, 3)
+    ctx.fillStyle = P.grassHi; ctx.fillRect(x + (x / 16 * 3) % 12, y, 2, 2)
+    if (cracked) { ctx.fillStyle = P.K; ctx.fillRect(x + 3, y + 2, 1, 4); ctx.fillRect(x + 4, y + 6, 1, 3); ctx.fillRect(x + 5, y + 9, 1, 2); ctx.fillRect(x + 10, y + 3, 1, 3); ctx.fillRect(x + 9, y + 6, 1, 3) }
+  }
+  function drawObject(o) {
+    var x = Math.round(o.x), y = Math.round(o.y), t = o.type
+    if (t === 'cracked_pot') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 3, y + 5, 10, 11); ctx.fillRect(x + 2, y + 4, 12, 2)
+      ctx.fillStyle = '#c47a3a'; ctx.fillRect(x + 4, y + 6, 8, 9)
+      ctx.fillStyle = '#d4854a'; ctx.fillRect(x + 3, y + 5, 10, 1); ctx.fillRect(x + 5, y + 7, 2, 5)
+      ctx.fillStyle = '#aa6633'; ctx.fillRect(x + 9, y + 8, 2, 6)
+    } else if (t === 'broken_plank') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 1, y + 9, 14, 5); ctx.fillStyle = '#8b6639'; ctx.fillRect(x + 2, y + 10, 12, 3); ctx.fillStyle = '#5a3a1e'; ctx.fillRect(x + 5, y + 10, 1, 3); ctx.fillRect(x + 10, y + 10, 1, 3)
+    } else if (t === 'shard') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 5, y + 10, 7, 5); ctx.fillStyle = '#c47a3a'; ctx.fillRect(x + 6, y + 11, 5, 3)
+    } else if (t === 'broken_gnome') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 6, y + 2, 4, 4); ctx.fillRect(x + 5, y + 6, 6, 8); ctx.fillRect(x + 4, y + 14, 8, 2)
+      ctx.fillStyle = '#cc2222'; ctx.fillRect(x + 7, y + 3, 2, 2); ctx.fillStyle = '#e8c8a0'; ctx.fillRect(x + 6, y + 5, 4, 2)
+      ctx.fillStyle = '#3a6ab0'; ctx.fillRect(x + 6, y + 7, 4, 6); ctx.fillStyle = '#5a3a1e'; ctx.fillRect(x + 5, y + 14, 6, 1)
+    } else if (t === 'gnome_hat') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 7, y + 4, 2, 2); ctx.fillRect(x + 6, y + 6, 4, 3); ctx.fillRect(x + 5, y + 9, 6, 3); ctx.fillRect(x + 3, y + 12, 10, 3)
+      ctx.fillStyle = '#e03a3a'; ctx.fillRect(x + 7, y + 5, 2, 1); ctx.fillRect(x + 7, y + 7, 2, 2); ctx.fillRect(x + 6, y + 10, 4, 2); ctx.fillRect(x + 4, y + 13, 8, 1)
+      if (o.cracks) { ctx.fillStyle = P.K; for (var c = 0; c < o.cracks; c++) ctx.fillRect(x + 5 + c * 2, y + 10 + c, 1, 3) }
+    } else if (t === 'snapped_rake') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 1, y + 10, 14, 3); ctx.fillRect(x + 12, y + 6, 3, 8)
+      ctx.fillStyle = '#8b4513'; ctx.fillRect(x + 2, y + 11, 11, 1); ctx.fillStyle = '#8a8f96'; ctx.fillRect(x + 13, y + 7, 1, 6)
+    } else if (t === 'rusty_pipe') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 1, y + 10, 14, 5); ctx.fillRect(x + 1, y + 9, 3, 7); ctx.fillRect(x + 12, y + 9, 3, 7)
+      ctx.fillStyle = '#8a8f96'; ctx.fillRect(x + 2, y + 11, 12, 3); ctx.fillStyle = '#c0c4ca'; ctx.fillRect(x + 2, y + 11, 12, 1)
+    } else if (t === 'tangled_hose') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 2, y + 6, 12, 10); ctx.fillStyle = '#3a7a3a'; ctx.fillRect(x + 3, y + 7, 10, 8); ctx.fillStyle = P.K; ctx.fillRect(x + 6, y + 9, 4, 4); ctx.fillStyle = '#5a9a4a'; ctx.fillRect(x + 4, y + 8, 2, 2)
+    } else if (t === 'faded_label') {
+      ctx.fillStyle = P.K; ctx.fillRect(x + 4, y + 8, 8, 8); ctx.fillStyle = '#e8e2cc'; ctx.fillRect(x + 5, y + 9, 6, 6); ctx.fillStyle = '#8b7b60'; ctx.fillRect(x + 6, y + 10, 4, 1); ctx.fillRect(x + 6, y + 12, 3, 1)
+    } else if (t === 'corpse_rat') { blit('corpse_rat', x + 3, y + 10) }
+    else if (t === 'corpse_slug') { ctx.fillStyle = '#2e5a9a'; ctx.fillRect(x + 2, y + 12, 12, 3) }
+  }
+  function drawBin(b) {
+    var x = b.tx * T, y = b.ty * T
+    ctx.fillStyle = P.K; ctx.fillRect(x + 1, y + 2, 14, 14)
+    ctx.fillStyle = b.col; ctx.fillRect(x + 2, y + 3, 12, 12)
+    ctx.fillStyle = P.K; ctx.fillRect(x, y + 1, 16, 2); ctx.fillRect(x + 4, y + 7, 8, 5)
+    text(b.label, x + 5 - (b.label.length - 1) * 2, y + 7, '#fff')
+    var q = quota[b.mat]
+    text(q[0] + '/' + q[1], x + 3, y - 6, q[0] >= q[1] ? P.gold : P.cream, true)
+  }
+  function drawKnight() {
+    var p = player, x = Math.round(p.x) - 3, y = Math.round(p.y) - 1
+    if (p.inv > 0 && (tick >> 2) % 2 === 0) return
+    if (sack.weight > 0) { // sack on back
+      var sw = sack.weight >= 10 ? 12 : sack.weight >= 5 ? 9 : 6, sx = p.dir > 0 ? x - sw + 4 : x + 18 - 4
+      ctx.fillStyle = P.K; ctx.fillRect(sx, y + 6, sw, sw + 4); ctx.fillStyle = '#9b7653'; ctx.fillRect(sx + 1, y + 7, sw - 2, sw + 2); ctx.fillStyle = '#6b4e2e'; ctx.fillRect(sx + 2, y + 10, 2, sw - 3)
+    }
+    var bob = p.onGround && p.vx !== 0 ? ((tick >> 3) % 2) : 0
+    if (p.roll > 0) { ctx.save(); ctx.translate(x + 9, y + 12); ctx.rotate(p.rollDir * (14 - p.roll) * 0.45); ctx.drawImage(sprite('knight', p.dir < 0), -9, -12); ctx.restore() }
+    else blit('knight', x, y + bob, p.dir < 0)
+    // held object
+    if (p.held) {
+      var hx = p.dir > 0 ? x + 14 : x - 12, hy = y + 8
+      if (p.swing > 0 && p.held.def.use !== 'throw') { var sw2 = (12 - p.swing) / 12; hx += p.dir * sw2 * 6; hy -= (1 - sw2) * 8 }
+      p.held.x = hx; p.held.y = hy; drawObject(p.held)
+    }
+    if (p.swing > 0) { // swing arc
+      var reach = p.held ? (p.held.def.reach || 1) : 1
+      ctx.fillStyle = '#e8e2cc'
+      var ax = p.dir > 0 ? x + 20 : x - 4, prog = (12 - p.swing) / 12
+      for (var i = 0; i < 5; i++) { var a = (i / 4 - 0.5) * 2.2, rr = reach * 10 + 4; var px = ax + p.dir * Math.cos(a) * rr * prog, py = y + 14 + Math.sin(a) * rr * prog; ctx.fillRect(Math.round(px), Math.round(py), 2, 2) }
+    }
+  }
+  function drawEnemy(e) {
+    var x = Math.round(e.x), y = Math.round(e.y)
+    if (e.hurt > 0 && (tick >> 1) % 2 === 0) { ctx.globalAlpha = 0.5 }
+    if (e.kind === 'rat') blit('rat', x - 1, y - 2, e.dir < 0)
+    else blit('slug', x - 1, y, e.dir < 0)
+    ctx.globalAlpha = 1
+    if (e.stun > 0) { text('*', x + 4, y - 8, P.gold) }
+  }
+  function drawRoom() {
+    ctx.save(); ctx.translate(ROOM_X + (shake > 0 ? (Math.random() - 0.5) * shake : 0), ROOM_Y + (shake > 0 ? (Math.random() - 0.5) * shake : 0))
+    ctx.fillStyle = P.sky; ctx.fillRect(0, 0, ROOM_W, ROOM_H)
+    ctx.fillStyle = P.back; ctx.fillRect(16, 16, 288, 160)
+    ctx.fillStyle = P.line
+    var x, y
+    for (y = 16; y < 176; y += 8) { ctx.fillRect(16, y, 288, 1); for (x = 16 + ((y / 8) % 2) * 8; x < 304; x += 16) ctx.fillRect(x, y, 1, 8) }
+    ctx.fillStyle = '#2a3526'; for (y = 16; y < 176; y += 16) for (x = 16; x < 304; x += 16) ctx.fillRect(x, y, 1, 1)
+    ctx.fillStyle = '#2f4424'; [[40, 16, 26], [120, 16, 18], [262, 16, 20]].forEach(function(v) { for (var k = 0; k < v[2]; k += 2) ctx.fillRect(v[0] + (k % 6 === 0 ? 1 : 0), v[1] + k, 2, 2) })
+    for (y = 0; y < ROWS; y++) for (x = 0; x < COLS; x++) {
+      var t = map[y][x], px = x * T, py = y * T
+      if (t === SOLID) { if (y === ROWS - 1) floorTile(px, py, false); else stone(px, py) }
+      else if (t === CRACK) floorTile(px, py, true)
+      else if (t === HOLE) { ctx.fillStyle = '#000'; ctx.fillRect(px, py, T, T); ctx.fillStyle = P.dirtDk; ctx.fillRect(px, py, T, 2) }
+      else if (t === WATER) { ctx.fillStyle = P.dirtDk; ctx.fillRect(px, py + 8, T, 8); ctx.fillStyle = stunWater > 0 && (tick >> 1) % 2 ? '#a8d0ff' : P.water; ctx.fillRect(px, py + 3, T, 5); ctx.fillStyle = P.waterHi; ctx.fillRect(px + 2 + ((x + (tick >> 4)) % 2) * 6, py + 3, 5, 1) }
+      else if (t === PLANK) { ctx.fillStyle = P.K; ctx.fillRect(px, py, T, 5); ctx.fillStyle = P.plank; ctx.fillRect(px, py + 1, T, 3); ctx.fillStyle = P.plankDk; ctx.fillRect(px, py + 1, 1, 3) }
+      else if (t === LADDER) { ctx.fillStyle = P.K; ctx.fillRect(px + 2, py, 3, T); ctx.fillRect(px + 11, py, 3, T); ctx.fillStyle = P.plank; ctx.fillRect(px + 3, py, 1, T); ctx.fillRect(px + 12, py, 1, T); ctx.fillStyle = P.K; ctx.fillRect(px + 4, py + 4, 7, 2); ctx.fillRect(px + 4, py + 12, 7, 2); ctx.fillStyle = P.plank; ctx.fillRect(px + 4, py + 4, 7, 1); ctx.fillRect(px + 4, py + 12, 7, 1) }
+    }
+    // door (2 tiles tall at col 19 rows 9-10)
+    blit(doorOpen ? 'door_open' : 'door', 19 * T - 8, 9 * T - 12 + 4)
+    if (!doorOpen) { ctx.fillStyle = P.gold; ctx.fillRect(19 * T + 2, 9 * T + 4, 4, 2); ctx.fillRect(19 * T + 2, 9 * T + 10, 4, 2) }
+    // trash arrow over the hole
+    ctx.fillStyle = P.K; ctx.fillRect(60, 160, 8, 2); ctx.fillRect(63, 162, 2, 6); ctx.fillRect(61, 166, 6, 1)
+    ctx.fillStyle = P.red; ctx.fillRect(61, 161, 6, 1); ctx.fillRect(63, 162, 2, 5)
+    text('TRASH', 52, 150, P.muted)
+    // bins
+    bins.forEach(drawBin)
+    // pile
+    if (pile) {
+      var key = pile.layers.length >= 3 ? 'junk_garden_3' : pile.layers.length === 2 ? 'junk_garden_2' : 'junk_garden_1'
+      var sp = assets[key]
+      var px2 = pile.tx * T + 8 - Math.floor(sp.w / 2), py2 = (pile.ty + 1) * T - sp.h
+      if (pile.hitFlash > 0) { silhouette(key, px2, py2, '#fff') } else blit(key, px2, py2)
+      // EYE preview
+      if (player.eye >= 3) {
+        var next = pile.layers[0], deep = pile.layers[1]
+        if (next && next[0] === 'trap') { ctx.fillStyle = '#e03a3a'; for (var d = 0; d < 12; d += 2) { ctx.fillRect(px2 + 6 + d, py2 + 6, 1, 1); ctx.fillRect(px2 + 6 + d, py2 + 14, 1, 1) } }
+        if (deep && deep[0] === 'trap') { ctx.fillStyle = '#e03a3a'; for (d = 0; d < 12; d += 2) { ctx.fillRect(px2 + 6 + d, py2 + 10, 1, 1) } }
+        for (var L = 0; L < Math.min(2, pile.layers.length); L++) if (pile.layers[L].indexOf('gnome_hat') >= 0) { ctx.fillStyle = P.gold; ctx.fillRect(pile.tx * T + 7, pile.ty * T + 6 + L * 3, 2, 2); ctx.fillRect(pile.tx * T + 6, pile.ty * T + 8 + L * 3, 4, 1) }
+      }
+    }
+    // objects
+    objects.forEach(drawObject)
+    // enemies
+    enemies.forEach(drawEnemy)
+    drawKnight()
+    // particles / floats
+    particles.forEach(function(pt) { ctx.fillStyle = pt.col; ctx.fillRect(Math.round(pt.x), Math.round(pt.y), 2, 2) })
+    floats.forEach(function(f) { text(f.s, Math.round(f.x), Math.round(f.y), f.col, true) })
+    // aim preview
+    if (input.actHeld > 8 && player.held && !gameOver) {
+      var range = 3 + player.might, sx = player.x + (player.dir > 0 ? player.w : -16), sy = player.y + 4, vx = player.dir * (range * 0.55), vy = -2.6
+      ctx.fillStyle = P.gold
+      for (var s = 0; s < 40; s++) { vy += GRAVITY; sx += vx; sy += vy; if (s % 3 === 0) ctx.fillRect(Math.round(sx + 8), Math.round(sy + 8), 1, 1); if (solidAt(sx + 8, sy + 16, false)) break }
+    }
+    // overlays
+    if (gameOver || exitState) {
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, ROOM_W, ROOM_H)
+      var msg = gameOver ? 'YOU DIED' : exitState.kind === 'tidy' ? 'TIDY EXIT' : 'TRASH EXIT'
+      text(msg, 160 - msg.length * 2, 80, gameOver ? P.red : P.gold, true)
+      var sub = 'MOOD ' + (mood >= 0 ? '+' : '') + mood + '   SACK ' + sack.items.length + ' ITEMS'
+      text(sub, 160 - sub.length * 2, 92, P.cream, true)
+      if (gameOver || exitState.t > 30) text('ACT TO RESTART', 160 - 28, 108, P.muted, true)
+    }
+    ctx.restore()
+  }
+  function drawHud() {
+    ctx.fillStyle = hudFlash > 0 ? '#2a0c0c' : '#0a0812'; ctx.fillRect(0, 0, VIEW_W, HUD_H)
+    for (var i = 0; i < 6; i++) { var h = ['01010', '11111', '11111', '01110', '00100']; for (var r = 0; r < 5; r++) for (var c = 0; c < 5; c++) if (h[r].charAt(c) === '1') { ctx.fillStyle = i < player.hp ? '#e03a3a' : '#3a1a1a'; ctx.fillRect(4 + i * 7 + c, 6 + r, 1, 1) } }
+    text('M' + player.might + ' N' + player.nimble + ' E' + player.eye, 52, 6, P.cream)
+    text('SACK', 96, 6, P.muted)
+    ctx.fillStyle = '#000'; ctx.fillRect(116, 6, 34, 5); ctx.fillStyle = sack.weight >= 10 ? P.red : '#9b7653'; ctx.fillRect(117, 7, Math.min(32, sack.weight * 2), 3)
+    text(sack.weight, 154, 6, P.cream)
+    var mx = 190
+    mx = text('MOOD ' + (mood >= 0 ? '+' : '') + mood, mx, 6, mood < 0 ? P.red : mood > 0 ? P.gold : P.muted)
+    text(player.held ? player.held.def.name : 'HANDS FREE', 246, 6, player.held ? P.gold : P.muted)
+    ctx.fillStyle = '#2e2838'; ctx.fillRect(0, HUD_H - 1, VIEW_W, 1)
+  }
+  function drawMontor() {
+    var y0 = ROOM_Y + ROOM_H
+    ctx.fillStyle = '#0a0812'; ctx.fillRect(0, y0, VIEW_W, MONTOR_H)
+    ctx.fillStyle = '#2e2838'; ctx.fillRect(0, y0, VIEW_W, 1)
+    if (montor && montorTimer > 0) { text('MONTOR:', 6, y0 + 8, P.purple); text('"' + montor + '"', 40, y0 + 8, P.cream) }
+    else text(player.held ? (player.held.def.use === 'throw' || player.held.def.use === 'none' ? 'ACT: THROW   DOWN+ACT: PUT DOWN   UP+ACT: SACK' : 'TAP ACT: SWING  HOLD ACT: THROW  DOWN+ACT: DROP  UP+ACT: SACK') : 'ACT: PICK UP / DIG / PUNCH   Z JUMP  X ACT  C ROLL', 6, y0 + 8, P.muted)
+  }
+  var BTN = { roll: { x: 262, y: 274, r: 12 }, act: { x: 296, y: 268, r: 13 }, jump: { x: 332, y: 258, r: 15 } }
+  var DPAD = { x: 14, y: 246 }
+  function drawPad() {
+    var y0 = ROOM_Y + ROOM_H + MONTOR_H
+    ctx.fillStyle = '#0a0812'; ctx.fillRect(0, y0, VIEW_W, PAD_H)
+    ctx.fillStyle = '#2e2838'; ctx.fillRect(0, y0, VIEW_W, 1)
+    var x = DPAD.x, y = DPAD.y
+    ctx.fillStyle = '#000'; ctx.fillRect(x + 14, y, 14, 42); ctx.fillRect(x, y + 14, 42, 14)
+    ctx.fillStyle = input.up ? '#3a3548' : '#231f2c'; ctx.fillRect(x + 15, y + 1, 12, 13)
+    ctx.fillStyle = input.down ? '#3a3548' : '#231f2c'; ctx.fillRect(x + 15, y + 28, 12, 13)
+    ctx.fillStyle = input.left ? '#3a3548' : '#231f2c'; ctx.fillRect(x + 1, y + 15, 13, 12)
+    ctx.fillStyle = input.right ? '#3a3548' : '#231f2c'; ctx.fillRect(x + 28, y + 15, 13, 12)
+    ctx.fillStyle = '#1a1720'; ctx.fillRect(x + 15, y + 15, 12, 12)
+    function btn(b, col, label, lc, on) { ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 1, 0, 7); ctx.fill(); ctx.fillStyle = on ? '#fff' : col; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); text(label, b.x - label.length * 2 + 1, b.y - 2, lc) }
+    btn(BTN.roll, '#3a6ab0', 'ROLL', '#fff', input.roll); btn(BTN.act, '#b0463a', 'ACT', '#fff', input.act); btn(BTN.jump, P.gold, 'JUMP', '#000', input.jump)
+    text('BINS: W WOOD  M METAL  M\' MONTOR\'S', 76, 252, P.muted)
+    text('FILL THE BINS TO OPEN THE DOOR', 76, 262, P.muted)
+    text('OR TAKE THE HOLE. HE\'LL NOTICE.', 76, 272, P.muted)
+    text('METAL + WATER = ?', 76, 282, P.muted)
+  }
+  function render() { drawHud(); drawRoom(); drawMontor(); drawPad() }
+
+  // ---- input ----
+  var keys = {}
+  function keymap(code) {
+    switch (code) {
+      case 'ArrowLeft': case 'KeyA': return 'left'
+      case 'ArrowRight': case 'KeyD': return 'right'
+      case 'ArrowUp': case 'KeyW': return 'up'
+      case 'ArrowDown': case 'KeyS': return 'down'
+      case 'KeyZ': case 'Space': return 'jump'
+      case 'KeyX': case 'KeyE': case 'Enter': return 'act'
+      case 'KeyC': case 'ShiftLeft': case 'ShiftRight': return 'roll'
+    }
+    return null
+  }
+  function onKeyDown(e) {
+    var a = keymap(e.code); if (!a) return
+    e.preventDefault()
+    if (!keys[e.code]) { keys[e.code] = true; press(a) }
+  }
+  function onKeyUp(e) { var a = keymap(e.code); if (!a) return; keys[e.code] = false; release(a) }
+  function press(a) {
+    if (a === 'jump' && !input.jump) input.jumpPressed = true
+    if (a === 'act' && !input.act) { input.actPressed = true; input.actHeld = 0 }
+    if (a === 'roll' && !input.roll) input.rollPressed = true
+    input[a] = true
+  }
+  function release(a) { input[a] = false; if (a === 'act') { input.actReleased = true; input.actHeldAtRelease = input.actHeld; input.actHeld = 0 } }
+
+  // touch / pointer on the canvas pad
+  var pointers = {}
+  function canvasPos(ev) { var r = canvas.getBoundingClientRect(); return { x: (ev.clientX - r.left) * VIEW_W / r.width, y: (ev.clientY - r.top) * VIEW_H / r.height } }
+  function regionFor(p) {
+    var y0 = ROOM_Y + ROOM_H + MONTOR_H
+    if (p.y < y0 - 10) return null
+    for (var k in BTN) { var b = BTN[k]; if ((p.x - b.x) * (p.x - b.x) + (p.y - b.y) * (p.y - b.y) < (b.r + 8) * (b.r + 8)) return k }
+    if (p.x < 100) { var cx = DPAD.x + 21, cy = DPAD.y + 21, dx = p.x - cx, dy = p.y - cy; if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return null; return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up') }
+    return null
+  }
+  function onPointerDown(ev) { ev.preventDefault(); var a = regionFor(canvasPos(ev)); if (a) { pointers[ev.pointerId] = a; press(a) } canvas.setPointerCapture && canvas.setPointerCapture(ev.pointerId) }
+  function onPointerMove(ev) { if (!(ev.pointerId in pointers)) return; var a = regionFor(canvasPos(ev)); var prev = pointers[ev.pointerId]; if (a !== prev && ['left', 'right', 'up', 'down'].indexOf(prev) >= 0) { release(prev); if (a && ['left', 'right', 'up', 'down'].indexOf(a) >= 0) { pointers[ev.pointerId] = a; press(a) } else delete pointers[ev.pointerId] } }
+  function onPointerUp(ev) { var a = pointers[ev.pointerId]; if (a) release(a); delete pointers[ev.pointerId] }
+
+  window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('keyup', onKeyUp)
+  canvas.addEventListener('pointerdown', onPointerDown)
+  canvas.addEventListener('pointermove', onPointerMove)
+  canvas.addEventListener('pointerup', onPointerUp)
+  canvas.addEventListener('pointercancel', onPointerUp)
+  canvas.style.touchAction = 'none'
+
+  // ---- loop ----
+  var raf = 0, last = 0, acc = 0, STEP = 1000 / 60, running = true
+  function frame(ts) {
+    if (!running) return
+    if (!last) last = ts
+    acc += Math.min(100, ts - last); last = ts
+    while (acc >= STEP) { if (input.act) input.actHeld++; update(); acc -= STEP }
+    render()
+    raf = requestAnimationFrame(frame)
+  }
+  reset()
+  raf = requestAnimationFrame(frame)
+  if (opts.debug) { window.__descentBin = function(type, i) { dropInBin(makeObject(type, 0, 0), bins[i]) }; window.__descentDoor = function() { return doorOpen } }
+  if (opts.debug) window.__descentDebug = function() { return { tick: tick, px: player.x, py: player.y, vx: player.vx, held: player.held && player.held.type, input: JSON.parse(JSON.stringify(input)), objects: objects.map(function(o) { return o.type + '@' + o.tx + ',' + o.ty + ':' + o.state }), enemies: enemies.map(function(e) { return e.kind + '@' + Math.round(e.x) + ',' + Math.round(e.y) + ' hp' + e.hp }), quota: quota, montor: montor } }
+
+  return {
+    destroy: function() {
+      running = false; cancelAnimationFrame(raf)
+      window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp)
+      canvas.removeEventListener('pointerdown', onPointerDown); canvas.removeEventListener('pointermove', onPointerMove); canvas.removeEventListener('pointerup', onPointerUp); canvas.removeEventListener('pointercancel', onPointerUp)
+    },
+    reset: reset,
+  }
+}
+
+
+createDescentGame(document.getElementById('game'), DESCENT_ASSETS, { debug: location.hash === '#debug' });
+</script>

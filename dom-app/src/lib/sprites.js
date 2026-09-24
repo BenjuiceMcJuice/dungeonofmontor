@@ -1041,4 +1041,4 @@ function drawConditionIcon(canvas, conditionId, scale) {
   }
 }
 
-export { SPRITES, PLAYER_SPRITES, CLASS_COLOURS, TIERS, DARK_TIERS, drawSprite, drawPlayerSprite, DOOR_SPRITE, DOOR_THEMES, drawDoorSprite, CHAMBER_ICONS, drawChamberIcon, CONDITION_ICONS, drawConditionIcon }
+export { SPRITES, PLAYER_SPRITES, CLASS_COLOURS, TIERS, DARK_TIERS, drawSprite, drawPlayerSprite, DOOR_SPRITE, DOOR_SPRITE_OPEN, DOOR_THEMES, drawDoorSprite, CHAMBER_ICONS, drawChamberIcon, CONDITION_ICONS, drawConditionIcon }

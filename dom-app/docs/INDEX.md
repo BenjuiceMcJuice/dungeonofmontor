@@ -29,6 +29,7 @@
 | [Narrative Mode Demo](narrative_mode_demo.md) | Sample campaign showing how the text RPG plays — shareable |
 | [Platformer Mode Spec](platformer_mode_spec.md) | Montor's Descent — room-by-room side-view platformer version using the same mechanics, data and sprites |
 | [Platformer Design Options](platformer_design_options.md) | Montor's Descent as its own game — nine junk-as-puzzle directions, comparison, recommended loop, prototype order |
+| [Descent P0 (playable)](descent_p0.html) | Standalone playable prototype of one Garden room — open in a browser. Rebuild with `node scripts/build-descent-standalone.mjs` |
 | [Montor's Descent Spec v1](platformer_descent_spec.md) | **Current platformer spec** — snap-to-grid junk platformer, 3 stats, fixed Montor lines, piles/bins/sack/treasures, 7-phase build plan |
 
 ---

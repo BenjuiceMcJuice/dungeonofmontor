@@ -4,6 +4,7 @@
 > Supersedes the mechanics in [platformer_mode_spec.md](platformer_mode_spec.md) (v0.1, the faithful Crawl port) -- that doc's tech notes on rooms, sprites and the engine loop still apply. Directions chosen from [platformer_design_options.md](platformer_design_options.md): C (wear the house) + E (dig) + D (tidy) as the loop, H (the sack) as the pressure, G (treasures) as the goal.
 > Written 2026-09-24. Status: **spec -- nothing built.**
 > Gameplay view PoC image: ![Descent PoC](platformer_descent_poc.png)
+> **P0 is playable:** open [descent_p0.html](descent_p0.html) in a browser, or the Montor's Descent tile in the Tavern. Engine: `src/descent/engine.js`.
 
 ---
 

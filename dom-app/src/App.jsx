@@ -10,6 +10,7 @@ import Game from './pages/Game.jsx'
 import Results from './pages/Results.jsx'
 import Preparation from './pages/Preparation.jsx'
 import Narrative from './pages/Narrative.jsx'
+import Descent from './pages/Descent.jsx'
 import LandingScene from './components/LandingScene.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './App.css'
@@ -160,6 +161,10 @@ function App() {
     setScreen('tavern')
   }
 
+  function handleEnterDescent() {
+    setScreen('descent')
+  }
+
   function handleSignOut() {
     setScreen('loading')
     setCharacters([])
@@ -213,8 +218,14 @@ function App() {
         onDeleteCharacter={handleDeleteCharacter}
         onSignOut={handleSignOut}
         onEnterNarrative={handleEnterNarrative}
+        onEnterDescent={handleEnterDescent}
       />
     )
+  }
+
+  // Montor's Descent — junk platformer (P0)
+  if (screen === 'descent') {
+    return <Descent onExit={handleExitNarrative} />
   }
 
   // Narrative Mode — Montor's Tale (PoC)
@@ -275,6 +286,7 @@ function App() {
       onDeleteCharacter={handleDeleteCharacter}
       onSignOut={handleSignOut}
       onEnterNarrative={handleEnterNarrative}
+      onEnterDescent={handleEnterDescent}
     />
   )
 }

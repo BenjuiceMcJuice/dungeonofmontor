@@ -33,7 +33,7 @@ var ARRIVE_LINES = {
   ],
 }
 
-function Tavern({ user, characters, onCreateCharacter, onSelectCharacter, onResumeRun, onDeleteCharacter, onSignOut, activeRuns, returnContext, onEnterNarrative }) {
+function Tavern({ user, characters, onCreateCharacter, onSelectCharacter, onResumeRun, onDeleteCharacter, onSignOut, activeRuns, returnContext, onEnterNarrative, onEnterDescent }) {
   var [phase, setPhase] = useState(returnContext ? 'arrive' : 'characters') // arrive | characters | gameMode
   var [selectedCharId, setSelectedCharId] = useState(null)
   var [creating, setCreating] = useState(false)
@@ -168,6 +168,29 @@ function Tavern({ user, characters, onCreateCharacter, onSelectCharacter, onResu
               letterSpacing: '2px', position: 'absolute', top: '12px', right: '12px',
             }}>
               WORK IN PROGRESS
+            </span>
+          </button>
+
+          {/* Montor's Descent — junk platformer (P0) */}
+          <button onClick={function() { if (onEnterDescent) onEnterDescent() }}
+            style={{
+              background: '#0a0812', border: '2px solid #5a7a3a', borderRadius: '8px',
+              padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%', position: 'relative',
+            }}>
+            <span style={{ fontFamily: pixelFont, fontSize: '13px', color: '#d4a017', display: 'block', marginBottom: '8px' }}>
+              Montor's Descent
+            </span>
+            <span style={{ fontFamily: displayFont, fontSize: '14px', color: '#d4c8a0', fontStyle: 'italic', display: 'block', marginBottom: '6px' }}>
+              Run, jump, and hit rats with his stuff.
+            </span>
+            <span style={{ fontFamily: uiFont, fontSize: '11px', color: '#8b7b60' }}>
+              Junk platformer — one room. Dig the piles. Fill the bins. Or don't.
+            </span>
+            <span style={{
+              fontFamily: uiFont, fontSize: '9px', color: '#7a9a4a', textTransform: 'uppercase',
+              letterSpacing: '2px', position: 'absolute', top: '12px', right: '12px',
+            }}>
+              PROTOTYPE
             </span>
           </button>
 

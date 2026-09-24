@@ -205,7 +205,7 @@ Granular daily work is in `logs/YYYY-MM-DD.md`.
 | 2026-09-23 | Platformer example room mockup — "The Potting Shed" (Garden B2), real sprite grids, annotated + mechanics explainer | ✅ Done |
 | 2026-09-23 | Platformer design options — junk as physical puzzle objects, 9 directions, recommended C+E+D+H+G loop | ✅ Done |
 | 2026-09-24 | **Montor's Descent spec v1** — grid rules, MIGHT/NIMBLE/EYE, junk objects (size/weight/material/use/hits), no-dice combat + 5 material rules, layered piles, bins + tidy/trash exits, the sack, 3-fragment treasures → Gifts, fixed Montor line events + mood, 12 enemy junk rules, one new rule per floor, data/code layout | ✅ Done |
-|            | P0 — One Garden room: grid move, pick up / throw / swing / put down, pot + rake + gnome, one rat | ⬜ |
+| 2026-09-24 | **P0 — playable Garden room** — `src/descent/engine.js` (canvas, no framework), Tavern tile + route, standalone `docs/descent_p0.html`. Pick up / tap-swing / hold-throw / put down / sack, stacking + crush, 3-layer pile with trap + EYE hints, bins + tidy door + trash hole, sack weight tiers + cracked floor, rats + slug, metal-in-water zap, ceramic shatter, fixed Montor lines + mood, touch + keyboard | ✅ Done |
 |            | P1 — Piles with layers + spill, EYE silhouettes, one trap, stacking to reach a ledge | ⬜ |
 |            | P2 — Bins + tidy door + trash hole, mess meter, mood, 10 Montor events | ⬜ |
 |            | P3 — The sack, weight tiers, creaking floors, safe room (sell / dump / give) | ⬜ |
